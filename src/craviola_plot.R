@@ -1,19 +1,19 @@
 ##IMPORTS
-library(ggplot2)
-library(reshape2)
-source("/media/yoann/3CAD87DD271F7BEC/PhD_2018-2021/Hematopoiesis_DNMT1_Hypomorph/analysis/Methylation_Violin_Plot/bin_polygons.R")
+Imports = c("ggplot2","reshape2","data.table")
+lapply(Imports, library, character.only = T)
+source("analysis/Methylation_Violin_Plot/bin_polygons.R")
 
 ##DUMMY DATA
 dummy_data = data.frame(
   Samples=c(rep('Sample1', 1000), rep('Sample2', 1000),
             rep('Sample3', 1000), rep('Sample4', 1000),
             rep('Sample5', 1000), rep('Sample6', 1000)),
-  Cell.types=c(rep('a', 2000), rep('b', 2000), rep('c', 2000)),
-  Genotypes=c(rep('i', 1000), rep('j', 1000), rep('i', 1000),rep('j', 1000),
+  Groups=c(rep('a', 2000), rep('b', 2000), rep('c', 2000)),
+  Conditions=c(rep('i', 1000), rep('j', 1000), rep('i', 1000),rep('j', 1000),
           rep('i', 1000), rep('j', 1000)),
   Beta=c(rnorm(1000), rnorm(1000, 0.5), rnorm(1000, 1), rnorm(1000, 1.5),
          rnorm(1000,-1), rnorm(1000, -0.5)),
-  Coverage = c(rep(x = c(60,50,40,30,20,10,30,40,50,60), each=100),
+  "SD(2ndVar)" = c(rep(x = c(60,50,40,30,20,10,30,40,50,60), each=100),
                rep(x = c(60,50,40,30,20,10,30,40,50,60), each=100),
                rep(x = c(60,50,40,30,20,10,30,40,50,60), each=100),
                rep(x = c(60,50,40,30,20,10,30,40,50,60), each=100),
@@ -48,8 +48,6 @@ dummy_data.bis = data.frame(
 #'                       to use to fill the craviolas.
 #' @param craviola.width A \code{double} value to specify the width of
 #'                       craviolas.
-#' @param extrema        A \code{logical} specifying if maxima and minima should
-#'                       be displayed or not (Default: extrema = TRUE).
 #' @param boxplots       A \code{logical} specifying if boxplots should be
 #'                       displayed or not (Default: boxplots = TRUE).
 #' @param boxplot.width  A \code{double} specifying the width of boxplots
@@ -73,24 +71,27 @@ dummy_data.bis = data.frame(
 #TODO : cut density at min and max !!
 
 ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
-                     extrema = TRUE, boxplots = TRUE, boxplot.width=0.04,
-                     mean.value = TRUE, bins=FALSE,
-                     bins.quantiles=seq(0.1,0.9,0.1), lines.col = NA){
-
+                     boxplots = TRUE, boxplot.width=0.04, mean.value = TRUE,
+                     bins=FALSE, bins.quantiles=seq(0.1,0.9,0.1), bin.fun="sd",
+                     lines.col = NA){
+  #Make annotation table
   Annot.table<-data[!duplicated(data[[1]]),1:3]
-
   if(length(unique(Annot.table[[3]])) > 2){
     stop("More than 2 conditions inputed. Only 2 conditions tolerated.")
   } else {
     original.var.col<-levels(Annot.table[[3]])
+    if (length(levels(Annot.table[[3]])) > 2) {
+      stop("More levels than possible values. Only 2 conditions tolerated. Remove the excess levels.")
+    } else {
     levels(Annot.table[[3]])[1]<-"1"
     levels(Annot.table[[3]])[2]<-"2"
+    }
   }
   amount.grp<-length(unique(Annot.table[[2]]))
   if(amount.grp > 1){
-    lapply(seq_along(unique(Annot.table[[2]])), function(i){
+    invisible(lapply(seq_along(unique(Annot.table[[2]])), function(i){
       levels(Annot.table[[2]])[i]<<- i
-    })
+    }))
   }
 
   mylist_data<-split(data,f = data[[1]])
@@ -114,15 +115,8 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
                top=qiles[4], max = qiles[5],mean = means,
                pos.crav = round(x.pos))
   })
-
   box.dframe<-do.call(rbind, list.bp.stat)
-
-  if(extrema){
-    min.max.dframe<-melt(data = box.dframe,
-                         id.vars = c("Var.col","pos.crav","x"),
-                         measure.vars = c("min","max"))
-  }
-
+  
   #Create Craviola plot
   list_dens.res<-lapply(list_vect.val1,density)
 
@@ -156,7 +150,7 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
     rownames(df)<-NULL
     df
   })
-  ##Create Bins based on a third variable
+  #Create Bins based on a third variable
   if(bins){ #Create bin polygons
     #Bin polygons
     list.quant.lim<-ls.quantile(ls = list_vect.val1, qtiles = bins.quantiles)
@@ -164,27 +158,60 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
                            list.quant.lim = list.quant.lim,
                            Annot.table = Annot.table)
     #Calculate average value on 3rd variable for each bin
-    list.av.val2<-lapply(seq_along(list.quant.lim), function(i){
+    list.fun.val2<-lapply(seq_along(list.quant.lim), function(i){
       smpl.data<-data[data[[1]] == names(list.quant.lim)[i],]
       # Check if external quantiles are min and max
       if(min(list_vect.val1[[i]]) != list.quant.lim[[i]][1]){
+        # Add minimum value at the beginning of the vector
         list.quant.lim[[i]]<<-c(min(list_vect.val1[[i]]),list.quant.lim[[i]])
       }
       if(max(list_vect.val1[[i]]) != rev(list.quant.lim[[i]])[1]){
+        # Add maximum value at the end of the vector
         list.quant.lim[[i]]<<-c(list.quant.lim[[i]],max(list_vect.val1[[i]]))
       }
       smpl.data[["bin.groups"]]<-findInterval(smpl.data[[4]],
                                               list.quant.lim[[i]],
                                               all.inside = T)-1
-      unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
-        mean(smpl.data[smpl.data$bin.groups == j,5])
-      }))
+      if(bin.fun == "mean"){
+        #Check if smpl.data is a data.table or just a simple data.frame
+        if(is.data.table(smpl.data)){
+          unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
+            mean(smpl.data[smpl.data$bin.groups == j][[5]],na.rm = T)
+          })) 
+        } else {
+          unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
+            mean(smpl.data[smpl.data$bin.groups == j,5],na.rm = T)
+          })) 
+        }  
+      } else if(bin.fun == "sd"){
+        if(is.data.table(smpl.data)){
+          unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
+            sd(smpl.data[smpl.data$bin.groups == j][[5]],na.rm = T)
+          })) 
+        } else {
+          unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
+            sd(smpl.data[smpl.data$bin.groups == j,5],na.rm = T)
+          })) 
+        }  
+      } else if(bin.fun == "mad"){
+        if(is.data.table(smpl.data)){
+          unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
+            mad(smpl.data[smpl.data$bin.groups == j][[5]],na.rm = T)
+          }))
+        } else {
+          unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
+            mad(smpl.data[smpl.data$bin.groups == j,5],na.rm = T)
+          })) 
+        }  
+      } else {
+        stop("Unsupported function. Supported functions: bin.fun = c('mean','sd' and 'mad').")
+      }
     })
-    vec_av.val2<-unlist(list.av.val2) #Make vector average val2
+    vec_av.val2<-unlist(list.fun.val2) #Make vector average val2
     #Map Bins average value on 3rd variable to the dataframe list
     list.dfs<-lapply(seq_along(list.dfs), function(i){
       list.bins<-split(x =list.dfs[[i]],f= list.dfs[[i]]$bin)
-      list.bins<-Map(cbind,list.bins, bin.av.val2 = list.av.val2[[i]])
+      list.bins<-Map(cbind,list.bins, bin.av.val2 = list.fun.val2[[i]])
       do.call(rbind,list.bins)
     })
     #Add Sample IDs, Var.grp and Var.col
@@ -233,13 +260,6 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
       geom_boxplot(data = box.dframe,
                    mapping = aes(x=x, ymin = low,lower = low, middle = mid,
                                  upper = top, ymax = top), stat = "identity")
-  }
-  if(extrema){ #extrema TRUE
-    craviola.plot<-craviola.plot +
-      geom_segment(data=min.max.dframe,
-                   mapping = aes(x = pos.crav, xend = x, y = value,
-                                 yend = value, color = fill.color), size = 1) +
-      guides(color = guide_legend(order = 3))
   }
   if(mean.value){ #mean.value TRUE
     craviola.plot<-craviola.plot +

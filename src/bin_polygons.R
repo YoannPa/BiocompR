@@ -5,30 +5,37 @@
 
 ##FUNCTIONS
 
-# Fun.name #####################################################################
+# ls.quantile ##################################################################
 
-#' @description Function description.
-#'
-#' @param param1      A \code{type} parameter description.
-#' @value a \code{type} object returned description.
+#' @description Applies the quantile function on a list of vectors.
+#' 
+#' @param ls     A \code{list} of vectors.
+#' @param qtiles A \code{double} vector specifying the values of percentiles of
+#'               interest. Values must be between 0 and 1.
+#' @value a \code{list} of vectors containing percentiles values, one vector by
+#' distribution. 
 #' @author Yoann Pageaud.
 
 ls.quantile<-function(ls,qtiles){
   lapply(ls,quantile, qtiles)
 }
 
-#TODO: Add condition to avoid quantiles being equal to extrema.
 # Fun.name #####################################################################
 
-#' @description Function description.
-#'
-#' @param param1      A \code{type} parameter description.
-#' @value a \code{type} object returned description.
+#' @description Bins desnity object following specific percentiles.
+#' 
+#' @param list_oriented_dens A \code{list} of data.frames, each dataframes
+#'                           describeing a density distribution.
+#' @param list.quant.lim     A \code{list} of vectors, each vectors containing
+#'                           values of specific percentiles.
+#' @param Annot.table        A \code{data.frame} containing annotations about
+#'                           the distributions.
+#' @value a \code{list} of modified data.frames of the density distributions
+#' containing breaks to be used for delimitating bins.
 #' @author Yoann Pageaud.
 
 bin.polygons<-function(list_oriented_dens,list.quant.lim,Annot.table){
   #Add quantile values to density positions vector and sort it.
-  print(list.quant.lim)
   list_dens.pos<-lapply(list_oriented_dens, function(i){ i$y.pos })
   merged.pos<-Map(c,list.quant.lim,list_dens.pos)
   merged.pos<-lapply(merged.pos,sort)
@@ -47,10 +54,6 @@ bin.polygons<-function(list_oriented_dens,list.quant.lim,Annot.table){
       list_dens.val[[i]][quant.pos[[i]][j]+1-j]
     }))
   })
-  print("VALBEFORE")
-  print(val.before)
-  print("VALAFTER")
-  print(val.after)
   #Calculate mean density values
   mean.dens.val<-lapply(seq_along(val.before), function(i){
     rowMeans(data.frame(val.before = val.before[[i]],
@@ -95,7 +98,6 @@ bin.polygons<-function(list_oriented_dens,list.quant.lim,Annot.table){
     mrg_df<-do.call(rbind,i)
     mrg_df[!duplicated(mrg_df),] # remove appended rogue dataframe
   })
-
   return(list.dfs)
 }
 
