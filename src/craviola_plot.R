@@ -1,7 +1,7 @@
 ##IMPORTS
 Imports = c("ggplot2","reshape2","data.table")
 lapply(Imports, library, character.only = T)
-source("analysis/Methylation_Violin_Plot/bin_polygons.R")
+source("src/bin_polygons.R")
 
 ##DUMMY DATA
 dummy_data = data.frame(
@@ -75,7 +75,24 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
                      bins=FALSE, bins.quantiles=seq(0.1,0.9,0.1), bin.fun="sd",
                      lines.col = NA){
   #Make annotation table
-  Annot.table<-data[!duplicated(data[[1]]),1:3]
+  if (ncol(data) < 4){
+    if (nrow(data[!duplicated(data[[1]])]) == 2) {
+      if(is.factor(data[!duplicated(data[[1]])][[1]])){
+        Annot.table<-data.table("Samples"=data[!duplicated(data[[1]])][[1]],
+                                "Groups"=as.factor(c(1,1)),
+                                "Conditions"=data[!duplicated(data[[1]])][[1]],
+                                data[!duplicated(data[[1]]),2])
+        colnames(data)[1]<-"Samples"
+        data<-merge(x = Annot.table[,-4],y = data,by="Samples",all.y=TRUE)
+      } else {
+        stop("column 1 in data is not of type 'factor'.")
+      }
+    } else{
+      stop("Missing columns in the data provided.")
+    }
+  } else {
+    Annot.table<-data[!duplicated(data[[1]]),1:3]
+  }
   if(length(unique(Annot.table[[3]])) > 2){
     stop("More than 2 conditions inputed. Only 2 conditions tolerated.")
   } else {
@@ -86,6 +103,9 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
     levels(Annot.table[[3]])[1]<-"1"
     levels(Annot.table[[3]])[2]<-"2"
     }
+  }
+  if (length(Annot.table[[1]]) < length(levels(Annot.table[[1]]))){
+    stop("More levels than matching values found in column 1 of data.")
   }
   amount.grp<-length(unique(Annot.table[[2]]))
   if(amount.grp > 1){
@@ -123,23 +143,20 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
   list_dens.df<-lapply(list_dens.res, function(i){
     data.frame(y.pos=i$x, dens.curv = i$y*craviola.width)
   })
-
-  if(amount.grp > 1){
-    list_oriented_dens<-lapply(seq_along(list_dens.df),function(i){
-      if(Annot.table[Annot.table[[1]] == names(list_dens.df)[i],3] == 1){
-        list_dens.df[[i]]$dens.curv<<-list_dens.df[[i]]$dens.curv * -1
-        list_dens.df[[i]]
-      } else { list_dens.df[[i]] }
-
-      if(Annot.table[Annot.table[[1]] == names(list_dens.df)[i],2] != 1){
-        list_dens.df[[i]]$dens.curv<<-list_dens.df[[i]]$dens.curv +
-          (as.integer(Annot.table[Annot.table[[1]] ==
-                                    names(list_dens.df)[i],2]) - 1)
-        list_dens.df[[i]]
-      } else { list_dens.df[[i]] }
-    })
-  }
-
+  
+  list_oriented_dens<-lapply(seq_along(list_dens.df),function(i){
+    if(Annot.table[Annot.table[[1]] == names(list_dens.df)[i],3] == 1){
+      list_dens.df[[i]]$dens.curv<<-list_dens.df[[i]]$dens.curv * -1
+      list_dens.df[[i]]
+    } else { list_dens.df[[i]] }
+    
+    if(Annot.table[Annot.table[[1]] == names(list_dens.df)[i],2] != 1){
+      list_dens.df[[i]]$dens.curv<<-list_dens.df[[i]]$dens.curv +
+        (as.integer(Annot.table[Annot.table[[1]] ==
+                                  names(list_dens.df)[i],2]) - 1)
+      list_dens.df[[i]]
+    } else { list_dens.df[[i]] }
+  })
   #Remove density values outside the extrema
   xtrems<-ls.quantile(ls = list_vect.val1, qtiles = c(0,1))
   bined.xtrm.dens<-bin.polygons(list_oriented_dens = list_oriented_dens,
@@ -150,6 +167,7 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
     rownames(df)<-NULL
     df
   })
+  names(list_oriented_dens)<-names(list_dens.df)
   #Create Bins based on a third variable
   if(bins){ #Create bin polygons
     #Bin polygons
@@ -220,7 +238,7 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
   } else { #No bin polygons
     #Add Sample IDs, Var.grp and Var.col
     list.dframes<-Map(cbind,Var1 = Annot.table[[1]], Var.grp = Annot.table[[2]],
-                      Var.col = Annot.table[[3]], list_oriented_dens)
+                      Var.col = Annot.table[[3]], list_oriented_dens[Annot.table[[1]]])
   }
   #Make data.frame
   dframe<-do.call(rbind,list.dframes)
