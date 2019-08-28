@@ -1,6 +1,6 @@
 
 ##IMPORTS
-Imports = c("data.table","ggplot2")
+Imports = c("data.table","gtools","ggplot2")
 lapply(Imports, library, character.only = T)
 
 ##FUNCTIONS
@@ -18,7 +18,7 @@ lapply(Imports, library, character.only = T)
 #' @author Yoann Pageaud.
 
 ggcoverage<-function(data, round.unit=2, rev.stack=FALSE, invert.percent=FALSE,
-                     horizontal=FALSE, log.scaled=FALSE, decreasing.order=FALSE){
+                     horizontal=FALSE,log.scaled=FALSE,decreasing.order=FALSE){
   colnames(data)[1:3]<-c("IDs","Total","Subset")
   suppressWarnings(data<-data[, lapply(.SD, na.replace, replace = 0)])
   data[, remainings:=.(Total-Subset)]
