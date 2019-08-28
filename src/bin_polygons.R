@@ -16,7 +16,7 @@ ls.quantile<-function(ls,qtiles){
   lapply(ls,quantile, qtiles)
 }
 
-# Fun.name #####################################################################
+# bin.polygons #################################################################
 
 #' @description Bins density object following specific percentiles.
 #' 

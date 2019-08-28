@@ -1,36 +1,29 @@
 ##IMPORTS
-Imports = c("ggplot2","reshape2","data.table")
-# Imports = c("ggplot2","data.table")
+Imports = c("ggplot2","data.table")
 lapply(Imports, library, character.only = T)
 source("src/bin_polygons.R")
 
 ##DUMMY DATA
-dummy_data = data.frame(
-  Samples=c(rep('Sample1', 1000), rep('Sample2', 1000),
-            rep('Sample3', 1000), rep('Sample4', 1000),
-            rep('Sample5', 1000), rep('Sample6', 1000)),
-  Groups=c(rep('a', 2000), rep('b', 2000), rep('c', 2000)),
-  Conditions=c(rep('i', 1000), rep('j', 1000), rep('i', 1000),rep('j', 1000),
-          rep('i', 1000), rep('j', 1000)),
-  Beta=c(rnorm(1000), rnorm(1000, 0.5), rnorm(1000, 1), rnorm(1000, 1.5),
-         rnorm(1000,-1), rnorm(1000, -0.5)),
-  "SD(2ndVar)" = c(rep(x = c(60,50,40,30,20,10,30,40,50,60), each=100),
-               rep(x = c(60,50,40,30,20,10,30,40,50,60), each=100),
-               rep(x = c(60,50,40,30,20,10,30,40,50,60), each=100),
-               rep(x = c(60,50,40,30,20,10,30,40,50,60), each=100),
-               rep(x = c(60,50,40,30,20,10,30,40,50,60), each=100),
-               rep(x = c(60,50,40,30,20,10,30,40,50,60), each=100))
-)
+dummy.complete = data.frame(
+  Samples=rep(paste0("Sample",c(1:6)),each = 1000),
+  Groups=rep(c('A','B','C'),each = 2000),
+  Conditions=rep(c('I','J'),each = 1000,3),
+  Values=c(rnorm(1000,0), rnorm(1000, 0.5),
+           rnorm(1000, 3), rnorm(1000, 3.5),
+           rnorm(1000,-3), rnorm(1000, -3.5)),
+  "Function(2ndVar)" = rep(rep(x =c(60,50,40,30,20,10,30,40,50,60),each=100),6))
 
-dummy_data.bis = data.frame(
-  Samples=c(rep('Sample1', 1000), rep('Sample2', 1000),
-            rep('Sample3', 1000), rep('Sample4', 1000),
-            rep('Sample5', 1000), rep('Sample6', 1000)),
-  Cell.types=c(rep('a', 2000), rep('b', 2000), rep('c', 2000)),
-  Genotypes=c(rep('i', 1000), rep('j', 1000), rep('i', 1000),rep('j', 1000),
-              rep('i', 1000), rep('j', 1000)),
-  Beta=c(rnorm(1000), rnorm(1000, 0.5), rnorm(1000, 1), rnorm(1000, 1.5),
-         rnorm(1000,-1), rnorm(1000, -0.5)))
+dummy.complete.bis = data.frame(
+  Samples=rep(paste0("Sample",c(1:6)),each = 1000),
+  Groups=rep(c('A','B','C'),each = 2000),
+  Conditions=rep(c('I','J'),each = 1000,3),
+  Values=c(rnorm(1000,0), rnorm(1000, 0.5),
+           rnorm(1000, 3), rnorm(1000, 3.5),
+           rnorm(1000,-3), rnorm(1000, -3.5)))
+
+dummy.minimal = data.frame(
+  Samples = rep(paste0("Sample",c(1:2)),each = 1000),
+  Values=c(rnorm(1000,0), rnorm(1000, 0.5)))
 
 ##FUNCTIONS
 
@@ -38,17 +31,32 @@ dummy_data.bis = data.frame(
 
 #' Read Chromosomes Methylation from a specific sample.
 #'
-#' @param data           A \code{data.frame} of 5 columns:
+#' @param data           A \code{data.frame}. 2 formats of data.frame are
+#'                       supported.
+#'                       A "complete" data.frame of 5 columns:
 #'                       column 1 must be the samples column,
 #'                       column 2 must be the "grouping" variable column,
 #'                       column 3 must be the "filling color" variable column,
 #'                       column 4 must be the "value" column,
 #'                       column 5 can be the additionnal "opacity" variable
-#'                       column.
+#'                       column to be used if bins = TRUE.
+#'                       A "minimal" data.frame of 2 columns:
+#'                       column 1 must be the samples column. This column can
+#'                       take a maximum of 2 possible levels. Based on this
+#'                       column ggcraviola will guess the "grouping" and the
+#'                       "filling".
+#'                       column 2 must be the "value" column.
+#'                       The "minimal" data.frame is usefull to easily plot 1
+#'                       craviola with 2 distributions.
+#'                       You cannot plot more than 1 craviola with the "minimal"
+#'                       data.frame format. the "minimal" format also do not
+#'                       support the binning. 
+#'                       
 #' @param fill.color     A \code{character} vector of length 2 containing colors
-#'                       to use to fill the craviolas.
+#'                       to use to fill the craviolas
+#'                       (Default: fill.color = c("blue","red")).
 #' @param craviola.width A \code{double} value to specify the width of
-#'                       craviolas.
+#'                       craviolas (Default: craviola.width = 1).
 #' @param boxplots       A \code{logical} specifying if boxplots should be
 #'                       displayed or not (Default: boxplots = TRUE).
 #' @param boxplot.width  A \code{double} specifying the width of boxplots
@@ -60,12 +68,18 @@ dummy_data.bis = data.frame(
 #'                       be binned following specific quantiles to be displayed
 #'                       following different opacity thanks to the values in the
 #'                       5th column of the data data.frame
-#'                       (Default: mean.value = FALSE).
+#'                       (Default: bins = FALSE).
 #' @param bins.quantiles A \code{double} vector to define the limits between the
-#'                       bins used by the quantile function.
+#'                       bins as percentiles of distributions
 #'                       (Default: bins.quantiles = seq(0.1,0.9,0.1)).
+#' @param bin.fun        A \code{character} to specify the function to apply on
+#'                       values of the additional variable for each bin of
+#'                       distrubutions
+#'                       (Supported: bin.fun = c("sd","mad","mean");
+#'                       Default: bin.fun = "sd"). 
 #' @param lines.col      A \code{character} matching a color to use for the
-#'                       border lines of the craviola's bins.
+#'                       border lines of the craviola's bins
+#'                       (Default: lines.col = NA).
 #' @return a \code{gg} craviola plot.
 #' @author Yoann Pageaud.
 
@@ -75,6 +89,8 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
                      boxplots = TRUE, boxplot.width=0.04, mean.value = TRUE,
                      bins=FALSE, bins.quantiles=seq(0.1,0.9,0.1), bin.fun="sd",
                      lines.col = NA){
+  #Check if data is a data.table and convert if not
+  if (!is.data.table(data)){data<-as.data.table(data)}
   #Make annotation table
   if (ncol(data) < 4){
     if (nrow(data[!duplicated(data[[1]])]) == 2) {
@@ -86,7 +102,7 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
         colnames(data)[1]<-"Samples"
         data<-merge(x = Annot.table[,-4],y = data,by="Samples",all.y=TRUE)
       } else {
-        stop("column 1 in data is not of type 'factor'.")
+        stop("Column 1 in data is not of type 'factor'.")
       }
     } else{
       stop("Missing columns in the data provided.")
@@ -114,11 +130,10 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
       levels(Annot.table[[2]])[i]<<- i
     }))
   }
-
   mylist_data<-split(data,f = data[[1]])
   list_val1<-lapply(mylist_data,subset, select = 4)
   list_vect.val1<-lapply(list_val1,unlist)
-
+  
   #Create stats plots
   list.bp.stat<-lapply(seq_along(list_vect.val1),function(i){
     qiles<-quantile(list_vect.val1[[i]])
@@ -140,17 +155,14 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
   
   #Create Craviola plot
   list_dens.res<-lapply(list_vect.val1,density)
-
   list_dens.df<-lapply(list_dens.res, function(i){
     data.frame(y.pos=i$x, dens.curv = i$y*craviola.width)
   })
-  
   list_oriented_dens<-lapply(seq_along(list_dens.df),function(i){
     if(Annot.table[Annot.table[[1]] == names(list_dens.df)[i],3] == 1){
       list_dens.df[[i]]$dens.curv<<-list_dens.df[[i]]$dens.curv * -1
       list_dens.df[[i]]
     } else { list_dens.df[[i]] }
-    
     if(Annot.table[Annot.table[[1]] == names(list_dens.df)[i],2] != 1){
       list_dens.df[[i]]$dens.curv<<-list_dens.df[[i]]$dens.curv +
         (as.integer(Annot.table[Annot.table[[1]] ==
@@ -192,36 +204,17 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
                                               list.quant.lim[[i]],
                                               all.inside = T)-1
       if(bin.fun == "mean"){
-        #Check if smpl.data is a data.table or just a simple data.frame
-        if(is.data.table(smpl.data)){
-          unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
-            mean(smpl.data[smpl.data$bin.groups == j][[5]],na.rm = T)
-          })) 
-        } else {
-          unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
-            mean(smpl.data[smpl.data$bin.groups == j,5],na.rm = T)
-          })) 
-        }  
+        unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
+          mean(smpl.data[smpl.data$bin.groups == j][[5]],na.rm = T)
+        })) 
       } else if(bin.fun == "sd"){
-        if(is.data.table(smpl.data)){
-          unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
-            sd(smpl.data[smpl.data$bin.groups == j][[5]],na.rm = T)
-          })) 
-        } else {
-          unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
-            sd(smpl.data[smpl.data$bin.groups == j,5],na.rm = T)
-          })) 
-        }  
+        unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
+          sd(smpl.data[smpl.data$bin.groups == j][[5]],na.rm = T)
+        })) 
       } else if(bin.fun == "mad"){
-        if(is.data.table(smpl.data)){
-          unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
-            mad(smpl.data[smpl.data$bin.groups == j][[5]],na.rm = T)
-          }))
-        } else {
-          unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
-            mad(smpl.data[smpl.data$bin.groups == j,5],na.rm = T)
-          })) 
-        }  
+        unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
+          mad(smpl.data[smpl.data$bin.groups == j][[5]],na.rm = T)
+        }))
       } else {
         stop("Unsupported function. Supported functions: bin.fun = c('mean','sd' and 'mad').")
       }
