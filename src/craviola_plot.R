@@ -1,5 +1,6 @@
 ##IMPORTS
 Imports = c("ggplot2","reshape2","data.table")
+# Imports = c("ggplot2","data.table")
 lapply(Imports, library, character.only = T)
 source("src/bin_polygons.R")
 
@@ -238,7 +239,8 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
   } else { #No bin polygons
     #Add Sample IDs, Var.grp and Var.col
     list.dframes<-Map(cbind,Var1 = Annot.table[[1]], Var.grp = Annot.table[[2]],
-                      Var.col = Annot.table[[3]], list_oriented_dens[Annot.table[[1]]])
+                      Var.col = Annot.table[[3]],
+                      list_oriented_dens[Annot.table[[1]]])
   }
   #Make data.frame
   dframe<-do.call(rbind,list.dframes)
@@ -277,7 +279,8 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
     craviola.plot<-craviola.plot +
       geom_boxplot(data = box.dframe,
                    mapping = aes(x=x, ymin = low,lower = low, middle = mid,
-                                 upper = top, ymax = top), stat = "identity")
+                                 upper = top, ymax = top, group = x),
+                   stat = "identity")
   }
   if(mean.value){ #mean.value TRUE
     craviola.plot<-craviola.plot +

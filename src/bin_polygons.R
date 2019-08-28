@@ -1,8 +1,4 @@
 
-##IMPORTS
-# Imports = c("list packages used here")
-# lapply(Imports, library, character.only = T)
-
 ##FUNCTIONS
 
 # ls.quantile ##################################################################
@@ -22,7 +18,7 @@ ls.quantile<-function(ls,qtiles){
 
 # Fun.name #####################################################################
 
-#' @description Bins desnity object following specific percentiles.
+#' @description Bins density object following specific percentiles.
 #' 
 #' @param list_oriented_dens A \code{list} of data.frames, each dataframes
 #'                           describeing a density distribution.
@@ -100,4 +96,3 @@ bin.polygons<-function(list_oriented_dens,list.quant.lim,Annot.table){
   })
   return(list.dfs)
 }
-
