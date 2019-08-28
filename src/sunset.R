@@ -1,7 +1,6 @@
 ##IMPORTS
-Imports = c("ggplot2","plyr","IRanges")
+Imports = c("ggplot2","IRanges")
 lapply(Imports, library, character.only = T)
-
 
 ##DATA 
 pal_sunset<-c("red","gold","blue4")
@@ -17,47 +16,53 @@ pal_insta<-c("deeppink","red","goldenrod1")
 
 #' @description draw a sunset plot showing the completeness of a dataset.
 #' 
-#' @param pos.cov          An \code{integer} vector containing the sum of
-#'                         non-0/non-NA values by rows of the dataset.
+#' @param mat              A \code{matrix}.
 #' @param title            A \code{character} to specify the title of your plot.
 #' @param col.pal          A \code{character} vector of length 3 matching R
 #'                         colors to used as a palette for the plot.
 #'                         Alternatively col.pal can use the palettes provides
 #'                         within the script of the function:
-#'                         pal_sunset (default), pal_westworld, pal_startrek,
-#'                         pal_margesimpson, pal_eighties, pal_insta. 
+#'                         pal_sunset, pal_westworld, pal_startrek,
+#'                         pal_margesimpson, pal_eighties, pal_insta
+#'                         (Default: col.pal = pal_sunset). 
 #' @param horizontal       A \code{logical} to specify whether the plot should
-#'                         be drawn vertically (default) or horizontally.
+#'                         be drawn vertically or horizontally
+#'                         (Default: horizontal = FALSE).
+#' @param reverse          A \code{logical} to specify whether the order
+#'                         displayed of the bins should reversed
+#'                         (Default: reverse = FALSE).
 #' @param keep_2nd_ticks   A \code{logical} to specify whether the ticks of the
 #'                         secondary axis should be displayed or not (default).
 #' @param n.grad           An \code{integer} specifying the number of graduation
 #'                         to use on the Y-Axis (Default: n.grad = 15).
-#' @param display.cutoff   A \code{double} specifying the the minimum height of
-#'                         a bin to display the label of the number of samples
-#'                         on it.
+#' @param display.cutoff   A \code{double} specifying the minimum height of
+#'                         a bin to label the number of samples
+#'                         on it. Below this cutoff the number of samples is
+#'                         displayed in the side margin
+#'                         (Default: display.cutoff = 0.03).
 #' @param display.num.smpl A \code{double} specifying the minimum height of a
-#'                         bin to display the label of the number of samples on
-#'                         its side.
-#' @param display.sep      A \code{double} specifying the linewidth of the
-#'                         separations between the bins.
-#' @param lgd.pos          A \code{character} specifying the position of the
-#'                         legend (for more information about the possible
-#'                         values, check the theme() function from the ggplot2
-#'                         package for the parameter "legend.position").
+#'                         bin to display the number of samples in the side
+#'                         margin (Default: display.num.smpl = 0.01).
+#' @param display.sep      A \code{double} specifying the minimum height of a
+#'                         bin to display the separations between itself and the
+#'                         neighboring ones.
 #'  
 #' @value a \code{gg} plot of the sunset.
 #' @author Yoann Pageaud.
 
-sunset<-function(pos.cov, title, col.pal = pal_sunset, horizontal = F,
-                 keep_2nd_ticks = F, n.grad = 15, display.cutoff = 0.03,
-                 display.num.smpl = 0.01, display.sep = 0.005,
-                 lgd.pos = "bottom",reverse=F){
+sunset<-function(mat, title, col.pal = pal_sunset, horizontal = F,
+                 reverse=F, keep_2nd_ticks = F, n.grad = 15,
+                 display.cutoff = 0.03, display.num.smpl = 0.01,
+                 display.sep = 0.005, lgd.pos = "bottom"){
+  #Calculate number values not being NAs for each row in the matrix
+  pos.cov<-as.integer(rowSums(!is.na(mat)))
   
   N <- max(pos.cov)
   x <- tabulate(pos.cov + 1L, N + 1L)
   smpl_string<-paste0(c("NONE",seq(N))," (",round((x/sum(x))*100),"%",")")
   Sample.Amt <-c(0,seq(N))
   
+  #Reverse option
   if(reverse){
     x<-rev(x)
     smpl_string<-rev(smpl_string)
@@ -73,7 +78,6 @@ sunset<-function(pos.cov, title, col.pal = pal_sunset, horizontal = F,
                      diff_bins = x/sum(x),
                      cumulated = cumsum(x),
                      stringsAsFactors = F)
-  
   df_right_y<-data.frame(CpG.Covered = x,
                          cumulated_smpl = cumsum(x)-0.5*x,
                          right_Y = smpl_string,
@@ -91,18 +95,17 @@ sunset<-function(pos.cov, title, col.pal = pal_sunset, horizontal = F,
   pos_str<-match(smpl_string[-(sort(match(c(df_right_y$right_Y,dframe$percent),
                                           smpl_string)))],smpl_string)
   #Get groups of following samples
-  smpl_intervals<-IRanges()
-  for(i in pos_str){
-    if(i+1 - i == 1){
+  smpl_intervals<-do.call(c,lapply(pos_str, function(i){
+    if(i+1 - i == 1){ #If first sample
       if(!is.na(match(i+1,pos_str))){
-        smpl_intervals<-c(smpl_intervals,IRanges(start = i, end = i+1))
+        IRanges(start = i, end = i+1)
       }
     }
-  }
+  }))
   smpl_intervals<-reduce(smpl_intervals)
   #Get groups average label.pos cumulative diff_bins
   if(length(smpl_intervals) != 0){
-    for (i in seq(length(smpl_intervals))) {
+    invisible(lapply(seq_along(smpl_intervals), function(i){
       df_grp<-dframe[c(start(smpl_intervals[i]):end(smpl_intervals[i])),
                      c(1:3,6,7)]
       cpg_cov_grp<-sum(df_grp$CpG.Covered)
@@ -111,27 +114,24 @@ sunset<-function(pos.cov, title, col.pal = pal_sunset, horizontal = F,
                       df_grp[as.character(end(smpl_intervals[i])),1]," (",
                       round(per_grp*100),"%)")
       if(rownames(head(df_grp,n=1L))=="1"){
-        pos_lab_grp<-(0 + tail(df_grp$cumulated,n=1L))/2
+        pos_lab_grp<-tail(df_grp$cumulated,n=1L)/2
       } else {
         pos_lab_grp<-(dframe[as.integer(rownames(head(df_grp,n=1L)))-1,
                              ]$cumulated + tail(df_grp$cumulated,n=1L))/2  
       }
       if(per_grp > display.num.smpl){
-        df_right_y<-rbind(df_right_y,data.frame("CpG.Covered" = cpg_cov_grp,
-                                                "cumulated_smpl" = pos_lab_grp,
-                                                "right_Y" = str_grp,
-                                                "diff_bins" = per_grp))
+        df_right_y<<-rbind(df_right_y,data.frame(
+          "CpG.Covered" = cpg_cov_grp, "cumulated_smpl" = pos_lab_grp,
+          "right_Y" = str_grp, "diff_bins" = per_grp))
       }
-    }  
+    }))
   }
-  
   if(keep_2nd_ticks == F) {
     df_right_y<-df_right_y[df_right_y$right_Y != " ",]  
   }
   
   #Vector for white lines
   white_lines<-dframe[!is.na(dframe$white_lines),]$white_lines
-  
   
   #"Sunset" Plot of the Amount of CpGs Covered by Number of Samples
   Sunset<-ggplot(data=dframe,aes(x = 0,y=CpG.Covered, fill = Sample.Amt)) +
@@ -144,13 +144,8 @@ sunset<-function(pos.cov, title, col.pal = pal_sunset, horizontal = F,
     scale_fill_gradient2(low=col.pal[1],mid=col.pal[2],high=col.pal[3],
                          midpoint = round(N/2)) +
     scale_y_continuous(expand = c(0,0),
-                       breaks =
-                         seq(0, sum(dframe$CpG.Covered),
-                             by = round_any(sum(dframe$CpG.Covered)/n.grad,
-                                            10^(nchar(as.character(
-                                              as.integer(round(
-                                                sum(dframe$CpG.Covered)/n.grad,
-                                                1))))-1))),
+                       breaks =seq(0,sum(dframe$CpG.Covered),length.out=n.grad),
+                       labels = function(x) format(x,digits=2,scientific=TRUE),
                        sec.axis = sec_axis(trans = ~.,
                                            breaks = df_right_y$cumulated_smpl,
                                            labels = df_right_y$right_Y)) +
@@ -167,7 +162,6 @@ sunset<-function(pos.cov, title, col.pal = pal_sunset, horizontal = F,
             axis.text.y = element_blank(),
             axis.text.x = element_text(size = 12,face = "bold"),
             legend.title = element_text(size = 14,vjust = 0.8),
-            legend.position=lgd.pos,
             plot.margin = margin(0,0,0,20)) +
       labs(fill = "Number of Samples") +
       coord_flip()
@@ -178,8 +172,7 @@ sunset<-function(pos.cov, title, col.pal = pal_sunset, horizontal = F,
             axis.ticks.x = element_blank(),
             axis.text.y = element_text(size = 12,face = "bold"),
             axis.title = element_text(size = 15),
-            legend.title = element_text(size = 14),
-            legend.position=lgd.pos) +
+            legend.title = element_text(size = 14)) +
       ylab(title) +
       labs(fill = "Number\nof\nSamples")
   }
