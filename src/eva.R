@@ -5,7 +5,24 @@ lapply(Imports, library, character.only = T)
 
 ##FUNCTIONS
 
-# ggEigenvector ################################################################
+# var.accounted ################################################################
+
+#' @description Calculate the variance accounted of an eigenvalue.
+#' 
+#' @param colname          A \code{character} matching a column name.
+#' @param eigen.values     A \code{numeric} vector of all eigenvalues.
+#' @value A \code{character} containg the value of the eigenvalue variance
+#'        accounted for its associated eigen vector.
+#' @author Yoann Pageaud.
+
+var.accounted<-function(colname, eigen.values){
+  vect.num<-gsub("[^0-9.]","",colname)
+  var.accounted<-round(
+    eigen.values[as.integer(vect.num)]/length(eigen.values)*100,2)
+  paste0("Eigenvector ",vect.num," (Variance accounted = " ,var.accounted, "%)")
+}
+
+# ggeigenvector ################################################################
 
 #' Create an Eigenvector Plot using GGplot.
 #' 
@@ -31,25 +48,16 @@ lapply(Imports, library, character.only = T)
 #'         selected.
 #' @author Yoann Pageaud.
 
-ggEigenvector<- function(data, xcol, ycol, eigenvalues, colors, title){
+ggeigenvector<- function(data, xcol, ycol, eigenvalues, colors, title){
   ggplot(data=data) +
     ggtitle(title) +
     geom_point(aes_string(x = xcol, y = ycol, color = "Groups")) +
     geom_segment(aes_string(xend = xcol, yend = ycol, color = "Groups"),
-                 x = 0, y = 0, size = 1,
-                 arrow = arrow(length = unit(0.3,"cm"))) +
+                 x=0, y=0, size=1, arrow = arrow(length = unit(0.3,"cm"))) +
     geom_label_repel(aes_string(x = xcol, y = ycol, label = "Labels")) +
     scale_color_manual(values=colors) +
-    xlab(paste0("Eigenvector ",gsub("[^0-9.]","",xcol),
-                " (Variance accounted = ",
-                round(eigenvalues[as.integer(gsub("[^0-9.]","",xcol))]
-                      /nrow(data)*100,2),
-                "%)")) +
-    ylab(paste0("Eigenvector ",gsub("[^0-9.]","",ycol),
-                " (Variance accounted = ",
-                round(eigenvalues[as.integer(gsub("[^0-9.]","",ycol))]
-                      /nrow(data)*100,2),
-                "%)")) +
+    xlab(var.accounted(colname=xcol, eigen.values=eigenvalues)) +
+    ylab(var.accounted(colname=ycol, eigen.values=eigenvalues)) +
     theme(plot.title = element_text(hjust = 0.5),
           axis.title = element_text(size = 13),
           legend.text = element_text(size=12)) +
@@ -86,9 +94,9 @@ ggEigenvector<- function(data, xcol, ycol, eigenvalues, colors, title){
 #' @param colors      A \code{character} vector of colors for the eigenvectors.
 #'                    The length of this vector has to match the number of
 #'                    different groups existing.
-#' @value A \code{list} object containing the principal components correlations,
+#' @value A \code{list} containing the principal components correlations,
 #'        a list of the Eigenvector Plots generated and principal components
-#'        scores of the data.
+#'        scores of the scaled data.
 #' @author Yoann Pageaud.
 
 EVA<-function(data, use = "pairwise", method = "pearson", adjust = "none",
@@ -104,20 +112,19 @@ EVA<-function(data, use = "pairwise", method = "pearson", adjust = "none",
   true.eigvals<-length(var.acc[var.acc >= var.min])
   #Get eigenvectors
   eigvects <- as.data.frame(eigen(M)$vectors[,c(1:true.eigvals)])
-  dframe<-as.data.frame(cbind(eigvects,"Groups" = groups,
-                              "Labels" = colnames(data)))
-  dframe$Groups<-factor(dframe$Groups,levels = unique(dframe$Groups))
+  dframe<-as.data.frame(
+    cbind(eigvects,"Groups" = as.factor(groups),"Labels" = colnames(data)))
   #Create all possible combinations
   combs<-expand.grid(seq(true.eigvals),seq(true.eigvals))
   #Remove duplicate and order
   combs<-combs[combs$Var1 != combs$Var2,]
   combs<-combs[order(combs[,1]),]
-  my_cols<-rev(rev(colnames(dframe))[-c(1,2)])
+  my_cols<-colnames(dframe)[!colnames(dframe) %in% c("Groups","Labels")]
   #Generate all Eigenvector Plots
   list_EVplots<-lapply(my_cols, function(col1){
     lapply(my_cols, function(col2){
       if(col1 == col2){ return(NULL) } else {
-        ggEigenvector(data = dframe, eigenvalues = eigvals, xcol = col1,
+        ggeigenvector(data = dframe, eigenvalues = eigvals, xcol = col1,
                       ycol = col2, colors = colors,
                       title = paste("Eigenvector Plot - Pairwise",method,
                                     "correlation with", adjust, "adjustment"))
