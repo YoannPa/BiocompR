@@ -96,7 +96,6 @@ Check the eigenvector plot based on Eigenvectors 2 and 3:
 ```R
 eva.res$EV.plots$`2 & 3`
 ```
-PLOT!  
 
 <p align="center">
 <img src="img/EVA_plot1.png">
@@ -139,7 +138,10 @@ library(GGally)
 ggfacet(eva.res$PC.scores[,c(1:5)]) + geom_density_2d()
 ```
 
-PLOT!
+<p align="center">
+<img src="img/EVA_plot2.png">
+</p>
+
 
 As one can see the first eigenvectors discriminate specific genes more strongly than latest ones.  
 
