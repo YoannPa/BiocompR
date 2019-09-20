@@ -72,9 +72,9 @@ ggeigenvector<- function(data, xcol, ycol, eigenvalues, colors, title){
 #' 
 #' @param data        A \code{matrix} or a \code{data.frame} containing
 #'                    variables by columns and values to be used for the
-#'                    correlation test.
+#'                    correlation test by rows.
 #' @param use         A \code{character} to specify how to handle missing values
-#'                    when calculating a correlation. Possible types are
+#'                    when calculating a correlation. Possible values are
 #'                    'pairwise' and 'complete'. 'pairwise' is the default value
 #'                    and will do pairwise deletion of cases. 'complete' will
 #'                    select just complete cases.
@@ -82,13 +82,13 @@ ggeigenvector<- function(data, xcol, ycol, eigenvalues, colors, title){
 #'                    matching one of these: 'pearson','spearman','kendall'.
 #' @param adjust      A \code{character} specifying what adjustment for multiple
 #'                    tests should be used. Possible values are: "holm",
-#'                    "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr",
+#'                    "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr" and
 #'                    "none".
 #' @param var.min     A \code{double} setting the minimum variance accountable
 #'                    for an eigenvector to be considered in the plots
 #'                    generated.
-#' @param groups      A \code{character} vector of groups to which variable
-#'                    belongs for eigenvector annotations. The length of this
+#' @param groups      A \code{character} vector of groups to which variables
+#'                    belong for eigenvector annotations. The length of this
 #'                    vector has to match the number/variables of columns in the
 #'                    data.
 #' @param colors      A \code{character} vector of colors for the eigenvectors.
@@ -110,6 +110,9 @@ EVA<-function(data, use = "pairwise", method = "pearson", adjust = "none",
   var.acc<-eigvals/length(eigvals)
   #How many eigenvalues are above the minimum threshold for variance accounted
   true.eigvals<-length(var.acc[var.acc >= var.min])
+  if(true.eigvals == 0){
+    stop("No eigenvalues accounting for more than the var.min minimum of the variance. Please set a lower var.min.")
+  }
   #Get eigenvectors
   eigvects <- as.data.frame(eigen(M)$vectors[,c(1:true.eigvals)])
   dframe<-as.data.frame(
