@@ -57,6 +57,13 @@ lapply(Imports, library, character.only = T)
 ## Tutorial
 ### How to run an EVA (EigenVector Analysis)
 
+An eigenvector analysis is very similar to a PCA (Principal Component Analysis) except the principal components here are eigenvectors.  
+Its main advantage is that it only relies on a correlation test and is, consequently super fast to run, faster than a PCA.
+It returns 3 types of results:  
+* a list of eigenvector plots,  
+* a table showing the correlation values between eigenvectors and selected variables,  
+* a table showing the score of your data for each eigenvector.  
+
 For this tutorial we need the package **mixOmics** that can be installed from [**Biocondutor**](https://www.bioconductor.org/packages/release/bioc/html/mixOmics.html).
 
 Once installed, load **mixOmics**:  
