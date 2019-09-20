@@ -1,5 +1,5 @@
 # BiocompR
-BiocompR is a R package build upon ggplot2 to improve commonly used plots dedicated to data comparison, dataset exploration and, ultimately provides users with versatile and customizable graphics.  
+BiocompR is a R package built upon ggplot2 to improve commonly used plots dedicated to data comparison, dataset exploration and, ultimately provides users with versatile and customizable graphics.  
 
 **Author: PAGEAUD Y.<sup>1</sup>**  
 **Contributors: MAYAKONDA A.<sup>2</sup>; WURSTHORN A.<sup>3</sup>; TOTH R.<sup>2</sup>; LUTSIK P.<sup>2</sup>**   
@@ -9,7 +9,7 @@ BiocompR is a R package build upon ggplot2 to improve commonly used plots dedica
 
 **Version: 0.0.1**  
 **R Compatibility: Version 3.6.1**  
-**Last Update: 18/09/2019**  
+**Last Update: 20/09/2019**  
 
 ## Content
 Currently the BiocompR repository contains **9 scripts** in the folder **src/**:
