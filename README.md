@@ -5,7 +5,7 @@ BiocompR is a R package build upon ggplot2 to improve commonly used plots dedica
 **Contributors: MAYAKONDA A.<sup>2</sup>; WURSTHORN A.<sup>3</sup>; TOTH R.<sup>2</sup>; LUTSIK P.<sup>2</sup>**   
 **1-** [**DKFZ - Division of Applied Bioinformatics, Germany.**](https://www.dkfz.de/en/applied-bioinformatics/index.php)  
 **2-** [**DKFZ - Computational Cancer Epigenomics, Germany.**](https://www.dkfz.de/en/CanEpi/CompEpigen/index.html)  
-**3-** [**DKFZ - Computational Cancer Epigenomics, Germany.**](https://www.dkfz.de/en/CanEpi/CompEpigen/index.html)  
+**3-** [**DKFZ - .**]()  
 
 **Version: 0.0.1**  
 **R Compatibility: Version 3.6.1**  
@@ -41,23 +41,23 @@ lapply(Imports, library, character.only = T)
 ⚠️ For now there is no package built, so nothing to install.
 
 ## Documentation
-### EVA
+### EVA()
 **Description:** From a Correlation test return eigenvectors, principal components scores and principal components correlations with the data.  
 **Parameters:**  
-* _data_ - A matrix or a data.frame containing variables by columns and values to be used for the correlation test by rows.  
-* _use_ -  A character to specify how to handle missing values when calculating a correlation. Possible values are 'pairwise' and 'complete'. 'pairwise' is the default value and will do pairwise deletion of cases. 'complete' will select just complete cases.  
-* _method_ - The correlation method to use as a character matching one of these: 'pearson','spearman','kendall'.  
-* _adjust_ - A character specifying what adjustment for multiple tests should be used. Possible values are: "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr" and "none".  
-* _var.min_ - A double setting the minimum variance accountable for an eigenvector to be considered in the plots generated.  
-* _groups_ - A character vector of groups to which variables belong for eigenvector annotations. The length of this vector has to match the number/variables of columns in the data.  
-* _colors_ - A character vector of colors for the eigenvectors. The length of this vector has to match the number of different groups existing.  
+* **_data_** - A matrix or a data.frame containing variables by columns and values to be used for the correlation test by rows.  
+* **_use_** -  A character to specify how to handle missing values when calculating a correlation. Possible values are 'pairwise' and 'complete'. 'pairwise' is the default value and will do pairwise deletion of cases. 'complete' will select just complete cases.  
+* **_method_** - The correlation method to use as a character matching one of these: 'pearson','spearman','kendall'.  
+* **_adjust_** - A character specifying what adjustment for multiple tests should be used. Possible values are: "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr" and "none".  
+* **_var.min_** - A double setting the minimum variance accountable for an eigenvector to be considered in the plots generated.  
+* **_groups_** - A character vector of groups to which variables belong for eigenvector annotations. The length of this vector has to match the number/variables of columns in the data.  
+* **_colors_** - A character vector of colors for the eigenvectors. The length of this vector has to match the number of different groups existing.  
 
 ⚠️ **Work in progress !**
 
 ## Tutorial
 ### How to run an EVA (EigenVector Analysis)
 
-For this tutorial we need the package **mixOmics** that can be installed from Biocondutor.
+For this tutorial we need the package **mixOmics** that can be installed from [**Biocondutor**](https://www.bioconductor.org/packages/release/bioc/html/mixOmics.html).
 
 Once installed, load **mixOmics**:  
 
@@ -97,6 +97,11 @@ Check the eigenvector plot based on Eigenvectors 2 and 3:
 eva.res$EV.plots$`2 & 3`
 ```
 PLOT!  
+
+<p align="center">
+<img src="img/EVA_plot1.png">
+</p>
+
 Check the correlation between each eigenvector and the selected samples:
 ```R
 eva.res$PC.cor
@@ -133,6 +138,7 @@ Here the 5 first eigenvectors are selected (the package **GGally** is necessary 
 library(GGally)
 ggfacet(eva.res$PC.scores[,c(1:5)]) + geom_density_2d()
 ```
+
 PLOT!
 
 As one can see the first eigenvectors discriminate specific genes more strongly than latest ones.  
@@ -148,8 +154,9 @@ top10.gene.IDs
  [6] "ENSG00000181449" "ENSG00000120211" "ENSG00000136634" "ENSG00000125743" "ENSG00000148297"
 
 ```
-This is only an example, it doesn't mean that the parameters set here are the best ones for these data.
+This is only an example, it doesn't mean that the parameters set here are the best ones for these data.  
 
+⚠️ **Work in progress !**  
 
 ## Licence
 
