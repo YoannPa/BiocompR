@@ -29,10 +29,10 @@ Currently the BiocompR repository contains **9 scripts** in the folder **src/**:
 ### Install all dependencies
 
 ```R
-Imports = c('ggplot2','psych','data.table','gridExtra','grid','parallel',
+inst.pkgs = c('ggplot2','psych','data.table','gridExtra','grid','parallel',
 	    'ggrepel','corrplot','ggdendro','fastcluster','parallelDist',
 	    'IRanges','RColorBrewer','Hmisc','gtools')
-lapply(Imports, library, character.only = T)
+install.packages(inst.pkgs)
 ```
 
 ⚠️ RColorBrewer, Hmisc and gtools will be removed in the next commits.
