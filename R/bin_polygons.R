@@ -1,16 +1,14 @@
 
-##FUNCTIONS
-
-# ls.quantile ##################################################################
-
 #' @description Applies the quantile function on a list of vectors.
-#' 
+#'
 #' @param ls     A \code{list} of vectors.
 #' @param qtiles A \code{double} vector specifying the values of percentiles of
 #'               interest. Values must be between 0 and 1.
 #' @value a \code{list} of vectors containing percentiles values, one vector by
-#' distribution. 
+#' distribution.
 #' @author Yoann Pageaud.
+#' @export
+#' @examples
 
 ls.quantile<-function(ls,qtiles){
   lapply(ls,quantile, qtiles)
@@ -19,7 +17,7 @@ ls.quantile<-function(ls,qtiles){
 # bin.polygons #################################################################
 
 #' @description Bins density object following specific percentiles.
-#' 
+#'
 #' @param list_oriented_dens A \code{list} of data.frames, each dataframes
 #'                           describeing a density distribution.
 #' @param list.quant.lim     A \code{list} of vectors, each vectors containing

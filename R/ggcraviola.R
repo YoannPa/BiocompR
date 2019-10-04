@@ -1,35 +1,5 @@
-##IMPORTS
-Imports = c("ggplot2","data.table")
-lapply(Imports, library, character.only = T)
-source("src/bin_polygons.R")
 
-##DUMMY DATA
-dummy.complete = data.frame(
-  Samples=rep(paste0("Sample",c(1:6)),each = 1000),
-  Groups=rep(c('A','B','C'),each = 2000),
-  Conditions=rep(c('I','J'),each = 1000,3),
-  Values=c(rnorm(1000,0), rnorm(1000, 0.5),
-           rnorm(1000, 3), rnorm(1000, 3.5),
-           rnorm(1000,-3), rnorm(1000, -3.5)),
-  "Function(2ndVar)" = rep(rep(x =c(60,50,40,30,20,10,30,40,50,60),each=100),6))
-
-dummy.complete.bis = data.frame(
-  Samples=rep(paste0("Sample",c(1:6)),each = 1000),
-  Groups=rep(c('A','B','C'),each = 2000),
-  Conditions=rep(c('I','J'),each = 1000,3),
-  Values=c(rnorm(1000,0), rnorm(1000, 0.5),
-           rnorm(1000, 3), rnorm(1000, 3.5),
-           rnorm(1000,-3), rnorm(1000, -3.5)))
-
-dummy.minimal = data.frame(
-  Samples = rep(paste0("Sample",c(1:2)),each = 1000),
-  Values=c(rnorm(1000,0), rnorm(1000, 0.5)))
-
-##FUNCTIONS
-
-# ggcraviola ###################################################################
-
-#' Read Chromosomes Methylation from a specific sample.
+#' @description Draw a craviola plot.
 #'
 #' @param data           A \code{data.frame}. 2 formats of data.frame are
 #'                       supported.
@@ -50,8 +20,8 @@ dummy.minimal = data.frame(
 #'                       craviola with 2 distributions.
 #'                       You cannot plot more than 1 craviola with the "minimal"
 #'                       data.frame format. the "minimal" format also do not
-#'                       support the binning. 
-#'                       
+#'                       support the binning.
+#'
 #' @param fill.color     A \code{character} vector of length 2 containing colors
 #'                       to use to fill the craviolas
 #'                       (Default: fill.color = c("blue","red")).
@@ -76,12 +46,13 @@ dummy.minimal = data.frame(
 #'                       values of the additional variable for each bin of
 #'                       distrubutions
 #'                       (Supported: bin.fun = c("sd","mad","mean");
-#'                       Default: bin.fun = "sd"). 
+#'                       Default: bin.fun = "sd").
 #' @param lines.col      A \code{character} matching a color to use for the
 #'                       border lines of the craviola's bins
 #'                       (Default: lines.col = NA).
-#' @return a \code{gg} craviola plot.
+#' @value a \code{gg} craviola plot.
 #' @author Yoann Pageaud.
+#' @export
 
 #TODO : cut density at min and max !!
 
@@ -133,7 +104,7 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
   mylist_data<-split(data,f = data[[1]])
   list_val1<-lapply(mylist_data,subset, select = 4)
   list_vect.val1<-lapply(list_val1,unlist)
-  
+
   #Create stats plots
   list.bp.stat<-lapply(seq_along(list_vect.val1),function(i){
     qiles<-quantile(list_vect.val1[[i]])
@@ -152,7 +123,7 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
                pos.crav = round(x.pos))
   })
   box.dframe<-do.call(rbind, list.bp.stat)
-  
+
   #Create Craviola plot
   list_dens.res<-lapply(list_vect.val1,density)
   list_dens.df<-lapply(list_dens.res, function(i){
@@ -206,11 +177,11 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
       if(bin.fun == "mean"){
         unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
           mean(smpl.data[smpl.data$bin.groups == j][[5]],na.rm = T)
-        })) 
+        }))
       } else if(bin.fun == "sd"){
         unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
           sd(smpl.data[smpl.data$bin.groups == j][[5]],na.rm = T)
-        })) 
+        }))
       } else if(bin.fun == "mad"){
         unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
           mad(smpl.data[smpl.data$bin.groups == j][[5]],na.rm = T)
@@ -237,7 +208,7 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
   }
   #Make data.frame
   dframe<-do.call(rbind,list.dframes)
-  
+
   #Plot
   craviola.plot<-ggplot() +
     scale_x_continuous(breaks = as.integer(levels(dframe$Var.grp))-1,
@@ -247,7 +218,7 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
          alpha = colnames(data)[5]) +
     guides(fill = guide_legend(order = 1)) +
     scale_fill_manual(values = fill.color, labels = original.var.col)
-  
+
   #Plot Options
   if(bins){ #bins TRUE
     craviola.plot<-craviola.plot +

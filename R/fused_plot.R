@@ -1,26 +1,20 @@
 
-##IMPORTS
-Imports = c('ggplot2','gridExtra','grid','psych','corrplot','ggdendro',
-            'fastcluster','parallel','data.table')
-lapply(Imports, library, character.only = T)
-source("core_ggplot_fun.R")
-source("core_stat_tests.R")
-
-##FUNCTIONS
-
 # min.max.update ###############################################################
 
 #' @description Check if min & max are given by legend;
-#'              If given, update min & max of the plot. 
+#'              If given, update min & max of the plot.
 #'              If none, calculate min & max from melted triangle.
-#' 
+#'
 #' @param lgd.limits A \code{vector} of length 2, containing limit values.
 #'                   Can be NULL (Default: lgd.limits=NULL).
 #' @param melt.tri   A \code{data.frame} melted triangle containing test values.
 #' @param tri.type   A \code{character} specifying the type of triangle provided
-#'                   (Supported: tri.type = c("upper","lower")) 
+#'                   (Supported: tri.type = c("upper","lower"))
 #' @value A \code{list} of length 2 containing the updated min and max values.
 #' @author Yoann Pageaud.
+#' @export
+#' @examples
+#'
 
 min.max.update<-function(lgd.limits=NULL, melt.tri, tri.type){
   if(is.null(lgd.limits)){
@@ -38,7 +32,7 @@ min.max.update<-function(lgd.limits=NULL, melt.tri, tri.type){
                   "upper limit and the lower limit."))
     } else {
       min_tri<-lgd.limits[1]
-      max_tri<-lgd.limits[2]  
+      max_tri<-lgd.limits[2]
     }
   }
   return(list("min_tri"=min_tri,"max_tri"=max_tri))
@@ -47,7 +41,7 @@ min.max.update<-function(lgd.limits=NULL, melt.tri, tri.type){
 # fix.corrMatOrder.alphabet ####################################################
 
 #' @description Function description.
-#' 
+#'
 #' @param cor.order A \code{character} vector of interest.
 #' @param str       A \code{character} vector from which to get elements order.
 #' @value a \code{type} object returned description.
@@ -56,13 +50,13 @@ min.max.update<-function(lgd.limits=NULL, melt.tri, tri.type){
 fix.corrMatOrder.alphabet<-function(cor.order,str){
   unlist(lapply(cor.order, function(i){
     grep(pattern=paste0("^",i,"$"),x=str)
-  }))  
+  }))
 }
 
 # fused.view ###################################################################
 
 #' @description Visualize 2 matrices of results as a fused plot.
-#' 
+#'
 #' @param param1 A \code{type} parameter description.
 #' @value a \code{type} object returned description.
 #' @author Yoann Pageaud.
@@ -102,7 +96,7 @@ fused.view<-function(
   raster = FALSE, raster1 = NULL, raster2 = NULL,
   add.ggplot.arg = NULL
   ){
-  
+
   #Get order of the correlations for the method used
   if(order.select == 'upper'){
     correlation.order<-corrMatOrder(upper.mat, order = order.method,
@@ -128,7 +122,7 @@ fused.view<-function(
   #Generate Dendrogram
   if(dendro.pos != "none"){
     dendrogram<-as.dendrogram(hierarchy.clust)
-    ddgr_dat<-dendro_data(dendrogram) #Dendrogram data    
+    ddgr_dat<-dendro_data(dendrogram) #Dendrogram data
     ddgr_seg <- ggdend(ddgr_dat$segments,dendro.pos) #Get dendrogram segments
   }
   #Re-order rows and columns
@@ -153,7 +147,7 @@ fused.view<-function(
       lgd.limits = lgd.limits1, melt.tri = upper.melt, tri.type = "upper")
     min_upper<-upper.minmax$min_tri
     max_upper<-upper.minmax$max_tri
-    
+
     lower.minmax<-min.max.update(
       lgd.limits = lgd.limits2, melt.tri = lower.melt, tri.type = "lower")
     min_lower<-lower.minmax$min_tri
@@ -216,7 +210,7 @@ fused.view<-function(
   #Plot Color Sidebar
   col_sidebar<-plot.col.sidebar(
     sample.names = sample.names ,annot.grps = annot.grps,annot.pal = annot.pal,
-    annot.pos = annot.pos, cor.order = correlation.order, 
+    annot.pos = annot.pos, cor.order = correlation.order,
     axis.text.x = axis.text.x, axis.text.y = axis.text.y,
     axis.ticks = axis.ticks, axis.title.x = axis.title.x,
     axis.title.y = axis.title.y, set.x.title = set.x.title,
@@ -249,7 +243,7 @@ fused.view<-function(
       main_grob$widths[2:5] <- as.list(maxWidth)
       sidebar_grob$widths[2:5] <- as.list(maxWidth)
       dendro_grob$widths[2:5] <- as.list(maxWidth)
-      
+
       main_grob<-arrangeGrob(dendro_grob, sidebar_grob, main_grob, ncol=1,
                              heights = c(10+dendro.size,9+annot.size,40))
     } else {
@@ -264,10 +258,10 @@ fused.view<-function(
     #Create the Right Panel for legends
     right.legends<-arrangeGrob(upper.legend,sidebar.legend,nrow = 1)
   } else{
-    #Annotation on the left    
+    #Annotation on the left
     if(dendro.pos == "left"){
       #Get common width of a list of objects widths
-      maxHeight = unit.pmax(main_grob$heights[3:8], 
+      maxHeight = unit.pmax(main_grob$heights[3:8],
                             sidebar_grob$heights[3:8],
                             dendro_grob$heights[3:8])
       #Assign back the maximum width to all object of the list
@@ -300,7 +294,7 @@ fused.view<-function(
 
 #' @description Create a plot summarizing results from 2 different pairwise
 #'              comparisons.
-#' 
+#'
 #' @param data                  A \code{matrix} or \code{dataframe}.
 #' @param ncores                An \code{integer} to specify the number of
 #'                              cores/threads to be used to parallel-run tests.
@@ -327,13 +321,13 @@ fused.view<-function(
 #'                              value, 'n' - the number of cases used for the
 #'                              comparison, 'stat' - the value of the comparison
 #'                              statistic, 'p' - the P-value of the comparison,
-#'                              'se' - the standard error of the comparison. 
+#'                              'se' - the standard error of the comparison.
 #' @param na.rm                 A \code{character} to specify how to handle
 #'                              missing values when calculating a correlation.
 #'                              Possible types are 'pairwise' and 'complete'.
 #'                              'pairwise' is the default value and will do
 #'                              pairwise deletion of cases. 'complete' will
-#'                              select just complete cases.  
+#'                              select just complete cases.
 #' @param order.method          A \code{character} specifying the ordering
 #'                              method to apply. Possible ordering methods are:
 #'                              'AOE' - angular order of the eigenvectors,
@@ -363,7 +357,7 @@ fused.view<-function(
 #'                              number of levels of vectors listed in
 #'                              'annot.grps'. If a list is provided, its length
 #'                              must match the length of the list provided to
-#'                              'annot.grps'. 
+#'                              'annot.grps'.
 #' @param annot.pos             A \code{character} specifying the position of
 #'                              the annotation sidebar. Possible values are:
 #'                              'top', 'left' or 'both'.
@@ -392,16 +386,16 @@ fused.view<-function(
 #'                              text.
 #' @param axis.ticks            An \code{element_line} object to setup the ticks
 #'                              of the plot.
-#' @param set.x.title           A \code{character}to be used as the title for 
+#' @param set.x.title           A \code{character}to be used as the title for
 #'                              the X axis.
-#' @param set.y.title           A \code{character}to be used as the title for 
-#'                              the Y axis.                             
+#' @param set.y.title           A \code{character}to be used as the title for
+#'                              the Y axis.
 #' @param set.lgd1.title        A \code{character}to be used as the title of the
 #'                              legend.
 #' @param set.lgd2.title        A \code{character}to be used as the title of the
 #'                              legend.
 #' @param diag.col              A \code{character} defining the color of cells
-#'                              with of the empty diagonal. 
+#'                              with of the empty diagonal.
 #' @param lgd.pal1              A \code{character} vector of colors to use for
 #'                              the palette of the upper triangle.
 #' @param lgd.pal2              A \code{character} vector of colors to use for
@@ -415,7 +409,7 @@ fused.view<-function(
 #' @param lgd.text              An \code{element_text} object to setup the text
 #'                              of both legends.
 #' @param lgd.text1             An \code{element_text} object to setup the text
-#'                              of the upper triangle legend.       
+#'                              of the upper triangle legend.
 #' @param lgd.text2             An \code{element_text} object to setup the text
 #'                              of the lower triangle legend.
 #' @param lgd.breaks            A \code{double} vector defining the graduation
@@ -504,7 +498,7 @@ fused.view<-function(
 #'        'lower.res' - the matrix result of pairwise comparisons displayed in
 #'        the lower triangle,
 #'        'fused.plot' - the plot.
-#' 
+#'
 #' @author Yoann Pageaud.
 
 fused.plot<-function(data,ncores,
@@ -554,7 +548,7 @@ fused.plot<-function(data,ncores,
   #Upper value type
   if(!(upper.value %in% c('r','n','stat','p','se'))){
     stop("value type unknown for upper.value")
-  } 
+  }
   #Lower value type
   if(!(lower.value %in% c('r','n','stat','p','se'))){
     stop("value type unknown for lower.value")
@@ -566,7 +560,7 @@ fused.plot<-function(data,ncores,
   #Order Method
   if(order.method %in% c("AOE","FPC","hclust","alphabet","default")){
     cat(paste("Apply",order.method,"ordering method.\n"))
-    
+
     if(order.method == "hclust"){
       #check hclust.method
       if(hclust.method %in% c('ward.D','ward.D2', 'single', 'complete',
@@ -586,7 +580,7 @@ fused.plot<-function(data,ncores,
          are not ordered following the hierarchical clustering.")
       }
     }
-    #order select 
+    #order select
     if(order.method %in% c("AOE","FPC","hclust","alphabet")){
       if(!(order.select %in% c('upper','lower'))){
         stop("Wrong value for order.select - You can only select values from the
@@ -742,7 +736,7 @@ fused.plot<-function(data,ncores,
     if(lower.comp == upper.comp){
       if(lower.value %in% c('n','stat','p')){
         lower.mat<-get.ks.stat(table_combinations = ks.res$table_combinations,
-                               df.ks.tests = ks.res$res.test, statistic) 
+                               df.ks.tests = ks.res$res.test, statistic)
       } else if(lower.value == 'r'){
         stop("a KS test does not compute a correlation value.")
       } else if(lower.value == 'se'){
@@ -762,7 +756,7 @@ fused.plot<-function(data,ncores,
     }
     lower.res<-lower.mat
   } else { stop("'upper.comp' value not supported yet.") }
-  
+
   #Create Fused Plot
   fused.res<-fused.view(
     sample.names = colnames(data), upper.mat = upper.mat, lower.mat = lower.mat,

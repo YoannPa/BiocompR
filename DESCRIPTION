@@ -1,0 +1,20 @@
+Package: BiocompR
+Title: Adavanced vizualisation for data comparisons
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Yoann",
+           family = "Pageaud",
+           role = c("aut", "cre"),
+           email = "y.pageaud@dkfz.de",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: What the package does (one paragraph).
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Depends: ggplot2
+Imports: gridExtra,grid,psych,corrplot,ggdendro,fastcluster,parallel,data.table,IRanges
+RoxygenNote: 6.1.1
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
