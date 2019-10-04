@@ -23,9 +23,9 @@ ggcoverage<-function(data, round.unit=2, rev.stack=FALSE, invert.percent=FALSE,
   suppressWarnings(data<-data[, lapply(.SD, na.replace, replace = 0)])
   data[, remainings:=.(Total-Subset)]
   if(invert.percent){
-    data[, percents:=.(round((Subset/Total)*100,2))]  
+    data[, percents:=.(round((Subset/Total)*100,round.unit))]  
   } else {
-    data[, percents:=.(round((remainings/Total)*100,2))]
+    data[, percents:=.(round((remainings/Total)*100,round.unit))]
   }
   data[, percents:=.(paste0(percents,"%"))]
   if(log.scaled){
@@ -78,9 +78,9 @@ ggcoverage<-function(data, round.unit=2, rev.stack=FALSE, invert.percent=FALSE,
     geom_text(aes(y=label_ypos, label=value.char), vjust=0.5, color="white",
               size=4,fontface = "bold")
   if (isTRUE(horizontal)) {
-    ggcov<-ggcov + geom_text(aes(y=Total, label=percents), hjust=-0.1) + coord_flip()
+    ggcov<-ggcov +geom_text(aes(y=Total,label=percents),hjust=-0.1)+coord_flip()
   } else {
-    ggcov<-ggcov + geom_text(aes(y=Total, label=percents), vjust=-1, hjust=0.38)
+    ggcov<-ggcov + geom_text(aes(y=Total, label=percents), vjust=-1, hjust=0.5)
   }
   return(ggcov)
 }
