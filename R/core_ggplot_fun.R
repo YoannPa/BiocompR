@@ -3,28 +3,24 @@
 Imports = c("ggplot2","data.table")
 lapply(Imports, library, character.only = T)
 
-##FUNCTIONS
-
-# is.elt_blank #################################################################
-
-#' @description Check if a list's attributes has for class 'element_blank'.
-#' 
+#' Checks if a list's attributes has for class 'element_blank'.
+#'
 #' @param arg A \code{list}.
-#' @value A \code{logical}.
+#' @return A \code{logical}.
 #' @author Yoann Pageaud.
+#' @keywords internal
 
 is.elt_blank<-function(arg){
   bool<-attributes(arg)$class[1] == "element_blank"
   return(bool)
 }
 
-# get.lgd ######################################################################
-
-#' @description Extract legend from a ggplot object.
-#' 
+#' Extracts legend from a ggplot2 object.
+#'
 #' @param gg2.obj  A \code{gg} object with legends.
-#' @value A \code{gg} object only containing the legends of the plot.
+#' @return A \code{gg} object only containing the legends of the plot.
 #' @author Yoann Pageaud.
+#' @keywords internal
 
 get.lgd<-function(gg2.obj){
   tmp <- ggplot_gtable(ggplot_build(gg2.obj))
@@ -33,18 +29,16 @@ get.lgd<-function(gg2.obj){
   return(legend)
 }
 
-# ggdend #######################################################################
-
-#' @description Create a dendogram in ggplot
-#' 
-#' @param df          A \code{data.frame} containing variables and value to be
+#' Creates a dendogram in ggplot2.
+#'
+#' @param df          A \code{data.frame} containing variables and values to be
 #'                    used to create the dendrogram.
 #' @param orientation A \code{character} specifying the orientation of the
 #'                    dendrogram. Possible values are "top" and "left".
-#' @value A \code{gg} object of the dendrogram that can be plotted.
+#' @return A \code{gg} plot of the dendrogram.
 #' @author Yoann Pageaud.
 
-ggdend <- function(df,orientation) {
+ggdend <- function(df, orientation) {
   ddplot<- ggplot() +
     geom_segment(data = df, aes(x=x, y=y, xend=xend, yend=yend)) +
     theme(axis.title = element_blank(), axis.text = element_blank(),
@@ -68,23 +62,22 @@ ggdend <- function(df,orientation) {
   return(ddplot)
 }
 
-# basic.ggplot.tri #############################################################
-
-#' @description Draw a ggplot for a basic upper or lower triangle.
-#' 
+#' Draws a ggplot for a basic upper or lower triangle.
+#'
 #' @param melt.tri       A \code{data.frame} melted triangle containing test
 #'                       values.
 #' @param grid.col       A \code{character} specifying the color of the grid.
 #' @param grid.thickness A \code{double} value for the thickness of the grid.
-#' @value A \code{gg} object of a basic triangle plot (a 'geom_tile()').
+#' @return A \code{gg} object of a basic triangle plot (a 'geom_tile()').
 #' @author Yoann Pageaud.
+#' @keywords internal
 
 basic.ggplot.tri<-function(melt.tri, grid.col, grid.thickness, lgd.title,
                            lgd.text, lgd.pal, min_tri, max_tri, lgd.breaks,
                            lgd.round, lgd.ticks, lgd.nbin, lgd.height,lgd.width,
                            rasteri, lgd.ticks.linewidth, lgd.frame.col,
                            lgd.frame.linewidth, diag.col, set.lgd.title){
-  ggplot() + 
+  ggplot() +
     geom_tile(data = melt.tri, aes(x=Var1, y=Var2, fill = value),
               color = grid.col, size=grid.thickness) +
     theme(legend.title = lgd.title,
@@ -110,14 +103,12 @@ basic.ggplot.tri<-function(melt.tri, grid.col, grid.thickness, lgd.title,
                          name = set.lgd.title)
 }
 
-# basic.sidebar ################################################################
-
-#' @description draw a ggplot of a basic sidebar.
-#' 
+#' Draws a ggplot2 of a basic sidebar.
+#'
 #' @param data    A \code{data.frame} with the column names 'Samples','.id' and
 #'                'Groups' in this order.
 #' @param palette A \code{character} vector containing R colors like a palette.
-#' @value a \code{gg} object of the basic sidebar (a 'geom_tile()').
+#' @return A \code{gg} object of the basic sidebar (a 'geom_tile()').
 #' @author Yoann Pageaud.
 
 basic.sidebar<-function(data, palette){
@@ -136,14 +127,13 @@ basic.sidebar<-function(data, palette){
     scale_fill_manual(values=as.character(palette))
 }
 
-# plot.col.sidebar #############################################################
-
-#' @description Create a colored side annotation bars in ggplot.
-#' 
-#' @param param1 A \code{type} parameter description.
-#' @value a \code{type} object returned description.
+#' Creates a colored side annotation bars in ggplot2.
+#'
+#' @param sample.names A \code{type} parameter description.
+#' @return A \code{type} object returned description.
 #' @author Yoann Pageaud.
 
+#TODO: Write documentation!
 plot.col.sidebar<-function(
   sample.names, annot.grps, annot.pal, annot.pos, cor.order, split.annot = TRUE,
   merge.lgd = FALSE, lgd.title = "Legends", axis.text.x, axis.text.y,
@@ -161,12 +151,12 @@ plot.col.sidebar<-function(
           stop(paste0("The length of annotation '",names(groups)[i],
                       "' levels do not match the length of the corresponding ",
                       "palette."))}
-      })  
+      })
     } else {
       stop("The number of annotations does not match the number of palettes provided.")
     }
   } else {
-    if(is.vector(annot.pal)){ #if a single palette is provided 
+    if(is.vector(annot.pal)){ #if a single palette is provided
       col_table<-lapply(seq_along(groups), function(i){
         if(length(groups[[i]]) == length(annot.pal)){ #if groups match colors
           data.frame("Grps"=groups[[i]],"Cols"=annot.pal)
@@ -240,7 +230,7 @@ plot.col.sidebar<-function(
       #   facet_grid(. ~ .id, scales = "free", space = "free_x")
     }
   }
-  
+
   if(merge.lgd){# Do not split legends
     sidebar.lgd<-list(get.lgd(col_sidebar + labs(fill = lgd.title)))
   } else {# Split legends and return a list of legends

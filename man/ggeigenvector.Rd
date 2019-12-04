@@ -2,7 +2,7 @@
 % Please edit documentation in R/eva.R
 \name{ggeigenvector}
 \alias{ggeigenvector}
-\title{Create an Eigenvector Plot using GGplot.}
+\title{Creates an eigenvector plot using ggplot2.}
 \usage{
 ggeigenvector(data, xcol, ycol, eigenvalues, colors, title)
 }
@@ -31,8 +31,12 @@ different groups existing.}
 \item{title}{A \code{character} that will be used as a title for the
 plot.}
 }
+\value{
+A \code{gg} plot of the variables following the 2 eigenvectors
+        selected.
+}
 \description{
-Create an Eigenvector Plot using GGplot.
+Creates an eigenvector plot using ggplot2.
 }
 \author{
 Yoann Pageaud.

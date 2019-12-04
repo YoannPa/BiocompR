@@ -1,22 +1,20 @@
 
-#' @description Applies the quantile function on a list of vectors.
+#' Applies the quantile function on a list of vectors.
 #'
 #' @param ls     A \code{list} of vectors.
 #' @param qtiles A \code{double} vector specifying the values of percentiles of
 #'               interest. Values must be between 0 and 1.
-#' @value a \code{list} of vectors containing percentiles values, one vector by
+#' @return A \code{list} of vectors containing percentiles values, one vector by
 #' distribution.
 #' @author Yoann Pageaud.
-#' @export
+#' @keywords internal
 #' @examples
 
-ls.quantile<-function(ls,qtiles){
-  lapply(ls,quantile, qtiles)
+ls.quantile<-function(ls, qtiles){
+  lapply(ls, quantile, qtiles)
 }
 
-# bin.polygons #################################################################
-
-#' @description Bins density object following specific percentiles.
+#' Bins density object following specific percentiles.
 #'
 #' @param list_oriented_dens A \code{list} of data.frames, each dataframes
 #'                           describeing a density distribution.
@@ -24,9 +22,10 @@ ls.quantile<-function(ls,qtiles){
 #'                           values of specific percentiles.
 #' @param Annot.table        A \code{data.frame} containing annotations about
 #'                           the distributions.
-#' @value a \code{list} of modified data.frames of the density distributions
+#' @return A \code{list} of modified data.frames of the density distributions
 #' containing breaks to be used for delimitating bins.
 #' @author Yoann Pageaud.
+#' @keywords internal
 
 bin.polygons<-function(list_oriented_dens,list.quant.lim,Annot.table){
   #Add quantile values to density positions vector and sort it.

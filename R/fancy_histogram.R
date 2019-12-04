@@ -2,12 +2,8 @@
 Imports = c("quantmod","ggplot2","ggrepel","parallel")
 lapply(Imports, library, character.only = T)
 
-##FUNCTIONS
-
-# fancy.hist ###########################################################
-
-#' @description compute in parallel and plot an histogram using ggplot2 from a
-#'              given vector of values.
+#' Computes in parallel and plot an histogram using ggplot2 from a given vector
+#' of values.
 #'
 #' @param x          A \code{numeric} vector to be used for plotting the
 #'                   histogram.
@@ -15,22 +11,22 @@ lapply(Imports, library, character.only = T)
 #'                   to display values. All values above this limit will be
 #'                   agregated on the last histogram bin.
 #' @param nbreaks    An \code{integer} specifying the number of delimitations to
-#'                   be use for histogram bins (Default: nbreaks = 10).
+#'                   be use for histogram bins\cr(Default: nbreaks = 10).
 #' @param ngrad      An \code{integer} specifying the number of graduations to
-#'                   display on the X-axis of the plot (Default: ngrad = 10).
+#'                   display on the X-axis of the plot\cr(Default: ngrad = 10).
 #' @param round.grad An \code{integer} specifying the number significant digits
-#'                   to be considered when calculating graduations
+#'                   to be considered when calculating graduations\cr
 #'                   (Default: round.grad = 1).
 #' @param ncores     An \code{integer} to specifying the number of cores to use
-#'                   when parallel-running the computation of the histogram
+#'                   when parallel-running the computation of the histogram\cr
 #'                   (Default: ncores = 1).
-#' @param xlab       A \code{character} to be used as X-axis label
+#' @param xlab       A \code{character} to be used as X-axis label\cr
 #'                   (Default: xlab = 'values').
-#' @param ylab       A \code{character} to be used as Y-axis label
+#' @param ylab       A \code{character} to be used as Y-axis label\cr
 #'                   (Default: ylab = 'Frequency').
 #' @param bin.col    A \code{character} matching a R color code to be use to
-#'                   fill the histogram bins. 
-#' @value a \code{gg} plot of an histogram.
+#'                   fill the histogram bins.
+#' @return A \code{gg} plot of an histogram.
 #' @author Yoann Pageaud.
 
 fancy.hist<-function(x, xmax, nbreaks = 10, ngrad = 10, round.grad = 1,
@@ -43,7 +39,7 @@ fancy.hist<-function(x, xmax, nbreaks = 10, ngrad = 10, round.grad = 1,
   #Set breaks
   xbreaks <- seq(0, xmax, length.out = nbreaks)
   #Set graduations
-  xgrads <- round(x = seq(0, xmax, length.out = ngrad), digits = round.grad) 
+  xgrads <- round(x = seq(0, xmax, length.out = ngrad), digits = round.grad)
   #Set X axis labels
   xlabs<-as.character(xgrads)
   xlabs[length(xlabs)]<-paste(xlabs[length(xlabs)],"\nor more")

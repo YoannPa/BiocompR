@@ -3,19 +3,17 @@
 Imports = c("data.table")
 lapply(Imports, library, character.only = T)
 
-##FUNCTIONS
-
-# get.ks.stat ##################################################################
-
-#' @description Function description.
-#' 
+#' Extracts Kolmogorov-Smirnov test results and return them as a matrix.
+#'
 #' @param df.ks.tests A \code{data.frame} containing raw results from multiple
 #'                    Kolmogorov-Smirnov tests.
 #' @param statistic   A \code{character} specifying the type of statistic to
-#'                    retrieve from the test
+#'                    retrieve from the test\cr
 #'                    (Supported: statistic = c('n','stat','p')).
-#' @value a \code{matrix} containing the KS test's statistic values of interest.
+#' @return A \code{matrix} containing the KS test's statistic values of
+#'         interest.
 #' @author Yoann Pageaud.
+#' @keywords internal
 
 get.ks.stat<-function(table_combinations, df.ks.tests, statistic){
   ks.res<-df.ks.tests[[statistic]]
@@ -27,21 +25,19 @@ get.ks.stat<-function(table_combinations, df.ks.tests, statistic){
   return(mat)
 }
 
-# pairwise.ks ##################################################################
-
-#' @description Compute a Kolmogrov-Smirnov test between all columns of a
-#'              data.frame.
-#' 
+#' Computes a Kolmogrov-Smirnov test between all columns of a data.frame.
+#'
 #' @param data      A \code{data.frame} of numerical values.
 #' @param statistic A \code{character} specifying the type of statistic to
-#'                  retrieve from the test
+#'                  retrieve from the test\cr
 #'                  (Supported: statistic = c('n','stat','p')).
 #' @param ncores    An \code{integer} to specify the number of cores/threads to
 #'                  be used to parallel-run tests.
-#' @value A \code{list} containing a matrix of the statistic values, a
-#'        dataframe of the pairwise KS raw test results, and a table of pairwise
+#' @return A \code{list} containing a matrix of the statistic values, a
+#'        data.frame of the pairwise KS raw test results, and a table of pairwise
 #'        combinations.
 #' @author Yoann Pageaud.
+#' @keywords internal
 
 pairwise.ks<-function(data, statistic, ncores){
   table_combinations<-expand.grid(colnames(data),colnames(data))

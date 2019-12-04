@@ -1,20 +1,19 @@
 
-# min.max.update ###############################################################
-
-#' @description Check if min & max are given by legend;
-#'              If given, update min & max of the plot.
-#'              If none, calculate min & max from melted triangle.
+#' Checks if min & max are given by legend:
+#' \itemize{
+#'  \item{If given: updates min & max of the plot.}
+#'  \item{If none: calculates min & max from melted triangle.}
+#' }
 #'
 #' @param lgd.limits A \code{vector} of length 2, containing limit values.
-#'                   Can be NULL (Default: lgd.limits=NULL).
+#'                   Can be NULL\cr(Default: lgd.limits=NULL).
 #' @param melt.tri   A \code{data.frame} melted triangle containing test values.
 #' @param tri.type   A \code{character} specifying the type of triangle provided
-#'                   (Supported: tri.type = c("upper","lower"))
-#' @value A \code{list} of length 2 containing the updated min and max values.
+#'                   \cr(Supported: tri.type = c("upper","lower"))
+#' @return A \code{list} of length 2 containing the updated min and max values.
 #' @author Yoann Pageaud.
-#' @export
+#' @keywords internal
 #' @examples
-#'
 
 min.max.update<-function(lgd.limits=NULL, melt.tri, tri.type){
   if(is.null(lgd.limits)){
@@ -38,14 +37,13 @@ min.max.update<-function(lgd.limits=NULL, melt.tri, tri.type){
   return(list("min_tri"=min_tri,"max_tri"=max_tri))
 }
 
-# fix.corrMatOrder.alphabet ####################################################
-
-#' @description Function description.
+#' Fixes a bug related to corrMatOrder when order parameter is set to 'alphabet'.
 #'
 #' @param cor.order A \code{character} vector of interest.
 #' @param str       A \code{character} vector from which to get elements order.
-#' @value a \code{type} object returned description.
+#' @return A \code{type} object returned description.
 #' @author Yoann Pageaud.
+#' @keywords internal
 
 fix.corrMatOrder.alphabet<-function(cor.order,str){
   unlist(lapply(cor.order, function(i){
@@ -53,14 +51,13 @@ fix.corrMatOrder.alphabet<-function(cor.order,str){
   }))
 }
 
-# fused.view ###################################################################
-
-#' @description Visualize 2 matrices of results as a fused plot.
+#' Displays 2 matrices of results as a fused plot.
 #'
 #' @param param1 A \code{type} parameter description.
-#' @value a \code{type} object returned description.
+#' @return A \code{type} object returned description.
 #' @author Yoann Pageaud.
 
+#TODO: Write documentation!
 fused.view<-function(
   sample.names, upper.mat, lower.mat,
   order.select, order.method, hclust.method,
@@ -290,10 +287,7 @@ fused.view<-function(
   return(fused.res)
 }
 
-# fused.plot ################################################################
-
-#' @description Create a plot summarizing results from 2 different pairwise
-#'              comparisons.
+#' Creates a plot summarizing results from 2 different pairwise comparisons.
 #'
 #' @param data                  A \code{matrix} or \code{dataframe}.
 #' @param ncores                An \code{integer} to specify the number of
@@ -304,24 +298,20 @@ fused.view<-function(
 #'                              'pearson','spearman','kendall'.
 #' @param upper.value           A \code{character} matching the type of value to
 #'                              display in the upper triangle of the plot
-#'                              resulting from the comparison. The possible
-#'                              value types are: 'r' - the correlation values,
-#'                              'n' - the number of cases used for the
-#'                              comparisons, 'stat' - the values of the
-#'                              comparison statistic, 'p' - the P-values of the
-#'                              comparison, 'se' - the standard errors of the
-#'                              comparison.
+#'                              resulting from the comparison.\cr The possible
+#'                              value types are:
+#'  \itemize{
+#'   \item{'r' - the correlation values.}
+#'   \item{'n' - the number of cases used for the comparisons.}
+#'   \item{'stat' - the values of the comparison statistic.}
+#'   \item{'p' - the P-values of the comparison.}
+#'   \item{'se' - the standard errors of the comparison.}
+#'  }
 #' @param lower.comp            The comparison for which results will be
 #'                              displayed in the lower triangle of the plot as a
 #'                              \code{character} matching one of these:
 #'                              'pearson','spearman','kendall'.
-#' @param lower.value           A \code{character} matching the type of value to
-#'                              display resulting from the comparison. The
-#'                              possible value types are: 'r' - the correlation
-#'                              value, 'n' - the number of cases used for the
-#'                              comparison, 'stat' - the value of the comparison
-#'                              statistic, 'p' - the P-value of the comparison,
-#'                              'se' - the standard error of the comparison.
+#' @param lower.value           See 'upper.value' help.
 #' @param na.rm                 A \code{character} to specify how to handle
 #'                              missing values when calculating a correlation.
 #'                              Possible types are 'pairwise' and 'complete'.
@@ -329,22 +319,25 @@ fused.view<-function(
 #'                              pairwise deletion of cases. 'complete' will
 #'                              select just complete cases.
 #' @param order.method          A \code{character} specifying the ordering
-#'                              method to apply. Possible ordering methods are:
-#'                              'AOE' - angular order of the eigenvectors,
-#'                              'FPC' - first principal component order,
-#'                              'hclust' - hierarchical clustering order,
-#'                              'alphabet' - alphabetical order, 'default'.
+#'                              method to apply.\cr Possible ordering methods are:
+#' \itemize{
+#'  \item{'AOE' - angular order of the eigenvectors.}
+#'  \item{'FPC' - first principal component order.}
+#'  \item{'hclust' - hierarchical clustering order.}
+#'  \item{'alphabet' - alphabetical order}
+#'  \item{'default'}
+#' }
 #' @param order.select          A \code{character} specifying comparison results
-#'                              to use for the clustering. Possible values are
-#'                              'upper' or 'lower'.
+#'                              to use for the clustering.\cr Possible values
+#'                              are 'upper' or 'lower'.
 #' @param hclust.method         A \code{character} specifying the method to use
 #'                              for the hierarchical clustering if the ordering
-#'                              method is 'hclust'. Possible methods are:
+#'                              method is 'hclust'.\cr Possible methods are:
 #'                              'ward.D','ward.D2', 'single', 'complete',
 #'                              'average' (= UPGMA), 'mcquitty' (= WPGMA),
 #'                              median' (= WPGMC) or 'centroid' (= UPGMC).
 #' @param p.adjust              A \code{character} specifying what adjustment
-#'                              for multiple tests should be used. Possible
+#'                              for multiple tests should be used.\cr Possible
 #'                              values are: "holm", "hochberg", "hommel",
 #'                              "bonferroni", "BH", "BY", "fdr", "none".
 #' @param annot.grps            A \code{list} of vectors of groups to which
@@ -359,13 +352,13 @@ fused.view<-function(
 #'                              must match the length of the list provided to
 #'                              'annot.grps'.
 #' @param annot.pos             A \code{character} specifying the position of
-#'                              the annotation sidebar. Possible values are:
+#'                              the annotation sidebar.\cr Possible values are:
 #'                              'top', 'left' or 'both'.
 #' @param annot.size            An \code{integer} to increase or decrease the
 #'                              size of the annotation side bar.
 #' @param dendro.pos            A \code{character} specifying the position of
 #'                              dendrograms if the selected order is 'hclust'.
-#'                              Possible values are: 'top','left','none'.
+#'                              \cr Possible values are: 'top','left','none'.
 #' @param dendro.size           An \code{integer} to increase or decrease the
 #'                              size of the dendrogram.
 #' @param grid.col              A \code{character} specifying the color of the
@@ -452,25 +445,25 @@ fused.view<-function(
 #'                              of the upper triangle associated legend ticks.
 #' @param lgd.ticks.linewidth2  A \code{double} value to specify the thickness
 #'                              of the lower triangle associated legend ticks.
-#' @param lgd.nbin             An \code{integer} specifying the number of bins
-#'                              for drawing both colourbars. A smoother
-#'                              colourbar results from a larger value.
-#' @param lgd.nbin1            An \code{integer} specifying the number of bins
+#' @param lgd.nbin              An \code{integer} specifying the number of bins
+#'                              for drawing both colorbars. A smoother
+#'                              colorbar results from a larger value.
+#' @param lgd.nbin1             An \code{integer} specifying the number of bins
 #'                              for drawing the upper triangle associated
-#'                              colourbar. A smoother colourbar results from a
+#'                              colorbar. A smoother colorbar results from a
 #'                              larger value.
-#' @param lgd.nbin2            An \code{integer} specifying the number of bins
+#' @param lgd.nbin2             An \code{integer} specifying the number of bins
 #'                              for drawing the lower triangle associated
-#'                              colourbar. A smoother colourbar results from a
+#'                              colorbar. A smoother colorbar results from a
 #'                              larger value.
 #' @param lgd.height1           A \code{double} specifying the height of the
-#'                              upper triangle associated colourbar.
+#'                              upper triangle associated colorbar.
 #' @param lgd.height2           A \code{double} specifying the height of the
-#'                              lower triangle associated colourbar.
+#'                              lower triangle associated colorbar.
 #' @param lgd.width1            A \code{double} specifying the width of the
-#'                              upper triangle associated colourbar.
+#'                              upper triangle associated colorbar.
 #' @param lgd.width2            A \code{double} specifying the height of the
-#'                              lower triangle associated colourbar.
+#'                              lower triangle associated colorbar.
 #' @param lgd.frame.col         A \code{character} defining the color of the
 #'                              frame of legends.
 #' @param lgd.frame.linewidth   A \code{double} defining the thickness of the
@@ -487,18 +480,19 @@ fused.view<-function(
 #' @param raster2               A \code{logical} to specify whether or not
 #'                              colors in the lower triangle associated legend
 #'                              should be rasterized.
-#' @param add.ggplot.args       Ultimate Ggplot2 additionnal argument that you
+#' @param add.ggplot.args       Ultimate ggplot2 additionnal components that you
 #'                              want to pass to the plot (Use only if you are an
 #'                              ggplot2 advanced user).
-#' @value a \code{gtable} object is automatically plotted and a \code{list} of
-#'        the results of the 2 comparisons as 2 matrices, with the gtable object
-#'        again:
-#'        'upper.res' - the matrix result of pairwise comparisons displayed in
-#'        the upper triangle,
-#'        'lower.res' - the matrix result of pairwise comparisons displayed in
-#'        the lower triangle,
-#'        'fused.plot' - the plot.
-#'
+#' @return A \code{gtable} object plotted automatically and a \code{list} of
+#'        results from the 2 comparisons as 2 matrices, with the same gtable
+#'        object:
+#'        \itemize{
+#'         \item{'upper.res' - the matrix result of pairwise comparisons
+#'         displayed in the upper triangle.}
+#'         \item{'lower.res' - the matrix result of pairwise comparisons
+#'         displayed in the lower triangle.}
+#'         \item{'fused.plot' - the plot.}
+#'        }
 #' @author Yoann Pageaud.
 
 fused.plot<-function(data,ncores,

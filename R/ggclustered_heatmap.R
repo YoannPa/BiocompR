@@ -4,43 +4,38 @@ Imports = c('data.table','ggplot2','Hmisc','fastcluster','parallelDist',
             'fastcluster','RColorBrewer')
 lapply(Imports, library, character.only = T)
 
-##FUNCTION
-
-# ggclust.heatmap ##############################################################
-
-#' Create a clustered heatmap using GGplot.
-#' 
+#' Creates a clustered heatmap using ggplot2.
+#'
 #' @param data             A \code{matrix} or a \code{data.frame} with samples
 #'                         by columns and regions by rows. Row names have to be
 #'                         of the format "chr:start-end" and matching at least
-#'                         some regions clustered.  
+#'                         some regions clustered.
 #' @param regions.clusters A \code{data.frame} of BED format with the cluster
 #'                         IDs (chr, start, end, clusterID).
 #' @param order.type       A \code{character} specifying how regions should be
 #'                         ordered within a cluster. 2 possible methods:
-#'                         SD - ordered by increasing order of standard
-#'                         deviation
-#'                         Hclust - ordered following a hierarchical clustering
-#'                         method.
+#'  \itemize{
+#'   \item{'SD' - ordered by increasing order of standard deviation}
+#'   \item{'Hclust' - ordered following a hierarchical clustering method.}
+#'  }
 #' @param distance.method  A \code{character} specifying the distance
 #'                         calculation method if regions should be ordered
-#'                         following a hierarchical clustering method.
-#'                         Distance methods for continuous input variables:
-#'                         bhjattacharyya, bray, canberra, chord, divergence,
-#'                         dtw, euclidean, fJaccard, geodesic, hellinger,
-#'                         kullback, mahalanobis, manhattan, maximum, minkowski,
-#'                         podani, soergel, wave, whittaker.
-#'                         Distance methods for binary input variables:
-#'                         binary, braun-blanquet, cosine, dice, fager, faith,
-#'                         hamman, hamming, kulczynski1, kulczynski2, michael,
-#'                         mountford, mozley, ochiai, phi, russel,
-#'                         simple matching,  simpson, stiles, tanimoto, yule,
-#'                         yule2.
+#'                         following a hierarchical clustering method:
+#'  \itemize{
+#'   \item{Distance methods for continuous input variables:\cr bhjattacharyya,
+#'   bray, canberra, chord, divergence, dtw, euclidean, fJaccard, geodesic,
+#'   hellinger, kullback, mahalanobis, manhattan, maximum, minkowski, podani,
+#'   soergel, wave, whittaker.}
+#'   \item{Distance methods for binary input variables:\cr binary,
+#'   braun-blanquet, cosine, dice, fager, faith, hamman, hamming, kulczynski1,
+#'   kulczynski2, michael, mountford, mozley, ochiai, phi, russel,
+#'   simple matching, simpson, stiles, tanimoto, yule, yule2.}
+#'  }
 #' @param select.clust     A \code{character} vector specifying the clusters to
 #'                         keep for the plot.
 #' @param select.sample    A \code{character} vector specifying the samples to
 #'                         keep for the plot (must match the columns names of
-#'                         the matrix). 
+#'                         the matrix).
 #' @param groups           A \code{character} vector specifying the name of the
 #'                         groups for samples. The length of the vector must
 #'                         match the number of columns in the matrix.
@@ -54,7 +49,7 @@ lapply(Imports, library, character.only = T)
 #'                         amount specified, all regions of the cluster will be
 #'                         selected.
 #' @param na.rm            A \code{logical} to specify if NAs should be removed
-#'                         or not from the data. If order.type = "Hclust", NAs
+#'                         or not from the data. If order.type = 'Hclust', NAs
 #'                         are removed anyway.
 #' @param title            A \code{character} to be used as the plot title.
 #' @param palette          A \code{character} vector to be used as a color
@@ -63,16 +58,16 @@ lapply(Imports, library, character.only = T)
 #'                         on the plot.
 #' @param margins          A \code{double} vector of length 4 to give the
 #'                         thickness of each margin of the plot.
-#' @return A \code{gg} plot.
+#' @return A \code{gg} plot of a faceted heatmap.
 #' @author Yoann Pageaud.
 
-ggclust.heatmap<-function(data, regions.clusters, order.type="Hclust",
-                          distance.method, select.clust = NULL,
-                          select.sample = NULL,
-                          groups=NULL,groups.order=NULL,
-                          sampling = F,sampling.size = 500, na.rm = F, title="",
-                          palette = c("steelblue", "gray95", "darkorange"),
-                          na.col = "black", margins = c(0.5,0,0,0)){
+ggclust.heatmap<-function(
+  data, regions.clusters, order.type="Hclust", distance.method,
+  select.clust = NULL, select.sample = NULL, groups=NULL, groups.order=NULL,
+  sampling = F,sampling.size = 500, na.rm = F, title="",
+  palette = c("steelblue", "gray95", "darkorange"), na.col = "black",
+  margins = c(0.5,0,0,0)){
+
   #Concatenate regions chr + start + end
   regions.clusters$V2<-apply(regions.clusters[,c(2,3)],1,paste0,collapse = "-")
   regions.clusters$V1<-as.integer(gsub("[^0-9.]",replacement ="",
@@ -82,12 +77,12 @@ ggclust.heatmap<-function(data, regions.clusters, order.type="Hclust",
   regions.clusters$V1<-as.character(regions.clusters$V1)
   regions.clusters$V2<-apply(regions.clusters[,c(1,2)],1,paste0,collapse = ":")
   regions.clusters<-regions.clusters[,c(2,4)]
-  
+
   #Only Consider the regions that have been clustered.
   data<-as.data.frame(data[rownames(data) %in% regions.clusters$V2,])
   data<-setDT(data, keep.rownames = TRUE)
   data[, Clusters := regions.clusters$V4]
-  
+
   #Remove all NAs
   if(na.rm){
     data<-na.omit(data)
@@ -97,21 +92,21 @@ ggclust.heatmap<-function(data, regions.clusters, order.type="Hclust",
       data<-na.omit(data)
     }
   }
-  
+
   #Random Sampling by Clusters if sampling TRUE
   if(sampling){
     data<-data[,.SD[sample(.N, min(sampling.size,.N))],by = Clusters]
   }
   #Keep Clusters of interest
   if(is.null(select.clust) == F) {
-    data<-data[Clusters %in% select.clust]  
+    data<-data[Clusters %in% select.clust]
   }
   #Keep Samples of interest
   if(is.null(select.sample) == F){
     cols<-c("rn","Clusters",select.sample)
-    data<-data[,..cols]  
+    data<-data[,..cols]
   }
-  
+
   #Order Regions in clusters
   if(order.type == "SD"){ #Order regions by cluster and then by SD
     data[, sd := apply(data[, 3:(ncol(data))], 1, sd, na.rm = T)]
@@ -120,7 +115,7 @@ ggclust.heatmap<-function(data, regions.clusters, order.type="Hclust",
     row_count<-nrow(data)
     distance.method<-"none"
     melt_data<-melt.data.table(data,id.vars = c("rn","Clusters"))
-    
+
   } else {#Order regions by cluster and then by hierarchical cluster
     row_count<-nrow(data)
     data_list<-split(data,f = data$Clusters)
@@ -151,9 +146,9 @@ ggclust.heatmap<-function(data, regions.clusters, order.type="Hclust",
     split_melt<-split(melt_data,f = melt_data$variable)
     split_melt<-Map(cbind,split_melt,Groups = groups)
     melt_data<-do.call(rbind,split_melt)
-    melt_data$Groups<-factor(melt_data$Groups,levels = groups.order)  
+    melt_data$Groups<-factor(melt_data$Groups,levels = groups.order)
   }
-  
+
   #Plot Heatmap Cluster
   if(na.rm){
     Clustheatmap<- ggplot(data = melt_data, aes(x = variable, y = rn,
@@ -181,7 +176,7 @@ ggclust.heatmap<-function(data, regions.clusters, order.type="Hclust",
     labs(title = paste(title,"\n",row_count,"regions ordered by",order.type,
                        "using",capitalize(distance.method),"distance."),
          x = "Samples", y = "Clusters")
-  
+
   if(is.null(groups) == F){
     Clustheatmap <- Clustheatmap +
       facet_grid(Clusters ~ Groups, scales = "free", switch="y")

@@ -3,19 +3,23 @@
 Imports = c("data.table","gtools","ggplot2")
 lapply(Imports, library, character.only = T)
 
-##FUNCTIONS
-# ggcoverage ###################################################################
-
-#' @description Plot an annotated barplot.
-#' 
-#' @param data       A \code{data.frame} containing labels in column 1, total
-#'                   amount in column 2, subset amount in column 3.
+#' Plots an annotated barplot.
+#'
+#' @param data       A \code{data.frame} containing:
+#' \itemize{
+#'  \item{labels in column 1}
+#'  \item{total amount in column 2}
+#'  \item{subset amount in column 3}
+#' }
 #' @param round.unit An \code{integer} to specify how much decimals should be
 #'                   kept when rounding percentages.
 #' @param horizontal A \code{logical} to specify whether the plot should be
 #'                   plotted horizontally or vertically.
-#' @value a \code{type} object returned description.
+#' @return A \code{gg} dodged barplot with annotations.
 #' @author Yoann Pageaud.
+
+#TODO: Fix the way dodge bars are plotted
+#TODO: rewrite documentation!
 
 ggcoverage<-function(data, round.unit=2, rev.stack=FALSE, invert.percent=FALSE,
                      horizontal=FALSE,log.scaled=FALSE,decreasing.order=FALSE){
@@ -23,7 +27,7 @@ ggcoverage<-function(data, round.unit=2, rev.stack=FALSE, invert.percent=FALSE,
   suppressWarnings(data<-data[, lapply(.SD, na.replace, replace = 0)])
   data[, remainings:=.(Total-Subset)]
   if(invert.percent){
-    data[, percents:=.(round((Subset/Total)*100,round.unit))]  
+    data[, percents:=.(round((Subset/Total)*100,round.unit))]
   } else {
     data[, percents:=.(round((remainings/Total)*100,round.unit))]
   }
@@ -38,7 +42,7 @@ ggcoverage<-function(data, round.unit=2, rev.stack=FALSE, invert.percent=FALSE,
       measure.vars = c("logSubset","logremainings"))
   } else {
     data<-melt(data, id.vars = c("IDs","Total","percents"),
-               measure.vars = c("Subset","remainings"))  
+               measure.vars = c("Subset","remainings"))
   }
   if(!rev.stack){
   data<-data[order(variable,decreasing = TRUE)] #Change order for cumsum
@@ -63,14 +67,14 @@ ggcoverage<-function(data, round.unit=2, rev.stack=FALSE, invert.percent=FALSE,
     factor(data$IDs,levels = unique(data[
       order(Total,decreasing = decreasing.order)]$IDs))
   if(rev.stack){
-    data$variable<-factor(data$variable, levels = rev(levels(data$variable)))  
+    data$variable<-factor(data$variable, levels = rev(levels(data$variable)))
   }
   #Removing duplicated strings to not display it
   data[, filter.val:= .(value - display.count.cutoff*max(data$value))]
   data[filter.val<0, value.char := " "]
   data[variable == "Subset", percents := " "]
   if(log.scaled){
-    data[, "Total":=.(logTotal)]  
+    data[, "Total":=.(logTotal)]
   }
   #Barplot
   ggcov<-ggplot(data=data, aes(x=IDs, y=value, fill=variable)) +

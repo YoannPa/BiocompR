@@ -3,17 +3,14 @@
 Imports = c('psych','ggplot2','ggrepel')
 lapply(Imports, library, character.only = T)
 
-##FUNCTIONS
-
-# var.accounted ################################################################
-
-#' @description Calculate the variance accounted of an eigenvalue.
-#' 
+#' Calculate the variance accounted of an eigenvalue.
+#'
 #' @param colname          A \code{character} matching a column name.
 #' @param eigen.values     A \code{numeric} vector of all eigenvalues.
-#' @value A \code{character} containg the value of the eigenvalue variance
-#'        accounted for its associated eigen vector.
+#' @return A \code{character} containg the value of the eigenvalue variance
+#'         accounted for its associated eigen vector.
 #' @author Yoann Pageaud.
+#' @keywords internal
 
 var.accounted<-function(colname, eigen.values){
   vect.num<-gsub("[^0-9.]","",colname)
@@ -22,10 +19,8 @@ var.accounted<-function(colname, eigen.values){
   paste0("Eigenvector ",vect.num," (Variance accounted = " ,var.accounted, "%)")
 }
 
-# ggeigenvector ################################################################
-
-#' Create an Eigenvector Plot using GGplot.
-#' 
+#' Creates an eigenvector plot using ggplot2.
+#'
 #' @param data        A \code{data.frame} containg:
 #'                    N eigen vectors, one vector by column, with column names
 #'                    numbered from "V1" to "VN",
@@ -44,7 +39,7 @@ var.accounted<-function(colname, eigen.values){
 #'                    different groups existing.
 #' @param title       A \code{character} that will be used as a title for the
 #'                    plot.
-#' @value A \code{gg} plot of the variables following the 2 eigenvectors
+#' @return A \code{gg} plot of the variables following the 2 eigenvectors
 #'         selected.
 #' @author Yoann Pageaud.
 
@@ -65,11 +60,8 @@ ggeigenvector<- function(data, xcol, ycol, eigenvalues, colors, title){
     geom_vline(xintercept = 0, linetype="dashed")
 }
 
-# EVA - EigenVector Analysis ###################################################
-
-#' From a Correlation test return eigenvectors, principal components scores and
-#' principal components correlations with the data.  
-#' 
+#' Computes eigenvectors, PC scores and correlations from a correlation test.
+#'
 #' @param data        A \code{matrix} or a \code{data.frame} containing
 #'                    variables by columns and values to be used for the
 #'                    correlation test by rows.
@@ -94,9 +86,9 @@ ggeigenvector<- function(data, xcol, ycol, eigenvalues, colors, title){
 #' @param colors      A \code{character} vector of colors for the eigenvectors.
 #'                    The length of this vector has to match the number of
 #'                    different groups existing.
-#' @value A \code{list} containing the principal components correlations,
-#'        a list of the Eigenvector Plots generated and principal components
-#'        scores of the scaled data.
+#' @return A \code{list} containing the principal components correlations,
+#'         a list of the Eigenvector Plots generated and principal components
+#'         scores of the scaled data.
 #' @author Yoann Pageaud.
 
 EVA<-function(data, use = "pairwise", method = "pearson", adjust = "none",

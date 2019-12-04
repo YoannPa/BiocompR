@@ -2,12 +2,17 @@
 % Please edit documentation in R/eva.R
 \name{EVA}
 \alias{EVA}
-\title{From a Correlation test return eigenvectors, principal components scores and
-principal components correlations with the data.}
+\title{Computes eigenvectors, PC scores and correlations from a correlation test.}
 \usage{
-EVA(data, use = "pairwise", method = "pearson", adjust = "none",
-  var.min = 0.01, groups = as.character(seq(ncol(data))),
-  colors = rainbow(n = ncol(data)))
+EVA(
+  data,
+  use = "pairwise",
+  method = "pearson",
+  adjust = "none",
+  var.min = 0.01,
+  groups = as.character(seq(ncol(data))),
+  colors = rainbow(n = ncol(data))
+)
 }
 \arguments{
 \item{data}{A \code{matrix} or a \code{data.frame} containing
@@ -41,9 +46,13 @@ data.}
 The length of this vector has to match the number of
 different groups existing.}
 }
+\value{
+A \code{list} containing the principal components correlations,
+        a list of the Eigenvector Plots generated and principal components
+        scores of the scaled data.
+}
 \description{
-From a Correlation test return eigenvectors, principal components scores and
-principal components correlations with the data.
+Computes eigenvectors, PC scores and correlations from a correlation test.
 }
 \author{
 Yoann Pageaud.

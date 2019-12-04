@@ -7,7 +7,7 @@ BiocompR is a R package built upon ggplot2 to improve commonly used plots dedica
 **2-** [**DKFZ - Computational Cancer Epigenomics, Germany.**](https://www.dkfz.de/en/CanEpi/CompEpigen/index.html)  
 **3-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
-**Version: 0.0.1**  
+**Version: 0.0.26 (Beta)**  
 **R Compatibility: Version 3.6.1**  
 **Last Update: 20/09/2019**  
 

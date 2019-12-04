@@ -1,60 +1,63 @@
 
-#' @description Draw a craviola plot.
+#' Draws a craviola plot (half-splitted and percentile-binned violin plot).
 #'
 #' @param data           A \code{data.frame}. 2 formats of data.frame are
-#'                       supported.
-#'                       A "complete" data.frame of 5 columns:
-#'                       column 1 must be the samples column,
-#'                       column 2 must be the "grouping" variable column,
-#'                       column 3 must be the "filling color" variable column,
-#'                       column 4 must be the "value" column,
-#'                       column 5 can be the additionnal "opacity" variable
-#'                       column to be used if bins = TRUE.
-#'                       A "minimal" data.frame of 2 columns:
-#'                       column 1 must be the samples column. This column can
-#'                       take a maximum of 2 possible levels. Based on this
-#'                       column ggcraviola will guess the "grouping" and the
-#'                       "filling".
-#'                       column 2 must be the "value" column.
-#'                       The "minimal" data.frame is usefull to easily plot 1
-#'                       craviola with 2 distributions.
-#'                       You cannot plot more than 1 craviola with the "minimal"
-#'                       data.frame format. the "minimal" format also do not
-#'                       support the binning.
+#'                       supported:
+#' \itemize{
+#'  \item{A "complete" data.frame of 5 columns:
+#'   \itemize{
+#'    \item{column 1 must be the samples column.}
+#'    \item{column 2 must be the "grouping" variable column.}
+#'    \item{column 3 must be the "filling color" variable column.}
+#'    \item{column 4 must be the "value" column.}
+#'    \item{column 5 can be the additionnal "opacity" variable column to be used
+#'    if bins = TRUE.}
+#'   }
+#'  }
+#'  \item{A "minimal" data.frame of 2 columns:
+#'   \itemize{
+#'    \item{column 1 must be the samples column. This column can take a maximum
+#'    of 2 possible levels. Based on this column ggcraviola will guess the
+#'    "grouping" and the "filling".}
+#'    \item{column 2 must be the "value" column.}
+#'   }
+#'   The "minimal" data.frame is usefull to easily plot 1 craviola with 2
+#'   distributions. You cannot plot more than 1 craviola with the "minimal"
+#'   data.frame format. the "minimal" format also do not support the binning.
+#'  }
+#' }
 #'
 #' @param fill.color     A \code{character} vector of length 2 containing colors
-#'                       to use to fill the craviolas
+#'                       to use to fill the craviolas\cr
 #'                       (Default: fill.color = c("blue","red")).
 #' @param craviola.width A \code{double} value to specify the width of
-#'                       craviolas (Default: craviola.width = 1).
+#'                       craviolas\cr(Default: craviola.width = 1).
 #' @param boxplots       A \code{logical} specifying if boxplots should be
-#'                       displayed or not (Default: boxplots = TRUE).
-#' @param boxplot.width  A \code{double} specifying the width of boxplots
+#'                       displayed or not\cr(Default: boxplots = TRUE).
+#' @param boxplot.width  A \code{double} specifying the width of boxplots\cr
 #'                       (Default: boxplot.width = 0.04).
 #' @param mean.value     A \code{logical} specifying if the red dot of the mean
-#'                       value should be displayed or not
+#'                       value should be displayed or not\cr
 #'                       (Default: mean.value = TRUE).
-#' @param bins           A \code{logical} specifying if the violin plos should
+#' @param bins           A \code{logical} specifying if the distributions should
 #'                       be binned following specific quantiles to be displayed
 #'                       following different opacity thanks to the values in the
-#'                       5th column of the data data.frame
+#'                       5th column of the data data.frame\cr
 #'                       (Default: bins = FALSE).
 #' @param bins.quantiles A \code{double} vector to define the limits between the
-#'                       bins as percentiles of distributions
+#'                       bins as percentiles of distributions\cr
 #'                       (Default: bins.quantiles = seq(0.1,0.9,0.1)).
 #' @param bin.fun        A \code{character} to specify the function to apply on
 #'                       values of the additional variable for each bin of
-#'                       distrubutions
+#'                       distrubutions\cr
 #'                       (Supported: bin.fun = c("sd","mad","mean");
 #'                       Default: bin.fun = "sd").
 #' @param lines.col      A \code{character} matching a color to use for the
-#'                       border lines of the craviola's bins
+#'                       border lines of the craviola's bins\cr
 #'                       (Default: lines.col = NA).
-#' @value a \code{gg} craviola plot.
+#' @return A \code{gg} craviola plot.
 #' @author Yoann Pageaud.
 #' @export
-
-#TODO : cut density at min and max !!
 
 ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
                      boxplots = TRUE, boxplot.width=0.04, mean.value = TRUE,
