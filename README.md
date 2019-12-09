@@ -85,12 +85,12 @@ library(BiocompR)
 ```
 Now let's run an EVA !  
 This EVA will be based on a spearman correlation (**method** = "pearson") between the samples.  
-Missing values will be removed following a pairwise deletion for each pair of samples compared (**use** = "pairwise").
+Missing values will be removed following a pairwise deletion for each pair of samples compared (**use** = "pairwise").  
 We will use the Holm adjusment method for multiple testing (**adjust** = "holm").  
 We will only consider eigenvalues with a minimum variance accountability of 10<sup>-3</sup>.  
 In this first analysis samples will be grouped by studies (**groups** = studies).  
 Samples will be colored in blue, red, green and orange following the study they belong to (**colors** = c("blue","red","green","orange")).  
-Because there are a lot of samples, we will not label sample IDs (**label** = FALSE).
+Because there are a lot of samples, we will not label sample IDs (**label** = FALSE).  
 The final command should look like this:  
 ```R
 eva.study<-EVA(data = df.stemc, use = "pairwise", method = "spearman",
@@ -149,7 +149,7 @@ ggfacet(eva.study$PC.scores[,c(1:5)]) + geom_density_2d()
 </p>
 
 
-As one can see the first eigenvectors discriminate specific genes more strongly than latest ones.  
+As one can see, the first eigenvectors discriminate specific genes more strongly than latest ones.  
 
 Finally one can select the Top10 most interesting genes following their scores for the 5 first and most important eigenvectors:
 ```R
@@ -178,7 +178,7 @@ eva.cells$EV.plots$`2 & 3`
 <img src="img/EVA_plot3.png">
 </p>
 
-It appears that Fibroblasts are clearly groupes together, while hESC and hiPS are mixed together in the same groups. Knowing that hiPS are supposed to have very similar properties than hESCs, this analysis confirm that is no visible difference between hESC and hiPS when looking at the 3 first eigenvectors. While 3rd eigenvector seems to almost separate Fibroblasts from hESC + hiPS, what the 2nd eigenvector represent is unclear.
+It appears that Fibroblasts are clearly groupes together, while hESC and hiPS are mixed together in the same groups. Knowing that hiPS are supposed to have very similar properties than hESCs, this analysis confirm that there is no visible difference between hESC and hiPS when looking at the 3 first eigenvectors. While 3rd eigenvector seems to almost separate Fibroblasts from hESC + hiPS, what the 2nd eigenvector represent is unclear.
 
 So is there any eigenvector able to discriminate hESC, hiPS ?  
 When looking at the different plot computed, it appears that actually the eigenvector 7 achieves to discriminate some hiPS samples from hESC samples, but not completely:
