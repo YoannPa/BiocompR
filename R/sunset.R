@@ -46,6 +46,7 @@ pal_insta<-c("deeppink","red","goldenrod1")
 #'
 #' @return A \code{gg} sunset plot.
 #' @author Yoann Pageaud.
+#' @export
 
 sunset<-function(mat, title, col.pal = pal_sunset, horizontal = FALSE,
                  reverse=FALSE, keep_2nd_ticks = FALSE, n.grad = 15,

@@ -17,6 +17,7 @@ lapply(Imports, library, character.only = T)
 #'                   plotted horizontally or vertically.
 #' @return A \code{gg} dodged barplot with annotations.
 #' @author Yoann Pageaud.
+#' @export
 
 #TODO: Fix the way dodge bars are plotted
 #TODO: rewrite documentation!

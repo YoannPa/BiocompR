@@ -4,7 +4,7 @@
 \alias{ggeigenvector}
 \title{Creates an eigenvector plot using ggplot2.}
 \usage{
-ggeigenvector(data, xcol, ycol, eigenvalues, colors, title)
+ggeigenvector(data, xcol, ycol, eigenvalues, colors, label = TRUE, title)
 }
 \arguments{
 \item{data}{A \code{data.frame} containg:

@@ -13,7 +13,6 @@
 #' @return A \code{list} of length 2 containing the updated min and max values.
 #' @author Yoann Pageaud.
 #' @keywords internal
-#' @examples
 
 min.max.update<-function(lgd.limits=NULL, melt.tri, tri.type){
   if(is.null(lgd.limits)){
@@ -56,6 +55,7 @@ fix.corrMatOrder.alphabet<-function(cor.order,str){
 #' @param param1 A \code{type} parameter description.
 #' @return A \code{type} object returned description.
 #' @author Yoann Pageaud.
+#' @export
 
 #TODO: Write documentation!
 fused.view<-function(
@@ -494,6 +494,7 @@ fused.view<-function(
 #'         \item{'fused.plot' - the plot.}
 #'        }
 #' @author Yoann Pageaud.
+#' @export
 
 fused.plot<-function(data,ncores,
                         upper.comp,upper.value,lower.comp,lower.value,

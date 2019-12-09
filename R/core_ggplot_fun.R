@@ -37,6 +37,7 @@ get.lgd<-function(gg2.obj){
 #'                    dendrogram. Possible values are "top" and "left".
 #' @return A \code{gg} plot of the dendrogram.
 #' @author Yoann Pageaud.
+#' @export
 
 ggdend <- function(df, orientation) {
   ddplot<- ggplot() +
@@ -110,6 +111,7 @@ basic.ggplot.tri<-function(melt.tri, grid.col, grid.thickness, lgd.title,
 #' @param palette A \code{character} vector containing R colors like a palette.
 #' @return A \code{gg} object of the basic sidebar (a 'geom_tile()').
 #' @author Yoann Pageaud.
+#' @export
 
 basic.sidebar<-function(data, palette){
   ggplot(data = data) +
@@ -132,6 +134,7 @@ basic.sidebar<-function(data, palette){
 #' @param sample.names A \code{type} parameter description.
 #' @return A \code{type} object returned description.
 #' @author Yoann Pageaud.
+#' @export
 
 #TODO: Write documentation!
 plot.col.sidebar<-function(

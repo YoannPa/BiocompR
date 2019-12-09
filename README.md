@@ -2,28 +2,30 @@
 BiocompR is a R package built upon ggplot2 to improve commonly used plots dedicated to data comparison, dataset exploration and, ultimately provides users with versatile and customizable graphics.  
 
 **Author: PAGEAUD Y.<sup>1</sup>**  
-**Contributors: MAYAKONDA A.<sup>2</sup>; WURSTHORN A.<sup>3</sup>; TOTH R.<sup>2</sup>; LUTSIK P.<sup>2</sup>**   
+**Contributors: MAYAKONDA A.<sup>2</sup>; WURSTHORN A.<sup>4</sup>; FEUERBACH L.<sup>1</sup>; TOTH R.<sup>2</sup>; SCHEFZIK R.<sup>3</sup>; HONG C.<sup>1</sup>.**  
 **1-** [**DKFZ - Division of Applied Bioinformatics, Germany.**](https://www.dkfz.de/en/applied-bioinformatics/index.php)  
 **2-** [**DKFZ - Computational Cancer Epigenomics, Germany.**](https://www.dkfz.de/en/CanEpi/CompEpigen/index.html)  
-**3-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
+**3-** [**Klinik für Anästhesiologie und Operative Intensivmedizin - Clinical Epidemiology Group, Germany.**](https://www.umm.de/klinik-fuer-anaesthesiologie-und-operative-intensivmedizin/)  
+**4-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
-**Version: 0.0.26 (Beta)**  
+**Version: 0.0.27 (Beta)**  
 **R Compatibility: Version 3.6.1**  
-**Last Update: 20/09/2019**  
+**Last Update: 09/12/2019**  
 
 ## Content
-Currently the BiocompR repository contains **9 scripts** in the folder **src/**:
-* `eva.R` - to run an EVA (EigenVector Analysis).  
-* `fused_plot.R` - to create a fused plot. It depends on 2 other scripts:  
+Currently the package BiocompR contains **12 functions**:
 
-  - `core_ggplot_fun.R` - contains several plotting functions.  
-  - `core_stat_tests.R` - contains functions to run statistic tests.  
-* `GG_Cluster_Heatmap.R` - to plot clustered heatmaps.  
-* `ggcoverage.R` - to create simple enriched barplots.  
-* `ggcraviola.R` - to create craviola plots (splitted & binned violin plots).  
-
-  - `bin_polygons.R` - to cut ggplot2 polygons following specified quantiles.  
-* `sunset.R` - to create a sunset plot (dodge barplot of completeness of a data.frame/matrix).  
+* `basic.sidebar()` - Draws a ggplot2 of a basic sidebar.  
+* `EVA()` - Computes eigenvectors, PC scores and correlations from a correlation test.  
+* `fancy.hist()` - Computes in parallel and plot an histogram using ggplot2 from a given vector of values.  
+* `fused.plot()` - Creates a plot summarizing results from 2 different pairwise comparisons.  
+* `fused.view()` - Displays 2 matrices of results as a fused plot.  
+* `ggcoverage()` - Plots an annotated barplot.  
+* `ggcraviola()` - Draws a craviola plot (half-splitted and percentile-binned violin plot).  
+* `ggdend()` - Creates a dendogram in ggplot2.  
+* `ggeigenvector()` - Creates an eigenvector plot using ggplot2.  
+* `plot.col.sidebar()` - Creates a colored side annotation bars in ggplot2.  
+* `sunset()` - Draws a sunset plot showing the completeness of a dataset.  
 
 ## Prerequesites
 ### Install all dependencies
@@ -31,28 +33,18 @@ Currently the BiocompR repository contains **9 scripts** in the folder **src/**:
 ```R
 inst.pkgs = c('ggplot2','psych','data.table','gridExtra','grid','parallel',
 	    'ggrepel','corrplot','ggdendro','fastcluster','parallelDist',
-	    'IRanges','RColorBrewer','Hmisc','gtools')
+	    'IRanges','RColorBrewer','Hmisc','gtools', 'devtools')
 install.packages(inst.pkgs)
 ```
 
 ⚠️ RColorBrewer, Hmisc and gtools will be removed in the next commits.
 
 ## Installing
-⚠️ For now there is no package built, so nothing to install.
-
-## Documentation
-### EVA()
-**Description:** From a Correlation test return eigenvectors, principal components scores and principal components correlations with the data.  
-**Parameters:**  
-* **_data_** - A matrix or a data.frame containing variables by columns and values to be used for the correlation test by rows.  
-* **_use_** -  A character to specify how to handle missing values when calculating a correlation. Possible values are 'pairwise' and 'complete'. 'pairwise' is the default value and will do pairwise deletion of cases. 'complete' will select just complete cases.  
-* **_method_** - The correlation method to use as a character matching one of these: 'pearson','spearman','kendall'.  
-* **_adjust_** - A character specifying what adjustment for multiple tests should be used. Possible values are: "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr" and "none".  
-* **_var.min_** - A double setting the minimum variance accountable for an eigenvector to be considered in the plots generated.  
-* **_groups_** - A character vector of groups to which variables belong for eigenvector annotations. The length of this vector has to match the number/variables of columns in the data.  
-* **_colors_** - A character vector of colors for the eigenvectors. The length of this vector has to match the number of different groups existing.  
-
-⚠️ **Work in progress !**
+1. Open BiocompR.Rproj in RStudio.
+2. In RStudio console:
+```R
+devtools::install()
+```
 
 ## Tutorial
 ### How to run an EVA (EigenVector Analysis)
@@ -76,73 +68,80 @@ Load the 'stemcells' dataset:
 
 ```R
 data("stemcells")
+summary(stemcells$study)
+summary(stemcells$celltype)
+```
+The dataset contains expression data from 4 studies.  
+3 different cell types are compared: Fibroblasts, human Embryonic Stem Cells (hESC) and human induced Pluripotent Stem cells (hiPS).  
+To assess differences between these cell types, expression data of 400 genes is studied in 125 samples: 30 Fibroblasts, 37 hESC and 58 hiPS.  
+
+Let's start by storing all expression data into a dataframe:
+```R
 df.stemc<-t(data.frame(stemcells$gene))
-df.stemc<-df.stemc[,c(73,74,35,36,108,109,50,51,27,28)]
 ```
-
-For this demonstration we will only use 10 samples.  
-The dataset contains values of 400 Ensembl gene IDs.  
-Load the script containing the EVA functions:
+Load BiocompR:
 ```R
-source("BiocompR/src/eva.R")
+library(BiocompR)
 ```
-Now let's run an EVA based on a pairwise pearson correlation between the samples:  
+Now let's run an EVA !  
+This EVA will be based on a spearman correlation (**method** = "pearson") between the samples.  
+Missing values will be removed following a pairwise deletion for each pair of samples compared (**use** = "pairwise").
+We will use the Holm adjusment method for multiple testing (**adjust** = "holm").  
+We will only consider eigenvalues with a minimum variance accountability of 10<sup>-3</sup>.  
+In this first analysis samples will be grouped by studies (**groups** = studies).  
+Samples will be colored in blue, red, green and orange following the study they belong to (**colors** = c("blue","red","green","orange")).  
+Because there are a lot of samples, we will not label sample IDs (**label** = FALSE).
+The final command should look like this:  
 ```R
-eva.res<-EVA(data = df.stemc, use = "pairwise", method = "pearson",
-             adjust = "none",var.min = 10^-3,
-             groups = c(rep("G1",2),rep("G2",2),rep("G3",2),rep("G4",2),
-                        rep("G5",2)),
-             colors = c("blue","red","pink","green","orange"))
+eva.study<-EVA(data = df.stemc, use = "pairwise", method = "spearman",
+               adjust = "holm", var.min = 10^-3, groups = stemcells$study,
+               colors = c("blue","red","green","orange"), label = FALSE)
 ```
-We don't set any adjustment (`adjust = "none"`).  
-The minimum variance of an eigenvalue to be considered for the plotting has to be above 10<sup>-3</sup> (`var.min =  10^-3`).  
-5 groups are specified from G1 to G5.
-5 colors matching the groups are specified (`colors = c("blue","red","pink","green","orange")`).  
-
-Check the eigenvector plot based on Eigenvectors 2 and 3:  
+Check the eigenvector plot based on Eigenvectors 1 and 2:  
 ```R
-eva.res$EV.plots$`2 & 3`
+eva.study$EV.plots$`1 & 2`
 ```
 
 <p align="center">
 <img src="img/EVA_plot1.png">
 </p>
 
-Check the correlation between each eigenvector and the selected samples:
-```R
-eva.res$PC.cor
+As you can see, samples from the 4 studies are clearly separated and grouped together by the 2nd eigenvector. The associated accounted variance is equal to 9.19% of the total variance. This share of the variance could possibly be explained by technical bias existing between studies.
 
-                 EV1        EV2         EV3         EV4         EV5          EV6          EV7          EV8          EV9         EV10
-sample115 -0.8303877  0.2491523  0.45039591 -0.15160967  0.11510217  0.020542017 -0.008006845  0.002219612 -0.093755029  0.002816303
-sample116 -0.8270994  0.2449026  0.45187351 -0.16403087  0.12603837 -0.025274282  0.004504351 -0.002762346  0.090898250 -0.004324801
-sample35  -0.8228492 -0.4842983  0.17619773 -0.11148536 -0.17350399  0.119256559  0.014262570 -0.009394247  0.016626372  0.002438156
-sample36  -0.8256010 -0.4932166  0.16062430 -0.06953648 -0.17018460 -0.122330139 -0.013803324  0.010029179 -0.015974597 -0.003344473
-sample150 -0.8593873  0.4008005  0.02999788  0.27233104 -0.11884120 -0.014124179  0.104639519 -0.020549451 -0.006475418 -0.003454545
-sample151 -0.8632567  0.3901246  0.01701053  0.27611832 -0.12041156  0.019294957 -0.102296139  0.024108381  0.010683778  0.005380210
-sample50  -0.8255276  0.1988074 -0.46570724 -0.23774594 -0.01220768 -0.010092492  0.003149189 -0.011115658  0.002349743  0.071996669
-sample51  -0.8165952  0.2131105 -0.47809691 -0.23148915 -0.01704860  0.005653178 -0.002983466  0.011698087 -0.003840261 -0.071478929
-sample27  -0.8826688 -0.3435637 -0.16771132  0.18893930  0.17164856 -0.003707339 -0.026506293 -0.093690731 -0.002622042 -0.008382416
-sample28  -0.8738047 -0.3660553 -0.16354698  0.17948951  0.18541211  0.010507487  0.027692799  0.090479404  0.002324763  0.007611173
+ 
+Let's check the correlation between the 5 first principal components (or 5 first eigenvectors) for 8 samples, 2 samples from each study:
+```R
+eva.study$PC.cor[c(1,21,39,45,60,72,111,114),1:5]
+
+                 EV1          EV2          EV3        EV4          EV5
+sample1   -0.8951883 -0.270063307 -0.022292016 -0.0678189  0.021730638
+sample21  -0.8772897 -0.277837669 -0.007358484 -0.0794286 -0.037385112
+sample39  -0.8663426 -0.001890668  0.368653214  0.3240846 -0.022192641
+sample45  -0.8593002  0.003487241  0.319675840  0.3602473 -0.027747364
+sample102 -0.8915803  0.343632835  0.050768567 -0.1466372  0.007248045
+sample114 -0.8066130  0.312796767 -0.304392402  0.2183301 -0.015844224
+sample153 -0.8118068 -0.177573462 -0.205558201  0.2889839  0.296801713
+sample156 -0.7894227 -0.218359094 -0.144346190  0.1110516  0.453881389
 ```
-It can be interesting to see if any sample annotation match the sign of correlations with a given eigenvector to speculate on the influence of known biological / clinical /technical sources of variability.
+It can be interesting to see if any sample annotation match the sign of correlations with a given eigenvector to speculate on the influence of known biological, clinical or technical sources of variability.
 
-Check principal component scores of some genes:
+Check the 5 first principal component scores of some genes:
 ```R
-head(eva.res$PC.scores)
+head(eva.study$PC.scores[,1:5])
 
-                       EV1        EV2         EV3        EV4        EV5         EV6          EV7         EV8         EV9        EV10
-ENSG00000159199 -2.0246248 -0.5528220 -1.00930041  0.2471116 -0.1336578  0.04290066  0.001005254  0.01905857  0.04044745  0.04081912
-ENSG00000106012  2.9909195 -1.0092463 -1.36802684 -0.6619587 -0.1415367  0.05128401 -0.122519295 -0.07243510 -0.10463717 -0.12469102
-ENSG00000129317 -0.4979149  0.6378724  0.01573723 -0.4529912 -0.2574748 -0.06799586 -0.090245910 -0.04900360 -0.05098465 -0.17514404
-ENSG00000075884  3.1443091  0.7550371  1.65414982  0.8340830  0.1546381  0.05009212  0.035017256  0.04395436 -0.16225866 -0.08159222
-ENSG00000189367  1.4103769  1.6848047  0.22572101 -0.2093240 -0.0700232  0.14676420 -0.164126624 -0.11752260 -0.07926383  0.17872138
-ENSG00000198542  0.3827579 -1.5375213  2.63838010 -2.4830413 -0.4560858 -0.31945756 -0.104490615  0.17904389 -0.08853756  0.05352093
+                      EV1        EV2        EV3        EV4        EV5
+ENSG00000159199 -7.511113 -2.9810886  2.2514981 -1.1580432 -1.4801993
+ENSG00000106012  9.535193 -5.2277593  2.9507172  2.4259599  0.2770715
+ENSG00000129317 -1.402454  1.6243366  1.6428285  1.7017169  1.5867111
+ENSG00000075884 11.154868  2.9302000 -3.4370837 -3.5778084 -1.1826668
+ENSG00000189367  6.390328  6.4396160  0.7661937 -0.7968169 -2.3035510
+ENSG00000198542  7.630721 -0.5296745 -3.7407614  9.1858624 -2.6607522
 ```
 One can then plot these genes following their scores for a set of selected eigenvectors.  
 Here the 5 first eigenvectors are selected (the package **GGally** is necessary for the demonstration):  
 ```R
 library(GGally)
-ggfacet(eva.res$PC.scores[,c(1:5)]) + geom_density_2d()
+ggfacet(eva.study$PC.scores[,c(1:5)]) + geom_density_2d()
 ```
 
 <p align="center">
@@ -152,19 +151,64 @@ ggfacet(eva.res$PC.scores[,c(1:5)]) + geom_density_2d()
 
 As one can see the first eigenvectors discriminate specific genes more strongly than latest ones.  
 
-Finally one can select the Top10 most interesting genes following their scores for all eigenvectors:
+Finally one can select the Top10 most interesting genes following their scores for the 5 first and most important eigenvectors:
 ```R
 res.abs<-apply(X = eva.res$PC.scores, MARGIN = 1:2,FUN = abs)
-top10.gene.IDs<-rownames(eva.res$PC.scores[order(rowSums(res.abs, na.rm = TRUE),
-                                                 decreasing = TRUE),][1:10,])
+top10.gene.IDs<-rownames(eva.res$PC.scores[order(rowSums(
+  res.abs[,1:5], na.rm = TRUE), decreasing = TRUE),][1:10,])
 top10.gene.IDs
 
- [1] "ENSG00000240970" "ENSG00000123080" "ENSG00000146674" "ENSG00000110696" "ENSG00000168542"
- [6] "ENSG00000181449" "ENSG00000120211" "ENSG00000136634" "ENSG00000125743" "ENSG00000148297"
-
+ [1] "ENSG00000240970" "ENSG00000120211" "ENSG00000136634" "ENSG00000181449"
+ [5] "ENSG00000110696" "ENSG00000148297" "ENSG00000125743" "ENSG00000163661"
+ [9] "ENSG00000123080" "ENSG00000111700"
 ```
-This is only an example, it doesn't mean that the parameters set here are the best ones for these data.  
+Now a similar EVA can be done using the cell types. Principal component correlations and scores will remain the same than in the previous analysis, only the plotting will be different:
+```R
+eva.cells<-EVA(data = df.stemc, use = "pairwise", method = "spearman",
+             adjust = "holm",var.min = 10^-3, groups = stemcells$celltype,
+             colors = c("blue","red","green"), label = FALSE)
+```
 
+While the 1st and 2nd eigenvectors where useful to separate sample from different studies, it is more interesting to have a look at the 2nd and the 3rd eigenvectors when it comes to cell types:
+```R
+eva.cells$EV.plots$`2 & 3`
+```
+
+<p align="center">
+<img src="img/EVA_plot3.png">
+</p>
+
+It appears that Fibroblasts are clearly groupes together, while hESC and hiPS are mixed together in the same groups. Knowing that hiPS are supposed to have very similar properties than hESCs, this analysis confirm that is no visible difference between hESC and hiPS when looking at the 3 first eigenvectors. While 3rd eigenvector seems to almost separate Fibroblasts from hESC + hiPS, what the 2nd eigenvector represent is unclear.
+
+So is there any eigenvector able to discriminate hESC, hiPS ?  
+When looking at the different plot computed, it appears that actually the eigenvector 7 achieves to discriminate some hiPS samples from hESC samples, but not completely:
+```R
+eva.cells$EV.plots$`2 & 7`
+```
+
+<p align="center">
+<img src="img/EVA_plot4.png">
+</p>
+
+Among the 16 eigenvectors selected the eigenvector 7 achieves the best result to separate some hiPS from the hESC.  
+We can then have a look at which genes could be associated to the remaining difference existing between hiPS and hESC (since the dataset did not change we can reuse previous data):
+```R
+top10.hiPSgene.IDs<-rownames(eva.res$PC.scores[
+  order(res.abs[,7], decreasing = TRUE),][1:10,])
+top10.hiPSgene.IDs
+
+ [1] "ENSG00000040731" "ENSG00000168542" "ENSG00000108511" "ENSG00000164093"
+ [5] "ENSG00000110169" "ENSG00000138685" "ENSG00000242265" "ENSG00000123080"
+ [9] "ENSG00000148053" "ENSG00000162849"
+```
+
+These results might mean that the differential expression of genes listed above probably explains some differences between hiPS and hESC cells.  
+
+This tutorial is only an example, it doesn't mean that the parameters set here are the best ones for these data and we encourage everyone to play with them to see how eigenvector analyses could be improved.  
+
+⚠️ **Work in progress !**  
+
+## References
 ⚠️ **Work in progress !**  
 
 ## Licence

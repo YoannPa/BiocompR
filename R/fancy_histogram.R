@@ -28,6 +28,7 @@ lapply(Imports, library, character.only = T)
 #'                   fill the histogram bins.
 #' @return A \code{gg} plot of an histogram.
 #' @author Yoann Pageaud.
+#' @export
 
 fancy.hist<-function(x, xmax, nbreaks = 10, ngrad = 10, round.grad = 1,
                      ncores = 1, xlab="values", ylab = "Frequency",

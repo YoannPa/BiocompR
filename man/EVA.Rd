@@ -11,7 +11,8 @@ EVA(
   adjust = "none",
   var.min = 0.01,
   groups = as.character(seq(ncol(data))),
-  colors = rainbow(n = ncol(data))
+  colors = rainbow(n = ncol(data)),
+  label = TRUE
 )
 }
 \arguments{

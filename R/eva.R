@@ -42,14 +42,15 @@ var.accounted<-function(colname, eigen.values){
 #' @return A \code{gg} plot of the variables following the 2 eigenvectors
 #'         selected.
 #' @author Yoann Pageaud.
+#' @export
 
-ggeigenvector<- function(data, xcol, ycol, eigenvalues, colors, title){
-  ggplot(data=data) +
+ggeigenvector<- function(
+  data, xcol, ycol, eigenvalues, colors, label=TRUE, title){
+  ev.plot<-ggplot(data=data) +
     ggtitle(title) +
     geom_point(aes_string(x = xcol, y = ycol, color = "Groups")) +
     geom_segment(aes_string(xend = xcol, yend = ycol, color = "Groups"),
                  x=0, y=0, size=1, arrow = arrow(length = unit(0.3,"cm"))) +
-    geom_label_repel(aes_string(x = xcol, y = ycol, label = "Labels")) +
     scale_color_manual(values=colors) +
     xlab(var.accounted(colname=xcol, eigen.values=eigenvalues)) +
     ylab(var.accounted(colname=ycol, eigen.values=eigenvalues)) +
@@ -58,6 +59,11 @@ ggeigenvector<- function(data, xcol, ycol, eigenvalues, colors, title){
           legend.text = element_text(size=12)) +
     geom_hline(yintercept = 0, linetype="dashed") +
     geom_vline(xintercept = 0, linetype="dashed")
+  if(label){
+    ev.plot <- ev.plot +
+      geom_label_repel(aes_string(x = xcol, y = ycol, label = "Labels"))
+  }
+  ev.plot
 }
 
 #' Computes eigenvectors, PC scores and correlations from a correlation test.
@@ -90,10 +96,11 @@ ggeigenvector<- function(data, xcol, ycol, eigenvalues, colors, title){
 #'         a list of the Eigenvector Plots generated and principal components
 #'         scores of the scaled data.
 #' @author Yoann Pageaud.
+#' @export
 
 EVA<-function(data, use = "pairwise", method = "pearson", adjust = "none",
               var.min = 0.01, groups = as.character(seq(ncol(data))),
-              colors = rainbow(n = ncol(data))){
+              colors = rainbow(n = ncol(data)), label=TRUE){
   #Compute a correlation test on the data
   M<-corr.test(x = data, use = use, method = method, adjust = adjust)$r
   #Get eigenvalues from the correlation matrix
@@ -120,7 +127,7 @@ EVA<-function(data, use = "pairwise", method = "pearson", adjust = "none",
     lapply(my_cols, function(col2){
       if(col1 == col2){ return(NULL) } else {
         ggeigenvector(data = dframe, eigenvalues = eigvals, xcol = col1,
-                      ycol = col2, colors = colors,
+                      ycol = col2, colors = colors, label = label,
                       title = paste("Eigenvector Plot - Pairwise",method,
                                     "correlation with", adjust, "adjustment"))
       }

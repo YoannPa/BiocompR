@@ -8,7 +8,6 @@
 #' distribution.
 #' @author Yoann Pageaud.
 #' @keywords internal
-#' @examples
 
 ls.quantile<-function(ls, qtiles){
   lapply(ls, quantile, qtiles)

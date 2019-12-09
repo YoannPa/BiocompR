@@ -60,6 +60,7 @@ lapply(Imports, library, character.only = T)
 #'                         thickness of each margin of the plot.
 #' @return A \code{gg} plot of a faceted heatmap.
 #' @author Yoann Pageaud.
+#' @export
 
 ggclust.heatmap<-function(
   data, regions.clusters, order.type="Hclust", distance.method,
