@@ -251,8 +251,8 @@ ggcraviola<-function(data, fill.color=c("blue","red"), craviola.width = 1,
   }
   if(mean.value){ #mean.value TRUE
     craviola.plot<-craviola.plot +
-      geom_point(data = box.dframe,mapping = aes(x = x,y = mean),size=2,
-                 color = "red")
+      geom_point(
+        data = box.dframe, mapping = aes(x = x,y = mean), size=2, color = "red")
   }
   craviola.plot
 }

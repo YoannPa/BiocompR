@@ -13,7 +13,9 @@ Description: BiocompR is a R package built upon ggplot2 to improve commonly used
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Depends: ggplot2
+Depends:
+    ggplot2,
+    data.table
 Imports:
     gridExtra,
     grid,
