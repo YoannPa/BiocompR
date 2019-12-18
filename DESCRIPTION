@@ -1,6 +1,6 @@
 Package: BiocompR
 Title: BiomcompR - Advanced vizualisations for data comparison
-Version: 0.0.26
+Version: 0.0.33
 Authors@R: 
     person(given = "Yoann",
            family = "Pageaud",
@@ -10,7 +10,7 @@ Authors@R:
 Description: BiocompR is a R package built upon ggplot2 to improve commonly used
             plots dedicated to data comparison, dataset exploration and,
             ultimately provides users with versatile and customizable graphics.
-License: MIT + file LICENSE
+License: GPL-3.0
 Encoding: UTF-8
 LazyData: true
 Depends:

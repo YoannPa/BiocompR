@@ -1,5 +1,5 @@
 # BiocompR
-BiocompR is a R package built upon ggplot2 to improve commonly used plots dedicated to data comparison, dataset exploration and, ultimately provides users with versatile and customizable graphics.  
+_**BiocompR** is a R package built upon ggplot2 to improve commonly used plots dedicated to data comparison, dataset exploration and, ultimately provides users with versatile and customizable graphics._  
 
 **Author: PAGEAUD Y.<sup>1</sup>**  
 **Contributors: MAYAKONDA A.<sup>2</sup>; WURSTHORN A.<sup>4</sup>; FEUERBACH L.<sup>1</sup>; TOTH R.<sup>2</sup>; SCHEFZIK R.<sup>3</sup>; HONG C.<sup>1</sup>.**  
@@ -8,7 +8,7 @@ BiocompR is a R package built upon ggplot2 to improve commonly used plots dedica
 **3-** [**Klinik für Anästhesiologie und Operative Intensivmedizin - Clinical Epidemiology Group, Germany.**](https://www.umm.de/klinik-fuer-anaesthesiologie-und-operative-intensivmedizin/)  
 **4-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
-**Version: 0.0.27 (Beta)**  
+**Version: 0.0.33 (Beta)**  
 **R Compatibility: Version 3.6.1**  
 **Last Update: 09/12/2019**  
 
