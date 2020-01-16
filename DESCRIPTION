@@ -17,15 +17,17 @@ Depends:
     ggplot2,
     data.table
 Imports:
-    gridExtra,
-    grid,
-    psych,
     corrplot,
-    ggdendro,
-    fastcluster,
-    parallel,
     data.table,
-    IRanges
+    fastcluster,
+    ggdendro,
+    ggrepel,
+    grid,
+    gridExtra,
+    IRanges,
+    psych,
+    parallel,
+    quantmod
 RoxygenNote: 7.0.2
 Suggests: 
     knitr,

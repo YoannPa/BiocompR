@@ -135,7 +135,8 @@ sunset<-function(mat, title, col.pal = pal_sunset, horizontal = FALSE,
   Sunset<-ggplot(data=dframe,aes(x = 0,y=CpG.Covered, fill = Sample.Amt)) +
     theme_gray() +
     theme(legend.title.align=0.5,
-          legend.text=element_text(size=12)) +
+          legend.text=element_text(size=12),
+          legend.position=lgd.pos) +
     geom_bar(stat = "identity") +
     geom_text(aes(y=label.pos, label=percent), vjust=0.25, hjust=0.5,
               colour = "white", size = 5) +

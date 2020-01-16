@@ -35,15 +35,18 @@ fancy.hist<-function(x, xmax, nbreaks = 10, ngrad = 10, round.grad = 1,
                      bin.col = "#0570b0"){
   #Check if is any NAs
   if(any(is.na(x))){ x<-x[!is.na(x)] } #rm NAs
-  #Set Maximum
-  x[x > xmax] <- xmax
+
   #Set breaks
   xbreaks <- seq(0, xmax, length.out = nbreaks)
   #Set graduations
   xgrads <- round(x = seq(0, xmax, length.out = ngrad), digits = round.grad)
   #Set X axis labels
   xlabs<-as.character(xgrads)
-  xlabs[length(xlabs)]<-paste(xlabs[length(xlabs)],"\nor more")
+  if(max(x) > xmax){
+    #Set Maximum
+    x[x > xmax] <- xmax
+    xlabs[length(xlabs)]<-paste(xlabs[length(xlabs)],"\nor more")
+  }
   #Compute quantities for each bin
   histdata<-mclapply(seq(length(xbreaks)-1), mc.cores = ncores, function(i){
     if(i == length(xbreaks)-1){ #If last bin take values equal to maximum too
@@ -53,7 +56,7 @@ fancy.hist<-function(x, xmax, nbreaks = 10, ngrad = 10, round.grad = 1,
   histdata<-unlist(histdata)
   #Get recommended cut-off value and median
   cat("Compute Median and Cutoff\n")
-  cutoff.val <- findValleys(histdata)[1]
+  cutoff.val <- quantmod::findValleys(histdata)[1]
   cutoff.pos <-cutoff.val*(length(histdata)/xmax) + 0.5
   median.val<-median(x,na.rm = TRUE)
   median.pos<-median.val*(length(histdata)/xmax) + 0.5
@@ -68,7 +71,7 @@ fancy.hist<-function(x, xmax, nbreaks = 10, ngrad = 10, round.grad = 1,
                        expand = c(0, 0)) +
     scale_y_continuous(expand = c(0, 0)) +
     geom_vline(xintercept = median.pos, color = "#313695", size = 0.7) +
-    geom_label_repel(
+    ggrepel::geom_label_repel(
       data = data.frame(), aes(x = median.pos, y = Inf, fontface = 2,
                                label = paste0("median = ", round(x = median.val,
                                                                  digits = 2))),
@@ -84,7 +87,7 @@ fancy.hist<-function(x, xmax, nbreaks = 10, ngrad = 10, round.grad = 1,
   if(cutoff.val <= median.val){
     gghist<-gghist +
       geom_vline(xintercept=cutoff.pos, color="#d7191c", size=0.7) +
-      geom_label_repel(
+      ggrepel::geom_label_repel(
         data = data.frame(),
         aes(x = cutoff.pos, y = Inf, fontface = 2,
             label = paste0("cut-off = ", round(x = cutoff.val, digits = 2))),
