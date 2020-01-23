@@ -254,3 +254,37 @@ plot.col.sidebar<-function(
   return(list("sidebar" = col_sidebar + theme(legend.position = "none"),
               "legends" = sidebar.lgd))
 }
+
+#' Resizes heights or widths of multiple grobs based on a given grob dimensions.
+#'
+#' @param ls.grobs   A \code{grob} list. The list can be named if necessary.
+#' @param dimensions A \code{character} specifying the type of dimensions to
+#'                   resize, either 'heights' or 'widths'.
+#' @param start.unit An \code{integer} specifying at which rank of the unit
+#'                   object the dimension comparison between grobs should start.
+#' @param end.unit   An \code{integer} specifying at which rank of the unit
+#'                   object the dimension comparison between grobs should end.
+#' @return A \code{grob} list, all resized with their dimensions modified by the
+#'         unit.pmax() function.
+#' @author Yoann Pageaud.
+#' @export
+#' @examples
+#' @references
+
+resize.grobs<-function(ls.grobs, dimensions, start.unit, end.unit){
+  #Get dimension units from the list of grobs to redimension
+  ls.dim<-lapply(X = ls.grobs, FUN = function(i){
+    i[[dimensions]][start.unit:end.unit]
+  })
+  #Calculate maxilum of all unit objects including the main grob.
+  max.dim <-eval(parse(
+    text = paste("unit.pmax(",paste(paste(
+      rep("ls.dim[[",length(ls.dim)), seq(length(ls.dim)),"]]", sep = ""),
+      collapse = ", "), ")", sep = "")))
+  #Apply changes to grobs dimensions
+  ls.grobs<-lapply(X = ls.grobs, FUN = function(i){
+    i[[dimensions]][start.unit:end.unit]<-as.list(max.dim)
+    i
+  })
+  return(ls.grobs)
+}

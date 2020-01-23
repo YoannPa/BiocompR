@@ -234,48 +234,45 @@ fused.view<-function(
   if(annot.pos == "top"){
     if(dendro.pos == "top"){
       #Get common width of a list of objects widths
-      maxWidth = unit.pmax(main_grob$widths[2:5], sidebar_grob$widths[2:5],
-                           dendro_grob$widths[2:5])
-      #Assign back the maximum width to all object of the list
-      main_grob$widths[2:5] <- as.list(maxWidth)
-      sidebar_grob$widths[2:5] <- as.list(maxWidth)
-      dendro_grob$widths[2:5] <- as.list(maxWidth)
+      upd_grobs<-resize.grobs(ls.grobs = list(
+        "main_grob" = main_grob, "sidebar_grob" = sidebar_grob,
+        "dendro_grob" = dendro_grob), dimensions = "widths", start.unit = 2,
+        end.unit = 5)
 
-      main_grob<-arrangeGrob(dendro_grob, sidebar_grob, main_grob, ncol=1,
+      main_grob<-arrangeGrob(upd_grobs$dendro_grob, upd_grobs$sidebar_grob,
+                             upd_grobs$main_grob, ncol=1,
                              heights = c(10+dendro.size,9+annot.size,40))
     } else {
       #Get common width of a list of objects widths
-      maxWidth = unit.pmax(main_grob$widths[2:5], sidebar_grob$widths[2:5])
-      #Assign back the maximum width to all object of the list
-      main_grob$widths[2:5] <- as.list(maxWidth)
-      sidebar_grob$widths[2:5] <- as.list(maxWidth)
-      main_grob<-arrangeGrob(sidebar_grob, main_grob, ncol=1,
+      upd_grobs<-resize.grobs(ls.grobs = list(
+        "main_grob" = main_grob, "sidebar_grob" = sidebar_grob),
+        dimensions = "widths", start.unit = 2, end.unit = 5)
+
+      main_grob<-arrangeGrob(upd_grobs$sidebar_grob, upd_grobs$main_grob,ncol=1,
                              heights = c(9+annot.size,40))
     }
     #Create the Right Panel for legends
     right.legends<-arrangeGrob(upper.legend,sidebar.legend,nrow = 1)
-  } else{
+  } else {
     #Annotation on the left
     if(dendro.pos == "left"){
       #Get common width of a list of objects widths
-      maxHeight = unit.pmax(main_grob$heights[3:8],
-                            sidebar_grob$heights[3:8],
-                            dendro_grob$heights[3:8])
-      #Assign back the maximum width to all object of the list
-      main_grob$heights[3:8] <- as.list(maxHeight)
-      sidebar_grob$heights[3:8] <- as.list(maxHeight)
-      dendro_grob$heights[3:8] <- as.list(maxHeight)
+      upd_grobs<-resize.grobs(ls.grobs = list(
+        "main_grob" = main_grob, "sidebar_grob" = sidebar_grob,
+        "dendro_grob" = dendro_grob), dimensions = "heights", start.unit = 3,
+        end.unit = 8)
+
       #Make main grob
-      main_grob<-arrangeGrob(dendro_grob, sidebar_grob, main_grob, nrow=1,
-                             widths = c(10+dendro.size,9+annot.size,40))
+      main_grob<-arrangeGrob(
+        upd_grobs$dendro_grob, upd_grobs$sidebar_grob,upd_grobs$main_grob,
+        nrow=1, widths = c(10+dendro.size,9+annot.size,40))
     } else {
       #Get common width of a list of objects widths
-      maxHeight = unit.pmax(main_grob$heights[3:8], sidebar_grob$heights[3:8])
-      #Assign back the maximum width to all object of the list
-      main_grob$heights[3:8] <- as.list(maxHeight)
-      sidebar_grob$heights[3:8] <- as.list(maxHeight)
+      upd_grobs<-resize.grobs(ls.grobs = list(
+        "main_grob" = main_grob, "sidebar_grob" = sidebar_grob),
+        dimensions = "heights", start.unit = 3, end.unit = 8)
       #Make main grob
-      main_grob<-arrangeGrob(sidebar_grob, main_grob, nrow=1,
+      main_grob<-arrangeGrob(upd_grobs$sidebar_grob, upd_grobs$main_grob,nrow=1,
                              widths = c(9+annot.size,40))
     }
     right.legends<-arrangeGrob(upper.legend,sidebar.legend,nrow = 1)

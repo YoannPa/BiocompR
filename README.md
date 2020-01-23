@@ -8,9 +8,9 @@ _**BiocompR** is a R package built upon ggplot2 to improve commonly used plots d
 **3-** [**Klinik für Anästhesiologie und Operative Intensivmedizin - Clinical Epidemiology Group, Germany.**](https://www.umm.de/klinik-fuer-anaesthesiologie-und-operative-intensivmedizin/)  
 **4-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
-**Version: 0.0.33 (Beta)**  
+**Version: 0.0.35 (Beta)**  
 **R Compatibility: Version 3.6.1**  
-**Last Update: 09/12/2019**  
+**Last Update: 23/01/2020**  
 
 ## Content
 Currently the package BiocompR contains **12 functions**:
@@ -25,19 +25,18 @@ Currently the package BiocompR contains **12 functions**:
 * `ggdend()` - Creates a dendogram in ggplot2.  
 * `ggeigenvector()` - Creates an eigenvector plot using ggplot2.  
 * `plot.col.sidebar()` - Creates a colored side annotation bars in ggplot2.  
+* `resize.grobs()` - Resizes heights or widths of multiple grobs based on a given grob dimensions.  
 * `sunset()` - Draws a sunset plot showing the completeness of a dataset.  
 
 ## Prerequesites
 ### Install all dependencies
 
 ```R
-inst.pkgs = c('ggplot2','psych','data.table','gridExtra','grid','parallel',
-	    'ggrepel','corrplot','ggdendro','fastcluster','parallelDist',
-	    'IRanges','RColorBrewer','Hmisc','gtools', 'devtools')
+inst.pkgs = c('corrplot', 'data.table', 'devtools', 'fastcluster', 'ggdendro',
+	      'ggplot2', 'ggrepel', grid', 'gridExtra', 'IRanges', 'psych',
+	      'parallel', 'parallelDist', 'quantmod')
 install.packages(inst.pkgs)
 ```
-
-⚠️ RColorBrewer, Hmisc and gtools will be removed in the next commits.
 
 ## Installing
 1. Open BiocompR.Rproj in RStudio.

@@ -1,6 +1,6 @@
 Package: BiocompR
 Title: BiomcompR - Advanced vizualisations for data comparison
-Version: 0.0.33
+Version: 0.0.35
 Authors@R: 
     person(given = "Yoann",
            family = "Pageaud",
@@ -14,11 +14,10 @@ License: GPL-3.0
 Encoding: UTF-8
 LazyData: true
 Depends:
-    ggplot2,
-    data.table
+    data.table,
+    ggplot2
 Imports:
     corrplot,
-    data.table,
     fastcluster,
     ggdendro,
     ggrepel,
@@ -27,6 +26,7 @@ Imports:
     IRanges,
     psych,
     parallel,
+    parallelDist,
     quantmod
 RoxygenNote: 7.0.2
 Suggests: 
