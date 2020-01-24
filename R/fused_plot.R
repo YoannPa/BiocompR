@@ -12,6 +12,7 @@
 #'                   \cr(Supported: tri.type = c("upper","lower"))
 #' @return A \code{list} of length 2 containing the updated min and max values.
 #' @author Yoann Pageaud.
+#' @export
 #' @keywords internal
 
 min.max.update<-function(lgd.limits=NULL, melt.tri, tri.type){
@@ -42,6 +43,7 @@ min.max.update<-function(lgd.limits=NULL, melt.tri, tri.type){
 #' @param str       A \code{character} vector from which to get elements order.
 #' @return A \code{type} object returned description.
 #' @author Yoann Pageaud.
+#' @export
 #' @keywords internal
 
 fix.corrMatOrder.alphabet<-function(cor.order,str){
@@ -66,8 +68,8 @@ fused.view<-function(
   annot.pos = 'top', annot.size = 0,annot.lgd.merge = FALSE, annot.split = TRUE,
   dendro.pos = 'none', dendro.size = 0,
   grid.col = "grey", grid.thickness = 0.5,
-  axis.title = element_blank(),axis.title.x = element_blank(),
-  axis.title.y = element_blank(),axis.text = element_text(size = 12),
+  axis.title = element_blank(), axis.title.x = element_blank(),
+  axis.title.y = element_blank(), axis.text = element_text(size = 12),
   axis.text.x = element_text(angle = 90, hjust = 0, vjust = 0.5),
   axis.text.y = element_blank(),
   axis.ticks = element_line(color = "black"),
@@ -87,12 +89,12 @@ fused.view<-function(
   lgd.ticks.linewidth = 2, lgd.ticks.linewidth1 = NULL,
   lgd.ticks.linewidth2 = NULL,
   lgd.nbin = NULL, lgd.nbin1 = NULL, lgd.nbin2 = NULL,
-  lgd.height1 = 26, lgd.height2 = 1, lgd.width1 = 1, lgd.width2 = 30,
+  lgd.height1 = 30, lgd.height2 = 1, lgd.width1 = 1, lgd.width2 = 30,
   lgd.frame.col = "grey",lgd.frame.linewidth = 1.5,lgd.frame.linewidth1 = NULL,
   lgd.frame.linewidth2 = NULL,
   raster = FALSE, raster1 = NULL, raster2 = NULL,
   add.ggplot.arg = NULL
-  ){
+){
 
   #Get order of the correlations for the method used
   if(order.select == 'upper'){
@@ -209,10 +211,11 @@ fused.view<-function(
     sample.names = sample.names ,annot.grps = annot.grps,annot.pal = annot.pal,
     annot.pos = annot.pos, cor.order = correlation.order,
     axis.text.x = axis.text.x, axis.text.y = axis.text.y,
-    axis.ticks = axis.ticks, axis.title.x = axis.title.x,
-    axis.title.y = axis.title.y, set.x.title = set.x.title,
-    set.y.title = set.y.title, dendro.pos = dendro.pos,
-    merge.lgd = annot.lgd.merge, split.annot = annot.split)
+    axis.ticks.x = axis.ticks, axis.ticks.y = axis.ticks,
+    axis.title.x = axis.title.x, axis.title.y = axis.title.y,
+    set.x.title = set.x.title, set.y.title = set.y.title,
+    dendro.pos = dendro.pos, merge.lgd = annot.lgd.merge,
+    split.annot = annot.split)
   #Remove all legends
   upper.ggplot.nolgd<-upper.ggplot + theme(legend.position = "none")
   lower.ggplot.nolgd<-lower.ggplot + theme(legend.position = "none")
@@ -252,7 +255,7 @@ fused.view<-function(
                              heights = c(9+annot.size,40))
     }
     #Create the Right Panel for legends
-    right.legends<-arrangeGrob(upper.legend,sidebar.legend,nrow = 1)
+    right.legends<-arrangeGrob(upper.legend,sidebar.legend, nrow = 1)
   } else {
     #Annotation on the left
     if(dendro.pos == "left"){
@@ -272,15 +275,15 @@ fused.view<-function(
         "main_grob" = main_grob, "sidebar_grob" = sidebar_grob),
         dimensions = "heights", start.unit = 3, end.unit = 8)
       #Make main grob
-      main_grob<-arrangeGrob(upd_grobs$sidebar_grob, upd_grobs$main_grob,nrow=1,
+      main_grob<-arrangeGrob(upd_grobs$sidebar_grob, upd_grobs$main_grob,ncol=1,
                              widths = c(9+annot.size,40))
     }
-    right.legends<-arrangeGrob(upper.legend,sidebar.legend,nrow = 1)
+    right.legends<-arrangeGrob(upper.legend, sidebar.legend, ncol = 2)
   }
   #Plot Final Figure
   fused.res<-grid.arrange(
     arrangeGrob(grobs = list(main_grob,right.legends,lower.legend),
-                ncol = 2,nrow = 2, heights = c(40,3), widths = c(20,6)))
+                ncol = 2,nrow = 2, heights = c(40,3), widths = c(20,7)))
   return(fused.res)
 }
 
@@ -494,46 +497,46 @@ fused.view<-function(
 #' @export
 
 fused.plot<-function(data,ncores,
-                        upper.comp,upper.value,lower.comp,lower.value,
-                        na.rm = 'pairwise', order.method, order.select,
-                        hclust.method = 'complete', p.adjust,
-                        annot.grps = list("Groups" = seq(ncol(data))),
-                        annot.pal = rainbow(n = ncol(data)),
-                        annot.pos = 'top', annot.size = 0,
-                        annot.lgd.merge = FALSE, annot.split = TRUE,
-                        dendro.pos = 'none', dendro.size = 0,
-                        grid.col = "grey",grid.thickness = 0.5,
-                        axis.title = element_blank(),
-                        axis.title.x = element_blank(),
-                        axis.title.y = element_blank(),
-                        axis.text = element_text(size = 12),
-                        axis.text.x =
-                          element_text(angle = 90, hjust = 0, vjust = 0.5),
-                        axis.text.y = element_blank(),
-                        axis.ticks = element_line(color = "black"),
-                        set.x.title = NULL, set.y.title = NULL,
-                        set.lgd1.title = NULL,set.lgd2.title = NULL,
-                        diag.col = "white",
-                        lgd.pal1 = NULL, lgd.pal2 = NULL,
-                        lgd.title = element_blank(),
-                        lgd.title1 = element_blank(),
-                        lgd.title2 = element_blank(),
-                        lgd.text = element_text(size = 12),
-                        lgd.text1 = element_blank(),lgd.text2 = element_blank(),
-                        lgd.breaks = NULL,lgd.breaks1 = NULL,lgd.breaks2 = NULL,
-                        lgd.labels = NULL,lgd.labels1 = NULL,lgd.labels2 = NULL,
-                        lgd.round = NULL,lgd.round1 = 2,lgd.round2 = 2,
-                        lgd.limits = NULL,lgd.limits1 = NULL,lgd.limits2 = NULL,
-                        lgd.ticks = TRUE,lgd.ticks1 = NULL,lgd.ticks2 = NULL,
-                        lgd.ticks.linewidth = 2,lgd.ticks.linewidth1 = NULL,
-                        lgd.ticks.linewidth2 = NULL,
-                        lgd.nbin = NULL,lgd.nbin1 = NULL, lgd.nbin2 = NULL,
-                        lgd.height1 = 26,lgd.height2 = 1,
-                        lgd.width1 = 1,lgd.width2 = 30,
-                        lgd.frame.col = "grey", lgd.frame.linewidth = 1.5,
-                        lgd.frame.linewidth1 = NULL,lgd.frame.linewidth2 = NULL,
-                        raster = FALSE, raster1 = NULL, raster2 = NULL,
-                        add.ggplot.arg = NULL){
+                     upper.comp,upper.value,lower.comp,lower.value,
+                     na.rm = 'pairwise', order.method, order.select,
+                     hclust.method = 'complete', p.adjust,
+                     annot.grps = list("Groups" = seq(ncol(data))),
+                     annot.pal = rainbow(n = ncol(data)),
+                     annot.pos = 'top', annot.size = 0,
+                     annot.lgd.merge = FALSE, annot.split = TRUE,
+                     dendro.pos = 'none', dendro.size = 0,
+                     grid.col = "grey",grid.thickness = 0.5,
+                     axis.title = element_blank(),
+                     axis.title.x = element_blank(),
+                     axis.title.y = element_blank(),
+                     axis.text = element_text(size = 12),
+                     axis.text.x =
+                       element_text(angle = 90, hjust = 0, vjust = 0.5),
+                     axis.text.y = element_blank(),
+                     axis.ticks = element_line(color = "black"),
+                     set.x.title = NULL, set.y.title = NULL,
+                     set.lgd1.title = NULL,set.lgd2.title = NULL,
+                     diag.col = "white",
+                     lgd.pal1 = NULL, lgd.pal2 = NULL,
+                     lgd.title = element_blank(),
+                     lgd.title1 = element_blank(),
+                     lgd.title2 = element_blank(),
+                     lgd.text = element_text(size = 12),
+                     lgd.text1 = element_blank(),lgd.text2 = element_blank(),
+                     lgd.breaks = NULL,lgd.breaks1 = NULL,lgd.breaks2 = NULL,
+                     lgd.labels = NULL,lgd.labels1 = NULL,lgd.labels2 = NULL,
+                     lgd.round = NULL,lgd.round1 = 2,lgd.round2 = 2,
+                     lgd.limits = NULL,lgd.limits1 = NULL,lgd.limits2 = NULL,
+                     lgd.ticks = TRUE,lgd.ticks1 = NULL,lgd.ticks2 = NULL,
+                     lgd.ticks.linewidth = 2,lgd.ticks.linewidth1 = NULL,
+                     lgd.ticks.linewidth2 = NULL,
+                     lgd.nbin = NULL,lgd.nbin1 = NULL, lgd.nbin2 = NULL,
+                     lgd.height1 = 26,lgd.height2 = 1,
+                     lgd.width1 = 1,lgd.width2 = 30,
+                     lgd.frame.col = "grey", lgd.frame.linewidth = 1.5,
+                     lgd.frame.linewidth1 = NULL,lgd.frame.linewidth2 = NULL,
+                     raster = FALSE, raster1 = NULL, raster2 = NULL,
+                     add.ggplot.arg = NULL){
   #Data format
   if(!(is.matrix(data))){if(is.data.frame(data)){data<-as.matrix(data)
   } else { stop("data is neither a matrix or a dataframe.") } }

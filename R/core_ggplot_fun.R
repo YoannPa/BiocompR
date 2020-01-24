@@ -8,6 +8,7 @@ lapply(Imports, library, character.only = T)
 #' @param arg A \code{list}.
 #' @return A \code{logical}.
 #' @author Yoann Pageaud.
+#' @export
 #' @keywords internal
 
 is.elt_blank<-function(arg){
@@ -20,7 +21,9 @@ is.elt_blank<-function(arg){
 #' @param gg2.obj  A \code{gg} object with legends.
 #' @return A \code{gg} object only containing the legends of the plot.
 #' @author Yoann Pageaud.
+#' @export
 #' @keywords internal
+#' @references \href{https://github.com/tidyverse/ggplot2/wiki/Share-a-legend-between-two-ggplot2-graphs}{Share a legend between two ggplot2 graphs - Mara Averick}
 
 get.lgd<-function(gg2.obj){
   tmp <- ggplot_gtable(ggplot_build(gg2.obj))
@@ -71,6 +74,7 @@ ggdend <- function(df, orientation) {
 #' @param grid.thickness A \code{double} value for the thickness of the grid.
 #' @return A \code{gg} object of a basic triangle plot (a 'geom_tile()').
 #' @author Yoann Pageaud.
+#' @export
 #' @keywords internal
 
 basic.ggplot.tri<-function(melt.tri, grid.col, grid.thickness, lgd.title,
@@ -116,11 +120,11 @@ basic.ggplot.tri<-function(melt.tri, grid.col, grid.thickness, lgd.title,
 basic.sidebar<-function(data, palette){
   ggplot(data = data) +
     geom_tile(aes(x = Samples, y = .id, fill = Groups)) +
-    theme(legend.justification = c(0,1),
-          legend.position = c(0.5,0.5),
+    theme(legend.justification = 'left',
+          # legend.position = c(0.5,0.5),
           legend.text=element_text(size= 12),
           legend.title = element_text(size = 12, face = "bold"),
-          legend.margin = margin(-35,0,0,-35), #Seems to fit in grid
+          # legend.margin = margin(-35,0,0,-35), #Seems to fit in grid
           axis.text = element_text(size = 12, face = "bold"),
           panel.grid = element_blank(),
           plot.margin = margin(0,0,0,0),
@@ -139,8 +143,9 @@ basic.sidebar<-function(data, palette){
 #TODO: Write documentation!
 plot.col.sidebar<-function(
   sample.names, annot.grps, annot.pal, annot.pos, cor.order, split.annot = TRUE,
-  merge.lgd = FALSE, lgd.title = "Legends", axis.text.x, axis.text.y,
-  axis.ticks, axis.title.x, axis.title.y, set.x.title, set.y.title, dendro.pos){
+  merge.lgd = FALSE, right = FALSE, lgd.title = "Legends", axis.text.x, axis.text.y,
+  axis.ticks.x, axis.ticks.y, axis.title.x, axis.title.y, set.x.title,
+  set.y.title, dendro.pos){
   #Create list of groups
   groups<-lapply(lapply(annot.grps,as.factor),levels)
   #Create list of color tables
@@ -204,9 +209,12 @@ plot.col.sidebar<-function(
   #Modify base plot following its position
   if(annot.pos == "top"){
     col_sidebar<-col_sidebar +
-      theme(axis.text.x.top = axis.text.x,axis.ticks.x = axis.ticks) +
-      scale_y_discrete(expand = c(0,0)) +
+      theme(axis.text.x.top = axis.text.x, axis.ticks.x = axis.ticks.x) +
       scale_x_discrete(expand = c(0,0),position = "top") + xlab(set.x.title)
+    if(right){
+      col_sidebar <- col_sidebar +
+        scale_y_discrete(position = 'right', expand = c(0,0))
+    } else { col_sidebar <- col_sidebar + scale_y_discrete(expand = c(0,0)) }
     if(dendro.pos !="top"){
       col_sidebar<-col_sidebar +
         theme(axis.title.x = axis.title.x, axis.title.y = element_blank())
@@ -218,7 +226,7 @@ plot.col.sidebar<-function(
   } else if(annot.pos == "left"){
     col_sidebar<-col_sidebar +
       coord_flip() +
-      theme(axis.text.y = axis.text.y, axis.ticks.y = axis.ticks,
+      theme(axis.text.y = axis.text.y, axis.ticks.y = axis.ticks.y,
             axis.text.x.top = element_text(angle = 90,hjust = 0, vjust = 0.5)) +
       scale_x_discrete(expand = c(0,0)) +
       scale_y_discrete(expand = c(0,0), position = "right") +
@@ -268,8 +276,7 @@ plot.col.sidebar<-function(
 #'         unit.pmax() function.
 #' @author Yoann Pageaud.
 #' @export
-#' @examples
-#' @references
+#' @references \href{https://github.com/tidyverse/ggplot2/wiki/Align-two-plots-on-a-page}{Align two plots on a page - Mara Averick}
 
 resize.grobs<-function(ls.grobs, dimensions, start.unit, end.unit){
   #Get dimension units from the list of grobs to redimension

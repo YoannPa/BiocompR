@@ -63,7 +63,7 @@ fused.view(
   lgd.nbin = NULL,
   lgd.nbin1 = NULL,
   lgd.nbin2 = NULL,
-  lgd.height1 = 26,
+  lgd.height1 = 30,
   lgd.height2 = 1,
   lgd.width1 = 1,
   lgd.width2 = 30,

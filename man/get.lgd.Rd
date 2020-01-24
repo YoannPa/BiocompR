@@ -15,6 +15,9 @@ A \code{gg} object only containing the legends of the plot.
 \description{
 Extracts legend from a ggplot2 object.
 }
+\references{
+\href{https://github.com/tidyverse/ggplot2/wiki/Share-a-legend-between-two-ggplot2-graphs}{Share a legend between two ggplot2 graphs - Mara Averick}
+}
 \author{
 Yoann Pageaud.
 }

@@ -26,7 +26,7 @@ A \code{grob} list, all resized with their dimensions modified by the
 Resizes heights or widths of multiple grobs based on a given grob dimensions.
 }
 \references{
-
+\href{https://github.com/tidyverse/ggplot2/wiki/Align-two-plots-on-a-page}{Align two plots on a page - Mara Averick}
 }
 \author{
 Yoann Pageaud.
