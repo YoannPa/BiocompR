@@ -38,11 +38,16 @@ get.lgd<-function(gg2.obj){
 #'                    used to create the dendrogram.
 #' @param orientation A \code{character} specifying the orientation of the
 #'                    dendrogram. Possible values are "top" and "left".
+#' @param plot.type   A \code{character} specifying whether the plot is a
+#'                    correlation plot ('corrplot') or a heatmap ('heatmap').
+#'                    This parameter is used to know if a dendrogram displayed
+#'                    on the left of a plot should be vertically reversed (like
+#'                    in a correlation plot) or not (like in a heatmap).
 #' @return A \code{gg} plot of the dendrogram.
 #' @author Yoann Pageaud.
 #' @export
 
-ggdend <- function(df, orientation) {
+ggdend <- function(df, orientation, plot.type) {
   ddplot<- ggplot() +
     geom_segment(data = df, aes(x=x, y=y, xend=xend, yend=yend)) +
     theme(axis.title = element_blank(), axis.text = element_blank(),
@@ -60,8 +65,14 @@ ggdend <- function(df, orientation) {
     ddplot <- ddplot +
       theme(plot.margin=unit(c(0,0,0,0.1),"cm")) +
       scale_y_reverse(expand = c(0,0)) +
-      scale_x_reverse(expand = c(0,0)) +
       coord_flip()
+    if(plot.type == "corrplot"){
+      ddplot <- ddplot + scale_x_reverse(expand = c(0,0))
+    } else if(plot.type == "heatmap"){
+      ddplot <- ddplot + scale_x_continuous(expand = c(0,0))
+    } else {
+      stop("Unknown plot.type. Supported plot.type: c('corrplot', 'heatmap').")
+    }
   } else {stop("dendrogram's orientation value not supported by ggdend().")}
   return(ddplot)
 }
@@ -123,9 +134,9 @@ basic.sidebar<-function(data, palette){
     theme(legend.justification = 'left',
           # legend.position = c(0.5,0.5),
           legend.text=element_text(size= 12),
-          legend.title = element_text(size = 12, face = "bold"),
+          legend.title = element_text(size = 12),
           # legend.margin = margin(-35,0,0,-35), #Seems to fit in grid
-          axis.text = element_text(size = 12, face = "bold"),
+          axis.text = element_text(size = 12),
           panel.grid = element_blank(),
           plot.margin = margin(0,0,0,0),
           strip.background = element_blank(),
@@ -143,9 +154,9 @@ basic.sidebar<-function(data, palette){
 #TODO: Write documentation!
 plot.col.sidebar<-function(
   sample.names, annot.grps, annot.pal, annot.pos, cor.order, split.annot = TRUE,
-  merge.lgd = FALSE, right = FALSE, lgd.title = "Legends", axis.text.x, axis.text.y,
-  axis.ticks.x, axis.ticks.y, axis.title.x, axis.title.y, set.x.title,
-  set.y.title, dendro.pos){
+  merge.lgd = FALSE, right = FALSE, lgd.lab = "Legends", lgd.title = NULL,
+  axis.text.x, axis.text.y, axis.ticks.x, axis.ticks.y, axis.title.x,
+  axis.title.y, set.x.title, set.y.title, dendro.pos){
   #Create list of groups
   groups<-lapply(lapply(annot.grps,as.factor),levels)
   #Create list of color tables
@@ -206,10 +217,15 @@ plot.col.sidebar<-function(
   }
   #Plot color sidebars
   col_sidebar<-basic.sidebar(data = dframe.annot, palette = col_table$Cols)
+
+  if(!is.null(lgd.title)){ #Add legend parameters if some
+    col_sidebar<- col_sidebar + theme(legend.title = lgd.title)
+  }
   #Modify base plot following its position
   if(annot.pos == "top"){
     col_sidebar<-col_sidebar +
-      theme(axis.text.x.top = axis.text.x, axis.ticks.x = axis.ticks.x) +
+      theme(axis.text.x.top = axis.text.x, axis.text.y = axis.text.y,
+            axis.ticks.x = axis.ticks.x, axis.ticks.y = axis.ticks.y) +
       scale_x_discrete(expand = c(0,0),position = "top") + xlab(set.x.title)
     if(right){
       col_sidebar <- col_sidebar +
@@ -227,7 +243,7 @@ plot.col.sidebar<-function(
     col_sidebar<-col_sidebar +
       coord_flip() +
       theme(axis.text.y = axis.text.y, axis.ticks.y = axis.ticks.y,
-            axis.text.x.top = element_text(angle = 90,hjust = 0, vjust = 0.5)) +
+            axis.text.x.top = axis.text.x) +
       scale_x_discrete(expand = c(0,0)) +
       scale_y_discrete(expand = c(0,0), position = "right") +
       xlab(set.y.title)
@@ -243,7 +259,7 @@ plot.col.sidebar<-function(
   }
 
   if(merge.lgd){# Do not split legends
-    sidebar.lgd<-list(get.lgd(col_sidebar + labs(fill = lgd.title)))
+    sidebar.lgd<-list(get.lgd(col_sidebar + labs(fill = lgd.lab)))
   } else {# Split legends and return a list of legends
     if(!split.annot){
       if(annot.pos == "top"){

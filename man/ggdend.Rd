@@ -4,7 +4,7 @@
 \alias{ggdend}
 \title{Creates a dendogram in ggplot2.}
 \usage{
-ggdend(df, orientation)
+ggdend(df, orientation, plot.type)
 }
 \arguments{
 \item{df}{A \code{data.frame} containing variables and values to be
@@ -12,6 +12,12 @@ used to create the dendrogram.}
 
 \item{orientation}{A \code{character} specifying the orientation of the
 dendrogram. Possible values are "top" and "left".}
+
+\item{plot.type}{A \code{character} specifying whether the plot is a
+correlation plot ('corrplot') or a heatmap ('heatmap').
+This parameter is used to know if a dendrogram displayed
+on the left of a plot should be vertically reversed (like
+in a correlation plot) or not (like in a heatmap).}
 }
 \value{
 A \code{gg} plot of the dendrogram.

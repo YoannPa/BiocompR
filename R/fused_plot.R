@@ -122,7 +122,8 @@ fused.view<-function(
   if(dendro.pos != "none"){
     dendrogram<-as.dendrogram(hierarchy.clust)
     ddgr_dat<-dendro_data(dendrogram) #Dendrogram data
-    ddgr_seg <- ggdend(ddgr_dat$segments,dendro.pos) #Get dendrogram segments
+    ddgr_seg <- ggdend( #Get dendrogram segments
+      df = ddgr_dat$segments, orientation = dendro.pos, plot.type = 'corrplot')
   }
   #Re-order rows and columns
   upper.mat<-upper.mat[correlation.order,correlation.order]
