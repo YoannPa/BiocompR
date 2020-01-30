@@ -13,71 +13,86 @@ gg2heatmap(
   dendrograms = TRUE,
   heatmap.pal = c("steelblue", "gray95", "darkorange"),
   annot.grps = list(Groups = seq(ncol(m))),
-  annot.pal = rainbow(n = ncol(m))
+  annot.pal = rainbow(n = ncol(m)),
+  imputation.grps = NULL,
+  ncores = 1
 )
 }
 \arguments{
 \item{m}{A \code{matrix}.}
 
-\item{na.handle}{A \code{character} to specify how missing values should be
-handled (Default: na.handle = 'remove';
+\item{na.handle}{A \code{character} to specify how missing values
+should be handled (Default: na.handle = 'remove';
 Supported: na.handle = c('keep','impute','remove')).}
 
-\item{dist.method}{A \code{character} vector to specify the distance methods
-to be used on the matrix rows and columns.
+\item{dist.method}{A \code{character} vector to specify the distance
+methods to be used on the matrix rows and columns.
 \itemize{
- \item{If the vector is of length 1: the given method will
-       be applied on rows and columns of the matrix.}
- \item{If the vector is of length 2: the first method will
-       be applied on matrix rows, and the second method
-       will be applied on matrix columns.}
+ \item{If the vector is of length 1: the given method
+       will be applied on rows and columns of the
+       matrix.}
+ \item{If the vector is of length 2: the first method
+       will be applied on matrix rows, and the second
+       method will be applied on matrix columns.}
 }
 (Default: dist.method = 'manhattan';
 Supported: dist.method = c('euclidean', 'maximum',
-'manhattan', 'canberra', 'binary', 'minkowski', 'none')).}
+'manhattan', 'canberra', 'binary', 'minkowski',
+'none')).}
 
 \item{rank.fun}{A \code{character} to specify a function to apply on
-matrix rows to order them on the final heatmap.
-\itemize{
- \item{If rank.fun = NULL the order of rows in the matrix
-       will be kept.}
- \item{If a function is given, 'dist.method' must be set
- to 'none' for the method to apply on rows.}
-}
-(Default: rank.fun = NULL; Supported: rank.fun = 'sd').}
+matrix rows to order them on the final heatmap. If
+rank.fun = NULL the order of rows in the matrix will
+be kept (Default: rank.fun = NULL;
+Supported: rank.fun = 'sd').}
 
-\item{top.rows}{An \code{integer} to specify the number of top rows you
-want to display on the heatmap. If an integer is given,
-'dist.method' must be set to 'none' for the method to
-apply on rows (Default: top.rows = NULL).}
+\item{top.rows}{An \code{integer} to specify the number of top rows
+you want to display on the heatmap
+(Default: top.rows = NULL).}
 
 \item{dendrograms}{A \code{logical} vector to specify whether dendrograms
 should be plotted with the heatmap.
 \itemize{
  \item{If dendrograms = TRUE: both dendrograms on row
        and columns of the matrix will be plotted.}
- \item{If dendrograms = FALSE: both dendrograms on rows
-       and columns of the matrix will NOT be plotted.}
+ \item{If dendrograms = FALSE: both dendrograms on
+       rows and columns of the matrix will NOT be
+       plotted.}
  \item{If the vector is of length 2: the first logical
-       will apply for rows, and the second logical will
-       apply for columns.}
+       will apply for rows, and the second logical
+       will apply for columns.}
+ \item{If 'rank.fun' and 'top.rows' are not NULL, and
+       dendrograms on rows set to TRUE, the ranking of
+       rows and the selection of the top ones will be
+       made before the computation of dendrograms.}
 }}
 
-\item{heatmap.pal}{A \code{character} vector to be used as a color palette
-for the heatmap.}
+\item{heatmap.pal}{A \code{character} vector to be used as a color
+palette for the heatmap.}
 
 \item{annot.grps}{A \code{list} of vectors of groups to which variables
 belongs for the annotation sidebars. 'Vectors' lengths
 have to match the number of variables.}
 
-\item{annot.pal}{A \code{list} of vectors to be used as color palettes for
-the annotation sidebars. The length of vectors has to
-match the number of levels of vectors listed in
-'annot.grps'. If a list is provided, its length must match
-the length of the list provided to 'annot.grps'.}
+\item{annot.pal}{A \code{list} of vectors to be used as color palettes
+for the annotation sidebars. The length of vectors has
+to match the number of levels of vectors listed in
+'annot.grps'. If a list is provided, its length must
+match the length of the list provided to 'annot.grps'.}
+
+\item{imputation.grps}{A \code{character} vector defining groups to which
+columns of the matrix belong. These groups are use to
+make group-wise imputation of missing values between
+columns. The vector has to be of the same length than
+the number of columns in the matrix
+(Default: imputation.grps = NULL).}
+
+\item{ncores}{An \code{integer} to specify the number of
+cores/threads to be used to parallel-compute distances
+for dendrograms.}
 }
 \value{
-A \code{grob} oh a heatmap plotted with ggplot2.
+A \code{grob} of a heatmap plotted with ggplot2.
 }
 \description{
 WARNING: Unstable! Creates a custom heatmap with dendrograms and annotations.

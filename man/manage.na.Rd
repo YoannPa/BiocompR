@@ -28,6 +28,9 @@ samples belong. Order of groups in the vector has to match the
 order of column names in data to properly associate samples and
 groups.}
 }
+\value{
+A \code{matrix}.
+}
 \description{
 Keeps, removes or imputes missing values in a matrix or a data.frame based on
 sample groups.

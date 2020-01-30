@@ -1,66 +1,75 @@
 
 #' WARNING: Unstable! Creates a custom heatmap with dendrograms and annotations.
 #'
-#' @param m A \code{matrix}.
-#' @param na.handle A \code{character} to specify how missing values should be
-#'                  handled (Default: na.handle = 'remove';
-#'                  Supported: na.handle = c('keep','impute','remove')).
-#' @param dist.method A \code{character} vector to specify the distance methods
-#'                    to be used on the matrix rows and columns.
-#'                    \itemize{
-#'                     \item{If the vector is of length 1: the given method will
-#'                           be applied on rows and columns of the matrix.}
-#'                     \item{If the vector is of length 2: the first method will
-#'                           be applied on matrix rows, and the second method
-#'                           will be applied on matrix columns.}
-#'                    }
-#'                    (Default: dist.method = 'manhattan';
-#'                    Supported: dist.method = c('euclidean', 'maximum',
-#'                    'manhattan', 'canberra', 'binary', 'minkowski', 'none')).
-#' @param rank.fun    A \code{character} to specify a function to apply on
-#'                    matrix rows to order them on the final heatmap.
-#'                    \itemize{
-#'                     \item{If rank.fun = NULL the order of rows in the matrix
-#'                           will be kept.}
-#'                     \item{If a function is given, 'dist.method' must be set
-#'                     to 'none' for the method to apply on rows.}
-#'                    }
-#'                    (Default: rank.fun = NULL; Supported: rank.fun = 'sd').
-#' @param top.rows    An \code{integer} to specify the number of top rows you
-#'                    want to display on the heatmap. If an integer is given,
-#'                    'dist.method' must be set to 'none' for the method to
-#'                    apply on rows (Default: top.rows = NULL).
-#' @param dendrograms A \code{logical} vector to specify whether dendrograms
-#'                    should be plotted with the heatmap.
-#'                    \itemize{
-#'                     \item{If dendrograms = TRUE: both dendrograms on row
-#'                           and columns of the matrix will be plotted.}
-#'                     \item{If dendrograms = FALSE: both dendrograms on rows
-#'                           and columns of the matrix will NOT be plotted.}
-#'                     \item{If the vector is of length 2: the first logical
-#'                           will apply for rows, and the second logical will
-#'                           apply for columns.}
-#'                    }
-#' @param heatmap.pal A \code{character} vector to be used as a color palette
-#'                    for the heatmap.
-#' @param annot.grps  A \code{list} of vectors of groups to which variables
-#'                    belongs for the annotation sidebars. 'Vectors' lengths
-#'                    have to match the number of variables.
-#' @param annot.pal   A \code{list} of vectors to be used as color palettes for
-#'                    the annotation sidebars. The length of vectors has to
-#'                    match the number of levels of vectors listed in
-#'                    'annot.grps'. If a list is provided, its length must match
-#'                    the length of the list provided to 'annot.grps'.
-#' @return A \code{grob} oh a heatmap plotted with ggplot2.
+#' @param m               A \code{matrix}.
+#' @param na.handle       A \code{character} to specify how missing values
+#'                        should be handled (Default: na.handle = 'remove';
+#'                        Supported: na.handle = c('keep','impute','remove')).
+#' @param dist.method     A \code{character} vector to specify the distance
+#'                        methods to be used on the matrix rows and columns.
+#'                        \itemize{
+#'                         \item{If the vector is of length 1: the given method
+#'                               will be applied on rows and columns of the
+#'                               matrix.}
+#'                         \item{If the vector is of length 2: the first method
+#'                               will be applied on matrix rows, and the second
+#'                               method will be applied on matrix columns.}
+#'                        }
+#'                        (Default: dist.method = 'manhattan';
+#'                        Supported: dist.method = c('euclidean', 'maximum',
+#'                        'manhattan', 'canberra', 'binary', 'minkowski',
+#'                        'none')).
+#' @param rank.fun        A \code{character} to specify a function to apply on
+#'                        matrix rows to order them on the final heatmap. If
+#'                        rank.fun = NULL the order of rows in the matrix will
+#'                        be kept (Default: rank.fun = NULL;
+#'                        Supported: rank.fun = 'sd').
+#' @param top.rows        An \code{integer} to specify the number of top rows
+#'                        you want to display on the heatmap
+#'                        (Default: top.rows = NULL).
+#' @param dendrograms     A \code{logical} vector to specify whether dendrograms
+#'                        should be plotted with the heatmap.
+#'                        \itemize{
+#'                         \item{If dendrograms = TRUE: both dendrograms on row
+#'                               and columns of the matrix will be plotted.}
+#'                         \item{If dendrograms = FALSE: both dendrograms on
+#'                               rows and columns of the matrix will NOT be
+#'                               plotted.}
+#'                         \item{If the vector is of length 2: the first logical
+#'                               will apply for rows, and the second logical
+#'                               will apply for columns.}
+#'                         \item{If 'rank.fun' and 'top.rows' are not NULL, and
+#'                               dendrograms on rows set to TRUE, the ranking of
+#'                               rows and the selection of the top ones will be
+#'                               made before the computation of dendrograms.}
+#'                        }
+#' @param heatmap.pal     A \code{character} vector to be used as a color
+#'                        palette for the heatmap.
+#' @param annot.grps      A \code{list} of vectors of groups to which variables
+#'                        belongs for the annotation sidebars. 'Vectors' lengths
+#'                        have to match the number of variables.
+#' @param annot.pal       A \code{list} of vectors to be used as color palettes
+#'                        for the annotation sidebars. The length of vectors has
+#'                        to match the number of levels of vectors listed in
+#'                        'annot.grps'. If a list is provided, its length must
+#'                        match the length of the list provided to 'annot.grps'.
+#' @param imputation.grps A \code{character} vector defining groups to which
+#'                        columns of the matrix belong. These groups are use to
+#'                        make group-wise imputation of missing values between
+#'                        columns. The vector has to be of the same length than
+#'                        the number of columns in the matrix
+#'                        (Default: imputation.grps = NULL).
+#' @param ncores          An \code{integer} to specify the number of
+#'                        cores/threads to be used to parallel-compute distances
+#'                        for dendrograms.
+#' @return A \code{grob} of a heatmap plotted with ggplot2.
 #' @author Yoann Pageaud.
 #' @export
-#' @examples
 
 #TODO: Support na.handle
 #TODO: Support tuple for dist.method
 #TODO: Support rank.fun
 #TODO: Support top.rows
-#TODO: Check dendrograms
 #TODO: Support annot.grps
 #TODO: Support annot.pal
 #TODO: Add some data in return
@@ -68,92 +77,108 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
                      rank.fun = NULL, top.rows = NULL, dendrograms = TRUE,
                      heatmap.pal = c("steelblue", "gray95", "darkorange"),
                      annot.grps = list("Groups" = seq(ncol(m))),
-                     annot.pal = rainbow(n = ncol(m))){
-  ##_Handle NAs_################################################################
-  m<-manage.na(data = m, method = na.handle, groups = sample_tbl$Cell.types)
+                     annot.pal = rainbow(n = ncol(m)), imputation.grps = NULL,
+                     ncores = 1){
+  #Check m is a matrix
+  if(!is.matrix(m)){ stop("m must be a matrix.") }
+  #Check if na.handle method  supported
+  na.method <- c('keep','impute','remove')
+  if(!na.handle %in% na.method){ stop("na.handle method not supported.") }
+  #Check dimensions of parameters
+  if(length(dist.method) == 1){
+    method.rows<-dist.method
+    method.cols<-dist.method
+  } else if(length(dist.method) == 2){
+    method.rows<-dist.method[1]
+    method.cols<-dist.method[2]
+  } else { stop("'dist.method' length > 2. Too many values.") }
+
+  methods.ls <- c(
+    'euclidean','maximum','manhattan','canberra','binary','minkowski','none')
+  if(!method.rows %in% methods.ls){
+    stop("Unknown method for distance computation on rows.")
+  }
+  if(!method.cols %in% methods.ls){
+    stop("Unknown method for distance computation on columns.")
+  }
+
+  #Check if rank.fun is a supported function
+  rank.method<-c("sd")
+  if(!is.null(rank.fun)){
+    if(!rank.fun %in% rank.method){ stop("ranking function not supported.") }
+  }
+  #Check if top.rows is an integer
+  if(!is.null(top.rows)){
+    if(is.numeric(top.rows)){
+      top.rows <- as.integer(top.rows)
+      if(top.rows < 1){ stop("'top.rows' must be a non-zero positive integer.") }
+    } else { stop("'top.rows' must be a non-zero positive integer.") }
+  }
+
+  if(length(dendrograms) == 1){
+    dd.rows<-dendrograms
+    dd.cols<-dendrograms
+  } else if(length(dendrograms) == 2){
+    dd.rows<-dendrograms[1]
+    dd.cols<-dendrograms[2]
+  } else { stop("'dendrograms' length > 2. Too many values.") }
+
+  #Check annotations groups and palettes matching
+  check.annotations(data = m, annot.grps = annot.grps, annot.pal = annot.pal)
+
+  #Handle NAs
+  m<-manage.na(data = m, method = na.handle, groups = imputation.grps)
+
+  #Apply ranking function if any function defined
+  if(!is.null(rank.fun)){#TODO: improve this part to support more function
+    m <- m[order(apply(m, 1, sd, na.rm = T), decreasing = TRUE), , drop = FALSE]
+  }
+  #Subset top rows if any value defined
+  if(!is.null(top.rows)){
+    m <- head(x = m, n = top.rows)
+  }
+
   ##_Create Dendrogram_#########################################################
   #Remove NAs if some for dendrogram matrix
   dend_mat<- m[complete.cases(m),]
 
-  if(length(dendrograms) == 1){
-    if(dendrograms){
-      if(length(dist.method) == 1 & dist.method != 'none'){
-        #Create Rows Dendrogram
-        row_dist<-parDist(dend_mat, method = dist.method, threads = 7)
-        row_hclust<-hclust(row_dist)
-        rm(row_dist)
-        rowclust<-as.dendrogram(row_hclust)
-        #Create Columns Dendrogram
-        ddgr <- as.dendrogram(hclust(
-          parDist(t(dend_mat), method = dist.method, threads = 7)))
-      } else if(length(dist.method) == 2 & !('none' %in% dist.method)){
-        #Create Rows Dendrogram
-        row_dist<-parDist(dend_mat, method = dist.method[1], threads = 7)
-        row_hclust<-hclust(row_dist)
-        rm(row_dist)
-        rowclust<-as.dendrogram(row_hclust)
-        #Create Columns Dendrogram
-        ddgr <- as.dendrogram(hclust(
-          parDist(t(dend_mat), method = dist.method[2], threads = 7)))
-      } else { stop("'dist.method' length > 2. Too many values.") }
-
-      #Get dendrogram data
-      ddgr_dat<-dendro_data(ddgr)
-      #Get dendrogram segments and order matrix rows and/or columns
-      ddgr_seg_row <- ggdend(df = dendro_data(rowclust)$segments,
-                             orientation = "left", plot.type = 'heatmap')
-      ddgr_seg_col <- ggdend(
-        df = ddgr_dat$segments, orientation = "top", plot.type = 'heatmap')
-
-      row.order<-order.dendrogram(rowclust)
-      column.order<-order.dendrogram(ddgr)
-
-      dframe<-m[row.order, column.order, drop = FALSE]
-    }
-  } else if(length(dendrograms) == 2){
-    if(dendrograms[1]){
-      if(length(dist.method) == 1 & dist.method != 'none'){
-        #Create Rows Dendrogram
-        row_dist<-parDist(dend_mat, method = dist.method, threads = 7)
-      } else if(length(dist.method) == 2 & !('none' %in% dist.method)){
-        #Create Rows Dendrogram
-        row_dist<-parDist(dend_mat, method = dist.method[1], threads = 7)
-      } else { stop("'dist.method' length > 2. Too many values.") }
-
-      row_hclust<-hclust(row_dist)
-      rm(row_dist)
-      rowclust<-as.dendrogram(row_hclust)
-      #Get dendrogram segments and order matrix rows and/or columns
-      ddgr_seg_row <- ggdend(df = dendro_data(rowclust)$segments,
-                             orientation = "left", plot.type = 'heatmap')
-      row.order<-order.dendrogram(rowclust)
-    }
-    if(dendrograms[2]){
-      if(length(dist.method) == 1 & dist.method != 'none'){
-        #Create Columns Dendrogram
-        ddgr <- as.dendrogram(hclust(
-          parDist(t(dend_mat), method = dist.method, threads = 7)))
-      } else if(length(dist.method) == 2 & !('none' %in% dist.method)){
-        #Create Columns Dendrogram
-        ddgr <- as.dendrogram(hclust(
-          parDist(t(dend_mat), method = dist.method[2], threads = 7)))
-      } else { stop("'dist.method' length > 2. Too many values.") }
-
-      #Get dendrogram data
-      ddgr_dat<-dendro_data(ddgr)
-      #Get dendrogram segments and order matrix rows and/or columns
-      ddgr_seg_col <- ggdend(
-        df = ddgr_dat$segments, orientation = "top", plot.type = 'heatmap')
-      column.order<-order.dendrogram(ddgr)
-    }
-
-    if(all(dendrograms == TRUE)){
-      dframe<-m[row.order, column.order, drop = FALSE]
-    } else if(dendrograms[1]){ dframe<-m[row.order,, drop = FALSE]
-    } else if(dendrograms[2]){ dframe<-m[, column.order, drop = FALSE] }
-  } else {
-    stop("'dendrograms' length > 2. Too many values.")
+  if(dd.rows & method.rows != 'none'){
+    #Create Rows Dendrogram
+    row_dist<-parDist(dend_mat, method = method.rows, threads = ncores)
+    row_hclust<-hclust(row_dist)
+    rm(row_dist)
+    rowclust<-as.dendrogram(row_hclust)
+    #Get dendrogram segments and order matrix rows
+    ddgr_seg_row <- ggdend(df = dendro_data(rowclust)$segments,
+                           orientation = "left", plot.type = 'heatmap')
+    row.order<-order.dendrogram(rowclust)
+  } else if(dd.rows & method.rows == 'none'){
+    stop("Cannot plot rows dendrogram with method.rows = 'none'.")
   }
+
+  if(dd.cols & method.cols != 'none'){
+    #Create Columns Dendrogram
+    ddgr <- as.dendrogram(hclust(
+      parDist(t(dend_mat), method = method.cols, threads = ncores)))
+    #Get dendrogram data
+    ddgr_dat<-dendro_data(ddgr)
+    #Get dendrogram segments and order matrix columns
+    ddgr_seg_col <- ggdend(
+      df = ddgr_dat$segments, orientation = "top", plot.type = 'heatmap')
+    column.order<-order.dendrogram(ddgr)
+  } else if(dd.cols & method.cols == 'none'){
+    stop("Cannot plot columns dendrogram with method.cols = 'none'.")
+  }
+
+  #Reorder rows and columns matrix following dendrograms orders
+  if(dd.rows & method.rows != 'none' & dd.cols & method.cols != 'none'){
+    dframe <- m[row.order, column.order, drop = FALSE]
+  } else if(dd.rows & method.rows != 'none' & is.null(rank.fun) & !dd.cols){
+    dframe <- m[row.order, , drop = FALSE]
+  } else if(!dd.rows & dd.cols & method.cols != 'none'){
+    dframe <- m[, column.order, drop = FALSE]
+  }
+
   melted_mat <- melt(dframe) #Melt Matrix into a dataframe
   colnames(melted_mat)[3]<-"Methylation"
 
@@ -183,18 +208,17 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
     xlab("Samples")
 
   ##_Create Color Side Bar_#####################################################
-  Samples<-colnames(dframe)
-  #Create Genotypes column
-  # Genotypes<-sample_tbl$Short.genotypes[column.order]
-  Genotypes<-sample_tbl$Geno.short[column.order]
-  # Genotypes<-factor(Genotypes,levels = color_table$Genotypes)
-  Genotypes<-factor(Genotypes,levels = color_tbl$Genotypes)
-  Genotype_table<-data.frame("Samples" = factor(Samples,levels = Samples),
-                             "Genotypes" = Genotypes,row.names = NULL)
+  # Samples<-colnames(dframe)
+  # #Create Genotypes column
+  # # Genotypes<-sample_tbl$Short.genotypes[column.order]
+  # Genotypes<-sample_tbl$Geno.short[column.order]
+  # # Genotypes<-factor(Genotypes,levels = color_table$Genotypes)
+  # Genotypes<-factor(Genotypes,levels = color_tbl$Genotypes)
+  # Genotype_table<-data.frame("Samples" = factor(Samples,levels = Samples),
+  #                            "Genotypes" = Genotypes,row.names = NULL)
 
   col_sidebar<-plot.col.sidebar(
-    sample.names = Genotype_table$Samples,
-    annot.grps = list("Genotypes" = Genotypes),
+    sample.names = colnames(m[, column.order]), annot.grps = annot.grps,
     annot.pal = list(color_tbl$Colors), annot.pos = 'top',
     cor.order = seq_along(colnames(dframe)), split.annot = FALSE,merge.lgd=TRUE,
     right = TRUE, lgd.lab = "Genotypes", axis.text.x = element_blank(),

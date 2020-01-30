@@ -19,10 +19,9 @@
 #'               samples belong. Order of groups in the vector has to match the
 #'               order of column names in data to properly associate samples and
 #'               groups.
-#' @value A \code{matrix}.
+#' @return A \code{matrix}.
 #' @author Yoann Pageaud.
 #' @export
-#' @examples
 #' @references
 #' @keywords internal
 
@@ -41,7 +40,8 @@ manage.na<-function(data, method = "remove", groups){
         sample_grps<-unique(groups)
 
         #Get median by cell type/line
-        apply(X = head(DMRs), MARGIN = 1, FUN = function(row){
+        #TODO: Make parallel apply
+        apply(X = data, MARGIN = 1, FUN = function(row){
           if(anyNA(data[row,])){
             row_vec<-sapply(sample_grps, function(grp){
               #List sample names matching the group

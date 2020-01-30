@@ -3,6 +3,59 @@
 Imports = c("ggplot2","data.table")
 lapply(Imports, library, character.only = T)
 
+#' Checks matching between annotation groups and annotation palettes.
+#'
+#' @param data       A \code{matrix} or a \code{data.frame} with column names.
+#' @param annot.grps A \code{list} of vectors of groups to which variables
+#'                   belongs for the annotation sidebars. Vectors' lengths have
+#'                   to match the number of variables.
+#' @param annot.pal  A \code{vector} or a list of vectors containing colors as
+#'                   characters for the annotation sidebars. The length of
+#'                   vectors has to match the number of levels of vectors listed
+#'                   in 'annot.grps'. If a list is provided, its length must
+#'                   match the length of the list provided to 'annot.grps'.
+#' @return An error message if something goes wrong during annotations checks.
+#' @author Yoann Pageaud.
+#' @export
+#' @references
+#' @keywords internal
+
+check.annotations<-function(data, annot.grps, annot.pal){
+  #Groups checking
+  if(any(unlist(lapply(annot.grps,length))!= ncol(data))){
+    stop("samples are not all assigned to a group.")
+  } else{#Print groups values
+    invisible(lapply(seq_along(annot.grps), function(i){
+      cat(paste0(names(annot.grps)[i],": ",paste(unique(annot.grps[[i]]),
+                                                 collapse=", "),".\n"))
+    }))
+  }
+  #Color checking
+  if(is.list(annot.pal)){
+    if(length(annot.grps) == length(annot.pal)){
+      invisible(lapply(seq_along(annot.pal), function(i){
+        if(length(annot.pal[[i]])!=length(levels(as.factor(annot.grps[[i]])))){
+          stop(paste0("The length of annotation '",names(annot.grps)[i],
+                      "' levels do not match the length of the corresponding ",
+                      "palette."))
+        }
+      }))
+    } else {
+      stop("The number of palettes does not match the number of annotations provided.")
+    }
+  } else if(is.vector(annot.pal)){ #if a single palette is provided
+    invisible(lapply(seq_along(annot.grps), function(i){
+      if(length(levels(as.factor(annot.grps[[i]]))) != length(annot.pal)){
+        stop(paste0("The length of annotation '",names(annot.grps)[i],
+                    "' levels do not match the length of the corresponding ",
+                    "palette."))
+      }
+    }))
+  } else { #If not a list or a vector
+    stop("Unknown type for 'annot.pal'. 'annot.pal' should be either a list or a vector.")
+  }
+}
+
 #' Checks if a list's attributes has for class 'element_blank'.
 #'
 #' @param arg A \code{list}.
@@ -159,7 +212,9 @@ plot.col.sidebar<-function(
   axis.title.y, set.x.title, set.y.title, dendro.pos){
   #Create list of groups
   groups<-lapply(lapply(annot.grps,as.factor),levels)
+
   #Create list of color tables
+  #TODO: try to merge with check.annotations()
   if(is.list(annot.pal)) { #If a list of palettes is provided
     if(length(groups) == length(annot.pal)){ #if annotations match palettes
       col_table<-lapply(seq_along(groups), function(i){
@@ -174,20 +229,21 @@ plot.col.sidebar<-function(
     } else {
       stop("The number of annotations does not match the number of palettes provided.")
     }
-  } else {
-    if(is.vector(annot.pal)){ #if a single palette is provided
-      col_table<-lapply(seq_along(groups), function(i){
-        if(length(groups[[i]]) == length(annot.pal)){ #if groups match colors
-          data.frame("Grps"=groups[[i]],"Cols"=annot.pal)
-        } else {
-          stop(paste0("The length of annotation '",names(groups)[i],
-                      "' levels do not match the length of the corresponding ",
-                      "palette."))}
-      })
-    } else { #If not a list or a vector
-      stop("Unknown type for 'annot.pal'. 'annot.pal' should be either a list or a vector.")
-    }
+  } else if(is.vector(annot.pal)){ #if a single palette is provided
+    col_table<-lapply(seq_along(groups), function(i){
+      if(length(groups[[i]]) == length(annot.pal)){ #if groups match colors
+        data.frame("Grps"=groups[[i]],"Cols"=annot.pal)
+      } else {
+        stop(paste0("The length of annotation '",names(groups)[i],
+                    "' levels do not match the length of the corresponding ",
+                    "palette."))}
+    })
+  } else { #If not a list or a vector
+    stop("Unknown type for 'annot.pal'. 'annot.pal' should be either a list or a vector.")
   }
+
+
+
   #Create list of annotation data.frames
   dframe.annot<-lapply(annot.grps, function(i){
     data.frame("Samples" = sample.names,"Groups" = i)

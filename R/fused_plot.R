@@ -589,41 +589,10 @@ fused.plot<-function(data,ncores,
                      "none")){
     cat(paste("Apply",p.adjust,"multiple testing adjustment.\n"))
   } else { stop("multiple testing adjustment method is not supported.") }
-  #Groups checking
-  if(any(unlist(lapply(annot.grps,length))!= ncol(data))){
-    stop("samples are not all assigned to a group.")
-  } else{
-    invisible(lapply(seq_along(annot.grps), function(i){
-      cat(paste0(names(annot.grps)[i],": ",paste(unique(annot.grps[[i]]),
-                                                 collapse=", "),".\n"))
-    }))
-  }
-  #Color checking
-  if(is.list(annot.pal)){
-    if(length(annot.grps) == length(annot.pal)){
-      invisible(lapply(seq_along(annot.pal), function(i){
-        if(length(annot.pal[[i]])!=length(levels(as.factor(annot.grps[[i]])))){
-          stop(paste0("The length of annotation '",names(annot.grps)[i],
-                      "' levels do not match the length of the corresponding ",
-                      "palette."))
-        }
-      }))
-    } else {
-      stop("The number of palettes does not match the number of annotations provided.")
-    }
-  } else {
-    if(is.vector(annot.pal)){ #if a single palette is provided
-      invisible(lapply(seq_along(annot.grps), function(i){
-        if(length(levels(as.factor(annot.grps[[i]]))) != length(annot.pal)){
-          stop(paste0("The length of annotation '",names(annot.grps)[i],
-                      "' levels do not match the length of the corresponding ",
-                      "palette."))
-        }
-      }))
-    } else { #If not a list or a vector
-      stop("Unknown type for 'annot.pal'. 'annot.pal' should be either a list or a vector.")
-    }
-  }
+
+  #Groups and palettes matching
+  check.annotations(data = data, annot.grps = annot.grps, annot.pal = annot.pal)
+
   #Position annotation
   if(!(annot.pos %in% c("top","left","both"))){
     stop("annotation sidebar cannot be put here.")
