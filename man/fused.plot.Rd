@@ -20,6 +20,7 @@ fused.plot(
   annot.pal = rainbow(n = ncol(data)),
   annot.pos = "top",
   annot.size = 0,
+  annot.text = NULL,
   annot.lgd.merge = FALSE,
   annot.split = TRUE,
   dendro.pos = "none",

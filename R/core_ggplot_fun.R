@@ -208,7 +208,8 @@ basic.sidebar<-function(data, palette){
 plot.col.sidebar<-function(
   sample.names, annot.grps, annot.pal, annot.pos, cor.order, split.annot = TRUE,
   merge.lgd = FALSE, right = FALSE, lgd.lab = "Legends", lgd.title = NULL,
-  axis.text.x, axis.text.y, axis.ticks.x, axis.ticks.y, axis.title.x,
+  axis.text.x = element_text(size = 12), axis.text.y = element_text(size = 12),
+  axis.ticks.x, axis.ticks.y, axis.title.x,
   axis.title.y, set.x.title, set.y.title, dendro.pos){
   #Create list of groups
   groups<-lapply(lapply(annot.grps,as.factor),levels)

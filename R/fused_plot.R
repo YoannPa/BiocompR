@@ -65,7 +65,8 @@ fused.view<-function(
   order.select, order.method, hclust.method,
   correlation.order,
   annot.grps = list("Groups"=seq(ncol(data))),annot.pal=rainbow(n = ncol(data)),
-  annot.pos = 'top', annot.size = 0,annot.lgd.merge = FALSE, annot.split = TRUE,
+  annot.pos = 'top', annot.size = 0, annot.text = NULL, annot.lgd.merge = FALSE,
+  annot.split = TRUE,
   dendro.pos = 'none', dendro.size = 0,
   grid.col = "grey", grid.thickness = 0.5,
   axis.title = element_blank(), axis.title.x = element_blank(),
@@ -211,12 +212,24 @@ fused.view<-function(
   col_sidebar<-plot.col.sidebar(
     sample.names = sample.names ,annot.grps = annot.grps,annot.pal = annot.pal,
     annot.pos = annot.pos, cor.order = correlation.order,
-    axis.text.x = axis.text.x, axis.text.y = axis.text.y,
     axis.ticks.x = axis.ticks, axis.ticks.y = axis.ticks,
     axis.title.x = axis.title.x, axis.title.y = axis.title.y,
     set.x.title = set.x.title, set.y.title = set.y.title,
     dendro.pos = dendro.pos, merge.lgd = annot.lgd.merge,
     split.annot = annot.split)
+  if(annot.pos == "top"){
+    if(is.null(annot.text)){
+      annot.text <- element_text(size = 12, face = 'bold', hjust = 1, vjust=0.5)
+    }
+    col_sidebar$sidebar <- col_sidebar$sidebar +
+      theme(axis.text.x.top = axis.text.x, axis.text.y = annot.text)
+  } else if(annot.pos == "left"){
+    if(is.null(annot.text)){
+      annot.text <- element_text(size=12,angle=90,face='bold',hjust=0,vjust=0.5)
+    }
+    col_sidebar$sidebar <- col_sidebar$sidebar +
+      theme(axis.text.x.top = annot.text, axis.text.y = axis.text.y)
+  }
   #Remove all legends
   upper.ggplot.nolgd<-upper.ggplot + theme(legend.position = "none")
   lower.ggplot.nolgd<-lower.ggplot + theme(legend.position = "none")
@@ -497,6 +510,8 @@ fused.view<-function(
 #' @author Yoann Pageaud.
 #' @export
 
+#TODO: Simplify the annot.text.x and annot.text.y arguments to make specific to
+# annotation position.
 fused.plot<-function(data,ncores,
                      upper.comp,upper.value,lower.comp,lower.value,
                      na.rm = 'pairwise', order.method, order.select,
@@ -504,6 +519,7 @@ fused.plot<-function(data,ncores,
                      annot.grps = list("Groups" = seq(ncol(data))),
                      annot.pal = rainbow(n = ncol(data)),
                      annot.pos = 'top', annot.size = 0,
+                     annot.text = NULL,
                      annot.lgd.merge = FALSE, annot.split = TRUE,
                      dendro.pos = 'none', dendro.size = 0,
                      grid.col = "grey",grid.thickness = 0.5,
@@ -728,11 +744,11 @@ fused.plot<-function(data,ncores,
     order.select = order.select, order.method = order.method,
     hclust.method = hclust.method, correlation.order = correlation.order,
     annot.grps = annot.grps, annot.pal = annot.pal, annot.pos = annot.pos,
-    annot.size = annot.size, annot.lgd.merge = annot.lgd.merge,
+    annot.size = annot.size, annot.text = annot.text, annot.lgd.merge = annot.lgd.merge,
     annot.split = annot.split, dendro.pos = dendro.pos, dendro.size=dendro.size,
     grid.col = grid.col, grid.thickness = grid.thickness,
     axis.title = axis.title, axis.title.x = axis.title.x,
-    axis.title.y = axis.title.y,axis.text = axis.text, axis.text.x = axis.text.x,
+    axis.title.y = axis.title.y, axis.text = axis.text, axis.text.x=axis.text.x,
     axis.text.y = axis.text.y,axis.ticks = axis.ticks,set.x.title = set.x.title,
     set.y.title = set.y.title, set.lgd1.title = set.lgd1.title,
     set.lgd2.title = set.lgd2.title,
