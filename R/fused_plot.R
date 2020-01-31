@@ -510,8 +510,7 @@ fused.view<-function(
 #' @author Yoann Pageaud.
 #' @export
 
-#TODO: Simplify the annot.text.x and annot.text.y arguments to make specific to
-# annotation position.
+#TODO: Add parameter documentation for annot.text.
 fused.plot<-function(data,ncores,
                      upper.comp,upper.value,lower.comp,lower.value,
                      na.rm = 'pairwise', order.method, order.select,

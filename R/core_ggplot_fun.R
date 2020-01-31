@@ -211,17 +211,28 @@ plot.col.sidebar<-function(
   axis.text.x = element_text(size = 12), axis.text.y = element_text(size = 12),
   axis.ticks.x, axis.ticks.y, axis.title.x,
   axis.title.y, set.x.title, set.y.title, dendro.pos){
-  #Create list of groups
-  groups<-lapply(lapply(annot.grps,as.factor),levels)
+
+  #Create list of groups in their original order
+  origin.grps<-lapply(X = annot.grps, FUN = function(i){
+    if(is.factor(i)){ levels(i) } else { levels(as.factor(i)) }
+  })
+
+  #Update levels following the new order of the annotation
+  groups<-lapply(X = lapply(X = annot.grps, FUN = function(i){
+    factor(x = i, levels =  unique(i))}), FUN = levels)
 
   #Create list of color tables
   #TODO: try to merge with check.annotations()
   if(is.list(annot.pal)) { #If a list of palettes is provided
     if(length(groups) == length(annot.pal)){ #if annotations match palettes
+      #Map groups to palettes
+      ls.df.grp.pal<-Map(data.frame, "Grps" = origin.grps, "Cols" = annot.pal,
+                         stringsAsFactors = FALSE)
       col_table<-lapply(seq_along(groups), function(i){
         if(length(groups[[i]]) == length(annot.pal[[i]])){
           #if groups match colors
-          data.frame("Grps"=groups[[i]],"Cols"=annot.pal[[i]])
+          ls.df.grp.pal[[i]][match(groups[[i]], ls.df.grp.pal[[i]]$Grps),]
+          # data.frame("Grps"=groups[[i]],"Cols"=annot.pal[[i]])
         } else {
           stop(paste0("The length of annotation '",names(groups)[i],
                       "' levels do not match the length of the corresponding ",
@@ -253,10 +264,8 @@ plot.col.sidebar<-function(
   # and categories by alphabetical order
   if(annot.pos == "left"){ cor.order<-rev(cor.order)}
   dframe.annot<-lapply(dframe.annot, function(i){
-    i[["Samples"]]<-factor(
-      i[["Samples"]],levels = levels(i[["Samples"]])[cor.order])
-    i[["Groups"]]<-factor(
-      i[["Groups"]], levels = sort(unique(i[["Groups"]])))
+    i[["Samples"]]<-factor(i[["Samples"]], levels = i[["Samples"]][cor.order])
+    i[["Groups"]]<-factor(i[["Groups"]], levels = unique(i[["Groups"]]))
     i
   })
   #Rbind all annotations

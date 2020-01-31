@@ -66,6 +66,8 @@
 #' @author Yoann Pageaud.
 #' @export
 
+#TODO: Fix bug of plot.col.sidebar (merge.lgd = FALSE)
+#TODO: Fix bug of the order in the legend
 #TODO: Support na.handle
 #TODO: Support tuple for dist.method
 #TODO: Support rank.fun
@@ -207,6 +209,11 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
                                      vjust = 0.5, face = "bold")) +
     xlab("Samples")
 
+  #Reoder groups and convert as factors
+  annot.grps <- lapply(X = annot.grps, FUN = function(i){
+    factor(x = i, levels =  unique(i))})
+  annot.grps <- lapply(X = annot.grps, FUN = function(i){i[column.order]})
+
   ##_Create Color Side Bar_#####################################################
   # Samples<-colnames(dframe)
   # #Create Genotypes column
@@ -219,8 +226,8 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
 
   col_sidebar<-plot.col.sidebar(
     sample.names = colnames(m[, column.order]), annot.grps = annot.grps,
-    annot.pal = list(color_tbl$Colors), annot.pos = 'top',
-    cor.order = seq_along(colnames(dframe)), split.annot = FALSE,merge.lgd=TRUE,
+    annot.pal = annot.pal, annot.pos = 'top',
+    cor.order = seq_along(colnames(dframe)), split.annot = FALSE, merge.lgd=FALSE,
     right = TRUE, lgd.lab = "Genotypes", axis.text.x = element_blank(),
     axis.text.y = element_text(size = 11, color = "black"),
     axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
