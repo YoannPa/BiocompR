@@ -185,7 +185,7 @@ basic.sidebar<-function(data, palette){
   ggplot(data = data) +
     geom_tile(aes(x = Samples, y = .id, fill = Groups)) +
     theme(legend.justification = 'left',
-          # legend.position = c(0.5,0.5),
+          legend.position = c(0.5,0.5),
           legend.text=element_text(size= 12),
           legend.title = element_text(size = 12),
           # legend.margin = margin(-35,0,0,-35), #Seems to fit in grid
@@ -324,13 +324,17 @@ plot.col.sidebar<-function(
     }
   }
 
-  if(merge.lgd){# Do not split legends
+  if(merge.lgd){ # Do not split legends
     sidebar.lgd<-list(get.lgd(col_sidebar + labs(fill = lgd.lab)))
   } else {# Split legends and return a list of legends
     if(!split.annot){
       if(annot.pos == "top"){
         dframe.annot$.id<-factor(
           dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
+        #Convert col_table ids as.factor
+        col_table$.id<-as.factor(col_table$.id)
+        #Reverse order of levels of palettes ids to match new order of annots
+        levels(col_table$.id)<-rev(levels(col_table$.id))
       }
     }
     sidebar.lgd<-lapply(seq_along(levels(dframe.annot$.id)), function(i){

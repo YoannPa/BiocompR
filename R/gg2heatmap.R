@@ -43,6 +43,15 @@
 #'                               rows and the selection of the top ones will be
 #'                               made before the computation of dendrograms.}
 #'                        }
+#' @param imputation.grps A \code{character} vector defining groups to which
+#'                        columns of the matrix belong. These groups are use to
+#'                        make group-wise imputation of missing values between
+#'                        columns. The vector has to be of the same length than
+#'                        the number of columns in the matrix
+#'                        (Default: imputation.grps = NULL).
+#' @param ncores          An \code{integer} to specify the number of
+#'                        cores/threads to be used to parallel-compute distances
+#'                        for dendrograms.
 #' @param heatmap.pal     A \code{character} vector to be used as a color
 #'                        palette for the heatmap.
 #' @param annot.grps      A \code{list} of vectors of groups to which variables
@@ -53,34 +62,47 @@
 #'                        to match the number of levels of vectors listed in
 #'                        'annot.grps'. If a list is provided, its length must
 #'                        match the length of the list provided to 'annot.grps'.
-#' @param imputation.grps A \code{character} vector defining groups to which
-#'                        columns of the matrix belong. These groups are use to
-#'                        make group-wise imputation of missing values between
-#'                        columns. The vector has to be of the same length than
-#'                        the number of columns in the matrix
-#'                        (Default: imputation.grps = NULL).
-#' @param ncores          An \code{integer} to specify the number of
-#'                        cores/threads to be used to parallel-compute distances
-#'                        for dendrograms.
+#' @param annot.size      A \code{numeric} defining the width of the annotation
+#'                        bars (Default: annot.size = 1).
+#' @param annot.lgd.space A \code{numeric} defining the size of the space
+#'                        separating the different annotation bar legends
+#'                        (Default: annot.lgd.space = 0).
+#' @param lgd.lab         A \code{character} specifying the name of annotation
+#'                        side bar legends, when legends are merged
+#'                        (lgd.merge = TRUE).
+#' @param lgd.pos.x       A \code{numeric} vector or unit object specifying the
+#'                        x-location of the legends (Default: lgd.pos.x = 0.5).
+#' @param lgd.pos.y       A \code{numeric} vector or unit object specifying the
+#'                        y-location of the legends (Default: lgd.pos.y = 0.5).
+#' @param lgd.merge       A \code{logical} specifying whether the legends of
+#'                        multiple annotation bars should be merged
+#'                        (lgd.merge = TRUE) or remain separated
+#'                        (lgd.merge = FALSE). lgd.merge is especially useful
+#'                        when you want to map the same color palette to
+#'                        multiple annotations sharing the same values
+#'                        (Default: lgd.merge = FALSE).
 #' @return A \code{grob} of a heatmap plotted with ggplot2.
 #' @author Yoann Pageaud.
 #' @export
 
-#TODO: Fix bug of plot.col.sidebar (merge.lgd = FALSE)
-#TODO: Fix bug of the order in the legend
+#TODO: Fix bug of plot.col.sidebar when giving 1 palette for multiple annotations
+# (lgd.merge = TRUE)
+#TODO: Fix bug of plot.col.sidebar (split.annot = TRUE)
+#TODO: Check why annotations bars are displayed in the reversed order than the
+# one they are provided.
 #TODO: Support na.handle
 #TODO: Support tuple for dist.method
 #TODO: Support rank.fun
 #TODO: Support top.rows
-#TODO: Support annot.grps
-#TODO: Support annot.pal
 #TODO: Add some data in return
 gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
                      rank.fun = NULL, top.rows = NULL, dendrograms = TRUE,
+                     imputation.grps = NULL, ncores = 1,
                      heatmap.pal = c("steelblue", "gray95", "darkorange"),
                      annot.grps = list("Groups" = seq(ncol(m))),
-                     annot.pal = rainbow(n = ncol(m)), imputation.grps = NULL,
-                     ncores = 1){
+                     annot.pal = rainbow(n = ncol(m)), annot.size=1,
+                     annot.lgd.space = 0, lgd.pos.x = 0.5, lgd.pos.y = 0.5,
+                     lgd.merge = FALSE){
   #Check m is a matrix
   if(!is.matrix(m)){ stop("m must be a matrix.") }
   #Check if na.handle method  supported
@@ -94,7 +116,7 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
     method.rows<-dist.method[1]
     method.cols<-dist.method[2]
   } else { stop("'dist.method' length > 2. Too many values.") }
-
+  #Check distance methods
   methods.ls <- c(
     'euclidean','maximum','manhattan','canberra','binary','minkowski','none')
   if(!method.rows %in% methods.ls){
@@ -103,7 +125,6 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
   if(!method.cols %in% methods.ls){
     stop("Unknown method for distance computation on columns.")
   }
-
   #Check if rank.fun is a supported function
   rank.method<-c("sd")
   if(!is.null(rank.fun)){
@@ -113,10 +134,10 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
   if(!is.null(top.rows)){
     if(is.numeric(top.rows)){
       top.rows <- as.integer(top.rows)
-      if(top.rows < 1){ stop("'top.rows' must be a non-zero positive integer.") }
+      if(top.rows <1){ stop("'top.rows' must be a non-zero positive integer.") }
     } else { stop("'top.rows' must be a non-zero positive integer.") }
   }
-
+  #Check logicals for dendrograms
   if(length(dendrograms) == 1){
     dd.rows<-dendrograms
     dd.cols<-dendrograms
@@ -140,10 +161,10 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
     m <- head(x = m, n = top.rows)
   }
 
-  ##_Create Dendrogram_#########################################################
   #Remove NAs if some for dendrogram matrix
   dend_mat<- m[complete.cases(m),]
 
+  #Create Dendrograms
   if(dd.rows & method.rows != 'none'){
     #Create Rows Dendrogram
     row_dist<-parDist(dend_mat, method = method.rows, threads = ncores)
@@ -190,7 +211,7 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
     scale_fill_gradientn(colours = palette.heatmap) +
     scale_x_discrete(expand = c(0,0)) + scale_y_discrete(expand = c(0,0)) +
     theme(legend.justification = 'left', plot.margin = margin(0, 0, 0, 0),
-          panel.grid = element_blank(),
+          legend.position = c(0.5,0.5), panel.grid = element_blank(),
           panel.background = element_rect(fill = "transparent"),
           plot.background = element_rect(fill = "transparent"))
   if(dendrograms[1]){
@@ -214,35 +235,27 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
     factor(x = i, levels =  unique(i))})
   annot.grps <- lapply(X = annot.grps, FUN = function(i){i[column.order]})
 
-  ##_Create Color Side Bar_#####################################################
-  # Samples<-colnames(dframe)
-  # #Create Genotypes column
-  # # Genotypes<-sample_tbl$Short.genotypes[column.order]
-  # Genotypes<-sample_tbl$Geno.short[column.order]
-  # # Genotypes<-factor(Genotypes,levels = color_table$Genotypes)
-  # Genotypes<-factor(Genotypes,levels = color_tbl$Genotypes)
-  # Genotype_table<-data.frame("Samples" = factor(Samples,levels = Samples),
-  #                            "Genotypes" = Genotypes,row.names = NULL)
-
+  #Create Color Sidebar
   col_sidebar<-plot.col.sidebar(
     sample.names = colnames(m[, column.order]), annot.grps = annot.grps,
     annot.pal = annot.pal, annot.pos = 'top',
-    cor.order = seq_along(colnames(dframe)), split.annot = FALSE, merge.lgd=FALSE,
-    right = TRUE, lgd.lab = "Genotypes", axis.text.x = element_blank(),
+    cor.order = seq_along(colnames(dframe)), split.annot = FALSE,
+    merge.lgd = lgd.merge, right = TRUE, lgd.lab = lgd.lab,
+    axis.text.x = element_blank(),
     axis.text.y = element_text(size = 11, color = "black"),
     axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
     axis.title.x = element_blank(), axis.title.y = element_blank(),
     set.x.title = NULL, set.y.title = NULL, dendro.pos = 'top')
 
-  ##_Extract Legend_############################################################
+  #Extract Legend
   htmp_legend <- get.lgd(gg2.obj = htmp)
   sidebar_legend <- col_sidebar$legends
-  ##convert ggplots into grobs
+  #Convert ggplots into grobs
   ddgr_seg_col <- ggplotGrob(ddgr_seg_col)
   col_sidebar_grob <- ggplotGrob(col_sidebar$sidebar)
   ddgr_seg_row <- ggplotGrob(ddgr_seg_row)
   htmp <- ggplotGrob(htmp + theme(legend.position="none"))
-  ## Resize grobs
+  #Resize grobs
   upd.grob_w<-resize.grobs(ls.grobs = list(
     'dd_col' = ddgr_seg_col, 'sidebar' = col_sidebar_grob, 'htmp' = htmp),
     dimensions = "widths", start.unit = 4, end.unit = 6)
@@ -250,19 +263,29 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
     'dd_row' = ddgr_seg_row, 'htmp' = upd.grob_w$htmp), dimensions = 'heights',
     start.unit = 7, end.unit = 9)
 
-  ##_Combine Dendrogram with Color Sidebar and Heatmap_#########################
+  #Combine Dendrogram with Color Sidebar and Heatmap
   if((length(dendrograms) == 1 & dendrograms) |
      (length(dendrograms) == 2 & all(dendrograms == TRUE))){
     #Create main grob
-    main_grob <- arrangeGrob(grobs = list(
-      textGrob(""), upd.grob_w$dd_col, textGrob(""), upd.grob_w$sidebar,
-      upd.grob_h$dd_row, upd.grob_h$htmp),ncol = 2,nrow = 3,
-      heights = c(3,1,30), widths = c(2,10))
+    main_grob <- arrangeGrob(
+      grobs = list(textGrob(""), upd.grob_w$dd_col,
+                   textGrob(""), upd.grob_w$sidebar,
+                   upd.grob_h$dd_row, upd.grob_h$htmp),
+      ncol = 2, nrow = 3, heights = c(3, annot.size, 30), widths = c(2, 10))
     #Create the Right Panel for legends
-    sidebar_legend.grob <- arrangeGrob(grobs = sidebar_legend, ncol = 1)
+    sidebar_legend.grob <- arrangeGrob(
+      grobs = sidebar_legend, nrow = 4, heights = c(4,1+annot.lgd.space,4,4))
     right.legends <- arrangeGrob(
-      textGrob(""), sidebar_legend.grob, htmp_legend, textGrob(""),textGrob(""),
-      ncol = 1, vp = viewport(x = -0.5))
+      htmp_legend, textGrob(""), sidebar_legend.grob,
+      layout_matrix = cbind(c(1,1,1,2), c(2,2,2,2), c(3,3,3,3)),
+      vp = viewport(x= lgd.pos.x-0.6, y = lgd.pos.y))
+    # right.legends <- arrangeGrob(
+    #   textGrob(""), textGrob(""), textGrob(""),
+    #   htmp_legend, textGrob(""), sidebar_legend.grob,
+    #   textGrob(""), textGrob(""), textGrob(""),
+    #   ncol = 3, vp = viewport(x = -0.1), widths = c(1,1,1),
+    #   heights = c(1, 1 + annot.lgd.space, 1 + annot.lgd.space))
+
     #Final plot
     grid.arrange(arrangeGrob(
       top = textGrob("DMRs in 129 and BL6J WT Vs. 129 Mut DMNT1 HSPCs",
@@ -272,7 +295,7 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
                        "distance; Rows ordered by", dist.method, "distance;",
                        nrow(m), "loci.)"), gp = gpar(fontsize=12, fontface=3L)),
         arrangeGrob(grobs = list(main_grob, right.legends), ncol = 2,
-                    widths = c(20,1))),
+                    widths = c(20,3))),
       nrow = 2, heights = c(3,50)))
   }
 }

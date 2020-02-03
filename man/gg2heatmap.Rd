@@ -11,11 +11,16 @@ gg2heatmap(
   rank.fun = NULL,
   top.rows = NULL,
   dendrograms = TRUE,
+  imputation.grps = NULL,
+  ncores = 1,
   heatmap.pal = c("steelblue", "gray95", "darkorange"),
   annot.grps = list(Groups = seq(ncol(m))),
   annot.pal = rainbow(n = ncol(m)),
-  imputation.grps = NULL,
-  ncores = 1
+  annot.size = 1,
+  annot.lgd.space = 0,
+  lgd.pos.x = 0.5,
+  lgd.pos.y = 0.5,
+  lgd.merge = FALSE
 )
 }
 \arguments{
@@ -67,6 +72,17 @@ should be plotted with the heatmap.
        made before the computation of dendrograms.}
 }}
 
+\item{imputation.grps}{A \code{character} vector defining groups to which
+columns of the matrix belong. These groups are use to
+make group-wise imputation of missing values between
+columns. The vector has to be of the same length than
+the number of columns in the matrix
+(Default: imputation.grps = NULL).}
+
+\item{ncores}{An \code{integer} to specify the number of
+cores/threads to be used to parallel-compute distances
+for dendrograms.}
+
 \item{heatmap.pal}{A \code{character} vector to be used as a color
 palette for the heatmap.}
 
@@ -80,16 +96,30 @@ to match the number of levels of vectors listed in
 'annot.grps'. If a list is provided, its length must
 match the length of the list provided to 'annot.grps'.}
 
-\item{imputation.grps}{A \code{character} vector defining groups to which
-columns of the matrix belong. These groups are use to
-make group-wise imputation of missing values between
-columns. The vector has to be of the same length than
-the number of columns in the matrix
-(Default: imputation.grps = NULL).}
+\item{annot.size}{A \code{numeric} defining the width of the annotation
+bars (Default: annot.size = 1).}
 
-\item{ncores}{An \code{integer} to specify the number of
-cores/threads to be used to parallel-compute distances
-for dendrograms.}
+\item{annot.lgd.space}{A \code{numeric} defining the size of the space
+separating the different annotation bar legends
+(Default: annot.lgd.space = 0).}
+
+\item{lgd.pos.x}{A \code{numeric} vector or unit object specifying the
+x-location of the legends (Default: lgd.pos.x = 0.5).}
+
+\item{lgd.pos.y}{A \code{numeric} vector or unit object specifying the
+y-location of the legends (Default: lgd.pos.y = 0.5).}
+
+\item{lgd.merge}{A \code{logical} specifying whether the legends of
+multiple annotation bars should be merged
+(lgd.merge = TRUE) or remain separated
+(lgd.merge = FALSE). lgd.merge is especially useful
+when you want to map the same color palette to
+multiple annotations sharing the same values
+(Default: lgd.merge = FALSE).}
+
+\item{lgd.lab}{A \code{character} specifying the name of annotation
+side bar legends, when legends are merged
+(lgd.merge = TRUE).}
 }
 \value{
 A \code{grob} of a heatmap plotted with ggplot2.
