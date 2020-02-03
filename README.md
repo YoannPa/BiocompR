@@ -2,10 +2,10 @@
 _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots dedicated to data comparison and dataset exploration and ultimately provides users with versatile and customizable graphics._  
 
 **Author: PAGEAUD Y.<sup>1</sup>**  
-**Contributors: MAYAKONDA A.<sup>2</sup>; WURSTHORN A.<sup>4</sup>; FEUERBACH L.<sup>1</sup>; TOTH R.<sup>2</sup>; SCHEFZIK R.<sup>3</sup>; HONG C.<sup>1</sup>.**  
+**Contributors: SCHEFZIK R.<sup>2</sup>; MAYAKONDA A.<sup>3</sup>; WURSTHORN A.<sup>4</sup>; FEUERBACH L.<sup>1</sup>; TOTH R.<sup>3</sup>; HONG C.<sup>1</sup>.**  
 **1-** [**DKFZ - Division of Applied Bioinformatics, Germany.**](https://www.dkfz.de/en/applied-bioinformatics/index.php)  
-**2-** [**DKFZ - Computational Cancer Epigenomics, Germany.**](https://www.dkfz.de/en/CanEpi/CompEpigen/index.html)  
-**3-** [**Klinik für Anästhesiologie und Operative Intensivmedizin, Medizinische Fakultät Mannheim, Universität Heidelberg, Germany.**](https://www.umm.de/klinik-fuer-anaesthesiologie-und-operative-intensivmedizin/)  
+**2-** [**Klinik für Anästhesiologie und Operative Intensivmedizin, Medizinische Fakultät Mannheim, Universität Heidelberg, Germany.**](https://www.umm.de/klinik-fuer-anaesthesiologie-und-operative-intensivmedizin/)  
+**3-** [**DKFZ - Computational Cancer Epigenomics, Germany.**](https://www.dkfz.de/en/CanEpi/CompEpigen/index.html)  
 **4-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
 **Version: 0.0.35 (Beta)**  
@@ -48,9 +48,11 @@ devtools::install()
 ## Tutorial
 ### How to run an eigenvector anaylsis (EVA)
 
-⚠️ **Please check the beginning of this section again!** 
-An eigenvector analysis is very similar to a principal component analysis (PCA) except that the principal components are eigenvectors.  
-Its main advantage is that it only relies on a correlation test and is consequently faster than a PCA.
+⚠️ **Please check the beginning of this section again!**  
+```diff
++ An eigenvector analysis is a principal component analysis (PCA) except that the principal components are eigenvectors of a correlation matrix.  
++ Its main advantage is that the correlation method can be specified, as well as the adjustment method for multiple testing.  
+```
 It returns three types of results:  
 * a list of eigenvector plots,  
 * a table showing the correlation values between eigenvectors and selected variables,  
