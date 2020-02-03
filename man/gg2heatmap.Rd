@@ -18,6 +18,7 @@ gg2heatmap(
   annot.pal = rainbow(n = ncol(m)),
   annot.size = 1,
   annot.lgd.space = 0,
+  lgd.lab = "Legends",
   lgd.pos.x = 0.5,
   lgd.pos.y = 0.5,
   lgd.merge = FALSE
@@ -103,6 +104,10 @@ bars (Default: annot.size = 1).}
 separating the different annotation bar legends
 (Default: annot.lgd.space = 0).}
 
+\item{lgd.lab}{A \code{character} specifying the name of annotation
+side bar legends, when legends are merged
+(lgd.merge = TRUE).}
+
 \item{lgd.pos.x}{A \code{numeric} vector or unit object specifying the
 x-location of the legends (Default: lgd.pos.x = 0.5).}
 
@@ -116,10 +121,6 @@ multiple annotation bars should be merged
 when you want to map the same color palette to
 multiple annotations sharing the same values
 (Default: lgd.merge = FALSE).}
-
-\item{lgd.lab}{A \code{character} specifying the name of annotation
-side bar legends, when legends are merged
-(lgd.merge = TRUE).}
 }
 \value{
 A \code{grob} of a heatmap plotted with ggplot2.

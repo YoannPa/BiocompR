@@ -101,8 +101,8 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
                      heatmap.pal = c("steelblue", "gray95", "darkorange"),
                      annot.grps = list("Groups" = seq(ncol(m))),
                      annot.pal = rainbow(n = ncol(m)), annot.size=1,
-                     annot.lgd.space = 0, lgd.pos.x = 0.5, lgd.pos.y = 0.5,
-                     lgd.merge = FALSE){
+                     annot.lgd.space = 0, lgd.lab = 'Legends', lgd.pos.x = 0.5,
+                     lgd.pos.y = 0.5, lgd.merge = FALSE){
   #Check m is a matrix
   if(!is.matrix(m)){ stop("m must be a matrix.") }
   #Check if na.handle method  supported
