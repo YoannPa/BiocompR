@@ -18,7 +18,7 @@ fused.view(
   annot.size = 0,
   annot.text = NULL,
   annot.lgd.merge = FALSE,
-  annot.split = TRUE,
+  annot.split = FALSE,
   dendro.pos = "none",
   dendro.size = 0,
   grid.col = "grey",

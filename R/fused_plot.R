@@ -66,7 +66,7 @@ fused.view<-function(
   correlation.order,
   annot.grps = list("Groups"=seq(ncol(data))),annot.pal=rainbow(n = ncol(data)),
   annot.pos = 'top', annot.size = 0, annot.text = NULL, annot.lgd.merge = FALSE,
-  annot.split = TRUE,
+  annot.split = FALSE,
   dendro.pos = 'none', dendro.size = 0,
   grid.col = "grey", grid.thickness = 0.5,
   axis.title = element_blank(), axis.title.x = element_blank(),
@@ -133,8 +133,8 @@ fused.view<-function(
   upper.mat[upper.tri(upper.mat)]<-NA
   lower.mat[lower.tri(lower.mat)]<-NA
   #Melt Correlation matrix
-  upper.melt<-melt(upper.mat,na.rm=T)
-  lower.melt<-melt(lower.mat,na.rm=T)
+  upper.melt<-melt(upper.mat, na.rm=TRUE)
+  lower.melt<-melt(lower.mat, na.rm=TRUE)
   #Invert order of samples
   upper.melt$Var2<-factor(upper.melt$Var2,levels = rev(levels(upper.melt$Var2)))
   lower.melt$Var2<-factor(lower.melt$Var2,levels = rev(levels(lower.melt$Var2)))
@@ -194,7 +194,7 @@ fused.view<-function(
       axis.ticks.x = axis.ticks, axis.ticks.y = element_blank(),
       axis.title.x = axis.title.x, axis.title.y = element_blank())
   } else {stop("'annot.pos' value not supported.")}
-  if(!(is.null(add.ggplot.arg))){upper.ggplot <- upper.ggplot + add.ggplot.arg}
+  if(!is.null(add.ggplot.arg)){ upper.ggplot <- upper.ggplot + add.ggplot.arg }
   #Lower plot
   lower.ggplot<-basic.ggplot.tri(
     melt.tri = lower.melt, grid.col = grid.col, grid.thickness = grid.thickness,
@@ -210,7 +210,7 @@ fused.view<-function(
           legend.direction = 'horizontal')
   #Plot Color Sidebar
   col_sidebar<-plot.col.sidebar(
-    sample.names = sample.names ,annot.grps = annot.grps,annot.pal = annot.pal,
+    sample.names = sample.names, annot.grps = annot.grps, annot.pal = annot.pal,
     annot.pos = annot.pos, cor.order = correlation.order,
     axis.ticks.x = axis.ticks, axis.ticks.y = axis.ticks,
     axis.title.x = axis.title.x, axis.title.y = axis.title.y,
@@ -519,7 +519,7 @@ fused.plot<-function(data,ncores,
                      annot.pal = rainbow(n = ncol(data)),
                      annot.pos = 'top', annot.size = 0,
                      annot.text = NULL,
-                     annot.lgd.merge = FALSE, annot.split = TRUE,
+                     annot.lgd.merge = FALSE, annot.split = FALSE,
                      dendro.pos = 'none', dendro.size = 0,
                      grid.col = "grey",grid.thickness = 0.5,
                      axis.title = element_blank(),
@@ -531,7 +531,7 @@ fused.plot<-function(data,ncores,
                      axis.text.y = element_blank(),
                      axis.ticks = element_line(color = "black"),
                      set.x.title = NULL, set.y.title = NULL,
-                     set.lgd1.title = NULL,set.lgd2.title = NULL,
+                     set.lgd1.title = NULL, set.lgd2.title = NULL,
                      diag.col = "white",
                      lgd.pal1 = NULL, lgd.pal2 = NULL,
                      lgd.title = element_blank(),
@@ -539,18 +539,18 @@ fused.plot<-function(data,ncores,
                      lgd.title2 = element_blank(),
                      lgd.text = element_text(size = 12),
                      lgd.text1 = element_blank(),lgd.text2 = element_blank(),
-                     lgd.breaks = NULL,lgd.breaks1 = NULL,lgd.breaks2 = NULL,
-                     lgd.labels = NULL,lgd.labels1 = NULL,lgd.labels2 = NULL,
-                     lgd.round = NULL,lgd.round1 = 2,lgd.round2 = 2,
-                     lgd.limits = NULL,lgd.limits1 = NULL,lgd.limits2 = NULL,
-                     lgd.ticks = TRUE,lgd.ticks1 = NULL,lgd.ticks2 = NULL,
-                     lgd.ticks.linewidth = 2,lgd.ticks.linewidth1 = NULL,
+                     lgd.breaks = NULL, lgd.breaks1 = NULL, lgd.breaks2 = NULL,
+                     lgd.labels = NULL, lgd.labels1 = NULL, lgd.labels2 = NULL,
+                     lgd.round = NULL, lgd.round1 = 2, lgd.round2 = 2,
+                     lgd.limits = NULL, lgd.limits1 = NULL, lgd.limits2 = NULL,
+                     lgd.ticks = TRUE, lgd.ticks1 = NULL, lgd.ticks2 = NULL,
+                     lgd.ticks.linewidth = 2, lgd.ticks.linewidth1 = NULL,
                      lgd.ticks.linewidth2 = NULL,
-                     lgd.nbin = NULL,lgd.nbin1 = NULL, lgd.nbin2 = NULL,
-                     lgd.height1 = 26,lgd.height2 = 1,
-                     lgd.width1 = 1,lgd.width2 = 30,
+                     lgd.nbin = NULL, lgd.nbin1 = NULL, lgd.nbin2 = NULL,
+                     lgd.height1 = 26, lgd.height2 = 1,
+                     lgd.width1 = 1, lgd.width2 = 30,
                      lgd.frame.col = "grey", lgd.frame.linewidth = 1.5,
-                     lgd.frame.linewidth1 = NULL,lgd.frame.linewidth2 = NULL,
+                     lgd.frame.linewidth1 = NULL, lgd.frame.linewidth2 = NULL,
                      raster = FALSE, raster1 = NULL, raster2 = NULL,
                      add.ggplot.arg = NULL){
   #Data format
@@ -580,7 +580,7 @@ fused.plot<-function(data,ncores,
       } else { stop("the clustering method is not supported.") }
       #check dendrogram
       if(dendro.pos != "none"){
-        if(!(dendro.pos %in% c('top','left','both'))){
+        if(!dendro.pos %in% c('top','left','both')){
           stop("dendrogram cannot be put here.")
         }
       }
@@ -593,7 +593,7 @@ fused.plot<-function(data,ncores,
     }
     #order select
     if(order.method %in% c("AOE","FPC","hclust","alphabet")){
-      if(!(order.select %in% c('upper','lower'))){
+      if(!order.select %in% c('upper','lower')){
         stop("Wrong value for order.select - You can only select values from the
          'upper' triangle or from the 'lower' triangle to apply order.")
       }
@@ -609,52 +609,53 @@ fused.plot<-function(data,ncores,
   check.annotations(data = data, annot.grps = annot.grps, annot.pal = annot.pal)
 
   #Position annotation
-  if(!(annot.pos %in% c("top","left","both"))){
+  if(!annot.pos %in% c("top","left","both")){
     stop("annotation sidebar cannot be put here.")
   }
   #Overwrite the plot titles if they take the same parameters
-  if(!(is.elt_blank(axis.title))){
-    axis.title.x <- axis.title ; axis.title.y <- axis.title
+  if(!is.elt_blank(axis.title)){
+    axis.title.x <- axis.title
+    axis.title.y <- axis.title
   }
   #Label matching Breaks
-  if(!(is.null(lgd.labels))){
+  if(!is.null(lgd.labels)){
     if(length(lgd.labels) != length(seq(lgd.breaks))){
       stop("the number of labels does not match the number of breaks.")
     }
   }
-  if(!(is.null(lgd.labels1))){
+  if(!is.null(lgd.labels1)){
     if(length(lgd.labels1) != length(lgd.breaks1)){
       stop("the number of labels does not match the number of breaks for upper
          triangle legend.")
     }
   }
-  if(!(is.null(lgd.labels2))){
+  if(!is.null(lgd.labels2)){
     if(length(lgd.labels2) != length(lgd.breaks2)){
       stop("the number of labels does not match the number of breaks for lower
          triangle legend.")
     }
   }
   #Overwrite the legends rounds if they take the same parameters
-  if(!(is.null(lgd.round))){ lgd.round1<-lgd.round;lgd.round2<-lgd.round }
+  if(!is.null(lgd.round)){ lgd.round1<-lgd.round; lgd.round2<-lgd.round }
   #Overwrite the legends titles if they take the same parameters
-  if(!(is.elt_blank(lgd.title))){ lgd.title1<-lgd.title;lgd.title2<-lgd.title }
+  if(!is.elt_blank(lgd.title)){ lgd.title1<-lgd.title; lgd.title2<-lgd.title }
   #Overwrite the legends titles if they take the same parameters
-  if(!(is.elt_blank(lgd.text))){ lgd.text1<-lgd.text;lgd.text2<-lgd.text }
+  if(!is.elt_blank(lgd.text)){ lgd.text1<-lgd.text; lgd.text2<-lgd.text }
   #Overwrite the legends breaks if they take the same parameters
-  if(!(is.null(lgd.breaks))){lgd.breaks1<-lgd.breaks;lgd.breaks2<-lgd.breaks}
+  if(!is.null(lgd.breaks)){lgd.breaks1<-lgd.breaks; lgd.breaks2<-lgd.breaks}
   #Overwrite the legends bins if they take the same value
-  if(!(is.null(lgd.nbin))){ lgd.nbin1<-lgd.nbin;lgd.nbin2<-lgd.nbin }
+  if(!is.null(lgd.nbin)){ lgd.nbin1<-lgd.nbin; lgd.nbin2<-lgd.nbin }
   #Overwrite the legends raster arg if they take the same value
-  if(!(is.null(raster))){ raster1 <- raster ; raster2 <- raster }
+  if(!is.null(raster)){ raster1 <- raster ; raster2 <- raster }
   #Overwrite the legends ticks arg if they take the same value
-  if(!(is.null(lgd.ticks))){ lgd.ticks1<-lgd.ticks ; lgd.ticks2<-lgd.ticks }
+  if(!is.null(lgd.ticks)){ lgd.ticks1<-lgd.ticks ; lgd.ticks2<-lgd.ticks }
   #Overwrite the legends ticks linewidth arg if they take the same value
-  if(!(is.null(lgd.ticks.linewidth))){
+  if(!is.null(lgd.ticks.linewidth)){
     lgd.ticks.linewidth1 <- lgd.ticks.linewidth
     lgd.ticks.linewidth2 <- lgd.ticks.linewidth
   }
   #Overwrite the legends frame linewidth arg if they take the same value
-  if(!(is.null(lgd.frame.linewidth))){
+  if(!is.null(lgd.frame.linewidth)){
     lgd.frame.linewidth1 <- lgd.frame.linewidth
     lgd.frame.linewidth2 <- lgd.frame.linewidth
   }

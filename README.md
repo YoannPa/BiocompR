@@ -210,6 +210,13 @@ This tutorial is only an example, it doesn't mean that the parameters set here a
 
 ⚠️ **Work in progress !**  
 
+## Known Issues ⚠️
+```R
+Error in UseMethod("depth") : 
+  no applicable method for 'depth' applied to an object of class "NULL"
+```
+This error seems to happen randomly when executing code using the ggplot2 and/or grid packages. Usually executing one more time the chuck of code solve the error. The current status of this issue can be tracked [**here**](https://github.com/tidyverse/ggplot2/issues/2514).
+
 ## References
 ⚠️ **Work in progress !**  
 

@@ -254,42 +254,43 @@ plot.col.sidebar<-function(
     stop("Unknown type for 'annot.pal'. 'annot.pal' should be either a list or a vector.")
   }
 
-
-
   #Create list of annotation data.frames
-  dframe.annot<-lapply(annot.grps, function(i){
+  dframe.annot <- lapply(annot.grps, function(i){
     data.frame("Samples" = sample.names,"Groups" = i)
   })
   #Order samples following the correlation order provided
   # and categories by alphabetical order
-  if(annot.pos == "left"){ cor.order<-rev(cor.order)}
+  if(annot.pos == "left"){ cor.order<-rev(cor.order) }
   dframe.annot<-lapply(dframe.annot, function(i){
     i[["Samples"]]<-factor(i[["Samples"]], levels = i[["Samples"]][cor.order])
     i[["Groups"]]<-factor(i[["Groups"]], levels = unique(i[["Groups"]]))
     i
   })
   #Rbind all annotations
-  dframe.annot<-rbindlist(dframe.annot,idcol = TRUE)
-  dframe.annot$.id<-as.factor(dframe.annot$.id)
+  dframe.annot <- rbindlist(dframe.annot, idcol = TRUE)
+  dframe.annot$.id <- factor(dframe.annot$.id, levels=unique(dframe.annot$.id))
   if(!split.annot){
     if(annot.pos == "top"){
-      dframe.annot$.id<-factor(dframe.annot$.id,
-                               levels = rev(levels(dframe.annot$.id)))
+      #Change order of levels
+      dframe.annot$.id <- factor(x = dframe.annot$.id,
+                                 levels = rev(levels(dframe.annot$.id)))
     }
   }
-  col_table<-rbindlist(col_table,idcol = TRUE)
+  col_table<-rbindlist(col_table, idcol = TRUE)
   if(any(duplicated(col_table$Grps))){
-    stop("Duplicated group name provided. Make sure 'annot.grps' does not contain duplicated group names in the list.")
+    warning("Duplicated group name provided. Removing duplicated...")
+    col_table<-col_table[!duplicated(Grps)]
+    # stop("Duplicated group name provided. Make sure 'annot.grps' does not contain duplicated group names in the list.")
   }
   #Plot color sidebars
   col_sidebar<-basic.sidebar(data = dframe.annot, palette = col_table$Cols)
 
   if(!is.null(lgd.title)){ #Add legend parameters if some
-    col_sidebar<- col_sidebar + theme(legend.title = lgd.title)
+    col_sidebar <- col_sidebar + theme(legend.title = lgd.title)
   }
   #Modify base plot following its position
   if(annot.pos == "top"){
-    col_sidebar<-col_sidebar +
+    col_sidebar <- col_sidebar +
       theme(axis.text.x.top = axis.text.x, axis.text.y = axis.text.y,
             axis.ticks.x = axis.ticks.x, axis.ticks.y = axis.ticks.y) +
       scale_x_discrete(expand = c(0,0),position = "top") + xlab(set.x.title)
@@ -300,7 +301,7 @@ plot.col.sidebar<-function(
     if(dendro.pos !="top"){
       col_sidebar<-col_sidebar +
         theme(axis.title.x = axis.title.x, axis.title.y = element_blank())
-    } else { col_sidebar<-col_sidebar + theme(axis.title = element_blank()) }
+    } else { col_sidebar <- col_sidebar + theme(axis.title = element_blank()) }
     if(split.annot){
       col_sidebar<-col_sidebar +
         facet_grid(.id ~ ., scales = "free", space = "free_y")
@@ -326,17 +327,20 @@ plot.col.sidebar<-function(
 
   if(merge.lgd){ # Do not split legends
     sidebar.lgd<-list(get.lgd(col_sidebar + labs(fill = lgd.lab)))
-  } else {# Split legends and return a list of legends
+  } else { # Split legends and return a list of legends
     if(!split.annot){
       if(annot.pos == "top"){
         dframe.annot$.id<-factor(
           dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
-        #Convert col_table ids as.factor
-        col_table$.id<-as.factor(col_table$.id)
-        #Reverse order of levels of palettes ids to match new order of annots
-        levels(col_table$.id)<-rev(levels(col_table$.id))
       }
     }
+
+    # #Convert col_table ids as.factor
+    # col_table$.id<-as.factor(col_table$.id)
+    # #Reverse order of levels of palettes ids to match new order of annots
+    # levels(col_table$.id)<-rev(levels(col_table$.id))
+
+    #Get all legends separately
     sidebar.lgd<-lapply(seq_along(levels(dframe.annot$.id)), function(i){
       get.lgd(
         basic.sidebar(data = dframe.annot[.id == levels(dframe.annot$.id)[i]],

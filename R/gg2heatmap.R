@@ -57,16 +57,21 @@
 #' @param annot.grps      A \code{list} of vectors of groups to which variables
 #'                        belongs for the annotation sidebars. 'Vectors' lengths
 #'                        have to match the number of variables.
-#' @param annot.pal       A \code{list} of vectors to be used as color palettes
-#'                        for the annotation sidebars. The length of vectors has
-#'                        to match the number of levels of vectors listed in
-#'                        'annot.grps'. If a list is provided, its length must
-#'                        match the length of the list provided to 'annot.grps'.
+#' @param annot.pal       A \code{vector} or a list of vectors containing colors
+#'                        as characters for the annotation sidebars. The length
+#'                        of vectors has to match the number of levels of
+#'                        vectors listed in 'annot.grps'. If a list is provided,
+#'                        its length must match the length of the list provided
+#'                        to 'annot.grps'.
 #' @param annot.size      A \code{numeric} defining the width of the annotation
 #'                        bars (Default: annot.size = 1).
 #' @param annot.lgd.space A \code{numeric} defining the size of the space
 #'                        separating the different annotation bar legends
 #'                        (Default: annot.lgd.space = 0).
+#' @param annot.split     A \code{logical} to specify whether a space should be
+#'                        added between each annotation (annot.split = TRUE) or
+#'                        not (annot.split = FALSE)
+#'                        (Default: annot.split = FALSE).
 #' @param lgd.lab         A \code{character} specifying the name of annotation
 #'                        side bar legends, when legends are merged
 #'                        (lgd.merge = TRUE).
@@ -85,11 +90,6 @@
 #' @author Yoann Pageaud.
 #' @export
 
-#TODO: Fix bug of plot.col.sidebar when giving 1 palette for multiple annotations
-# (lgd.merge = TRUE)
-#TODO: Fix bug of plot.col.sidebar (split.annot = TRUE)
-#TODO: Check why annotations bars are displayed in the reversed order than the
-# one they are provided.
 #TODO: Support na.handle
 #TODO: Support tuple for dist.method
 #TODO: Support rank.fun
@@ -101,8 +101,9 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
                      heatmap.pal = c("steelblue", "gray95", "darkorange"),
                      annot.grps = list("Groups" = seq(ncol(m))),
                      annot.pal = rainbow(n = ncol(m)), annot.size=1,
-                     annot.lgd.space = 0, lgd.lab = 'Legends', lgd.pos.x = 0.5,
-                     lgd.pos.y = 0.5, lgd.merge = FALSE){
+                     annot.lgd.space = 0, annot.split = FALSE,
+                     lgd.lab = 'Legends', lgd.pos.x = 0.5, lgd.pos.y = 0.5,
+                     lgd.merge = FALSE){
   #Check m is a matrix
   if(!is.matrix(m)){ stop("m must be a matrix.") }
   #Check if na.handle method  supported
@@ -239,7 +240,7 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
   col_sidebar<-plot.col.sidebar(
     sample.names = colnames(m[, column.order]), annot.grps = annot.grps,
     annot.pal = annot.pal, annot.pos = 'top',
-    cor.order = seq_along(colnames(dframe)), split.annot = FALSE,
+    cor.order = seq_along(colnames(dframe)), split.annot = annot.split,
     merge.lgd = lgd.merge, right = TRUE, lgd.lab = lgd.lab,
     axis.text.x = element_blank(),
     axis.text.y = element_text(size = 11, color = "black"),
@@ -258,7 +259,7 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
   #Resize grobs
   upd.grob_w<-resize.grobs(ls.grobs = list(
     'dd_col' = ddgr_seg_col, 'sidebar' = col_sidebar_grob, 'htmp' = htmp),
-    dimensions = "widths", start.unit = 4, end.unit = 6)
+    dimensions = "widths", start.unit = 4, end.unit = 7)
   upd.grob_h<- resize.grobs(ls.grobs = list(
     'dd_row' = ddgr_seg_row, 'htmp' = upd.grob_w$htmp), dimensions = 'heights',
     start.unit = 7, end.unit = 9)

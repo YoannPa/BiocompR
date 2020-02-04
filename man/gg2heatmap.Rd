@@ -18,6 +18,7 @@ gg2heatmap(
   annot.pal = rainbow(n = ncol(m)),
   annot.size = 1,
   annot.lgd.space = 0,
+  annot.split = FALSE,
   lgd.lab = "Legends",
   lgd.pos.x = 0.5,
   lgd.pos.y = 0.5,
@@ -91,11 +92,12 @@ palette for the heatmap.}
 belongs for the annotation sidebars. 'Vectors' lengths
 have to match the number of variables.}
 
-\item{annot.pal}{A \code{list} of vectors to be used as color palettes
-for the annotation sidebars. The length of vectors has
-to match the number of levels of vectors listed in
-'annot.grps'. If a list is provided, its length must
-match the length of the list provided to 'annot.grps'.}
+\item{annot.pal}{A \code{vector} or a list of vectors containing colors
+as characters for the annotation sidebars. The length
+of vectors has to match the number of levels of
+vectors listed in 'annot.grps'. If a list is provided,
+its length must match the length of the list provided
+to 'annot.grps'.}
 
 \item{annot.size}{A \code{numeric} defining the width of the annotation
 bars (Default: annot.size = 1).}
@@ -103,6 +105,11 @@ bars (Default: annot.size = 1).}
 \item{annot.lgd.space}{A \code{numeric} defining the size of the space
 separating the different annotation bar legends
 (Default: annot.lgd.space = 0).}
+
+\item{annot.split}{A \code{logical} to specify whether a space should be
+added between each annotation (annot.split = TRUE) or
+not (annot.split = FALSE)
+(Default: annot.split = FALSE).}
 
 \item{lgd.lab}{A \code{character} specifying the name of annotation
 side bar legends, when legends are merged
