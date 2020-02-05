@@ -19,57 +19,44 @@
 #'               samples belong. Order of groups in the vector has to match the
 #'               order of column names in data to properly associate samples and
 #'               groups.
+#' @param ncores An \code{integer} to specify the number of cores/threads to be
+#'               used to parallel-process the matrix (Default: ncores = 1).
 #' @return A \code{matrix}.
 #' @author Yoann Pageaud.
 #' @export
 #' @references
 #' @keywords internal
 
-manage.na<-function(data, method = "remove", groups){
+manage.na<-function(data, method = "remove", groups, ncores = 1){
   if(method != "keep"){ #If NA should not be kept
     if(any(is.na(data))) { #If any NA
       if(method == "remove"){ #Remove all rows containing any NA
         data<-data[complete.cases(data),]
-
       } else if(method == "impute"){ #Impute NAs with the median value by group
-        #Remove rows containing only NAs
-        data<- data[!apply(X = is.na(data),MARGIN = 1,FUN = all), ,drop = FALSE]
-
+        #Parallel-remove rows containing only NAs
+        data <- data[
+          !unlist(mclapply(X = seq(nrow(data)), mc.cores = ncores,
+                           FUN = function(r){
+                             all(is.na(data[r,])) })), , drop = FALSE]
         #Get groups of samples from sample conditions
         grp_tbl<-data.frame(samples = colnames(data), groups = groups)
         sample_grps<-unique(groups)
-
-        #Get median by cell type/line
-        #TODO: Make parallel apply
-        apply(X = data, MARGIN = 1, FUN = function(row){
-          if(anyNA(data[row,])){
-            row_vec<-sapply(sample_grps, function(grp){
-              #List sample names matching the group
-              samples.in.grp<-grp_tbl[groups == grp,]$samples
-              #List Methylation values of the group on the row
-              meth_vals<-data[row,samples.in.grp]
-              #If more than 1 sample in the group get median
-              if (length(samples.in.grp) > 1) { median(meth_vals,na.rm = T)}
-              else { meth_vals } #Else get value of sample
-            })
-            #If no NA in group medians keep row for manipulation; Else remove it
-            if (anyNA(row_vec) == F) {
-              #If no NA in full row do nothing
-              if(anyNA(data[row,])){
-                #Replace NA value by median of its group if some
-                data[row,]<-sapply(X = names(data[row,]), FUN = function(smpl){
-                  #Get methylation value
-                  valmeth<-data[row, smpl]
-                  if (is.na(valmeth)){
-                    row_vec[grp_tbl[grp_tbl$samples == smpl,]$groups]
-                  } else { valmeth } #Else keep value as is
-                })
-              }
-            } else { stop("Some group medians have for value NA.")
+        #Get median by groups
+        #TODO: Make parallel apply when it will be possible.
+        invisible(lapply(X = seq(nrow(data)), FUN = function(r){
+          invisible(sapply(sample_grps, function(grp){
+            #List sample names matching the group
+            samples.in.grp<-grp_tbl[groups == grp,]$samples
+            #List Methylation values of the group on the row
+            if(all(is.na(data[r,samples.in.grp]))){
               #TODO: Handle this case if the issue arises.
+              stop("The group as NA for all its values.")
+            } else if(anyNA(data[r,samples.in.grp])){
+              data[r,samples.in.grp][is.na(data[r,samples.in.grp])] <<-
+                median(x = data[r,samples.in.grp], na.rm = TRUE)
             }
-          }
-        })
+          }))
+        }))
       }
     }
   }

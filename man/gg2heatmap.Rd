@@ -2,7 +2,7 @@
 % Please edit documentation in R/gg2heatmap.R
 \name{gg2heatmap}
 \alias{gg2heatmap}
-\title{WARNING: Unstable! Creates a custom heatmap with dendrograms and annotations.}
+\title{Creates a custom heatmap with dendrograms and annotations.}
 \usage{
 gg2heatmap(
   m,
@@ -29,7 +29,19 @@ gg2heatmap(
 \item{m}{A \code{matrix}.}
 
 \item{na.handle}{A \code{character} to specify how missing values
-should be handled (Default: na.handle = 'remove';
+should be handled.
+\itemize{
+ \item{'keep' do not modify the matrix}
+ \item{'impute' make use of the groups provided in
+       'imputation.grps' to calculate the mean value
+       of a group of columns for a given row where at
+       least one missing value has been found. The
+       missing values are then substituted by the
+       calculated mean of the group.}
+ \item{'remove' removes all rows containing at least
+       1 missing value.}
+}
+(Default: na.handle = 'remove';
 Supported: na.handle = c('keep','impute','remove')).}
 
 \item{dist.method}{A \code{character} vector to specify the distance
@@ -93,11 +105,19 @@ belongs for the annotation sidebars. 'Vectors' lengths
 have to match the number of variables.}
 
 \item{annot.pal}{A \code{vector} or a list of vectors containing colors
-as characters for the annotation sidebars. The length
+as characters for the annotation sidebars.The length
 of vectors has to match the number of levels of
-vectors listed in 'annot.grps'. If a list is provided,
-its length must match the length of the list provided
-to 'annot.grps'.}
+vectors listed in 'annot.grps'.
+\itemize{
+ \item{If annot.pal is a list: its length must match
+       the length of the list provided to
+       'annot.grps'.}
+ \item{If annot.pal is a vector: make sure that the
+       levels content of annotations listed in
+       'annot.grps' is the same, and that no
+       annotation contains less or more levels than
+       another one in 'annot.grps'.}
+}}
 
 \item{annot.size}{A \code{numeric} defining the width of the annotation
 bars (Default: annot.size = 1).}
@@ -133,7 +153,7 @@ multiple annotations sharing the same values
 A \code{grob} of a heatmap plotted with ggplot2.
 }
 \description{
-WARNING: Unstable! Creates a custom heatmap with dendrograms and annotations.
+Creates a custom heatmap with dendrograms and annotations.
 }
 \author{
 Yoann Pageaud.

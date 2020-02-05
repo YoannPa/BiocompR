@@ -99,3 +99,4 @@ Creates a clustered heatmap using ggplot2.
 \author{
 Yoann Pageaud.
 }
+\keyword{internal}

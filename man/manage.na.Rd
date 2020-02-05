@@ -5,7 +5,7 @@
 \title{Keeps, removes or imputes missing values in a matrix or a data.frame based on
 sample groups.}
 \usage{
-manage.na(data, method = "remove", groups)
+manage.na(data, method = "remove", groups, ncores = 1)
 }
 \arguments{
 \item{data}{A \code{matrix} or \code{data.frame} with column names.}
@@ -27,6 +27,9 @@ NAs:
 samples belong. Order of groups in the vector has to match the
 order of column names in data to properly associate samples and
 groups.}
+
+\item{ncores}{An \code{integer} to specify the number of cores/threads to be
+used to parallel-process the matrix (Default: ncores = 1).}
 }
 \value{
 A \code{matrix}.

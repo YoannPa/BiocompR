@@ -8,18 +8,19 @@ _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots 
 **3-** [**DKFZ - Computational Cancer Epigenomics, Germany.**](https://www.dkfz.de/en/CanEpi/CompEpigen/index.html)  
 **4-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
-**Version: 0.0.35 (Beta)**  
-**R Compatibility: Version 3.6.1**  
-**Last Update: 23/01/2020**  
+**Version: 0.0.47 (Beta)**  
+**R Compatibility: Version 3.6.2**  
+**Last Update: 05/02/2020**  
 
 ## Content
-Currently the package BiocompR contains **12 functions**:
+Currently the package BiocompR contains **13 functions**:
 
 * `basic.sidebar()` - Draws a ggplot2 of a basic sidebar.  
 * `EVA()` - Computes eigenvectors, principal component scores and correlations from a correlation test.  
 * `fancy.hist()` - Computes in parallel and plot an histogram using ggplot2 from a given vector of values.  
 * `fused.plot()` - Creates a plot summarizing results from 2 different pairwise comparisons.  
 * `fused.view()` - Displays 2 matrices of results as a fused plot.  
+* `gg2heatmap()` - Creates a custom heatmap with dendrograms and annotations.
 * `ggcoverage()` - Plots an annotated barplot.  
 * `ggcraviola()` - Draws a craviola plot (half-splitted and percentile-binned violin plot).  
 * `ggdend()` - Creates a dendogram in ggplot2.  
@@ -30,7 +31,6 @@ Currently the package BiocompR contains **12 functions**:
 
 ## Prerequesites
 ### Install all dependencies
-
 ```R
 inst.pkgs = c('corrplot', 'data.table', 'devtools', 'fastcluster', 'ggdendro',
 	      'ggplot2', 'ggrepel', 'grid', 'gridExtra', 'IRanges', 'psych',
@@ -39,8 +39,14 @@ install.packages(inst.pkgs)
 ```
 
 ## Installing
-1. Open BiocompR.Rproj in RStudio.
-2. In RStudio console, type:
+1. In the Git repository click on "Clone or Download".
+2. Copy the HTTPS link.
+3. Open a terminal and type:
+```bash
+git clone https://github.com/YoannPa/BiocompR.git
+```
+4. Open the folder BiocompR and open the "BiocompR.Rproj" file in RStudio.
+5. In the RStudio console, type:
 ```R
 devtools::install()
 ```
@@ -49,6 +55,7 @@ devtools::install()
 ### How to run an eigenvector anaylsis (EVA)
 
 ⚠️ **Please check the beginning of this section again!**  
+**Proposed changes**  
 ```diff
 + An eigenvector analysis is a principal component analysis (PCA) except that the principal components are eigenvectors of a correlation matrix.  
 + Its main advantage is that the correlation method can be specified, as well as the adjustment method for multiple testing.  

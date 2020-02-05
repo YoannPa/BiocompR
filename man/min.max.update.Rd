@@ -17,7 +17,7 @@ Can be NULL\cr(Default: lgd.limits=NULL).}
 \item{melt.tri}{A \code{data.frame} melted triangle containing test values.}
 
 \item{tri.type}{A \code{character} specifying the type of triangle provided
-\cr(Supported: tri.type = c("upper","lower"))}
+\cr(Supported: tri.type = c("upper","lower")).}
 }
 \value{
 A \code{list} of length 2 containing the updated min and max values.

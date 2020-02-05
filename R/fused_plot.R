@@ -9,7 +9,7 @@
 #'                   Can be NULL\cr(Default: lgd.limits=NULL).
 #' @param melt.tri   A \code{data.frame} melted triangle containing test values.
 #' @param tri.type   A \code{character} specifying the type of triangle provided
-#'                   \cr(Supported: tri.type = c("upper","lower"))
+#'                   \cr(Supported: tri.type = c("upper","lower")).
 #' @return A \code{list} of length 2 containing the updated min and max values.
 #' @author Yoann Pageaud.
 #' @export
@@ -333,7 +333,8 @@ fused.view<-function(
 #'                              pairwise deletion of cases. 'complete' will
 #'                              select just complete cases.
 #' @param order.method          A \code{character} specifying the ordering
-#'                              method to apply.\cr Possible ordering methods are:
+#'                              method to apply.
+#'                              \cr Possible ordering methods are:
 #' \itemize{
 #'  \item{'AOE' - angular order of the eigenvectors.}
 #'  \item{'FPC' - first principal component order.}
@@ -744,8 +745,9 @@ fused.plot<-function(data,ncores,
     order.select = order.select, order.method = order.method,
     hclust.method = hclust.method, correlation.order = correlation.order,
     annot.grps = annot.grps, annot.pal = annot.pal, annot.pos = annot.pos,
-    annot.size = annot.size, annot.text = annot.text, annot.lgd.merge = annot.lgd.merge,
-    annot.split = annot.split, dendro.pos = dendro.pos, dendro.size=dendro.size,
+    annot.size = annot.size, annot.text = annot.text,
+    annot.lgd.merge = annot.lgd.merge, annot.split = annot.split,
+    dendro.pos = dendro.pos, dendro.size = dendro.size,
     grid.col = grid.col, grid.thickness = grid.thickness,
     axis.title = axis.title, axis.title.x = axis.title.x,
     axis.title.y = axis.title.y, axis.text = axis.text, axis.text.x=axis.text.x,

@@ -61,6 +61,7 @@ lapply(Imports, library, character.only = T)
 #' @return A \code{gg} plot of a faceted heatmap.
 #' @author Yoann Pageaud.
 #' @export
+#' @keywords internal
 
 ggclust.heatmap<-function(
   data, regions.clusters, order.type="Hclust", distance.method,

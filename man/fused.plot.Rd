@@ -120,7 +120,8 @@ pairwise deletion of cases. 'complete' will
 select just complete cases.}
 
 \item{order.method}{A \code{character} specifying the ordering
-                             method to apply.\cr Possible ordering methods are:
+                             method to apply.
+                             \cr Possible ordering methods are:
 \itemize{
  \item{'AOE' - angular order of the eigenvectors.}
  \item{'FPC' - first principal component order.}

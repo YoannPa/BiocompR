@@ -1,9 +1,21 @@
 
-#' WARNING: Unstable! Creates a custom heatmap with dendrograms and annotations.
+#' Creates a custom heatmap with dendrograms and annotations.
 #'
 #' @param m               A \code{matrix}.
 #' @param na.handle       A \code{character} to specify how missing values
-#'                        should be handled (Default: na.handle = 'remove';
+#'                        should be handled.
+#'                        \itemize{
+#'                         \item{'keep' do not modify the matrix}
+#'                         \item{'impute' make use of the groups provided in
+#'                               'imputation.grps' to calculate the mean value
+#'                               of a group of columns for a given row where at
+#'                               least one missing value has been found. The
+#'                               missing values are then substituted by the
+#'                               calculated mean of the group.}
+#'                         \item{'remove' removes all rows containing at least
+#'                               1 missing value.}
+#'                        }
+#'                        (Default: na.handle = 'remove';
 #'                        Supported: na.handle = c('keep','impute','remove')).
 #' @param dist.method     A \code{character} vector to specify the distance
 #'                        methods to be used on the matrix rows and columns.
@@ -58,11 +70,19 @@
 #'                        belongs for the annotation sidebars. 'Vectors' lengths
 #'                        have to match the number of variables.
 #' @param annot.pal       A \code{vector} or a list of vectors containing colors
-#'                        as characters for the annotation sidebars. The length
+#'                        as characters for the annotation sidebars.The length
 #'                        of vectors has to match the number of levels of
-#'                        vectors listed in 'annot.grps'. If a list is provided,
-#'                        its length must match the length of the list provided
-#'                        to 'annot.grps'.
+#'                        vectors listed in 'annot.grps'.
+#'                        \itemize{
+#'                         \item{If annot.pal is a list: its length must match
+#'                               the length of the list provided to
+#'                               'annot.grps'.}
+#'                         \item{If annot.pal is a vector: make sure that the
+#'                               levels content of annotations listed in
+#'                               'annot.grps' is the same, and that no
+#'                               annotation contains less or more levels than
+#'                               another one in 'annot.grps'.}
+#'                        }
 #' @param annot.size      A \code{numeric} defining the width of the annotation
 #'                        bars (Default: annot.size = 1).
 #' @param annot.lgd.space A \code{numeric} defining the size of the space
@@ -90,10 +110,8 @@
 #' @author Yoann Pageaud.
 #' @export
 
-#TODO: Support na.handle
-#TODO: Support tuple for dist.method
-#TODO: Support rank.fun
-#TODO: Support top.rows
+#TODO: Support rank.fun alone
+#TODO: Support top.rows alone
 #TODO: Add some data in return
 gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
                      rank.fun = NULL, top.rows = NULL, dendrograms = TRUE,
@@ -151,10 +169,12 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
   check.annotations(data = m, annot.grps = annot.grps, annot.pal = annot.pal)
 
   #Handle NAs
-  m<-manage.na(data = m, method = na.handle, groups = imputation.grps)
+  m<-manage.na(data = m, method = na.handle, groups = imputation.grps,
+               ncores = ncores)
 
   #Apply ranking function if any function defined
-  if(!is.null(rank.fun)){#TODO: improve this part to support more function
+  if(!is.null(rank.fun)){
+    #TODO: improve this part to support more function with eval() & parse()
     m <- m[order(apply(m, 1, sd, na.rm = T), decreasing = TRUE), , drop = FALSE]
   }
   #Subset top rows if any value defined
@@ -292,8 +312,8 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
       top = textGrob("DMRs in 129 and BL6J WT Vs. 129 Mut DMNT1 HSPCs",
                      gp = gpar(fontsize = 15, font = 1)),
       grobs = list(
-        textGrob(paste("(Columns ordered by", dist.method,
-                       "distance; Rows ordered by", dist.method, "distance;",
+        textGrob(paste("(Columns ordered by", method.cols,
+                       "distance; Rows ordered by", method.rows, "distance;",
                        nrow(m), "loci.)"), gp = gpar(fontsize=12, fontface=3L)),
         arrangeGrob(grobs = list(main_grob, right.legends), ncol = 2,
                     widths = c(20,3))),
