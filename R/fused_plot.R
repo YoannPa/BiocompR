@@ -371,6 +371,15 @@ fused.view<-function(
 #'                              'top', 'left' or 'both'.
 #' @param annot.size            An \code{integer} to increase or decrease the
 #'                              size of the annotation side bar.
+#' @param annot.text            A \code{element_text} object to setup
+#'                              annotations labels.
+#' @param annot.lgd.merge       A \code{logical} to specify whether annotation
+#'                              legends should be merged
+#'                              (annot.lgd.merge='TRUE') or remain separated
+#'                              (annot.lgd.merge='FALSE').
+#' @param annot.split           A \code{logical} to specify if a separating
+#'                              space should be inserted between annotation
+#'                              bars.
 #' @param dendro.pos            A \code{character} specifying the position of
 #'                              dendrograms if the selected order is 'hclust'.
 #'                              \cr Possible values are: 'top','left','none'.
@@ -454,6 +463,12 @@ fused.view<-function(
 #' @param lgd.limits2           A \code{double} vector of length 2, giving the
 #'                              upper and lower limits for mapping breaks and
 #'                              colors to the lower triangle legend.
+#' @param lgd.ticks             A \code{logical} to specify wether ticks should
+#'                              be diplayed on both axes.
+#' @param lgd.ticks1            A \code{logical} to specify wether ticks should
+#'                              be diplayed on the top X-axis.
+#' @param lgd.ticks2            A \code{logical} to specify wether ticks should
+#'                              be diplayed on the Y-axis.
 #' @param lgd.ticks.linewidth   A \code{double} value to specify the thickness
 #'                              of legends ticks.
 #' @param lgd.ticks.linewidth1  A \code{double} value to specify the thickness
@@ -511,7 +526,7 @@ fused.view<-function(
 #' @author Yoann Pageaud.
 #' @export
 
-#TODO: Add parameter documentation for annot.text.
+#TODO: Add default and supported values for all parameters.
 fused.plot<-function(data,ncores,
                      upper.comp,upper.value,lower.comp,lower.value,
                      na.rm = 'pairwise', order.method, order.select,

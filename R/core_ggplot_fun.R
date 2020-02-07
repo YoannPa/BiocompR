@@ -1,8 +1,4 @@
 
-##IMPORTS
-Imports = c("ggplot2","data.table")
-lapply(Imports, library, character.only = T)
-
 #' Checks matching between annotation groups and annotation palettes.
 #'
 #' @param data       A \code{matrix} or a \code{data.frame} with column names.
@@ -100,6 +96,7 @@ get.lgd<-function(gg2.obj){
 #' @author Yoann Pageaud.
 #' @export
 
+#TODO: change plot.type by reverse.x=TRUE/FALSE
 ggdend <- function(df, orientation, plot.type) {
   ddplot<- ggplot() +
     geom_segment(data = df, aes(x=x, y=y, xend=xend, yend=yend)) +
@@ -132,10 +129,47 @@ ggdend <- function(df, orientation, plot.type) {
 
 #' Draws a ggplot for a basic upper or lower triangle.
 #'
-#' @param melt.tri       A \code{data.frame} melted triangle containing test
-#'                       values.
-#' @param grid.col       A \code{character} specifying the color of the grid.
-#' @param grid.thickness A \code{double} value for the thickness of the grid.
+#' @param melt.tri            A \code{data.frame} melted triangle containing
+#'                            test values.
+#' @param grid.col            A \code{character} specifying the color of the
+#'                            grid.
+#' @param grid.thickness      A \code{double} value for the thickness of the
+#'                            grid.
+#' @param lgd.title           An \code{element_text} object to setup the legend
+#'                            title text.
+#' @param lgd.text            An \code{element_text} object to setup the legend
+#'                            labels text.
+#' @param lgd.pal             A \code{character} vector of colors to use for the
+#'                            palette of the triangle plot.
+#' @param min_tri             A \code{numeric} defining the minimum limit for
+#'                            the legend of the values in the triangle plot.
+#' @param max_tri             A \code{numeric} defining the maximum limit for
+#'                            the legend of the values in the triangle plot.
+#' @param lgd.breaks          An \code{integer} defining the number of breaks
+#'                            wanted in the legend.
+#' @param lgd.round           An \code{integer} indicating the number of decimal
+#'                            places to be used for the default legends labels.
+#' @param lgd.ticks           A \code{logical} to specify wether ticks should be
+#'                            diplayed on both axes.
+#' @param lgd.nbin            An \code{integer} specifying the number of bins
+#'                            for drawing both colorbars. A smoother colorbar
+#'                            results from a larger value.
+#' @param lgd.height          A \code{double} specifying the height of the
+#'                            colorbar.
+#' @param lgd.width           A \code{double} specifying the width of the
+#'                            colorbar.
+#' @param rasteri             A \code{logical} to specify whether or not colors
+#'                            in the legend should be rasterized.
+#' @param lgd.ticks.linewidth A \code{double} value to specify the thickness of
+#'                            legends ticks.
+#' @param lgd.frame.col       A \code{character} defining the color of the
+#'                            frame of legends.
+#' @param lgd.frame.linewidth A \code{double} defining the thickness of the
+#'                            frame of both legends.
+#' @param diag.col            A \code{character} defining the color of cells
+#'                            with of the empty diagonal.
+#' @param set.lgd.title       A \code{character} to used as the name of the
+#'                            legend.
 #' @return A \code{gg} object of a basic triangle plot (a 'geom_tile()').
 #' @author Yoann Pageaud.
 #' @export
@@ -199,12 +233,49 @@ basic.sidebar<-function(data, palette){
 
 #' Creates a colored side annotation bars in ggplot2.
 #'
-#' @param sample.names A \code{type} parameter description.
+#' @param sample.names A \code{character} vector of the labels to be used for
+#'                     annotation.
+#' @param annot.grps   A \code{list} of vectors of groups to which variables
+#'                     belongs for the annotation sidebars. vectors lengths
+#'                     have to match the number of variables.
+#' @param annot.pal    A \code{vector} or a list of vectors containing colors
+#'                     as characters for the annotation sidebars. The length of
+#'                     vectors has to match the number of levels of vectors
+#'                     listed in 'annot.grps'.
+#'                     \itemize{
+#'                      \item{If annot.pal is a list: its length must match the
+#'                            length of the list provided to 'annot.grps'.}
+#'                      \item{If annot.pal is a vector: make sure that the
+#'                            levels content of annotations listed in
+#'                            'annot.grps' is the same, and that no annotation
+#'                            contains less or more levels than another one in
+#'                            'annot.grps'.}
+#'                     }
+#' @param annot.pos    A \code{character} specifying the position of the
+#'                     annotation sidebar.\cr Possible values are: 'top',
+#'                     'left' or 'both'.
+#' @param cor.order    An \code{integer} vector to be used to reorder the labels
+#'                     in 'sample.names'.
+#' @param split.annot  to complete
+#' @param merge.lgd    to complete
+#' @param right        to complete
+#' @param lgd.lab      to complete
+#' @param lgd.title    to complete
+#' @param axis.text.x  to complete
+#' @param axis.text.y  to complete
+#' @param axis.ticks.x to complete
+#' @param axis.ticks.y to complete
+#' @param axis.title.x to complete
+#' @param axis.title.y to complete
+#' @param set.x.title  to complete
+#' @param set.y.title  to complete
+#' @param dendro.pos   to complete
 #' @return A \code{type} object returned description.
 #' @author Yoann Pageaud.
 #' @export
 
-#TODO: Write documentation!
+#TODO: Finish documentation!
+#TODO: change name of parameter cor.order to see if it can be remove.
 plot.col.sidebar<-function(
   sample.names, annot.grps, annot.pal, annot.pos, cor.order, split.annot = TRUE,
   merge.lgd = FALSE, right = FALSE, lgd.lab = "Legends", lgd.title = NULL,

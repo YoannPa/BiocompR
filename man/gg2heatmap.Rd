@@ -101,7 +101,7 @@ for dendrograms.}
 palette for the heatmap.}
 
 \item{annot.grps}{A \code{list} of vectors of groups to which variables
-belongs for the annotation sidebars. 'Vectors' lengths
+belongs for the annotation sidebars. vectors lengths
 have to match the number of variables.}
 
 \item{annot.pal}{A \code{vector} or a list of vectors containing colors

@@ -1,8 +1,4 @@
 
-##IMPORTS
-Imports = c("data.table")
-lapply(Imports, library, character.only = T)
-
 #' Extracts Kolmogorov-Smirnov test results and return them as a matrix.
 #'
 #' @param df.ks.tests A \code{data.frame} containing raw results from multiple

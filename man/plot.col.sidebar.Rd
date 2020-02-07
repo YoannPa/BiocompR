@@ -27,7 +27,61 @@ plot.col.sidebar(
 )
 }
 \arguments{
-\item{sample.names}{A \code{type} parameter description.}
+\item{sample.names}{A \code{character} vector of the labels to be used for
+annotation.}
+
+\item{annot.grps}{A \code{list} of vectors of groups to which variables
+belongs for the annotation sidebars. vectors lengths
+have to match the number of variables.}
+
+\item{annot.pal}{A \code{vector} or a list of vectors containing colors
+as characters for the annotation sidebars. The length of
+vectors has to match the number of levels of vectors
+listed in 'annot.grps'.
+\itemize{
+ \item{If annot.pal is a list: its length must match the
+       length of the list provided to 'annot.grps'.}
+ \item{If annot.pal is a vector: make sure that the
+       levels content of annotations listed in
+       'annot.grps' is the same, and that no annotation
+       contains less or more levels than another one in
+       'annot.grps'.}
+}}
+
+\item{annot.pos}{A \code{character} specifying the position of the
+annotation sidebar.\cr Possible values are: 'top',
+'left' or 'both'.}
+
+\item{cor.order}{An \code{integer} vector to be used to reorder the labels
+in 'sample.names'.}
+
+\item{split.annot}{to complete}
+
+\item{merge.lgd}{to complete}
+
+\item{right}{to complete}
+
+\item{lgd.lab}{to complete}
+
+\item{lgd.title}{to complete}
+
+\item{axis.text.x}{to complete}
+
+\item{axis.text.y}{to complete}
+
+\item{axis.ticks.x}{to complete}
+
+\item{axis.ticks.y}{to complete}
+
+\item{axis.title.x}{to complete}
+
+\item{axis.title.y}{to complete}
+
+\item{set.x.title}{to complete}
+
+\item{set.y.title}{to complete}
+
+\item{dendro.pos}{to complete}
 }
 \value{
 A \code{type} object returned description.

@@ -28,12 +28,66 @@ basic.ggplot.tri(
 )
 }
 \arguments{
-\item{melt.tri}{A \code{data.frame} melted triangle containing test
-values.}
+\item{melt.tri}{A \code{data.frame} melted triangle containing
+test values.}
 
-\item{grid.col}{A \code{character} specifying the color of the grid.}
+\item{grid.col}{A \code{character} specifying the color of the
+grid.}
 
-\item{grid.thickness}{A \code{double} value for the thickness of the grid.}
+\item{grid.thickness}{A \code{double} value for the thickness of the
+grid.}
+
+\item{lgd.title}{An \code{element_text} object to setup the legend
+title text.}
+
+\item{lgd.text}{An \code{element_text} object to setup the legend
+labels text.}
+
+\item{lgd.pal}{A \code{character} vector of colors to use for the
+palette of the triangle plot.}
+
+\item{min_tri}{A \code{numeric} defining the minimum limit for
+the legend of the values in the triangle plot.}
+
+\item{max_tri}{A \code{numeric} defining the maximum limit for
+the legend of the values in the triangle plot.}
+
+\item{lgd.breaks}{An \code{integer} defining the number of breaks
+wanted in the legend.}
+
+\item{lgd.round}{An \code{integer} indicating the number of decimal
+places to be used for the default legends labels.}
+
+\item{lgd.ticks}{A \code{logical} to specify wether ticks should be
+diplayed on both axes.}
+
+\item{lgd.nbin}{An \code{integer} specifying the number of bins
+for drawing both colorbars. A smoother colorbar
+results from a larger value.}
+
+\item{lgd.height}{A \code{double} specifying the height of the
+colorbar.}
+
+\item{lgd.width}{A \code{double} specifying the width of the
+colorbar.}
+
+\item{rasteri}{A \code{logical} to specify whether or not colors
+in the legend should be rasterized.}
+
+\item{lgd.ticks.linewidth}{A \code{double} value to specify the thickness of
+legends ticks.}
+
+\item{lgd.frame.col}{A \code{character} defining the color of the
+frame of legends.}
+
+\item{lgd.frame.linewidth}{A \code{double} defining the thickness of the
+frame of both legends.}
+
+\item{diag.col}{A \code{character} defining the color of cells
+with of the empty diagonal.}
+
+\item{set.lgd.title}{A \code{character} to used as the name of the
+legend.}
 }
 \value{
 A \code{gg} object of a basic triangle plot (a 'geom_tile()').

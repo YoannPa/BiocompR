@@ -166,6 +166,18 @@ the annotation sidebar.\cr Possible values are:
 \item{annot.size}{An \code{integer} to increase or decrease the
 size of the annotation side bar.}
 
+\item{annot.text}{A \code{element_text} object to setup
+annotations labels.}
+
+\item{annot.lgd.merge}{A \code{logical} to specify whether annotation
+legends should be merged
+(annot.lgd.merge='TRUE') or remain separated
+(annot.lgd.merge='FALSE').}
+
+\item{annot.split}{A \code{logical} to specify if a separating
+space should be inserted between annotation
+bars.}
+
 \item{dendro.pos}{A \code{character} specifying the position of
 dendrograms if the selected order is 'hclust'.
 \cr Possible values are: 'top','left','none'.}
@@ -284,6 +296,15 @@ colors to the upper triangle legend.}
 \item{lgd.limits2}{A \code{double} vector of length 2, giving the
 upper and lower limits for mapping breaks and
 colors to the lower triangle legend.}
+
+\item{lgd.ticks}{A \code{logical} to specify wether ticks should
+be diplayed on both axes.}
+
+\item{lgd.ticks1}{A \code{logical} to specify wether ticks should
+be diplayed on the top X-axis.}
+
+\item{lgd.ticks2}{A \code{logical} to specify wether ticks should
+be diplayed on the Y-axis.}
 
 \item{lgd.ticks.linewidth}{A \code{double} value to specify the thickness
 of legends ticks.}
