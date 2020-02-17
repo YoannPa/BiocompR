@@ -67,7 +67,7 @@
 #' @param heatmap.pal     A \code{character} vector to be used as a color
 #'                        palette for the heatmap.
 #' @param annot.grps      A \code{list} of vectors of groups to which variables
-#'                        belongs for the annotation sidebars. vectors lengths
+#'                        belongs for the annotation sidebars. 'Vectors' lengths
 #'                        have to match the number of variables.
 #' @param annot.pal       A \code{vector} or a list of vectors containing colors
 #'                        as characters for the annotation sidebars.The length
@@ -229,7 +229,7 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
   #Plot Heatmap
   htmp <-ggplot() +
     geom_tile(data = melted_mat, aes(x = Var2, y = Var1, fill=Methylation)) +
-    scale_fill_gradientn(colours = palette.heatmap) +
+    scale_fill_gradientn(colours = heatmap.pal) +
     scale_x_discrete(expand = c(0,0)) + scale_y_discrete(expand = c(0,0)) +
     theme(legend.justification = 'left', plot.margin = margin(0, 0, 0, 0),
           legend.position = c(0.5,0.5), panel.grid = element_blank(),
