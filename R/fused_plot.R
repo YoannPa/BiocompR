@@ -371,7 +371,7 @@ fused.view<-function(
 #'                              'top', 'left' or 'both'.
 #' @param annot.size            An \code{integer} to increase or decrease the
 #'                              size of the annotation side bar.
-#' @param annot.text            A \code{element_text} object to setup
+#' @param annot.text            An \code{element_text} object to setup
 #'                              annotations labels.
 #' @param annot.lgd.merge       A \code{logical} to specify whether annotation
 #'                              legends should be merged

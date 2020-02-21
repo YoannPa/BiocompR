@@ -55,6 +55,7 @@
 #'                               rows and the selection of the top ones will be
 #'                               made before the computation of dendrograms.}
 #'                        }
+#' @param plot.title      A \code{character} to be used as title for the plot.
 #' @param imputation.grps A \code{character} vector defining groups to which
 #'                        columns of the matrix belong. These groups are use to
 #'                        make group-wise imputation of missing values between
@@ -106,22 +107,55 @@
 #'                        when you want to map the same color palette to
 #'                        multiple annotations sharing the same values
 #'                        (Default: lgd.merge = FALSE).
+#' @param lgd.space.width A \code{numeric} specifying the width of the legend
+#'                        space (Default: lgd.space.width = 1).
+#' @param axis.title.x    An \code{element_text} object to setup X axis title
+#'                        (Default: axis.title.x = element_text(size = 12,
+#'                        color = 'black')).
+#' @param axis.text.x     An \code{element_text} object to setup X axis text
+#'                        (Default: axis.text.x = element_text(size = 11,
+#'                        angle = -45, hjust = 0, vjust = 0.5, face = 'bold')).
+#' @param axis.ticks.x    An \code{element_line} object to setup X axis ticks
+#'                        (Default: axis.ticks.x = element_line(color='black')).
+#' @param y.axis.right    A \code{logical} to specify whether the heatmap Y axis
+#'                        should be displayed on the right (y.axis.right = TRUE)
+#'                        or not (y.axis.right = FALSE)
+#'                        (Default: y.axis.right = FALSE).
+#' @param axis.title.y.right An \code{element_text} object to setup right Y axis
+#'                           title
+#'                           (Default: axis.title.y.right = element_blank()).
+#' @param axis.text.y.right  An \code{element_text} object to setup right Y axis
+#'                           text
+#'                           (Default: axis.text.y.right = element_blank()).
+#' @param axis.ticks.y.right An \code{element_line} object to setup right Y axis
+#'                           ticks (Default: axis.ticks.x = element_blank()).
 #' @return A \code{grob} of a heatmap plotted with ggplot2.
 #' @author Yoann Pageaud.
 #' @export
 
 #TODO: Support rank.fun alone
 #TODO: Support top.rows alone
+#TODO: Create a theme argument using the theme function
 #TODO: Add some data in return
 gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
                      rank.fun = NULL, top.rows = NULL, dendrograms = TRUE,
+                     plot.title = "DMRs in 129 and BL6J WT Vs. 129 Mut DMNT1 HSPCs",
                      imputation.grps = NULL, ncores = 1,
                      heatmap.pal = c("steelblue", "gray95", "darkorange"),
                      annot.grps = list("Groups" = seq(ncol(m))),
                      annot.pal = rainbow(n = ncol(m)), annot.size=1,
                      annot.lgd.space = 0, annot.split = FALSE,
                      lgd.lab = 'Legends', lgd.pos.x = 0.5, lgd.pos.y = 0.5,
-                     lgd.merge = FALSE){
+                     lgd.merge = FALSE, lgd.space.width = 1,
+                     axis.title.x = element_text(
+                       size = 12, color = 'black'), axis.text.x = element_text(
+                         size = 11, angle = -45, hjust = 0, vjust = 0.5,
+                         face = 'bold'),
+                     axis.ticks.x = element_line(color = 'black'),
+                     y.axis.right = FALSE,
+                     axis.title.y.right = element_blank(),
+                     axis.text.y.right = element_blank(),
+                     axis.ticks.y.right = element_blank()){
   #Check m is a matrix
   if(!is.matrix(m)){ stop("m must be a matrix.") }
   #Check if na.handle method  supported
@@ -164,6 +198,8 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
     dd.rows<-dendrograms[1]
     dd.cols<-dendrograms[2]
   } else { stop("'dendrograms' length > 2. Too many values.") }
+
+
 
   #Check annotations groups and palettes matching
   check.annotations(data = m, annot.grps = annot.grps, annot.pal = annot.pal)
@@ -230,26 +266,32 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
   htmp <-ggplot() +
     geom_tile(data = melted_mat, aes(x = Var2, y = Var1, fill=Methylation)) +
     scale_fill_gradientn(colours = heatmap.pal) +
-    scale_x_discrete(expand = c(0,0)) + scale_y_discrete(expand = c(0,0)) +
+    scale_x_discrete(expand = c(0,0)) +
     theme(legend.justification = 'left', plot.margin = margin(0, 0, 0, 0),
           legend.position = c(0.5,0.5), panel.grid = element_blank(),
           panel.background = element_rect(fill = "transparent"),
           plot.background = element_rect(fill = "transparent"))
   if(dendrograms[1]){
     htmp <- htmp +
-      theme(axis.title.y = element_blank(),
-            axis.ticks.y = element_blank(),
-            axis.ticks.length.y = unit(0, "pt"),
-            axis.text.y = element_blank(),
+      theme(axis.title.y.left = element_blank(),
+            axis.ticks.y.left = element_blank(),
+            axis.ticks.length.y.left = unit(0, "pt"),
+            axis.text.y.left = element_blank(),
             plot.margin=unit(c(0,0,0,0),"cm"))
   }
   htmp <- htmp +
     theme(legend.text=element_text(size= 11),
           legend.title = element_text(size = 12),
-          axis.title.x = element_text(size = 12, color = "black"),
-          axis.text.x = element_text(size = 11, angle = -45, hjust = 0,
-                                     vjust = 0.5, face = "bold")) +
+          axis.title.x = axis.title.x, axis.text.x = axis.text.x,
+          axis.ticks.x = axis.ticks.x, axis.title.y.right = axis.title.y.right,
+          axis.ticks.y.right = axis.ticks.y.right,
+          axis.text.y.right = axis.text.y.right) +
     xlab("Samples")
+  if(y.axis.right){
+    htmp <- htmp + scale_y_discrete(position = 'right', expand = c(0,0))
+  } else {
+    htmp <- htmp + scale_y_discrete(expand = c(0,0))
+  }
 
   #Reoder groups and convert as factors
   annot.grps <- lapply(X = annot.grps, FUN = function(i){
@@ -298,25 +340,18 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
       grobs = sidebar_legend, nrow = 4, heights = c(4,1+annot.lgd.space,4,4))
     right.legends <- arrangeGrob(
       htmp_legend, textGrob(""), sidebar_legend.grob,
-      layout_matrix = cbind(c(1,1,1,2), c(2,2,2,2), c(3,3,3,3)),
+      layout_matrix = cbind(c(1,1,1,2), c(2,2,2,2), c(3,3,3,3), c(2,2,2,2)),
       vp = viewport(x= lgd.pos.x-0.6, y = lgd.pos.y))
-    # right.legends <- arrangeGrob(
-    #   textGrob(""), textGrob(""), textGrob(""),
-    #   htmp_legend, textGrob(""), sidebar_legend.grob,
-    #   textGrob(""), textGrob(""), textGrob(""),
-    #   ncol = 3, vp = viewport(x = -0.1), widths = c(1,1,1),
-    #   heights = c(1, 1 + annot.lgd.space, 1 + annot.lgd.space))
-
     #Final plot
-    grid.arrange(arrangeGrob(
-      top = textGrob("DMRs in 129 and BL6J WT Vs. 129 Mut DMNT1 HSPCs",
-                     gp = gpar(fontsize = 15, font = 1)),
+    final.plot<-grid.arrange(arrangeGrob(
+      top = textGrob(plot.title, gp = gpar(fontsize = 15, font = 1)),
       grobs = list(
         textGrob(paste("(Columns ordered by", method.cols,
                        "distance; Rows ordered by", method.rows, "distance;",
-                       nrow(m), "loci.)"), gp = gpar(fontsize=12, fontface=3L)),
+                       nrow(m), "rows.)"), gp = gpar(fontsize=12, fontface=3L)),
         arrangeGrob(grobs = list(main_grob, right.legends), ncol = 2,
-                    widths = c(20,3))),
+                    widths = c(20, 2 + lgd.space.width))),
       nrow = 2, heights = c(3,50)))
   }
+  return(final.plot)
 }

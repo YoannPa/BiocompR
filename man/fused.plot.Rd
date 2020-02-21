@@ -166,7 +166,7 @@ the annotation sidebar.\cr Possible values are:
 \item{annot.size}{An \code{integer} to increase or decrease the
 size of the annotation side bar.}
 
-\item{annot.text}{A \code{element_text} object to setup
+\item{annot.text}{An \code{element_text} object to setup
 annotations labels.}
 
 \item{annot.lgd.merge}{A \code{logical} to specify whether annotation

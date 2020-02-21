@@ -11,6 +11,7 @@ gg2heatmap(
   rank.fun = NULL,
   top.rows = NULL,
   dendrograms = TRUE,
+  plot.title = "DMRs in 129 and BL6J WT Vs. 129 Mut DMNT1 HSPCs",
   imputation.grps = NULL,
   ncores = 1,
   heatmap.pal = c("steelblue", "gray95", "darkorange"),
@@ -22,7 +23,16 @@ gg2heatmap(
   lgd.lab = "Legends",
   lgd.pos.x = 0.5,
   lgd.pos.y = 0.5,
-  lgd.merge = FALSE
+  lgd.merge = FALSE,
+  lgd.space.width = 1,
+  axis.title.x = element_text(size = 12, color = "black"),
+  axis.text.x = element_text(size = 11, angle = -45, hjust = 0, vjust = 0.5, face =
+    "bold"),
+  axis.ticks.x = element_line(color = "black"),
+  y.axis.right = FALSE,
+  axis.title.y.right = element_blank(),
+  axis.text.y.right = element_blank(),
+  axis.ticks.y.right = element_blank()
 )
 }
 \arguments{
@@ -86,6 +96,8 @@ should be plotted with the heatmap.
        made before the computation of dendrograms.}
 }}
 
+\item{plot.title}{A \code{character} to be used as title for the plot.}
+
 \item{imputation.grps}{A \code{character} vector defining groups to which
 columns of the matrix belong. These groups are use to
 make group-wise imputation of missing values between
@@ -148,6 +160,36 @@ multiple annotation bars should be merged
 when you want to map the same color palette to
 multiple annotations sharing the same values
 (Default: lgd.merge = FALSE).}
+
+\item{lgd.space.width}{A \code{numeric} specifying the width of the legend
+space (Default: lgd.space.width = 1).}
+
+\item{axis.title.x}{An \code{element_text} object to setup X axis title
+(Default: axis.title.x = element_text(size = 12,
+color = 'black')).}
+
+\item{axis.text.x}{An \code{element_text} object to setup X axis text
+(Default: axis.text.x = element_text(size = 11,
+angle = -45, hjust = 0, vjust = 0.5, face = 'bold')).}
+
+\item{axis.ticks.x}{An \code{element_line} object to setup X axis ticks
+(Default: axis.ticks.x = element_line(color='black')).}
+
+\item{y.axis.right}{A \code{logical} to specify whether the heatmap Y axis
+should be displayed on the right (y.axis.right = TRUE)
+or not (y.axis.right = FALSE)
+(Default: y.axis.right = FALSE).}
+
+\item{axis.title.y.right}{An \code{element_text} object to setup right Y axis
+title
+(Default: axis.title.y.right = element_blank()).}
+
+\item{axis.text.y.right}{An \code{element_text} object to setup right Y axis
+text
+(Default: axis.text.y.right = element_blank()).}
+
+\item{axis.ticks.y.right}{An \code{element_line} object to setup right Y axis
+ticks (Default: axis.ticks.x = element_blank()).}
 }
 \value{
 A \code{grob} of a heatmap plotted with ggplot2.
