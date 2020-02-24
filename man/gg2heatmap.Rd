@@ -11,7 +11,9 @@ gg2heatmap(
   rank.fun = NULL,
   top.rows = NULL,
   dendrograms = TRUE,
+  dend.col.size = 1,
   plot.title = "DMRs in 129 and BL6J WT Vs. 129 Mut DMNT1 HSPCs",
+  row.type = "rows",
   imputation.grps = NULL,
   ncores = 1,
   heatmap.pal = c("steelblue", "gray95", "darkorange"),
@@ -20,7 +22,8 @@ gg2heatmap(
   annot.size = 1,
   annot.lgd.space = 0,
   annot.split = FALSE,
-  lgd.lab = "Legends",
+  lgd.scale.name = "values",
+  lgd.bars.name = "Legends",
   lgd.pos.x = 0.5,
   lgd.pos.y = 0.5,
   lgd.merge = FALSE,
@@ -96,7 +99,15 @@ should be plotted with the heatmap.
        made before the computation of dendrograms.}
 }}
 
+\item{dend.col.size}{A \code{numeric} defining the height of the dendrogram
+made on columns (Default: dend.col.size = 1).}
+
 \item{plot.title}{A \code{character} to be used as title for the plot.}
+
+\item{row.type}{A \code{character} to be used in the plot subtitle
+description as a definition of the rows (e.g. 'loci',
+'samples', 'regions', etc.
+Default: row.type = 'rows').}
 
 \item{imputation.grps}{A \code{character} vector defining groups to which
 columns of the matrix belong. These groups are use to
@@ -143,9 +154,13 @@ added between each annotation (annot.split = TRUE) or
 not (annot.split = FALSE)
 (Default: annot.split = FALSE).}
 
-\item{lgd.lab}{A \code{character} specifying the name of annotation
+\item{lgd.scale.name}{A \code{character} to be used as legend title for the
+heatmap scale (Default: lgd.scale.name = 'values').}
+
+\item{lgd.bars.name}{A \code{character} specifying the name of annotation
 side bar legends, when legends are merged
-(lgd.merge = TRUE).}
+(lgd.merge = TRUE)
+(Default: lgd.bars.name = 'Legends').}
 
 \item{lgd.pos.x}{A \code{numeric} vector or unit object specifying the
 x-location of the legends (Default: lgd.pos.x = 0.5).}

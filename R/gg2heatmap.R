@@ -55,7 +55,13 @@
 #'                               rows and the selection of the top ones will be
 #'                               made before the computation of dendrograms.}
 #'                        }
+#' @param dend.col.size   A \code{numeric} defining the height of the dendrogram
+#'                        made on columns (Default: dend.col.size = 1).
 #' @param plot.title      A \code{character} to be used as title for the plot.
+#' @param row.type        A \code{character} to be used in the plot subtitle
+#'                        description as a definition of the rows (e.g. 'loci',
+#'                        'samples', 'regions', etc.
+#'                        Default: row.type = 'rows').
 #' @param imputation.grps A \code{character} vector defining groups to which
 #'                        columns of the matrix belong. These groups are use to
 #'                        make group-wise imputation of missing values between
@@ -93,9 +99,12 @@
 #'                        added between each annotation (annot.split = TRUE) or
 #'                        not (annot.split = FALSE)
 #'                        (Default: annot.split = FALSE).
-#' @param lgd.lab         A \code{character} specifying the name of annotation
+#' @param lgd.scale.name  A \code{character} to be used as legend title for the
+#'                        heatmap scale (Default: lgd.scale.name = 'values').
+#' @param lgd.bars.name   A \code{character} specifying the name of annotation
 #'                        side bar legends, when legends are merged
-#'                        (lgd.merge = TRUE).
+#'                        (lgd.merge = TRUE)
+#'                        (Default: lgd.bars.name = 'Legends').
 #' @param lgd.pos.x       A \code{numeric} vector or unit object specifying the
 #'                        x-location of the legends (Default: lgd.pos.x = 0.5).
 #' @param lgd.pos.y       A \code{numeric} vector or unit object specifying the
@@ -133,20 +142,25 @@
 #' @author Yoann Pageaud.
 #' @export
 
+#TODO: Fix how legends are stacked and how spacing is calculated.
 #TODO: Support rank.fun alone
 #TODO: Support top.rows alone
-#TODO: Create a theme argument using the theme function
+#TODO: Merge dend.col.size & dend.row.size into dend.size being a tuple
+#TODO: Create a theme argument using the theme() function
 #TODO: Add some data in return
 gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
                      rank.fun = NULL, top.rows = NULL, dendrograms = TRUE,
+                     dend.col.size = 1,
                      plot.title = "DMRs in 129 and BL6J WT Vs. 129 Mut DMNT1 HSPCs",
+                     row.type = 'rows',
                      imputation.grps = NULL, ncores = 1,
                      heatmap.pal = c("steelblue", "gray95", "darkorange"),
                      annot.grps = list("Groups" = seq(ncol(m))),
-                     annot.pal = rainbow(n = ncol(m)), annot.size=1,
+                     annot.pal = rainbow(n = ncol(m)), annot.size = 1,
                      annot.lgd.space = 0, annot.split = FALSE,
-                     lgd.lab = 'Legends', lgd.pos.x = 0.5, lgd.pos.y = 0.5,
-                     lgd.merge = FALSE, lgd.space.width = 1,
+                     lgd.scale.name = 'values', lgd.bars.name = 'Legends',
+                     lgd.pos.x = 0.5, lgd.pos.y = 0.5, lgd.merge = FALSE,
+                     lgd.space.width = 1,
                      axis.title.x = element_text(
                        size = 12, color = 'black'), axis.text.x = element_text(
                          size = 11, angle = -45, hjust = 0, vjust = 0.5,
@@ -260,11 +274,12 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
   }
 
   melted_mat <- melt(dframe) #Melt Matrix into a dataframe
-  colnames(melted_mat)[3]<-"Methylation"
+  #TODO: rm this
+  # colnames(melted_mat)[3]<-"Methylation"
 
   #Plot Heatmap
   htmp <-ggplot() +
-    geom_tile(data = melted_mat, aes(x = Var2, y = Var1, fill=Methylation)) +
+    geom_tile(data = melted_mat, aes(x = Var2, y = Var1, fill = value)) +
     scale_fill_gradientn(colours = heatmap.pal) +
     scale_x_discrete(expand = c(0,0)) +
     theme(legend.justification = 'left', plot.margin = margin(0, 0, 0, 0),
@@ -286,7 +301,8 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
           axis.ticks.x = axis.ticks.x, axis.title.y.right = axis.title.y.right,
           axis.ticks.y.right = axis.ticks.y.right,
           axis.text.y.right = axis.text.y.right) +
-    xlab("Samples")
+    xlab("Samples") +
+    labs(fill = lgd.scale.name)
   if(y.axis.right){
     htmp <- htmp + scale_y_discrete(position = 'right', expand = c(0,0))
   } else {
@@ -303,7 +319,7 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
     sample.names = colnames(m[, column.order]), annot.grps = annot.grps,
     annot.pal = annot.pal, annot.pos = 'top',
     cor.order = seq_along(colnames(dframe)), split.annot = annot.split,
-    merge.lgd = lgd.merge, right = TRUE, lgd.lab = lgd.lab,
+    merge.lgd = lgd.merge, right = TRUE, lgd.lab = lgd.bars.name,
     axis.text.x = element_blank(),
     axis.text.y = element_text(size = 11, color = "black"),
     axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
@@ -334,7 +350,8 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
       grobs = list(textGrob(""), upd.grob_w$dd_col,
                    textGrob(""), upd.grob_w$sidebar,
                    upd.grob_h$dd_row, upd.grob_h$htmp),
-      ncol = 2, nrow = 3, heights = c(3, annot.size, 30), widths = c(2, 10))
+      ncol = 2, nrow = 3, heights = c(dend.col.size+2, annot.size, 30),
+      widths = c(2, 10))
     #Create the Right Panel for legends
     sidebar_legend.grob <- arrangeGrob(
       grobs = sidebar_legend, nrow = 4, heights = c(4,1+annot.lgd.space,4,4))
@@ -346,9 +363,10 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
     final.plot<-grid.arrange(arrangeGrob(
       top = textGrob(plot.title, gp = gpar(fontsize = 15, font = 1)),
       grobs = list(
-        textGrob(paste("(Columns ordered by", method.cols,
-                       "distance; Rows ordered by", method.rows, "distance;",
-                       nrow(m), "rows.)"), gp = gpar(fontsize=12, fontface=3L)),
+        textGrob(
+          paste0("Columns ordered by ", method.cols, " distance; Rows ordered by ",
+                method.rows, " distance; ", nrow(m), " ", row.type, "."),
+          gp = gpar(fontsize = 12, fontface = 3L)),
         arrangeGrob(grobs = list(main_grob, right.legends), ncol = 2,
                     widths = c(20, 2 + lgd.space.width))),
       nrow = 2, heights = c(3,50)))
