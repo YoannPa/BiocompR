@@ -228,7 +228,8 @@ basic.sidebar<-function(data, palette){
           plot.margin = margin(0,0,0,0),
           strip.background = element_blank(),
           strip.text = element_blank()) +
-    scale_fill_manual(values=as.character(palette))
+    scale_fill_manual(values=as.character(palette)) +
+    guides(fill = guide_legend(ncol = 1))
 }
 
 #' Creates a colored side annotation bars in ggplot2.
@@ -434,7 +435,7 @@ plot.col.sidebar<-function(
 #' @param end.unit   An \code{integer} specifying at which rank of the unit
 #'                   object the dimension comparison between grobs should end.
 #' @return A \code{grob} list, all resized with their dimensions modified by the
-#'         unit.pmax() function.
+#'         grid::unit.pmax() function.
 #' @author Yoann Pageaud.
 #' @export
 #' @references \href{https://github.com/tidyverse/ggplot2/wiki/Align-two-plots-on-a-page}{Align two plots on a page - Mara Averick}
@@ -446,7 +447,7 @@ resize.grobs<-function(ls.grobs, dimensions, start.unit, end.unit){
   })
   #Calculate maxilum of all unit objects including the main grob.
   max.dim <-eval(parse(
-    text = paste("unit.pmax(",paste(paste(
+    text = paste("grid::unit.pmax(",paste(paste(
       rep("ls.dim[[",length(ls.dim)), seq(length(ls.dim)),"]]", sep = ""),
       collapse = ", "), ")", sep = "")))
   #Apply changes to grobs dimensions

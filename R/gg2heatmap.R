@@ -167,9 +167,9 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
                          face = 'bold'),
                      axis.ticks.x = element_line(color = 'black'),
                      y.axis.right = FALSE,
-                     axis.title.y.right = element_blank(),
-                     axis.text.y.right = element_blank(),
-                     axis.ticks.y.right = element_blank()){
+                     axis.title.y.right = element_text(size = 12),
+                     axis.text.y.right = element_text(size = 12),
+                     axis.ticks.y.right = element_line(color = 'black')){
   #Check m is a matrix
   if(!is.matrix(m)){ stop("m must be a matrix.") }
   #Check if na.handle method  supported
@@ -238,12 +238,13 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
   #Create Dendrograms
   if(dd.rows & method.rows != 'none'){
     #Create Rows Dendrogram
-    row_dist<-parDist(dend_mat, method = method.rows, threads = ncores)
+    row_dist <- parallelDist::parDist(
+      dend_mat, method = method.rows, threads = ncores)
     row_hclust<-hclust(row_dist)
     rm(row_dist)
     rowclust<-as.dendrogram(row_hclust)
     #Get dendrogram segments and order matrix rows
-    ddgr_seg_row <- ggdend(df = dendro_data(rowclust)$segments,
+    ddgr_seg_row <- ggdend(df = ggdendro::dendro_data(rowclust)$segments,
                            orientation = "left", plot.type = 'heatmap')
     row.order<-order.dendrogram(rowclust)
   } else if(dd.rows & method.rows == 'none'){
@@ -252,10 +253,10 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
 
   if(dd.cols & method.cols != 'none'){
     #Create Columns Dendrogram
-    ddgr <- as.dendrogram(hclust(
-      parDist(t(dend_mat), method = method.cols, threads = ncores)))
+    ddgr <- as.dendrogram(hclust(parallelDist::parDist(
+      t(dend_mat), method = method.cols, threads = ncores)))
     #Get dendrogram data
-    ddgr_dat<-dendro_data(ddgr)
+    ddgr_dat<-ggdendro::dendro_data(ddgr)
     #Get dendrogram segments and order matrix columns
     ddgr_seg_col <- ggdend(
       df = ddgr_dat$segments, orientation = "top", plot.type = 'heatmap')
@@ -321,7 +322,7 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
     cor.order = seq_along(colnames(dframe)), split.annot = annot.split,
     merge.lgd = lgd.merge, right = TRUE, lgd.lab = lgd.bars.name,
     axis.text.x = element_blank(),
-    axis.text.y = element_text(size = 11, color = "black"),
+    axis.text.y = element_text(size = 12, color = "black"),
     axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
     axis.title.x = element_blank(), axis.title.y = element_blank(),
     set.x.title = NULL, set.y.title = NULL, dendro.pos = 'top')
@@ -346,29 +347,28 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
   if((length(dendrograms) == 1 & dendrograms) |
      (length(dendrograms) == 2 & all(dendrograms == TRUE))){
     #Create main grob
-    main_grob <- arrangeGrob(
-      grobs = list(textGrob(""), upd.grob_w$dd_col,
-                   textGrob(""), upd.grob_w$sidebar,
+    main_grob <- gridExtra::arrangeGrob(
+      grobs = list(grid::textGrob(""), upd.grob_w$dd_col,
+                   grid::textGrob(""), upd.grob_w$sidebar,
                    upd.grob_h$dd_row, upd.grob_h$htmp),
       ncol = 2, nrow = 3, heights = c(dend.col.size+2, annot.size, 30),
       widths = c(2, 10))
     #Create the Right Panel for legends
-    sidebar_legend.grob <- arrangeGrob(
+    sidebar_legend.grob <- gridExtra::arrangeGrob(
       grobs = sidebar_legend, nrow = 4, heights = c(4,1+annot.lgd.space,4,4))
-    right.legends <- arrangeGrob(
-      htmp_legend, textGrob(""), sidebar_legend.grob,
+    right.legends <- gridExtra::arrangeGrob(
+      htmp_legend, grid::textGrob(""), sidebar_legend.grob,
       layout_matrix = cbind(c(1,1,1,2), c(2,2,2,2), c(3,3,3,3), c(2,2,2,2)),
-      vp = viewport(x= lgd.pos.x-0.6, y = lgd.pos.y))
+      vp = grid::viewport(x= lgd.pos.x-0.6, y = lgd.pos.y))
     #Final plot
-    final.plot<-grid.arrange(arrangeGrob(
-      top = textGrob(plot.title, gp = gpar(fontsize = 15, font = 1)),
-      grobs = list(
-        textGrob(
-          paste0("Columns ordered by ", method.cols, " distance; Rows ordered by ",
-                method.rows, " distance; ", nrow(m), " ", row.type, "."),
-          gp = gpar(fontsize = 12, fontface = 3L)),
-        arrangeGrob(grobs = list(main_grob, right.legends), ncol = 2,
-                    widths = c(20, 2 + lgd.space.width))),
+    final.plot<-gridExtra::grid.arrange(gridExtra::arrangeGrob(
+      top = grid::textGrob(plot.title, gp = grid::gpar(fontsize = 15, font=1)),
+      grobs = list(grid::textGrob(paste0(
+        "Columns ordered by ", method.cols, " distance; Rows ordered by ",
+        method.rows, " distance; ", nrow(m), " ", row.type, "."),
+        gp = grid::gpar(fontsize = 12, fontface = 3L)),
+        gridExtra::arrangeGrob(grobs = list(main_grob, right.legends), ncol = 2,
+                               widths = c(20, 2 + lgd.space.width))),
       nrow = 2, heights = c(3,50)))
   }
   return(final.plot)

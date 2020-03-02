@@ -20,7 +20,7 @@ object the dimension comparison between grobs should end.}
 }
 \value{
 A \code{grob} list, all resized with their dimensions modified by the
-        unit.pmax() function.
+        grid::unit.pmax() function.
 }
 \description{
 Resizes heights or widths of multiple grobs based on a given grob dimensions.
