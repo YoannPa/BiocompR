@@ -55,3 +55,30 @@ pairwise.ks<-function(data, statistic, ncores){
   return(list("res.statistic" = mat, "res.test" = df.ks.tests,
               "table_combinations" = table_combinations))
 }
+
+#' Converts a list of type 'psych' objects into a data.table.
+#'
+#' @param psych.list A \code{psych} list of correlation results.
+#' @return A \code{data.table} of the correlation results with columns:
+#'         \itemize{
+#'          \item{'var.name' - the name of the psych in the list.}
+#'          \item{'cor' - the value of the correlation test.}
+#'          \item{'pvalue' - the P-value associated to the correlation test.}
+#'          \item{'nsample' - the number of samples used for the pairwise
+#'          correlation.}
+#'          \item{'stderr' - the standard error associated to the correlation
+#'          test.}
+#'         }
+#' @author Yoann Pageaud.
+#' @export
+#' @keywords internal
+
+ls.psych.as.dt<-function(psych.list){
+  dt<-rbindlist(l = lapply(X = psych.list, FUN = function(i){
+    data.table(
+      cor = i[["r"]], pvalue = i[["p"]], nsample = i[["n"]], stderr = i[["se"]])
+  }), use.names = TRUE, fill = TRUE)
+  dt<-cbind(var.name = names(psych.list),dt)
+  return(dt)
+}
+
