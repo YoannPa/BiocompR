@@ -2,20 +2,21 @@
 _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots dedicated to data comparison and dataset exploration and ultimately provides users with versatile and customizable graphics._  
 
 **Author: PAGEAUD Y.<sup>1</sup>**  
-**Contributors: SCHEFZIK R.<sup>2</sup>; MAYAKONDA A.<sup>3</sup>; WURSTHORN A.<sup>4</sup>; FEUERBACH L.<sup>1</sup>; TOTH R.<sup>3</sup>; HONG C.<sup>1</sup>.**  
+**Contributors: SCHEFZIK R.<sup>2</sup>; WURSTHORN A.<sup>4</sup>; MAYAKONDA A.<sup>3</sup>; FEUERBACH L.<sup>1</sup>; TOTH R.<sup>3</sup>.**  
 **1-** [**DKFZ - Division of Applied Bioinformatics, Germany.**](https://www.dkfz.de/en/applied-bioinformatics/index.php)  
 **2-** [**Klinik für Anästhesiologie und Operative Intensivmedizin, Medizinische Fakultät Mannheim, Universität Heidelberg, Germany.**](https://www.umm.de/klinik-fuer-anaesthesiologie-und-operative-intensivmedizin/)  
 **3-** [**DKFZ - Computational Cancer Epigenomics, Germany.**](https://www.dkfz.de/en/CanEpi/CompEpigen/index.html)  
 **4-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
-**Version: 0.0.47 (Beta)**  
+**Version: 0.0.56 (Beta)**  
 **R Compatibility: Version 3.6.2**  
-**Last Update: 05/02/2020**  
+**Last Update: 04/03/2020**  
 
 ## Content
-Currently the package BiocompR contains **13 functions**:
+Currently the package BiocompR contains **17 functions**:
 
 * `basic.sidebar()` - Draws a ggplot2 of a basic sidebar.  
+* `bivar.plot()` - Computes boxplots or violins from 1 variable values against ranges of a 2nd one.  
 * `EVA()` - Computes eigenvectors, principal component scores and correlations from a correlation test.  
 * `fancy.hist()` - Computes in parallel and plot an histogram using ggplot2 from a given vector of values.  
 * `fused.plot()` - Creates a plot summarizing results from 2 different pairwise comparisons.  
@@ -25,9 +26,12 @@ Currently the package BiocompR contains **13 functions**:
 * `ggcraviola()` - Draws a craviola plot (half-splitted and percentile-binned violin plot).  
 * `ggdend()` - Creates a dendogram in ggplot2.  
 * `ggeigenvector()` - Creates an eigenvector plot using ggplot2.  
+* `ggpanel.corr()` - Plots results of correlation test between a single variable and multiple others as jittered scatter plot divided into 4 different panels.  
+* `ggvolcano.corr()` - Plots results of correlation test between a single variable and multiple others as volcano plot.  
 * `plot.col.sidebar()` - Creates a colored side annotation bars in ggplot2.  
 * `resize.grobs()` - Resizes heights or widths of multiple grobs based on a given grob dimensions.  
 * `sunset()` - Draws a sunset plot showing the completeness of a dataset.  
+* `warn.handle()` - Filters unrelevant warnings matching a regular expression.  
 
 ## Prerequesites
 ### Install all dependencies
@@ -54,12 +58,9 @@ devtools::install()
 ## Tutorial
 ### How to run an eigenvector anaylsis (EVA)
 
-⚠️ **Please check the beginning of this section again!**  
-**Proposed changes**  
-```diff
-+ An eigenvector analysis is a principal component analysis (PCA) except that the principal components are eigenvectors of a correlation matrix.  
-+ Its main advantage is that the correlation method can be specified, as well as the adjustment method for multiple testing.  
-```
+An eigenvector analysis is a principal component analysis (PCA) except that the principal components are eigenvectors of a correlation matrix.  
+Its main advantage is that the correlation method can be specified, as well as the adjustment method for multiple testing.  
+
 It returns three types of results:  
 * a list of eigenvector plots,  
 * a table showing the correlation values between eigenvectors and selected variables,  
@@ -217,7 +218,7 @@ This tutorial is only an example, it doesn't mean that the parameters set here a
 
 ⚠️ **Work in progress !**  
 
-## Known Issues ⚠️
+## ⚠️Known Issues 
 ```R
 Error in UseMethod("depth") : 
   no applicable method for 'depth' applied to an object of class "NULL"

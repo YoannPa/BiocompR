@@ -1,0 +1,14 @@
+
+#' Filters unrelevant warnings matching a regular expression.
+#'
+#' @param pattern A \code{character} to be processed as a regular expression.
+#' @return A \code{character} list of warning messages.
+#' @author Yoann Pageaud.
+#' @export
+
+warn.handle <- function(pattern, ...){
+  withCallingHandlers(..., warning = function(warning){
+    condition <- conditionMessage(warning)
+    if(grepl(pattern, condition)){ invokeRestart("muffleWarning") }
+  })
+}
