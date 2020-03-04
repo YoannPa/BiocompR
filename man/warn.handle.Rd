@@ -10,7 +10,8 @@ warn.handle(pattern, ...)
 \item{pattern}{A \code{character} to be processed as a regular expression.}
 }
 \value{
-A \code{character} list of warning messages.
+A \code{character} list of warning messages without the warnings
+        matching the pattern.
 }
 \description{
 Filters unrelevant warnings matching a regular expression.

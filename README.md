@@ -218,7 +218,7 @@ This tutorial is only an example, it doesn't mean that the parameters set here a
 
 ⚠️ **Work in progress !**  
 
-## ⚠️Known Issues 
+## ⚠️ Known Issues 
 ```R
 Error in UseMethod("depth") : 
   no applicable method for 'depth' applied to an object of class "NULL"
