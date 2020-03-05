@@ -1,6 +1,6 @@
 
 #' Checks the data.table provided to ggpanel.corr() and ggvolcano.corr().
-#' 
+#'
 #' @param data A \code{data.table} which contains correlation data.
 #' @return A \code{data.table} with new column names.
 #' @author Yoann Pageaud.
@@ -17,7 +17,7 @@ chk.dt<-function(data){
   #Check col3
   if(is.numeric(data[[3]])){
     if(any(data[,3] < 0) | any(data[,3] > 1)){
-      stop("P-values in column 3 must be comprised between 0 and 1.")} 
+      stop("P-values in column 3 must be comprised between 0 and 1.")}
   } else { stop("Column 3 type must be numeric.") }
   #Check ncol(data)
   if(ncol(data) < 3){ stop("Data should contain at least 3 columns.")
@@ -124,11 +124,10 @@ chk.corr.lbl.cutoff<-function(corr.label.cutoff){
 #'         Each panel displays results as jittered scatter plots.
 #' @author Yoann Pageaud.
 #' @export
-#' @examples
 
 ggpanel.corr<-function(
   data, p.cutoff = 0.01, corr.label.cutoff, jitter.height = 0.4){
-  
+
   #Get colnames
   orig.cnames <- colnames(data)
   #Convert as a data.table
@@ -167,7 +166,7 @@ ggpanel.corr<-function(
   ggpan <- ggpan +
     geom_jitter(position = pos) +
     facet_grid(P.value ~ cor.cat, scales = "free", space = "free", switch="y") +
-    geom_label_repel(position = pos, size = 4) +
+    ggrepel::geom_label_repel(position = pos, size = 4) +
     theme(axis.ticks.x = element_blank(),
           panel.background = element_blank(),
           panel.grid.major.x = element_line(colour = "grey"),
@@ -242,7 +241,7 @@ ggpanel.corr<-function(
 ggvolcano.corr<-function(
   data, p.cutoff = 0.01, corr.cutoff = NULL,
   title.corr.cutoff = "Correlation cut-off", corr.label.cutoff){
-  
+
   #Get colnames
   orig.cnames <- colnames(data)
   #Convert as a data.table
@@ -270,29 +269,29 @@ ggvolcano.corr<-function(
       geom_point(data = data, aes(x = corr, y = -log10(pval), alpha=`P-value`))
   }
   ggvol <- ggvol + geom_hline(yintercept = -log10(p.cutoff), color = 'red')
-  
+
   if(!is.null(corr.cutoff)){
     ggvol <- ggvol +
       geom_vline(data = data.frame(), xintercept = corr.cutoff, color = 'blue')
   }
   if(ncol(data) > 4){
-    ggvol <- ggvol + geom_label_repel(
+    ggvol <- ggvol + ggrepel::geom_label_repel(
       data = data[(corr >= cutoff.values[2] | corr <= cutoff.values[1]) &
                     pval <= p.cutoff],
       mapping = aes(x = corr, y = -log10(pval), label = labels, color = grp),
       size = 4.5)
   } else if(ncol(data) == 4){
-    ggvol <- ggvol + geom_label_repel(
+    ggvol <- ggvol + ggrepel::geom_label_repel(
       data = data[(corr >= cutoff.values[2] | corr <= cutoff.values[1]) &
                     pval <= p.cutoff],
       mapping = aes(x = corr, y = -log10(pval), label = labels), size = 4.5)
   }
-  ggvol <- ggvol +geom_label_repel(
+  ggvol <- ggvol + ggrepel::geom_label_repel(
     data = data.frame(), aes(x = -Inf, y = -log10(p.cutoff), fontface = 1,
                              label = "P-value cut-off"),
     color = "red", direction = "x", size = 4)
   if(!is.null(corr.cutoff)){
-    ggvol <- ggvol + geom_label_repel(
+    ggvol <- ggvol + ggrepel::geom_label_repel(
       data = data.frame(), aes(x = corr.cutoff, y = Inf, fontface = 1,
                                label = title.corr.cutoff),
       color = "blue", direction = "y", size = 4)
