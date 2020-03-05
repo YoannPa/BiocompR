@@ -218,23 +218,23 @@ This tutorial is only an example, it doesn't mean that the parameters set here a
 
 ⚠️ **Work in progress !**  
 
-## ⚠️ Known Issues 
-**Error in UseMethod("depth")**  
+## Known Issues 
+**❎ Error in UseMethod("depth")**  
 ```R
 Error in UseMethod("depth") : 
   no applicable method for 'depth' applied to an object of class "NULL"
 ```
 This error seems to happen randomly when executing code using the ggplot2 and/or grid packages. Usually executing one more time the chuck of code solve the error. The current status of this issue can be tracked [**here**](https://github.com/tidyverse/ggplot2/issues/2514).
 
-**Using alpha for a discrete variable is not advised.**
+**⚠️ Using alpha for a discrete variable is not advised.**
 ```R
 Warning message:
 Using alpha for a discrete variable is not advised. 
 ```
-This warning can arise when using the function `ggvolcano.corr()` with additionnal ggplot2 componenents. it doesn't compromise the printing of the plot, however you might feel annoyed by it.  
+This warning can arise when using the function `ggvolcano.corr()` with additionnal ggplot2 components. It doesn't compromise the printing of the plot, however you might feel annoyed by it.  
 A quick fix to suppress specifically this warning is to use the function `warn.handle()`, which filters out annoying warnings using pattern matching, as following:  
 ```R
-#Create your correlation volcano plot
+#Create your correlation volcano plot (this will also print the 'default' volcano plot)
 my_volcano <- ggvolcano.corr(
   data = dfrm_my_correlation_res, p.cutoff = 0.01, corr.cutoff = 0.1,
   title.corr.cutoff = "Samples default correlation",
@@ -242,6 +242,7 @@ my_volcano <- ggvolcano.corr(
   scale_color_manual(values = ggsci::pal_npg("nrc", alpha = 1)(10)) +
   xlab("Spearman correlation") + ylab("Spearman P-value") +
   ggtitle("Spearman correlation between multiple variables and my variable of interest")
+
 #Print your volcano plot without displaying the annoying warning
 warn.handle(
   pattern = "Using alpha for a discrete variable is not advised.",
