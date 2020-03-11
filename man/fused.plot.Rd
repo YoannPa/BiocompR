@@ -171,16 +171,18 @@ annotations labels.}
 
 \item{annot.lgd.merge}{A \code{logical} to specify whether annotation
 legends should be merged
-(annot.lgd.merge='TRUE') or remain separated
-(annot.lgd.merge='FALSE').}
+(annot.lgd.merge = TRUE) or remain separated
+(annot.lgd.merge = FALSE)
+(Default: annot.lgd.merge = FALSE).}
 
-\item{annot.split}{A \code{logical} to specify if a separating
-space should be inserted between annotation
-bars.}
+\item{annot.split}{A \code{logical} to specify whether a separating
+space should be inserted between annotation bars
+or not (Default: annot.split = FALSE).}
 
 \item{dendro.pos}{A \code{character} specifying the position of
-dendrograms if the selected order is 'hclust'.
-\cr Possible values are: 'top','left','none'.}
+dendrograms if order.method = 'hclust'
+(Supported: dendro.pos = c('top','left','none')
+).}
 
 \item{dendro.size}{An \code{integer} to increase or decrease the
 size of the dendrogram.}

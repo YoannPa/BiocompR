@@ -10,7 +10,7 @@ plot.col.sidebar(
   annot.pal,
   annot.pos,
   cor.order,
-  split.annot = TRUE,
+  split.annot = FALSE,
   merge.lgd = FALSE,
   right = FALSE,
   lgd.lab = "Legends",
@@ -55,36 +55,65 @@ annotation sidebar.\cr Possible values are: 'top',
 \item{cor.order}{An \code{integer} vector to be used to reorder the labels
 in 'sample.names'.}
 
-\item{split.annot}{to complete}
+\item{split.annot}{A \code{logical} to specify whether a separating space
+should be inserted between annotation bars or not
+(Default: split.annot = FALSE).}
 
-\item{merge.lgd}{to complete}
+\item{merge.lgd}{A \code{logical} to specify whether annotation legends
+should be merged (annot.lgd.merge = TRUE) or remain
+separated (annot.lgd.merge = FALSE)
+(Default: annot.lgd.merge = FALSE).}
 
-\item{right}{to complete}
+\item{right}{A \code{logical} to specify that Y-axis should be
+displayed on the right side of the plot
+(Default: right = FALSE).}
 
-\item{lgd.lab}{to complete}
+\item{lgd.lab}{A \code{character} to specify a title to the legend of
+the plot, only if 'merge.lgd' = TRUE
+(Default: lgd.lab = "Legends").}
 
-\item{lgd.title}{to complete}
+\item{lgd.title}{An \code{element_text} object to setup legend titles
+(Default: lgd.title = NULL).}
 
-\item{axis.text.x}{to complete}
+\item{axis.text.x}{An \code{element_text} object to setup X axis text
+(Default: axis.text.x = element_text(size = 12)).}
 
-\item{axis.text.y}{to complete}
+\item{axis.text.y}{An \code{element_text} object to setup Y axis text
+(Default: axis.text.y = element_text(size = 12)).}
 
-\item{axis.ticks.x}{to complete}
+\item{axis.ticks.x}{An \code{element_line} object to setup X axis ticks.}
 
-\item{axis.ticks.y}{to complete}
+\item{axis.ticks.y}{An \code{element_line} object to setup Y axis ticks.}
 
-\item{axis.title.x}{to complete}
+\item{axis.title.x}{An \code{element_text} object to setup X axis title.
+\itemize{Exceptions:
+ \item{If annot.pos == 'left', then axis.title.x =
+ element_blank().}
+ \item{If annot.pos == dendro.pos == 'top', then
+ axis.title.x = element_blank().}
+}}
 
-\item{axis.title.y}{to complete}
+\item{axis.title.y}{An \code{element_text} object to setup Y axis title.
+\itemize{Exceptions:
+ \item{If annot.pos == 'top', then axis.title.y =
+ element_blank().}
+ \item{If annot.pos == dendro.pos == 'left', then
+ axis.title.y = element_blank().}
+}}
 
-\item{set.x.title}{to complete}
+\item{set.x.title}{A \code{character}to be used as the title for the X axis.}
 
-\item{set.y.title}{to complete}
+\item{set.y.title}{A \code{character}to be used as the title for the Y axis.}
 
-\item{dendro.pos}{to complete}
+\item{dendro.pos}{A \code{character} specifying the position of the
+dendrogram (Supported: dendro.pos = c('top','left')).}
 }
 \value{
-A \code{type} object returned description.
+A \code{list} of length 2:
+        \itemize{
+         \item{'sidebar' contains the colored sidebar plot.}
+         \item{'legends' contains a list of legends as \code{gg} objects.}
+        }
 }
 \description{
 Creates a colored side annotation bars in ggplot2.

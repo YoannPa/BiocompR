@@ -245,7 +245,7 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
     rowclust<-as.dendrogram(row_hclust)
     #Get dendrogram segments and order matrix rows
     ddgr_seg_row <- ggdend(df = ggdendro::dendro_data(rowclust)$segments,
-                           orientation = "left", plot.type = 'heatmap')
+                           orientation = "left")
     row.order<-order.dendrogram(rowclust)
   } else if(dd.rows & method.rows == 'none'){
     stop("Cannot plot rows dendrogram with method.rows = 'none'.")
@@ -258,8 +258,7 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
     #Get dendrogram data
     ddgr_dat<-ggdendro::dendro_data(ddgr)
     #Get dendrogram segments and order matrix columns
-    ddgr_seg_col <- ggdend(
-      df = ddgr_dat$segments, orientation = "top", plot.type = 'heatmap')
+    ddgr_seg_col <- ggdend(df = ddgr_dat$segments, orientation = "top")
     column.order<-order.dendrogram(ddgr)
   } else if(dd.cols & method.cols == 'none'){
     stop("Cannot plot columns dendrogram with method.cols = 'none'.")

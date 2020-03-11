@@ -124,7 +124,7 @@ fused.view<-function(
     dendrogram<-as.dendrogram(hierarchy.clust)
     ddgr_dat<-dendro_data(dendrogram) #Dendrogram data
     ddgr_seg <- ggdend( #Get dendrogram segments
-      df = ddgr_dat$segments, orientation = dendro.pos, plot.type = 'corrplot')
+      df = ddgr_dat$segments, orientation = dendro.pos, reverse.x = TRUE)
   }
   #Re-order rows and columns
   upper.mat<-upper.mat[correlation.order,correlation.order]
@@ -375,14 +375,16 @@ fused.view<-function(
 #'                              annotations labels.
 #' @param annot.lgd.merge       A \code{logical} to specify whether annotation
 #'                              legends should be merged
-#'                              (annot.lgd.merge='TRUE') or remain separated
-#'                              (annot.lgd.merge='FALSE').
-#' @param annot.split           A \code{logical} to specify if a separating
-#'                              space should be inserted between annotation
-#'                              bars.
+#'                              (annot.lgd.merge = TRUE) or remain separated
+#'                              (annot.lgd.merge = FALSE)
+#'                              (Default: annot.lgd.merge = FALSE).
+#' @param annot.split           A \code{logical} to specify whether a separating
+#'                              space should be inserted between annotation bars
+#'                              or not (Default: annot.split = FALSE).
 #' @param dendro.pos            A \code{character} specifying the position of
-#'                              dendrograms if the selected order is 'hclust'.
-#'                              \cr Possible values are: 'top','left','none'.
+#'                              dendrograms if order.method = 'hclust'
+#'                              (Supported: dendro.pos = c('top','left','none')
+#'                              ).
 #' @param dendro.size           An \code{integer} to increase or decrease the
 #'                              size of the dendrogram.
 #' @param grid.col              A \code{character} specifying the color of the

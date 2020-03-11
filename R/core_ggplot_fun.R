@@ -87,17 +87,16 @@ get.lgd<-function(gg2.obj){
 #'                    used to create the dendrogram.
 #' @param orientation A \code{character} specifying the orientation of the
 #'                    dendrogram. Possible values are "top" and "left".
-#' @param plot.type   A \code{character} specifying whether the plot is a
-#'                    correlation plot ('corrplot') or a heatmap ('heatmap').
-#'                    This parameter is used to know if a dendrogram displayed
-#'                    on the left of a plot should be vertically reversed (like
-#'                    in a correlation plot) or not (like in a heatmap).
+#' @param reverse.x   A \code{logical} specifying whether the X-axis should be
+#'                    reversed (reverse.x = TRUE like in a correlation plot), or
+#'                    kept unchanged (reverse.x = TRUE like in a heatmap), for a
+#'                    dendrogram to be displayed on the left of a plot
+#'                    (Default: reverse.x = FALSE).
 #' @return A \code{gg} plot of the dendrogram.
 #' @author Yoann Pageaud.
 #' @export
 
-#TODO: change plot.type by reverse.x=TRUE/FALSE
-ggdend <- function(df, orientation, plot.type) {
+ggdend <- function(df, orientation, reverse.x = FALSE) {
   ddplot<- ggplot() +
     geom_segment(data = df, aes(x=x, y=y, xend=xend, yend=yend)) +
     theme(axis.title = element_blank(), axis.text = element_blank(),
@@ -116,14 +115,9 @@ ggdend <- function(df, orientation, plot.type) {
       theme(plot.margin=unit(c(0,0,0,0.1),"cm")) +
       scale_y_reverse(expand = c(0,0)) +
       coord_flip()
-    if(plot.type == "corrplot"){
-      ddplot <- ddplot + scale_x_reverse(expand = c(0,0))
-    } else if(plot.type == "heatmap"){
-      ddplot <- ddplot + scale_x_continuous(expand = c(0,0))
-    } else {
-      stop("Unknown plot.type. Supported plot.type: c('corrplot', 'heatmap').")
-    }
-  } else {stop("dendrogram's orientation value not supported by ggdend().")}
+    if(reverse.x){ ddplot <- ddplot + scale_x_reverse(expand = c(0,0)) }
+    else { ddplot <- ddplot + scale_x_continuous(expand = c(0,0)) }
+  } else { stop("dendrogram's orientation value not supported by ggdend().") }
   return(ddplot)
 }
 
@@ -257,32 +251,60 @@ basic.sidebar<-function(data, palette){
 #'                     'left' or 'both'.
 #' @param cor.order    An \code{integer} vector to be used to reorder the labels
 #'                     in 'sample.names'.
-#' @param split.annot  to complete
-#' @param merge.lgd    to complete
-#' @param right        to complete
-#' @param lgd.lab      to complete
-#' @param lgd.title    to complete
-#' @param axis.text.x  to complete
-#' @param axis.text.y  to complete
-#' @param axis.ticks.x to complete
-#' @param axis.ticks.y to complete
-#' @param axis.title.x to complete
-#' @param axis.title.y to complete
-#' @param set.x.title  to complete
-#' @param set.y.title  to complete
-#' @param dendro.pos   to complete
-#' @return A \code{type} object returned description.
+#' @param split.annot  A \code{logical} to specify whether a separating space
+#'                     should be inserted between annotation bars or not
+#'                     (Default: split.annot = FALSE).
+#' @param merge.lgd    A \code{logical} to specify whether annotation legends
+#'                     should be merged (annot.lgd.merge = TRUE) or remain
+#'                     separated (annot.lgd.merge = FALSE)
+#'                     (Default: annot.lgd.merge = FALSE).
+#' @param right        A \code{logical} to specify that Y-axis should be
+#'                     displayed on the right side of the plot
+#'                     (Default: right = FALSE).
+#' @param lgd.lab      A \code{character} to specify a title to the legend of
+#'                     the plot, only if 'merge.lgd' = TRUE
+#'                     (Default: lgd.lab = "Legends").
+#' @param lgd.title    An \code{element_text} object to setup legend titles
+#'                     (Default: lgd.title = NULL).
+#' @param axis.text.x  An \code{element_text} object to setup X axis text
+#'                     (Default: axis.text.x = element_text(size = 12)).
+#' @param axis.text.y  An \code{element_text} object to setup Y axis text
+#'                     (Default: axis.text.y = element_text(size = 12)).
+#' @param axis.ticks.x An \code{element_line} object to setup X axis ticks.
+#' @param axis.ticks.y An \code{element_line} object to setup Y axis ticks.
+#' @param axis.title.x An \code{element_text} object to setup X axis title.
+#'                     \itemize{Exceptions:
+#'                      \item{If annot.pos == 'left', then axis.title.x =
+#'                      element_blank().}
+#'                      \item{If annot.pos == dendro.pos == 'top', then
+#'                      axis.title.x = element_blank().}
+#'                     }
+#' @param axis.title.y An \code{element_text} object to setup Y axis title.
+#'                     \itemize{Exceptions:
+#'                      \item{If annot.pos == 'top', then axis.title.y =
+#'                      element_blank().}
+#'                      \item{If annot.pos == dendro.pos == 'left', then
+#'                      axis.title.y = element_blank().}
+#'                     }
+#' @param set.x.title  A \code{character}to be used as the title for the X axis.
+#' @param set.y.title  A \code{character}to be used as the title for the Y axis.
+#' @param dendro.pos   A \code{character} specifying the position of the
+#'                     dendrogram (Supported: dendro.pos = c('top','left')).
+#' @return A \code{list} of length 2:
+#'         \itemize{
+#'          \item{'sidebar' contains the colored sidebar plot.}
+#'          \item{'legends' contains a list of legends as \code{gg} objects.}
+#'         }
 #' @author Yoann Pageaud.
 #' @export
 
-#TODO: Finish documentation!
 #TODO: change name of parameter cor.order to see if it can be remove.
 plot.col.sidebar<-function(
-  sample.names, annot.grps, annot.pal, annot.pos, cor.order, split.annot = TRUE,
-  merge.lgd = FALSE, right = FALSE, lgd.lab = "Legends", lgd.title = NULL,
-  axis.text.x = element_text(size = 12), axis.text.y = element_text(size = 12),
-  axis.ticks.x, axis.ticks.y, axis.title.x,
-  axis.title.y, set.x.title, set.y.title, dendro.pos){
+  sample.names, annot.grps, annot.pal, annot.pos, cor.order,
+  split.annot = FALSE, merge.lgd = FALSE, right = FALSE, lgd.lab = "Legends",
+  lgd.title = NULL, axis.text.x = element_text(size = 12),
+  axis.text.y = element_text(size = 12), axis.ticks.x, axis.ticks.y,
+  axis.title.x, axis.title.y, set.x.title, set.y.title, dendro.pos){
 
   #Create list of groups in their original order
   origin.grps<-lapply(X = annot.grps, FUN = function(i){
@@ -365,7 +387,7 @@ plot.col.sidebar<-function(
     col_sidebar <- col_sidebar +
       theme(axis.text.x.top = axis.text.x, axis.text.y = axis.text.y,
             axis.ticks.x = axis.ticks.x, axis.ticks.y = axis.ticks.y) +
-      scale_x_discrete(expand = c(0,0),position = "top") + xlab(set.x.title)
+      scale_x_discrete(expand = c(0,0), position = "top") + xlab(set.x.title)
     if(right){
       col_sidebar <- col_sidebar +
         scale_y_discrete(position = 'right', expand = c(0,0))
@@ -389,7 +411,7 @@ plot.col.sidebar<-function(
     if(dendro.pos !="left"){
       col_sidebar<-col_sidebar +
         theme(axis.title.x = element_blank(), axis.title.y = axis.title.y)
-    } else { col_sidebar<-col_sidebar + theme(axis.title = element_blank()) }
+    } else { col_sidebar <- col_sidebar + theme(axis.title = element_blank()) }
     if(split.annot){
       stop("A geom_tile vertically faceted in ggplot2_3.2.0 does not support heights redimensioning after being converted into a grob.")
       # col_sidebar<-col_sidebar +
