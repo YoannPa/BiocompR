@@ -272,7 +272,7 @@ ggvolcano.corr<-function(
 
   if(!is.null(corr.cutoff)){
     ggvol <- ggvol +
-      geom_vline(data = data.frame(), xintercept = corr.cutoff, color = 'blue')
+      geom_vline(xintercept = corr.cutoff, color = 'blue')
   }
   if(ncol(data) > 4){
     ggvol <- ggvol + ggrepel::geom_label_repel(
