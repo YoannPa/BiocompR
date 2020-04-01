@@ -306,8 +306,8 @@ ggvolcano.corr<-function(
           legend.title = element_text(size = 13),
           legend.text = element_text(size = 12),
           legend.key = element_blank()) +
-    labs(x = orig.cnames[2], y = orig.cnames[3], color = orig.cnames[4],
-         size = orig.cnames[5])
+    labs(x = orig.cnames[2], y = paste0("-log10(",orig.cnames[3],")"),
+         color = orig.cnames[4], size = orig.cnames[5])
   #Return plot removing warning about discrete variable given to alpha
   warn.handle(pattern = "Using alpha for a discrete variable is not advised.",
               print(ggvol))
