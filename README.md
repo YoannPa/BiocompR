@@ -224,7 +224,15 @@ This tutorial is only an example, it doesn't mean that the parameters set here a
 Error in UseMethod("depth") : 
   no applicable method for 'depth' applied to an object of class "NULL"
 ```
-This error seems to happen randomly when executing code using the ggplot2 and/or grid packages. Usually executing one more time the chuck of code solve the error. The current status of this issue can be tracked [**here**](https://github.com/tidyverse/ggplot2/issues/2514).
+This error seems to happen randomly when executing code using the ggplot2 and/or grid packages. Usually executing one more time the chuck of code solve the error. The current statues of this issue can be tracked [**here**](https://github.com/tidyverse/ggplot2/issues/2514).
+
+**⚠️ Reached elapsed time limit.**
+```
+Warning message:
+In grid.Call(C_convert, x, as.integer(whatfrom), as.integer(whatto),  :
+  reached elapsed time limit.
+```
+This warning seems to happen randomly when executing code using the ggplot2 and/or grid packages. Usually after executing one more time the chuck of code the warning does not display anymore. The current statues of this issue can be tracked [**here**](https://stackoverflow.com/questions/51247102/reached-elapsed-time-limit-errors-in-r).
 
 **⚠️ Using alpha for a discrete variable is not advised.**
 ```R
