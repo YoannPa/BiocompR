@@ -18,8 +18,8 @@ ggcoverage(
 \item{data}{A \code{data.frame} containing:
 \itemize{
  \item{labels in column 1}
- \item{total amount in column 2}
- \item{subset amount in column 3}
+ \item{total amounts in column 2}
+ \item{subset amounts in column 3}
 }}
 
 \item{round.unit}{An \code{integer} to specify how much decimals should be

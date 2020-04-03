@@ -1,16 +1,12 @@
 
-##IMPORTS
-Imports = c("data.table","gtools","ggplot2")
-lapply(Imports, library, character.only = T)
-
 #' Plots an annotated barplot.
 #'
 #' @param data       A \code{data.frame} containing:
-#' \itemize{
-#'  \item{labels in column 1}
-#'  \item{total amount in column 2}
-#'  \item{subset amount in column 3}
-#' }
+#'                   \itemize{
+#'                    \item{labels in column 1}
+#'                    \item{total amounts in column 2}
+#'                    \item{subset amounts in column 3}
+#'                   }
 #' @param round.unit An \code{integer} to specify how much decimals should be
 #'                   kept when rounding percentages.
 #' @param horizontal A \code{logical} to specify whether the plot should be
@@ -25,7 +21,10 @@ lapply(Imports, library, character.only = T)
 ggcoverage<-function(data, round.unit=2, rev.stack=FALSE, invert.percent=FALSE,
                      horizontal=FALSE,log.scaled=FALSE,decreasing.order=FALSE){
   colnames(data)[1:3]<-c("IDs","Total","Subset")
-  suppressWarnings(data<-data[, lapply(.SD, na.replace, replace = 0)])
+  #Replace NAs by zeros
+  data[is.na(Total), c("Total", "Subset") := 0]
+  data[is.na(Subset), Subset := 0]
+  #Calculate remaining amounts
   data[, remainings:=.(Total-Subset)]
   if(invert.percent){
     data[, percents:=.(round((Subset/Total)*100,round.unit))]
