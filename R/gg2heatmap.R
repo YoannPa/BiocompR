@@ -1,4 +1,3 @@
-
 #' Creates a custom heatmap with dendrograms and annotations.
 #'
 #' @param m               A \code{matrix}.
@@ -151,7 +150,7 @@
 gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
                      rank.fun = NULL, top.rows = NULL, dendrograms = TRUE,
                      dend.col.size = 1,
-                     plot.title = "DMRs in 129 and BL6J WT Vs. 129 Mut DMNT1 HSPCs",
+                     plot.title = "",
                      row.type = 'rows',
                      imputation.grps = NULL, ncores = 1,
                      heatmap.pal = c("steelblue", "gray95", "darkorange"),

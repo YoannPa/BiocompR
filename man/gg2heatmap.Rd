@@ -12,7 +12,7 @@ gg2heatmap(
   top.rows = NULL,
   dendrograms = TRUE,
   dend.col.size = 1,
-  plot.title = "DMRs in 129 and BL6J WT Vs. 129 Mut DMNT1 HSPCs",
+  plot.title = "",
   row.type = "rows",
   imputation.grps = NULL,
   ncores = 1,
