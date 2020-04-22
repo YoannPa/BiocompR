@@ -77,7 +77,7 @@ fancy.hist<-function(x, xmax, nbreaks = 10, ngrad = 10, round.grad = 1,
                                                                  digits = 2))),
       vjust = 1.1, color = "#313695") +
     labs(x = xlab, y = ylab) +
-    theme(plot.margin = unit(c(0.1,1,0,0),"cm"),
+    theme(plot.margin = unit(c(0.1,1,0.1,0),"cm"),
           axis.title = element_text(size = 13),
           axis.text = element_text(size = 11),
           panel.grid.major = element_line(colour = "grey"),
