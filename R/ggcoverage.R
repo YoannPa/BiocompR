@@ -15,7 +15,7 @@
 #' @author Yoann Pageaud.
 #' @export
 
-#TODO: Fix the way dodge bars are plotted
+#TODO: Fix the way stacked bars are plotted
 #TODO: rewrite documentation!
 
 ggcoverage<-function(data, round.unit=2, rev.stack=FALSE, invert.percent=FALSE,

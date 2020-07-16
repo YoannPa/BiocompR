@@ -96,9 +96,6 @@ fused.view<-function(
   raster = NULL, raster1 = TRUE, raster2 = TRUE,
   add.ggplot.arg = NULL
 ){
-
-  ##############################################################################
-
   #Order Method
   if(order.method %in% c("AOE","FPC","hclust","alphabet","default")){
     cat(paste("Apply",order.method,"ordering method.\n"))
@@ -130,11 +127,6 @@ fused.view<-function(
       }
     }
   } else { stop("the order method is not supported.") }
-
-  ##############################################################################
-
-
-  ##############################################################################
 
   #Overwrite the plot titles if they take the same parameters
   if(!is.elt_blank(axis.title)){
@@ -184,13 +176,11 @@ fused.view<-function(
     lgd.frame.linewidth2 <- lgd.frame.linewidth
   }
 
-  ##############################################################################
-
   #Get order of the correlations for the method used
   if(order.select == 'upper'){
     if(order.method %in% c("AOE","FPC","hclust")){
-      correlation.order<-corrMatOrder(upper.mat, order = order.method,
-                                      hclust.method = hclust.method)
+      correlation.order<-corrplot::corrMatOrder(upper.mat, order = order.method,
+                                                hclust.method = hclust.method)
     } else if(order.method == "alphabet"){
       #Fix bug of corrMatOrder when alphabet order
       correlation.order<-fix.corrMatOrder.alphabet(cor.order=correlation.order,
@@ -203,8 +193,8 @@ fused.view<-function(
     }
   } else {
     if(order.method %in% c("AOE","FPC","hclust")){
-      correlation.order<-corrMatOrder(lower.mat, order = order.method,
-                                      hclust.method = hclust.method)
+      correlation.order<-corrplot::corrMatOrder(lower.mat, order = order.method,
+                                                hclust.method = hclust.method)
     } else if(order.method == "alphabet"){
       #Fix bug of corrMatOrder when alphabet order
       correlation.order<-fix.corrMatOrder.alphabet(cor.order=correlation.order,
@@ -219,7 +209,7 @@ fused.view<-function(
   #Generate Dendrogram
   if(dendro.pos != "none"){
     dendrogram<-as.dendrogram(hierarchy.clust)
-    ddgr_dat<-dendro_data(dendrogram) #Dendrogram data
+    ddgr_dat<-ggdendro::dendro_data(dendrogram) #Dendrogram data
     ddgr_seg <- ggdend( #Get dendrogram segments
       df = ddgr_dat$segments, orientation = dendro.pos, reverse.x = TRUE)
   }
@@ -344,8 +334,12 @@ fused.view<-function(
   #Get legends
   upper.legend <- get.lgd(upper.ggplot)
   lower.legend <- get.lgd(lower.ggplot)
-  sidebar.legend <- arrangeGrob(grobs = col_sidebar$legends,ncol = 1,
-                                vp = viewport(height = 0.3))
+
+  #Set sizes for colorbar legends
+  sidebar.legend <- stack.grobs.legends(
+    grobs.list = col_sidebar$legends, annot.grps = annot.grps,
+    height.lgds.space = 30)
+
   #Assemble grobs
   if(annot.pos == "top"){
     if(dendro.pos == "top"){
@@ -355,20 +349,22 @@ fused.view<-function(
         "dendro_grob" = dendro_grob), dimensions = "widths", start.unit = 2,
         end.unit = 5)
 
-      main_grob<-arrangeGrob(upd_grobs$dendro_grob, upd_grobs$sidebar_grob,
-                             upd_grobs$main_grob, ncol=1,
-                             heights = c(10+dendro.size,9+annot.size,40))
+      main_grob<-gridExtra::arrangeGrob(
+        upd_grobs$dendro_grob, upd_grobs$sidebar_grob, upd_grobs$main_grob,
+        ncol=1, heights = c(10 + dendro.size, 9 + annot.size , 40))
     } else {
       #Get common width of a list of objects widths
       upd_grobs<-resize.grobs(ls.grobs = list(
         "main_grob" = main_grob, "sidebar_grob" = sidebar_grob),
         dimensions = "widths", start.unit = 2, end.unit = 5)
 
-      main_grob<-arrangeGrob(upd_grobs$sidebar_grob, upd_grobs$main_grob,ncol=1,
-                             heights = c(9+annot.size,40))
+      main_grob<-gridExtra::arrangeGrob(
+        upd_grobs$sidebar_grob, upd_grobs$main_grob , ncol = 1,
+        heights = c(9 + annot.size , 40))
     }
     #Create the Right Panel for legends
-    right.legends<-arrangeGrob(upper.legend,sidebar.legend, nrow = 1)
+    right.legends<-gridExtra::arrangeGrob(
+      upper.legend, sidebar.legend, nrow = 1)
   } else {
     #Annotation on the left
     if(dendro.pos == "left"){
@@ -379,24 +375,27 @@ fused.view<-function(
         end.unit = 8)
 
       #Make main grob
-      main_grob<-arrangeGrob(
-        upd_grobs$dendro_grob, upd_grobs$sidebar_grob,upd_grobs$main_grob,
-        nrow=1, widths = c(10+dendro.size,9+annot.size,40))
+      main_grob<-gridExtra::arrangeGrob(
+        upd_grobs$dendro_grob, upd_grobs$sidebar_grob, upd_grobs$main_grob,
+        nrow=1, widths = c(10 + dendro.size, 9 + annot.size, 40))
     } else {
       #Get common width of a list of objects widths
       upd_grobs<-resize.grobs(ls.grobs = list(
         "main_grob" = main_grob, "sidebar_grob" = sidebar_grob),
         dimensions = "heights", start.unit = 3, end.unit = 8)
       #Make main grob
-      main_grob<-arrangeGrob(upd_grobs$sidebar_grob, upd_grobs$main_grob,ncol=1,
-                             widths = c(9+annot.size,40))
+      main_grob<-gridExtra::arrangeGrob(
+        upd_grobs$sidebar_grob, upd_grobs$main_grob, ncol = 1,
+        widths = c(9 + annot.size, 40))
     }
-    right.legends<-arrangeGrob(upper.legend, sidebar.legend, ncol = 2)
+    right.legends<-gridExtra::arrangeGrob(
+      upper.legend, sidebar.legend, ncol = 2)
   }
   #Plot Final Figure
-  fused.res<-grid.arrange(
-    arrangeGrob(grobs = list(main_grob,right.legends,lower.legend),
-                ncol = 2,nrow = 2, heights = c(40,3), widths = c(20,7)))
+  fused.res<-gridExtra::grid.arrange(
+    gridExtra::arrangeGrob(grobs = list(main_grob, right.legends, lower.legend),
+                           ncol = 2, nrow = 2, heights = c(40, 3),
+                           widths = c(20, 7)))
   return(fused.res)
 }
 
@@ -669,42 +668,6 @@ fused.plot<-function(data,ncores,
     cat(paste("Apply",na.rm,"deletion of missing data.\n"))
   } else { stop("the value of na.rm is not supported.") }
 
-  ##############################################################################
-  #
-  # #Order Method
-  # if(order.method %in% c("AOE","FPC","hclust","alphabet","default")){
-  #   cat(paste("Apply",order.method,"ordering method.\n"))
-  #
-  #   if(order.method == "hclust"){
-  #     #check hclust.method
-  #     if(hclust.method %in% c('ward.D','ward.D2', 'single', 'complete',
-  #                             'average','mcquitty', 'median', 'centroid')){
-  #       cat(paste("Apply",hclust.method,"clustering method.\n"))
-  #     } else { stop("the clustering method is not supported.") }
-  #     #check dendrogram
-  #     if(dendro.pos != "none"){
-  #       if(!dendro.pos %in% c('top','left','both')){
-  #         stop("dendrogram cannot be put here.")
-  #       }
-  #     }
-  #   } else {
-  #     #check dendrogram
-  #     if(dendro.pos != "none"){
-  #       stop("order != 'hclust'. Dendrogram cannot be generated if rows & cols
-  #        are not ordered following the hierarchical clustering.")
-  #     }
-  #   }
-  #   #order select
-  #   if(order.method %in% c("AOE","FPC","hclust","alphabet")){
-  #     if(!order.select %in% c('upper','lower')){
-  #       stop("Wrong value for order.select - You can only select values from the
-  #        'upper' triangle or from the 'lower' triangle to apply order.")
-  #     }
-  #   }
-  # } else { stop("the order method is not supported.") }
-  #
-  ##############################################################################
-
   #P-value adjustment method
   if(p.adjust %in% c("holm","hochberg","hommel","bonferroni","BH","BY","fdr",
                      "none")){
@@ -719,66 +682,14 @@ fused.plot<-function(data,ncores,
     stop("annotation sidebar cannot be put here.")
   }
 
-  ##############################################################################
-  #
-  # #Overwrite the plot titles if they take the same parameters
-  # if(!is.elt_blank(axis.title)){
-  #   axis.title.x <- axis.title
-  #   axis.title.y <- axis.title
-  # }
-  # #Label matching Breaks
-  # if(!is.null(lgd.labels)){
-  #   if(length(lgd.labels) != length(seq(lgd.breaks))){
-  #     stop("the number of labels does not match the number of breaks.")
-  #   }
-  # }
-  # if(!is.null(lgd.labels1)){
-  #   if(length(lgd.labels1) != length(lgd.breaks1)){
-  #     stop("the number of labels does not match the number of breaks for upper
-  #        triangle legend.")
-  #   }
-  # }
-  # if(!is.null(lgd.labels2)){
-  #   if(length(lgd.labels2) != length(lgd.breaks2)){
-  #     stop("the number of labels does not match the number of breaks for lower
-  #        triangle legend.")
-  #   }
-  # }
-  # #Overwrite the legends rounds if they take the same parameters
-  # if(!is.null(lgd.round)){ lgd.round1<-lgd.round; lgd.round2<-lgd.round }
-  # #Overwrite the legends titles if they take the same parameters
-  # if(!is.elt_blank(lgd.title)){ lgd.title1<-lgd.title; lgd.title2<-lgd.title }
-  # #Overwrite the legends titles if they take the same parameters
-  # if(!is.elt_blank(lgd.text)){ lgd.text1<-lgd.text; lgd.text2<-lgd.text }
-  # #Overwrite the legends breaks if they take the same parameters
-  # if(!is.null(lgd.breaks)){lgd.breaks1<-lgd.breaks; lgd.breaks2<-lgd.breaks}
-  # #Overwrite the legends bins if they take the same value
-  # if(!is.null(lgd.nbin)){ lgd.nbin1<-lgd.nbin; lgd.nbin2<-lgd.nbin }
-  # #Overwrite the legends raster arg if they take the same value
-  # if(!is.null(raster)){ raster1 <- raster ; raster2 <- raster }
-  # #Overwrite the legends ticks arg if they take the same value
-  # if(!is.null(lgd.ticks)){ lgd.ticks1<-lgd.ticks ; lgd.ticks2<-lgd.ticks }
-  # #Overwrite the legends ticks linewidth arg if they take the same value
-  # if(!is.null(lgd.ticks.linewidth)){
-  #   lgd.ticks.linewidth1 <- lgd.ticks.linewidth
-  #   lgd.ticks.linewidth2 <- lgd.ticks.linewidth
-  # }
-  # #Overwrite the legends frame linewidth arg if they take the same value
-  # if(!is.null(lgd.frame.linewidth)){
-  #   lgd.frame.linewidth1 <- lgd.frame.linewidth
-  #   lgd.frame.linewidth2 <- lgd.frame.linewidth
-  # }
-  #
-  ##############################################################################
-
   #Checking comparisons
   if(upper.comp %in% c("pearson","spearman","kendall")){
     #Overwrite "stat" by "t" for correlation
     if(upper.value == "stat"){ upper.value <- 't' }
     #Compute correlation
     cat(paste("Compute pairwise",upper.comp,"correlation test..."))
-    upper.correlation.res<-corr.test(data,use = na.rm, method = upper.comp,
-                                     adjust = p.adjust)
+    upper.correlation.res<-psych::corr.test(
+      data, use = na.rm, method = upper.comp, adjust = p.adjust)
     upper.mat<-upper.correlation.res[[upper.value]]
     upper.res<-upper.mat
     cat("Done.\n")
@@ -794,8 +705,8 @@ fused.plot<-function(data,ncores,
         if(lower.value == "stat"){ lower.value <- 't' }
         #Compute correlation
         cat(paste("Compute pairwise",lower.comp,"correlation test..."))
-        lower.correlation.res<-corr.test(data,use = na.rm, method = lower.comp,
-                                         adjust = p.adjust)
+        lower.correlation.res<-psych::corr.test(
+          data, use = na.rm, method = lower.comp, adjust = p.adjust)
         lower.mat<-lower.correlation.res[[lower.value]]
         cat("Done.\n")
       } else if(lower.comp == "KS"){
@@ -841,8 +752,8 @@ fused.plot<-function(data,ncores,
         if(lower.value == "stat"){ lower.value <- 't' }
         #Compute correlation
         cat(paste("Compute pairwise",lower.comp,"correlation test..."))
-        lower.correlation.res<-corr.test(data,use = na.rm, method = lower.comp,
-                                         adjust = p.adjust)
+        lower.correlation.res<-psych::corr.test(
+          data, use = na.rm, method = lower.comp, adjust = p.adjust)
         lower.mat<-lower.correlation.res[[lower.value]]
         cat("Done.\n")
       } else { stop("'lower.comp' value not supported yet.") }

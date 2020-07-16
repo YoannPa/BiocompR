@@ -3,6 +3,7 @@ Imports = c("ggplot2","IRanges")
 lapply(Imports, library, character.only = T)
 
 ##DATA
+#TODO: use data() function to load the predefined palettes.
 pal_sunset<-c("red","gold","blue4")
 pal_westworld<-c("sienna1","lightgoldenrod","skyblue3")
 pal_startrek<-c("red","goldenrod1","dodgerblue")

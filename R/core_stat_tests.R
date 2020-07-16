@@ -37,7 +37,7 @@ get.ks.stat<-function(table_combinations, df.ks.tests, statistic){
 
 pairwise.ks<-function(data, statistic, ncores){
   table_combinations<-expand.grid(colnames(data),colnames(data))
-  List_ks.tests<-mclapply(
+  List_ks.tests<-parallel::mclapply(
     seq(nrow(table_combinations)),mc.cores = ncores,function(i){
       #Compute KS test
       ks.res<-ks.test(x = data[,table_combinations[i,1]],

@@ -91,9 +91,6 @@
 #'                        }
 #' @param annot.size      A \code{numeric} defining the width of the annotation
 #'                        bars (Default: annot.size = 1).
-#' @param annot.lgd.space A \code{numeric} defining the size of the space
-#'                        separating the different annotation bar legends
-#'                        (Default: annot.lgd.space = 0).
 #' @param annot.split     A \code{logical} to specify whether a space should be
 #'                        added between each annotation (annot.split = TRUE) or
 #'                        not (annot.split = FALSE)
@@ -104,10 +101,6 @@
 #'                        side bar legends, when legends are merged
 #'                        (lgd.merge = TRUE)
 #'                        (Default: lgd.bars.name = 'Legends').
-#' @param lgd.pos.x       A \code{numeric} vector or unit object specifying the
-#'                        x-location of the legends (Default: lgd.pos.x = 0.5).
-#' @param lgd.pos.y       A \code{numeric} vector or unit object specifying the
-#'                        y-location of the legends (Default: lgd.pos.y = 0.5).
 #' @param lgd.merge       A \code{logical} specifying whether the legends of
 #'                        multiple annotation bars should be merged
 #'                        (lgd.merge = TRUE) or remain separated
@@ -141,7 +134,6 @@
 #' @author Yoann Pageaud.
 #' @export
 
-#TODO: Fix how legends are stacked and how spacing is calculated.
 #TODO: Support rank.fun alone
 #TODO: Support top.rows alone
 #TODO: Merge dend.col.size & dend.row.size into dend.size being a tuple
@@ -149,16 +141,13 @@
 #TODO: Add some data in return
 gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
                      rank.fun = NULL, top.rows = NULL, dendrograms = TRUE,
-                     dend.col.size = 1,
-                     plot.title = "",
-                     row.type = 'rows',
+                     dend.col.size = 1, plot.title = "", row.type = 'rows',
                      imputation.grps = NULL, ncores = 1,
                      heatmap.pal = c("steelblue", "gray95", "darkorange"),
                      annot.grps = list("Groups" = seq(ncol(m))),
                      annot.pal = rainbow(n = ncol(m)), annot.size = 1,
-                     annot.lgd.space = 0, annot.split = FALSE,
-                     lgd.scale.name = 'values', lgd.bars.name = 'Legends',
-                     lgd.pos.x = 0.5, lgd.pos.y = 0.5, lgd.merge = FALSE,
+                     annot.split = FALSE, lgd.scale.name = 'values',
+                     lgd.bars.name = 'Legends', lgd.merge = FALSE,
                      lgd.space.width = 1,
                      axis.title.x = element_text(
                        size = 12, color = 'black'), axis.text.x = element_text(
@@ -211,8 +200,6 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
     dd.rows<-dendrograms[1]
     dd.cols<-dendrograms[2]
   } else { stop("'dendrograms' length > 2. Too many values.") }
-
-
 
   #Check annotations groups and palettes matching
   check.annotations(data = m, annot.grps = annot.grps, annot.pal = annot.pal)
@@ -281,8 +268,8 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
     geom_tile(data = melted_mat, aes(x = Var2, y = Var1, fill = value)) +
     scale_fill_gradientn(colours = heatmap.pal) +
     scale_x_discrete(expand = c(0,0)) +
-    theme(legend.justification = 'left', plot.margin = margin(0, 0, 0, 0),
-          legend.position = c(0.5,0.5), panel.grid = element_blank(),
+    theme(plot.margin = margin(0, 0, 0, 0),
+          panel.grid = element_blank(),
           panel.background = element_rect(fill = "transparent"),
           plot.background = element_rect(fill = "transparent"))
   if(dendrograms[1]){
@@ -295,11 +282,15 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
   }
   htmp <- htmp +
     theme(legend.text=element_text(size= 11),
-          legend.title = element_text(size = 12),
+          legend.title = element_text(size = 12, vjust = 0.8),
+          legend.position = "bottom",
+          legend.justification = c(0.2,0.5),
           axis.title.x = axis.title.x, axis.text.x = axis.text.x,
           axis.ticks.x = axis.ticks.x, axis.title.y.right = axis.title.y.right,
           axis.ticks.y.right = axis.ticks.y.right,
           axis.text.y.right = axis.text.y.right) +
+    guides(fill = guide_colorbar(ticks=TRUE, label=TRUE, barwidth=15,
+                                  ticks.linewidth = 1)) +
     xlab("Samples") +
     labs(fill = lgd.scale.name)
   if(y.axis.right){
@@ -352,22 +343,28 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
       ncol = 2, nrow = 3, heights = c(dend.col.size+2, annot.size, 30),
       widths = c(2, 10))
     #Create the Right Panel for legends
-    sidebar_legend.grob <- gridExtra::arrangeGrob(
-      grobs = sidebar_legend, nrow = 4, heights = c(4,1+annot.lgd.space,4,4))
-    right.legends <- gridExtra::arrangeGrob(
-      htmp_legend, grid::textGrob(""), sidebar_legend.grob,
-      layout_matrix = cbind(c(1,1,1,2), c(2,2,2,2), c(3,3,3,3), c(2,2,2,2)),
-      vp = grid::viewport(x= lgd.pos.x-0.6, y = lgd.pos.y))
+    sidebar_legend.grob <- stack.grobs.legends(
+      grobs.list = sidebar_legend, annot.grps = annot.grps,
+      height.lgds.space = 29)
+
+    # sidebar_legend.grob <- gridExtra::arrangeGrob(
+    #   grobs = sidebar_legend, nrow = 4, heights = c(4,1+annot.lgd.space,4,4))
+    right.legends <- sidebar_legend.grob
+    # right.legends <- gridExtra::arrangeGrob(
+    #   htmp_legend, grid::textGrob(""), sidebar_legend.grob,
+    #   layout_matrix = cbind(c(1,1,1,2), c(2,2,2,2), c(3,3,3,3), c(2,2,2,2)),
+    #   vp = grid::viewport(x= lgd.pos.x-0.6, y = lgd.pos.y))
     #Final plot
     final.plot<-gridExtra::grid.arrange(gridExtra::arrangeGrob(
       top = grid::textGrob(plot.title, gp = grid::gpar(fontsize = 15, font=1)),
-      grobs = list(grid::textGrob(paste0(
-        "Columns ordered by ", method.cols, " distance; Rows ordered by ",
-        method.rows, " distance; ", nrow(m), " ", row.type, "."),
-        gp = grid::gpar(fontsize = 12, fontface = 3L)),
+      grobs = list(
+        grid::textGrob(paste0(
+          "Columns ordered by ", method.cols, " distance; Rows ordered by ",
+          method.rows, " distance; ", nrow(m), " ", row.type, "."),
+          gp = grid::gpar(fontsize = 12, fontface = 3L)),
         gridExtra::arrangeGrob(grobs = list(main_grob, right.legends), ncol = 2,
-                               widths = c(20, 2 + lgd.space.width))),
-      nrow = 2, heights = c(3,50)))
+                               widths = c(20, 2 + lgd.space.width)),
+        htmp_legend), nrow = 3, heights = c(3,50,6)))
   }
   return(final.plot)
 }

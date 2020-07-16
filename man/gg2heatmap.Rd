@@ -20,12 +20,9 @@ gg2heatmap(
   annot.grps = list(Groups = seq(ncol(m))),
   annot.pal = rainbow(n = ncol(m)),
   annot.size = 1,
-  annot.lgd.space = 0,
   annot.split = FALSE,
   lgd.scale.name = "values",
   lgd.bars.name = "Legends",
-  lgd.pos.x = 0.5,
-  lgd.pos.y = 0.5,
   lgd.merge = FALSE,
   lgd.space.width = 1,
   axis.title.x = element_text(size = 12, color = "black"),
@@ -145,10 +142,6 @@ vectors listed in 'annot.grps'.
 \item{annot.size}{A \code{numeric} defining the width of the annotation
 bars (Default: annot.size = 1).}
 
-\item{annot.lgd.space}{A \code{numeric} defining the size of the space
-separating the different annotation bar legends
-(Default: annot.lgd.space = 0).}
-
 \item{annot.split}{A \code{logical} to specify whether a space should be
 added between each annotation (annot.split = TRUE) or
 not (annot.split = FALSE)
@@ -161,12 +154,6 @@ heatmap scale (Default: lgd.scale.name = 'values').}
 side bar legends, when legends are merged
 (lgd.merge = TRUE)
 (Default: lgd.bars.name = 'Legends').}
-
-\item{lgd.pos.x}{A \code{numeric} vector or unit object specifying the
-x-location of the legends (Default: lgd.pos.x = 0.5).}
-
-\item{lgd.pos.y}{A \code{numeric} vector or unit object specifying the
-y-location of the legends (Default: lgd.pos.y = 0.5).}
 
 \item{lgd.merge}{A \code{logical} specifying whether the legends of
 multiple annotation bars should be merged

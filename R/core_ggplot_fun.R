@@ -192,7 +192,7 @@ basic.ggplot.tri<-function(melt.tri, grid.col, grid.thickness, lgd.title,
                            min_tri,max_tri,length.out = lgd.breaks),lgd.round),
                          guide=guide_colourbar(
                            ticks=lgd.ticks, nbin=lgd.nbin, barheight=lgd.height,
-                           label=T, barwidth=lgd.width, raster = rasteri,
+                           label=TRUE, barwidth=lgd.width, raster = rasteri,
                            ticks.linewidth = lgd.ticks.linewidth,
                            frame.colour = lgd.frame.col,
                            frame.linewidth = lgd.frame.linewidth),
@@ -212,8 +212,8 @@ basic.ggplot.tri<-function(melt.tri, grid.col, grid.thickness, lgd.title,
 basic.sidebar<-function(data, palette){
   ggplot(data = data) +
     geom_tile(aes(x = Samples, y = .id, fill = Groups)) +
-    theme(legend.justification = 'left',
-          legend.position = c(0.5,0.5),
+    theme(legend.justification = c(0,1),
+          legend.position = c(0,1),
           legend.text=element_text(size= 12),
           legend.title = element_text(size = 12),
           # legend.margin = margin(-35,0,0,-35), #Seems to fit in grid
@@ -374,7 +374,6 @@ plot.col.sidebar<-function(
   if(any(duplicated(col_table$Grps))){
     warning("Duplicated group name provided. Removing duplicated...")
     col_table<-col_table[!duplicated(Grps)]
-    # stop("Duplicated group name provided. Make sure 'annot.grps' does not contain duplicated group names in the list.")
   }
   #Plot color sidebars
   col_sidebar<-basic.sidebar(data = dframe.annot, palette = col_table$Cols)
@@ -414,8 +413,6 @@ plot.col.sidebar<-function(
     } else { col_sidebar <- col_sidebar + theme(axis.title = element_blank()) }
     if(split.annot){
       stop("A geom_tile vertically faceted in ggplot2_3.2.0 does not support heights redimensioning after being converted into a grob.")
-      # col_sidebar<-col_sidebar +
-      #   facet_grid(. ~ .id, scales = "free", space = "free_x")
     }
   }
 
@@ -428,11 +425,6 @@ plot.col.sidebar<-function(
           dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
       }
     }
-
-    # #Convert col_table ids as.factor
-    # col_table$.id<-as.factor(col_table$.id)
-    # #Reverse order of levels of palettes ids to match new order of annots
-    # levels(col_table$.id)<-rev(levels(col_table$.id))
 
     #Get all legends separately
     sidebar.lgd<-lapply(seq_along(levels(dframe.annot$.id)), function(i){
@@ -478,4 +470,27 @@ resize.grobs<-function(ls.grobs, dimensions, start.unit, end.unit){
     i
   })
   return(ls.grobs)
+}
+
+#' Stack grobs legends vertically in separate spaces of specific heights
+#' @param grobs.list A \code{list} of legends as grid objects.
+#' @param annot.grps A \code{factor} list mapped to the legends.
+#' @param height.lgds.space An \code{integer} specifying the height of the total
+#'                          space which is supposed to gather all legends in
+#'                          grobs.list.
+#' @return A \code{grob} containing all legends with their respective heights.
+#' @author Yoann Pageaud.
+#' @export
+#' @keywords internal
+
+stack.grobs.legends<-function(grobs.list, annot.grps, height.lgds.space){
+  size_lgd<-unlist(lapply(X = annot.grps, FUN = function(i){
+    length(unique(i)) + 1
+  }))
+  #Add a ending space in the legend to stack them to the top
+  grobs.list <- c(grobs.list, list(grid::textGrob("")))
+  #Calculate height of the ending space
+  hghts <- c(size_lgd, height.lgds.space-sum(size_lgd))
+  sidebar_legend <- gridExtra::arrangeGrob(grobs = grobs.list, heights = hghts)
+  return(sidebar_legend)
 }

@@ -63,6 +63,7 @@ lapply(Imports, library, character.only = T)
 #' @export
 #' @keywords internal
 
+#TODO Rewrite clean function 
 ggclust.heatmap<-function(
   data, regions.clusters, order.type="Hclust", distance.method,
   select.clust = NULL, select.sample = NULL, groups=NULL, groups.order=NULL,
