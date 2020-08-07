@@ -2,7 +2,7 @@
 % Please edit documentation in R/ggcoverage.R
 \name{ggcoverage}
 \alias{ggcoverage}
-\title{Plots an annotated barplot.}
+\title{Plots an annotated stacked barplot.}
 \usage{
 ggcoverage(
   data,
@@ -15,24 +15,45 @@ ggcoverage(
 )
 }
 \arguments{
-\item{data}{A \code{data.frame} containing:
+\item{data}{A \code{data.table} containing:
 \itemize{
  \item{labels in column 1}
  \item{total amounts in column 2}
  \item{subset amounts in column 3}
 }}
 
-\item{round.unit}{An \code{integer} to specify how much decimals should be
-kept when rounding percentages.}
+\item{round.unit}{An \code{integer} to specify how many decimals should
+be kept when rounding percentages
+(Default: round.unit = 2).}
 
-\item{horizontal}{A \code{logical} to specify whether the plot should be
-plotted horizontally or vertically.}
+\item{rev.stack}{A \code{logical} to specify whether the stacking
+order of bars should be reversed or not
+(Default: rev.stack = FALSE).}
+
+\item{invert.percent}{A \code{logical} to specify whether the calculated
+percentage should reflect the share of the subset
+initially defined in the data.table
+(Default: invert.percent = FALSE), or should reflect
+the remaining share of the total amount minus the
+subset (invert.percent = TRUE).}
+
+\item{horizontal}{A \code{logical} to specify whether the plot should
+be plotted horizontally or vertically
+(Default: horizontal = FALSE).}
+
+\item{log.scaled}{A \code{logical} to specify whether the plot should
+be log-scaled or not (Default: log.scaled = FALSE).}
+
+\item{decreasing.order}{A \code{logical} to specify how the bars should be
+ordered. By default, bars are ordered by increasing
+order of the sum of the values they display. This
+order can be inverted with: decreasing.order = TRUE.}
 }
 \value{
-A \code{gg} dodged barplot with annotations.
+A \code{gg} stacked barplot with annotations.
 }
 \description{
-Plots an annotated barplot.
+Plots an annotated stacked barplot.
 }
 \author{
 Yoann Pageaud.
