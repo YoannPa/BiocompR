@@ -2,13 +2,13 @@
 _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots dedicated to data comparison and dataset exploration and ultimately provides users with versatile and customizable graphics._  
 
 **Author: PAGEAUD Y.<sup>1</sup>**  
-**Contributors: SCHEFZIK R.<sup>2</sup>; KURILOV R.<sup>1</sup>; WURSTHORN A.<sup>4</sup>; MAYAKONDA A.<sup>3</sup>; FEUERBACH L.<sup>1</sup>; TOTH R.<sup>3</sup>.**  
+**Contributors: SCHEFZIK R.<sup>2</sup>; HRUSKA D.<sup>1</sup>; KURILOV R.<sup>1</sup>; WURSTHORN A.<sup>4</sup>; MAYAKONDA A.<sup>3</sup>; FEUERBACH L.<sup>1</sup>; TOTH R.<sup>3</sup>.**  
 **1-** [**DKFZ - Division of Applied Bioinformatics, Germany.**](https://www.dkfz.de/en/applied-bioinformatics/index.php)  
 **2-** [**Klinik für Anästhesiologie und Operative Intensivmedizin, Medizinische Fakultät Mannheim, Universität Heidelberg, Germany.**](https://www.umm.de/klinik-fuer-anaesthesiologie-und-operative-intensivmedizin/)  
 **3-** [**DKFZ - Computational Cancer Epigenomics, Germany.**](https://www.dkfz.de/en/CanEpi/CompEpigen/index.html)  
 **4-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
-**Version: 0.0.72 (Beta)**  
+**Version: 0.0.73 (Beta)**  
 **R Compatibility: Version 3.6.3**  
 **Last Update: 07/08/2020**  
 **How to cite:** _Pageaud Y. et al., BiomcompR - Advanced visualizations for data comparison._  
@@ -35,12 +35,14 @@ Currently the package BiocompR contains **18 functions**:
 * `sunset()` - Draws a sunset plot showing the completeness of a dataset.  
 * `warn.handle()` - Filters unrelevant warnings matching a regular expression.  
 
-## Prerequesites
+## Prerequisites
 ### Install Linux dependencies
+In the terminal do:  
 ```bash
 sudo apt-get install libcurl4-openssl-dev libxml2-dev
 ```
 ### Install Bioconductor dependencies
+In R do:
 ```R
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
