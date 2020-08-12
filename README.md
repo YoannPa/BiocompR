@@ -8,7 +8,7 @@ _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots 
 **3-** [**DKFZ - Computational Cancer Epigenomics, Germany.**](https://www.dkfz.de/en/CanEpi/CompEpigen/index.html)  
 **4-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
-**Version: 0.0.71 (Beta)**  
+**Version: 0.0.72 (Beta)**  
 **R Compatibility: Version 3.6.3**  
 **Last Update: 07/08/2020**  
 **How to cite:** _Pageaud Y. et al., BiomcompR - Advanced visualizations for data comparison._  
@@ -36,11 +36,22 @@ Currently the package BiocompR contains **18 functions**:
 * `warn.handle()` - Filters unrelevant warnings matching a regular expression.  
 
 ## Prerequesites
-### Install all dependencies
+### Install Linux dependencies
+```bash
+sudo apt-get install libcurl4-openssl-dev libxml2-dev
+```
+### Install Bioconductor dependencies
+```R
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("IRanges")
+```
+### Install CRAN dependencies
 ```R
 inst.pkgs = c('corrplot', 'data.table', 'devtools', 'fastcluster', 'ggdendro',
-	      'ggplot2', 'ggrepel', 'grid', 'gridExtra', 'IRanges', 'psych',
-	      'parallel', 'parallelDist', 'quantmod')
+	      'ggplot2', 'ggrepel', 'grid', 'gridExtra', 'psych', 'parallel',
+	      'parallelDist', 'quantmod', 'Hmisc')
 install.packages(inst.pkgs)
 ```
 
