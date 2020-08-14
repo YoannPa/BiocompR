@@ -7,46 +7,39 @@ of values.}
 \usage{
 fancy.hist(
   x,
-  xmax,
-  nbreaks = 10,
-  ngrad = 10,
+  xmax = max(x, na.rm = TRUE),
+  nbreaks = 11,
+  ngrad = 11,
   round.grad = 1,
-  ncores = 1,
-  xlab = "values",
-  ylab = "Frequency",
-  bin.col = "#0570b0"
+  bin.col = "#0570b0",
+  show.annot = FALSE
 )
 }
 \arguments{
 \item{x}{A \code{numeric} vector to be used for plotting the
 histogram.}
 
-\item{xmax}{A \code{numeric} specifying the maximum limit on the x axis
+\item{xmax}{A \code{numeric} specifying the maximum limit on the X-axis
 to display values. All values above this limit will be
-agregated on the last histogram bin.}
+agregated on the last histogram bin
+(Default: max(x, na.rm = TRUE)).}
 
 \item{nbreaks}{An \code{integer} specifying the number of delimitations to
-be use for histogram bins\cr(Default: nbreaks = 10).}
+be use for histogram bins (Default: nbreaks = 11).}
 
 \item{ngrad}{An \code{integer} specifying the number of graduations to
-display on the X-axis of the plot\cr(Default: ngrad = 10).}
+display on the X-axis of the plot (Default: ngrad = 11).}
 
 \item{round.grad}{An \code{integer} specifying the number significant digits
-to be considered when calculating graduations\cr
+to be considered when calculating graduations
 (Default: round.grad = 1).}
 
-\item{ncores}{An \code{integer} to specifying the number of cores to use
-when parallel-running the computation of the histogram\cr
-(Default: ncores = 1).}
-
-\item{xlab}{A \code{character} to be used as X-axis label\cr
-(Default: xlab = 'values').}
-
-\item{ylab}{A \code{character} to be used as Y-axis label\cr
-(Default: ylab = 'Frequency').}
-
 \item{bin.col}{A \code{character} matching a R color code to be use to
-fill the histogram bins.}
+fill the histogram bins (Default: bin.col = "#0570b0").}
+
+\item{show.annot}{A \code{logical} specifying whether the median and the
+cut-off annotation should be displayed (show.annot = TRUE)
+or not (Default: show.annot = FALSE).}
 }
 \value{
 A \code{gg} plot of an histogram.
@@ -54,6 +47,29 @@ A \code{gg} plot of an histogram.
 \description{
 Computes in parallel and plot an histogram using ggplot2 from a given vector
 of values.
+}
+\examples{
+# Basic use of fancy.hist()
+fancy.hist(x = rnorm(100, 5, 1))
+# Set a specific maximum limit on the X-axis to agregate values above it in a
+# single bin.
+fancy.hist(x = rnorm(100, 5, 1), xmax = 7)
+# Change the number of graduations on X-axis
+fancy.hist(x = rnorm(100, 5, 1), xmax = 7, ngrad = 8)
+# Change the number of histogram bins
+fancy.hist(x = rnorm(100, 5, 1), xmax = 7, ngrad = 8, nbreaks = 8)
+# Change filling color of the histogram
+fancy.hist(
+ x = rnorm(100, 5, 1), xmax = 7, ngrad = 8, nbreaks = 8, bin.col = "orange")
+# Display annotations
+fancy.hist(
+ x = rnorm(100, 5, 1), xmax = 7, ngrad = 8, nbreaks = 8, bin.col = "orange",
+ show.annot = TRUE)
+# Rename X-axis and Y-axis titles
+fancy.hist(
+ x = rnorm(100, 5, 1), xmax = 7, ngrad = 8, nbreaks = 8, bin.col = "orange",
+ show.annot = TRUE) +
+labs(x = "Distribution of the values", y = "Number of values in each bin")
 }
 \author{
 Yoann Pageaud.

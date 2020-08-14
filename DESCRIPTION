@@ -1,6 +1,6 @@
 Package: BiocompR
 Title: BiomcompR - Advanced visualizations for data comparison
-Version: 0.0.68
+Version: 0.0.74
 Authors@R: 
     person(given = "Yoann",
            family = "Pageaud",
@@ -8,14 +8,15 @@ Authors@R:
            email = "y.pageaud@dkfz.de",
            comment = c(ORCID = "https://orcid.org/0000-0002-1392-1744"))
 Description: BiocompR is a R package built upon ggplot2 to improve commonly used
-            plots dedicated to data comparison, dataset exploration and,
-            ultimately provides users with versatile and customizable graphics.
+            plots dedicated to data comparison and dataset exploration and,
+            ultimately, provides users with versatile and customizable graphics.
 License: GPL-3.0
 Encoding: UTF-8
 LazyData: true
 Depends:
     data.table,
     ggplot2
+biocViews:
 Imports:
     corrplot,
     fastcluster,
@@ -28,7 +29,7 @@ Imports:
     parallel,
     parallelDist,
     quantmod
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Suggests: 
     knitr,
     rmarkdown

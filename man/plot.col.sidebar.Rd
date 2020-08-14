@@ -4,7 +4,7 @@
 \alias{plot.col.sidebar}
 \title{Creates a colored side annotation bars in ggplot2.}
 \usage{
-plot.col.sidebar(
+\method{plot}{col.sidebar}(
   sample.names,
   annot.grps,
   annot.pal,
