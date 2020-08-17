@@ -1,15 +1,12 @@
-##IMPORTS
-Imports = c("ggplot2","IRanges")
-lapply(Imports, library, character.only = T)
 
 ##DATA
 #TODO: use data() function to load the predefined palettes.
-pal_sunset<-c("red","gold","blue4")
-pal_westworld<-c("sienna1","lightgoldenrod","skyblue3")
-pal_startrek<-c("red","goldenrod1","dodgerblue")
-pal_margesimpson<-c("lightgreen","gold","dodgerblue2")
-pal_eighties<-c("darkviolet","deeppink","blue4")
-pal_insta<-c("deeppink","red","goldenrod1")
+pal_sunset <- c("red","gold","blue4")
+pal_westworld <- c("sienna1","lightgoldenrod","skyblue3")
+pal_startrek <- c("red","goldenrod1","dodgerblue")
+pal_margesimpson <- c("lightgreen","gold","dodgerblue2")
+pal_eighties <- c("darkviolet","deeppink","blue4")
+pal_insta <- c("deeppink","red","goldenrod1")
 
 #' Draws a sunset plot showing the completeness of a dataset.
 #'
@@ -97,11 +94,11 @@ sunset<-function(mat, title, col.pal = pal_sunset, horizontal = FALSE,
   smpl_intervals<-do.call(c,lapply(pos_str, function(i){
     if(i+1 - i == 1){ #If first sample
       if(!is.na(match(i+1,pos_str))){
-        IRanges(start = i, end = i+1)
+        IRanges::IRanges(start = i, end = i+1)
       }
     }
   }))
-  smpl_intervals<-reduce(smpl_intervals)
+  smpl_intervals <- IRanges::reduce(smpl_intervals)
   #Get groups average label.pos cumulative diff_bins
   if(length(smpl_intervals) != 0){
     invisible(lapply(seq_along(smpl_intervals), function(i){
@@ -128,7 +125,6 @@ sunset<-function(mat, title, col.pal = pal_sunset, horizontal = FALSE,
   if(keep_2nd_ticks == F) {
     df_right_y<-df_right_y[df_right_y$right_Y != " ",]
   }
-
   #Vector for white lines
   white_lines<-dframe[!is.na(dframe$white_lines),]$white_lines
 
@@ -139,28 +135,27 @@ sunset<-function(mat, title, col.pal = pal_sunset, horizontal = FALSE,
           legend.text=element_text(size=12),
           legend.position=lgd.pos) +
     geom_bar(stat = "identity") +
-    geom_text(aes(y=label.pos, label=percent), vjust=0.25, hjust=0.5,
+    geom_text(aes(y = label.pos, label = percent), vjust = 0.25, hjust = 0.5,
               colour = "white", size = 5) +
-    scale_fill_gradient2(low=col.pal[1],mid=col.pal[2],high=col.pal[3],
+    scale_fill_gradient2(low = col.pal[1], mid = col.pal[2], high = col.pal[3],
                          midpoint = round(N/2)) +
-    scale_y_continuous(expand = c(0,0),
-                       breaks =seq(0,sum(dframe$CpG.Covered),length.out=n.grad),
-                       labels = function(x) format(x,digits=2,scientific=TRUE),
-                       sec.axis = sec_axis(trans = ~.,
-                                           breaks = df_right_y$cumulated_smpl,
-                                           labels = df_right_y$right_Y)) +
-    scale_x_continuous(expand = c(0,0)) +
-    geom_hline(yintercept=white_lines,color="white")
+    scale_y_continuous(
+      expand = c(0,0),
+      breaks = seq(0, sum(dframe$CpG.Covered), length.out = n.grad),
+      labels = function(x) format(x, digits = 2, scientific = TRUE),
+      sec.axis = sec_axis(trans = ~., breaks = df_right_y$cumulated_smpl,
+                          labels = df_right_y$right_Y)) +
+    scale_x_continuous(expand = c(0, 0)) +
+    geom_hline(yintercept = white_lines, color = "white")
 
   if(horizontal == T) {
     Sunset <- Sunset +
       ggtitle(title) +
-      theme(plot.title = element_text(title,
-                                      size = 15,hjust = 0.5),
+      theme(plot.title = element_text(title, size = 15, hjust = 0.5),
             axis.title = element_blank(),
             axis.ticks.y = element_blank(),
             axis.text.y = element_blank(),
-            axis.text.x = element_text(size = 12,face = "bold"),
+            axis.text.x = element_text(size = 12, face = "bold"),
             legend.title = element_text(size = 14,vjust = 0.8),
             plot.margin = margin(0,0,0,20)) +
       labs(fill = "Number of Samples") +
@@ -170,7 +165,7 @@ sunset<-function(mat, title, col.pal = pal_sunset, horizontal = FALSE,
       theme(axis.title.x = element_blank(),
             axis.text.x = element_blank(),
             axis.ticks.x = element_blank(),
-            axis.text.y = element_text(size = 12,face = "bold"),
+            axis.text.y = element_text(size = 12, face = "bold"),
             axis.title = element_text(size = 15),
             legend.title = element_text(size = 14)) +
       ylab(title) +

@@ -13,7 +13,6 @@
 #' @return An error message if something goes wrong during annotations checks.
 #' @author Yoann Pageaud.
 #' @export
-#' @references
 #' @keywords internal
 
 check.annotations<-function(data, annot.grps, annot.pal){
@@ -298,8 +297,8 @@ basic.sidebar<-function(data, palette){
 #' @author Yoann Pageaud.
 #' @export
 
-#TODO: change name of parameter cor.order to see if it can be remove.
 plot.col.sidebar<-function(
+  #TODO: change name of parameter cor.order to see if it can be remove
   sample.names, annot.grps, annot.pal, annot.pos, cor.order,
   split.annot = FALSE, merge.lgd = FALSE, right = FALSE, lgd.lab = "Legends",
   lgd.title = NULL, axis.text.x = element_text(size = 12),

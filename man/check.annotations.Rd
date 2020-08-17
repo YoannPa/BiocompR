@@ -25,9 +25,6 @@ An error message if something goes wrong during annotations checks.
 \description{
 Checks matching between annotation groups and annotation palettes.
 }
-\references{
-
-}
 \author{
 Yoann Pageaud.
 }

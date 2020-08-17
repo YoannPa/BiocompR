@@ -165,11 +165,11 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
   if(!na.handle %in% na.method){ stop("na.handle method not supported.") }
   #Check dimensions of parameters
   if(length(dist.method) == 1){
-    method.rows<-dist.method
-    method.cols<-dist.method
+    method.rows <- dist.method
+    method.cols <- dist.method
   } else if(length(dist.method) == 2){
-    method.rows<-dist.method[1]
-    method.cols<-dist.method[2]
+    method.rows <- dist.method[1]
+    method.cols <- dist.method[2]
   } else { stop("'dist.method' length > 2. Too many values.") }
   #Check distance methods
   methods.ls <- c(
@@ -181,7 +181,7 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
     stop("Unknown method for distance computation on columns.")
   }
   #Check if rank.fun is a supported function
-  rank.method<-c("sd")
+  rank.method <- c("sd")
   if(!is.null(rank.fun)){
     if(!rank.fun %in% rank.method){ stop("ranking function not supported.") }
   }
@@ -356,7 +356,8 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
     #   vp = grid::viewport(x= lgd.pos.x-0.6, y = lgd.pos.y))
     #Final plot
     final.plot<-gridExtra::grid.arrange(gridExtra::arrangeGrob(
-      top = grid::textGrob(plot.title, gp = grid::gpar(fontsize = 15, font=1)),
+      top = grid::textGrob(
+        plot.title, gp = grid::gpar(fontsize = 15, font = 1)),
       grobs = list(
         grid::textGrob(paste0(
           "Columns ordered by ", method.cols, " distance; Rows ordered by ",

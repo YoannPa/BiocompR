@@ -36,7 +36,6 @@
 ggcoverage <- function(
   data, round.unit = 2, rev.stack = FALSE, invert.percent = FALSE,
   horizontal = FALSE, log.scaled = FALSE, decreasing.order = FALSE){
-
   colnames(data)[1:3] <- c("IDs", "Total", "Subset")
   #Replace NAs by zeros
   data[is.na(Total), c("Total", "Subset") := 0]

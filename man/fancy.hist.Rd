@@ -11,6 +11,7 @@ fancy.hist(
   nbreaks = 11,
   ngrad = 11,
   round.grad = 1,
+  ncores = 1,
   bin.col = "#0570b0",
   show.annot = FALSE
 )
@@ -33,6 +34,10 @@ display on the X-axis of the plot (Default: ngrad = 11).}
 \item{round.grad}{An \code{integer} specifying the number significant digits
 to be considered when calculating graduations
 (Default: round.grad = 1).}
+
+\item{ncores}{An \code{integer} to specifying the number of cores to use
+when parallel-running the computation of the histogram
+(Default: ncores = 1).}
 
 \item{bin.col}{A \code{character} matching a R color code to be use to
 fill the histogram bins (Default: bin.col = "#0570b0").}

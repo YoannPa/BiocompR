@@ -34,11 +34,11 @@
 #' @author Yoann Pageaud, Yassen Assenov.
 #' @export
 
-bivar.plot <- function(data, violin = FALSE, cat.step=10L, cat.max=10L,
-                       fill="deepskyblue3"){
+bivar.plot <- function(data, violin = FALSE, cat.step = 10L, cat.max = 10L,
+                       fill = "deepskyblue3"){
   #Convert into a data.table
   if(!is.data.table(data)){
-    data<-as.data.table(data)
+    data <- as.data.table(data)
   }
   #Create colnames
   oldcolnames<-colnames(data)
@@ -64,7 +64,7 @@ bivar.plot <- function(data, violin = FALSE, cat.step=10L, cat.max=10L,
   #Update levels
   levels(data$category) <- cat.labels
   #Get boxplot statistics
-  dfr<-data[, boxplot.stats(x = Var1)$stats, by = c("category","cat.sizes")]
+  dfr <- data[, quantile(x = Var1), by = c("category","cat.sizes")]
   #Categories as Levels
   levels(dfr$category)<-dfr[
     match(x = levels(category), table = category)][, category:=.(paste0(
@@ -77,17 +77,17 @@ bivar.plot <- function(data, violin = FALSE, cat.step=10L, cat.max=10L,
   if(violin){
     bivar <- bivar +
       geom_violin(data = data,
-                  mapping = aes(x = category, y = Var1, alpha=cat.sizes),
+                  mapping = aes(x = category, y = Var1, alpha = cat.sizes),
                   fill = fill) +
       geom_boxplot(data = dfr, mapping = aes(x = category, y = V1),
-                   fill = "white", outlier.size = NA, width = 0.1)
+                   fill = "white", outlier.size = 1.5, width = 0.1)
   } else {
     bivar <- bivar +
       geom_boxplot(data = dfr, mapping = aes(x = category, y = V1),
-                   outlier.size = NA, color=NA) +
+                   outlier.size = 1.5, color = NA, outlier.color = "black") +
       geom_boxplot(data = dfr,
                    mapping = aes(x = category, y = V1, alpha = cat.sizes),
-                   fill = fill, outlier.size = NA)
+                   fill = fill, outlier.shape = NA)
   }
   bivar <- bivar +
     theme(legend.position="none",

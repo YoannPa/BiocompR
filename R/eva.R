@@ -1,8 +1,4 @@
 
-##IMPORTS
-Imports = c('psych','ggplot2','ggrepel')
-lapply(Imports, library, character.only = T)
-
 #' Calculate the variance accounted of an eigenvalue.
 #'
 #' @param colname          A \code{character} matching a column name.
@@ -10,13 +6,15 @@ lapply(Imports, library, character.only = T)
 #' @return A \code{character} containg the value of the eigenvalue variance
 #'         accounted for its associated eigen vector.
 #' @author Yoann Pageaud.
+#' @export
 #' @keywords internal
 
-var.accounted<-function(colname, eigen.values){
-  vect.num<-gsub("[^0-9.]","",colname)
-  var.accounted<-round(
+var.accounted <- function(colname, eigen.values){
+  vect.num <- gsub(pattern = "[^0-9.]", replacement = "", x = colname)
+  var.accounted <- round(
     eigen.values[as.integer(vect.num)]/length(eigen.values)*100,2)
-  paste0("Eigenvector ",vect.num," (Variance accounted = " ,var.accounted, "%)")
+  paste0("Eigenvector ", vect.num,
+         " (Variance accounted = ", var.accounted, "%)")
 }
 
 #' Creates an eigenvector plot using ggplot2.
@@ -44,24 +42,26 @@ var.accounted<-function(colname, eigen.values){
 #' @author Yoann Pageaud.
 #' @export
 
-ggeigenvector<- function(
-  data, xcol, ycol, eigenvalues, colors, label=TRUE, title){
-  ev.plot<-ggplot(data=data) +
+ggeigenvector <- function(
+  data, xcol, ycol, eigenvalues, colors, label = TRUE, title){
+  ev.plot <- ggplot(data = data) +
     ggtitle(title) +
     geom_point(aes_string(x = xcol, y = ycol, color = "Groups")) +
     geom_segment(aes_string(xend = xcol, yend = ycol, color = "Groups"),
-                 x=0, y=0, size=1, arrow = arrow(length = unit(0.3,"cm"))) +
-    scale_color_manual(values=colors) +
-    xlab(var.accounted(colname=xcol, eigen.values=eigenvalues)) +
-    ylab(var.accounted(colname=ycol, eigen.values=eigenvalues)) +
+                 x = 0, y = 0, size = 1,
+                 arrow = grid::arrow(length = grid::unit(0.3, "cm"))) +
+    scale_color_manual(values = colors) +
+    xlab(var.accounted(colname = xcol, eigen.values = eigenvalues)) +
+    ylab(var.accounted(colname = ycol, eigen.values = eigenvalues)) +
     theme(plot.title = element_text(hjust = 0.5),
           axis.title = element_text(size = 13),
           legend.text = element_text(size=12)) +
-    geom_hline(yintercept = 0, linetype="dashed") +
-    geom_vline(xintercept = 0, linetype="dashed")
+    geom_hline(yintercept = 0, linetype = "dashed") +
+    geom_vline(xintercept = 0, linetype = "dashed")
   if(label){
     ev.plot <- ev.plot +
-      geom_label_repel(aes_string(x = xcol, y = ycol, label = "Labels"))
+      ggrepel::geom_label_repel(aes_string(x = xcol, y = ycol,
+                                           label = "Labels"))
   }
   ev.plot
 }
@@ -98,32 +98,32 @@ ggeigenvector<- function(
 #' @author Yoann Pageaud.
 #' @export
 
-EVA<-function(data, use = "pairwise", method = "pearson", adjust = "none",
-              var.min = 0.01, groups = as.character(seq(ncol(data))),
-              colors = rainbow(n = ncol(data)), label=TRUE){
+EVA <- function(data, use = "pairwise", method = "pearson", adjust = "none",
+                var.min = 0.01, groups = as.character(seq(ncol(data))),
+                colors = grDevices::rainbow(n = ncol(data)), label = TRUE){
   #Compute a correlation test on the data
-  M<-corr.test(x = data, use = use, method = method, adjust = adjust)$r
+  M <- psych::corr.test(x = data, use = use, method = method, adjust = adjust)$r
   #Get eigenvalues from the correlation matrix
   eigvals <- eigen(M)$values
   #Get percentage of variance accounted by each eigen values
-  var.acc<-eigvals/length(eigvals)
+  var.acc <- eigvals/length(eigvals)
   #How many eigenvalues are above the minimum threshold for variance accounted
-  true.eigvals<-length(var.acc[var.acc >= var.min])
+  true.eigvals <- length(var.acc[var.acc >= var.min])
   if(true.eigvals == 0){
     stop("No eigenvalues accounting for more than the var.min minimum of the variance. Please set a lower var.min.")
   }
   #Get eigenvectors
-  eigvects <- as.data.frame(eigen(M)$vectors[,c(1:true.eigvals)])
-  dframe<-as.data.frame(
-    cbind(eigvects,"Groups" = as.factor(groups),"Labels" = colnames(data)))
+  eigvects <- as.data.frame(eigen(M)$vectors[, c(1:true.eigvals)])
+  dframe <- as.data.frame(
+    cbind(eigvects, "Groups" = as.factor(groups), "Labels" = colnames(data)))
   #Create all possible combinations
-  combs<-expand.grid(seq(true.eigvals),seq(true.eigvals))
+  combs <- expand.grid(seq(true.eigvals), seq(true.eigvals))
   #Remove duplicate and order
-  combs<-combs[combs$Var1 != combs$Var2,]
-  combs<-combs[order(combs[,1]),]
-  my_cols<-colnames(dframe)[!colnames(dframe) %in% c("Groups","Labels")]
+  combs <- combs[combs$Var1 != combs$Var2, ]
+  combs <- combs[order(combs[,1]), ]
+  my_cols <- colnames(dframe)[!colnames(dframe) %in% c("Groups", "Labels")]
   #Generate all Eigenvector Plots
-  list_EVplots<-lapply(my_cols, function(col1){
+  list_EVplots <- lapply(my_cols, function(col1){
     lapply(my_cols, function(col2){
       if(col1 == col2){ return(NULL) } else {
         ggeigenvector(data = dframe, eigenvalues = eigvals, xcol = col1,
@@ -134,17 +134,17 @@ EVA<-function(data, use = "pairwise", method = "pearson", adjust = "none",
     })
   })
   #Flatten list
-  list_EVplots<-unlist(list_EVplots,recursive = F)
+  list_EVplots <- unlist(list_EVplots, recursive = FALSE)
   #Remove NULL elements
-  list_EVplots<-Filter(Negate(is.null), list_EVplots)
-  names(list_EVplots)<-paste(combs[,1],"&",combs[,2])
+  list_EVplots <- Filter(Negate(is.null), list_EVplots)
+  names(list_EVplots) <- paste(combs[,1], "&", combs[, 2])
   #Scaling the matrix values.
-  data<-scale(data[complete.cases(data),])
+  data <- scale(data[complete.cases(data), ])
   #Matricial product of scaled values and eigenvectors.
-  pca.scores<- data %*% eigen(M)$vectors
-  colnames(pca.scores)<-paste("EV",seq(ncol(data)), sep="")
+  pca.scores <- data %*% eigen(M)$vectors
+  colnames(pca.scores) <- paste("EV", seq(ncol(data)), sep = "")
   #Get correlation between samples and Principal components.
-  PC.cor<-corr.test(data,pca.scores,use = use, method = method)$r
+  PC.cor <- psych::corr.test(data, pca.scores, use = use, method = method)$r
   return(list("PC.cor" = PC.cor, "EV.plots" = list_EVplots,
               "PC.scores" = as.data.frame(pca.scores)))
 }

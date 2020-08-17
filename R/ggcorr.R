@@ -7,7 +7,7 @@
 #' @export
 #' @keywords internal
 
-chk.dt<-function(data){
+chk.dt <- function(data){
   #Check col2
   if(is.numeric(data[[2]])){
     if(any(data[,2] < -1) | any(data[,2] > 1)){
@@ -58,7 +58,7 @@ chk.dt<-function(data){
 #' @export
 #' @keywords internal
 
-chk.corr.lbl.cutoff<-function(corr.label.cutoff){
+chk.corr.lbl.cutoff <- function(corr.label.cutoff){
   #Check corr.label.cutoff values
   if(length(corr.label.cutoff) == 2){
     neg.corr.label.cutoff<-min(corr.label.cutoff)
@@ -125,7 +125,7 @@ chk.corr.lbl.cutoff<-function(corr.label.cutoff){
 #' @author Yoann Pageaud.
 #' @export
 
-ggpanel.corr<-function(
+ggpanel.corr <- function(
   data, p.cutoff = 0.01, corr.label.cutoff, jitter.height = 0.4){
 
   #Get colnames
@@ -238,7 +238,7 @@ ggpanel.corr<-function(
 #' @author Yoann Pageaud.
 #' @export
 
-ggvolcano.corr<-function(
+ggvolcano.corr <- function(
   data, p.cutoff = 0.01, corr.cutoff = NULL,
   title.corr.cutoff = "Correlation cut-off", corr.label.cutoff){
 

@@ -27,7 +27,7 @@
 #' @references
 #' @keywords internal
 
-manage.na<-function(data, method = "remove", groups, ncores = 1){
+manage.na <- function(data, method = "remove", groups, ncores = 1){
   if(method != "keep"){ #If NA should not be kept
     if(any(is.na(data))) { #If any NA
       if(method == "remove"){ #Remove all rows containing any NA
@@ -35,8 +35,8 @@ manage.na<-function(data, method = "remove", groups, ncores = 1){
       } else if(method == "impute"){ #Impute NAs with the median value by group
         #Parallel-remove rows containing only NAs
         data <- data[
-          !unlist(mclapply(X = seq(nrow(data)), mc.cores = ncores,
-                           FUN = function(r){
+          !unlist(parallel::mclapply(
+            X = seq(nrow(data)), mc.cores = ncores, FUN = function(r){
                              all(is.na(data[r,])) })), , drop = FALSE]
         #Get groups of samples from sample conditions
         grp_tbl<-data.frame(samples = colnames(data), groups = groups)

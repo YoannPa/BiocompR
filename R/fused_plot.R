@@ -15,13 +15,13 @@
 #' @export
 #' @keywords internal
 
-min.max.update<-function(lgd.limits=NULL, melt.tri, tri.type){
+min.max.update <- function(lgd.limits = NULL, melt.tri, tri.type){
   if(is.null(lgd.limits)){
-    min_tri<-min(melt.tri$value,na.rm = T)
-    max_tri<-max(melt.tri$value,na.rm = T)
+    min_tri <- min(melt.tri$value, na.rm = TRUE)
+    max_tri <- max(melt.tri$value, na.rm = TRUE)
     if(min_tri == max_tri){
       stop(paste0("min and max values are equals. Please set limits for the ",
-                  tri.type," triangle legend."))
+                  tri.type, " triangle legend."))
     }
   } else {
     if(length(lgd.limits) != 2){
@@ -189,12 +189,13 @@ fused.view<-function(
       correlation.order<-seq(ncol(upper.mat))}
     if(dendro.pos != "none"){
       #Generate Hierarchy Cluster
-      hierarchy.clust<-hclust(d = as.dist(1-upper.mat), method = hclust.method)
+      hierarchy.clust <- hclust(
+        d = as.dist(1-upper.mat), method = hclust.method)
     }
   } else {
     if(order.method %in% c("AOE","FPC","hclust")){
-      correlation.order<-corrplot::corrMatOrder(lower.mat, order = order.method,
-                                                hclust.method = hclust.method)
+      correlation.order <- corrplot::corrMatOrder(
+        lower.mat, order = order.method, hclust.method = hclust.method)
     } else if(order.method == "alphabet"){
       #Fix bug of corrMatOrder when alphabet order
       correlation.order<-fix.corrMatOrder.alphabet(cor.order=correlation.order,
@@ -208,8 +209,8 @@ fused.view<-function(
   }
   #Generate Dendrogram
   if(dendro.pos != "none"){
-    dendrogram<-as.dendrogram(hierarchy.clust)
-    ddgr_dat<-ggdendro::dendro_data(dendrogram) #Dendrogram data
+    dendrogram <- as.dendrogram(hierarchy.clust)
+    ddgr_dat <- ggdendro::dendro_data(dendrogram) #Dendrogram data
     ddgr_seg <- ggdend( #Get dendrogram segments
       df = ddgr_dat$segments, orientation = dendro.pos, reverse.x = TRUE)
   }

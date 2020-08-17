@@ -4,7 +4,7 @@
 \alias{stack.grobs.legends}
 \title{Stack grobs legends vertically in separate spaces of specific heights}
 \usage{
-stack.grobs.legends(grobs.list, annot.grps, height.lgds.space)
+\method{stack}{grobs.legends}(grobs.list, annot.grps, height.lgds.space)
 }
 \arguments{
 \item{grobs.list}{A \code{list} of legends as grid objects.}

@@ -7,11 +7,10 @@
 #' @return A \code{list} of vectors containing percentiles values, one vector by
 #' distribution.
 #' @author Yoann Pageaud.
+#' @export
 #' @keywords internal
 
-ls.quantile<-function(ls, qtiles){
-  lapply(ls, quantile, qtiles)
-}
+ls.quantile <- function(ls, qtiles){ lapply(ls, quantile, qtiles) }
 
 #' Bins density object following specific percentiles.
 #'
@@ -24,9 +23,10 @@ ls.quantile<-function(ls, qtiles){
 #' @return A \code{list} of modified data.frames of the density distributions
 #' containing breaks to be used for delimitating bins.
 #' @author Yoann Pageaud.
+#' @export
 #' @keywords internal
 
-bin.polygons<-function(list_oriented_dens,list.quant.lim,Annot.table){
+bin.polygons <- function(list_oriented_dens, list.quant.lim, Annot.table){
   #Add quantile values to density positions vector and sort it.
   list_dens.pos<-lapply(list_oriented_dens, function(i){ i$y.pos })
   merged.pos<-Map(c,list.quant.lim,list_dens.pos)

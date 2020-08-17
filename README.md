@@ -53,7 +53,7 @@ BiocManager::install("IRanges")
 ```R
 inst.pkgs = c('corrplot', 'data.table', 'devtools', 'fastcluster', 'ggdendro',
 	      'ggplot2', 'ggrepel', 'grid', 'gridExtra', 'psych', 'parallel',
-	      'parallelDist', 'quantmod', 'Hmisc')
+	      'parallelDist', 'quantmod')
 install.packages(inst.pkgs)
 ```
 

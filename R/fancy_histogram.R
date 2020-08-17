@@ -15,6 +15,9 @@
 #' @param round.grad An \code{integer} specifying the number significant digits
 #'                   to be considered when calculating graduations
 #'                   (Default: round.grad = 1).
+#' @param ncores     An \code{integer} to specifying the number of cores to use
+#'                   when parallel-running the computation of the histogram
+#'                   (Default: ncores = 1).
 #' @param bin.col    A \code{character} matching a R color code to be use to
 #'                   fill the histogram bins (Default: bin.col = "#0570b0").
 #' @param show.annot A \code{logical} specifying whether the median and the
@@ -46,9 +49,9 @@
 #' labs(x = "Distribution of the values", y = "Number of values in each bin")
 #' @export
 
-fancy.hist<-function(
+fancy.hist <- function(
   x, xmax = max(x, na.rm = TRUE), nbreaks = 11, ngrad = 11, round.grad = 1,
-  bin.col = "#0570b0", show.annot = FALSE){
+  ncores = 1, bin.col = "#0570b0", show.annot = FALSE){
   #Check if is any NAs
   if(any(is.na(x))){ x<-x[!is.na(x)] } #rm NAs
 
@@ -64,7 +67,8 @@ fancy.hist<-function(
     xlabs[length(xlabs)] <- paste(xlabs[length(xlabs)], "\nor more")
   }
   #Compute quantities for each bin
-  histdata <- lapply(X = seq(length(xbreaks)-1), FUN = function(i){
+  histdata <- parallel::mclapply(
+    X = seq(length(xbreaks)-1), mc.cores = ncores, FUN = function(i){
     if(i == length(xbreaks)-1){ #If last bin take values equal to maximum too
       qs<-length(x[x >= xbreaks[i] & x <= xbreaks[i+1]])
     } else { qs <- length(x[x >= xbreaks[i] & x < xbreaks[i+1]]) }
@@ -73,7 +77,7 @@ fancy.hist<-function(
   #Get recommended cut-off value and median
   if(show.annot){
     cat("Compute Median and Cutoff\n")
-    cutoff.val <- quantmod::findValleys(histdata)[1]
+    cutoff.val <- quantmod::findValleys(x = histdata)[1]
     cutoff.pos <- cutoff.val*(length(histdata)/xmax) + 0.5
     median.val <- median(x,na.rm = TRUE)
     median.pos <- median.val*(length(histdata)/xmax) + 0.5

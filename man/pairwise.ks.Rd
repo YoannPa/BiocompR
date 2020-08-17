@@ -18,8 +18,8 @@ be used to parallel-run tests.}
 }
 \value{
 A \code{list} containing a matrix of the statistic values, a
-       data.frame of the pairwise KS raw test results, and a table of pairwise
-       combinations.
+        data.frame of the pairwise KS raw test results, and a table of
+        pairwise combinations.
 }
 \description{
 Computes a Kolmogrov-Smirnov test between all columns of a data.frame.

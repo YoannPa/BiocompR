@@ -1,9 +1,4 @@
 
-##IMPORTS
-Imports = c('data.table','ggplot2','Hmisc','fastcluster','parallelDist',
-            'fastcluster','RColorBrewer')
-lapply(Imports, library, character.only = T)
-
 #' Creates a clustered heatmap using ggplot2.
 #'
 #' @param data             A \code{matrix} or a \code{data.frame} with samples
@@ -63,7 +58,7 @@ lapply(Imports, library, character.only = T)
 #' @export
 #' @keywords internal
 
-#TODO Rewrite clean function 
+#TODO Rewrite clean function
 ggclust.heatmap<-function(
   data, regions.clusters, order.type="Hclust", distance.method,
   select.clust = NULL, select.sample = NULL, groups=NULL, groups.order=NULL,
@@ -113,28 +108,29 @@ ggclust.heatmap<-function(
   #Order Regions in clusters
   if(order.type == "SD"){ #Order regions by cluster and then by SD
     data[, sd := apply(data[, 3:(ncol(data))], 1, sd, na.rm = T)]
-    data<-data[order(as.numeric(Clusters), -sd)]
-    data<-data[,sd:=NULL]
-    row_count<-nrow(data)
-    distance.method<-"none"
-    melt_data<-melt.data.table(data,id.vars = c("rn","Clusters"))
+    data <- data[order(as.numeric(Clusters), -sd)]
+    data <- data[, sd := NULL]
+    row_count <- nrow(data)
+    distance.method <- "none"
+    melt_data <- melt.data.table(data, id.vars = c("rn", "Clusters"))
 
   } else {#Order regions by cluster and then by hierarchical cluster
-    row_count<-nrow(data)
-    data_list<-split(data,f = data$Clusters)
+    row_count <- nrow(data)
+    data_list <- split(data,f = data$Clusters)
     #Remove Clusters and and sd columns from all dataframes in list
-    data_list_names<-lapply(data_list, function(x) x[["rn"]])
+    data_list_names <- lapply(data_list, function(x) x[["rn"]])
     # data_list<-lapply(data_list, function(x) x[,c("rn","Clusters"):=NULL])
     lapply(data_list, function(x) x[,c("rn","Clusters"):=NULL])
-    data_list<-lapply(data_list,as.matrix)
-    row_dist<-lapply(data_list,parDist,method = distance.method,threads = 7)
-    row_hclust<-lapply(row_dist, hclust)
-    Dend_list<-lapply(row_hclust, as.dendrogram)
-    row.order<-lapply(Dend_list, order.dendrogram)
-    namesdata<-names(data_list)
+    data_list <- lapply(X = data_list, FUN = as.matrix)
+    row_dist <- lapply(X = data_list, FUN = parallelDist::parDist,
+                       method = distance.method, threads = 7)
+    row_hclust <- lapply(X = row_dist, FUN = hclust)
+    Dend_list <- lapply(X = row_hclust, FUN = as.dendrogram)
+    row.order <- lapply(X = Dend_list, FUN = order.dendrogram)
+    namesdata <- names(data_list)
     data_list<-lapply(1:length(data_list), function(i){
       xi = data_list[[i]]
-      xi = xi[row.order[[i]],, drop = FALSE]
+      xi = xi[row.order[[i]], , drop = FALSE]
       xi
     })
     names(data_list)<-namesdata
@@ -158,11 +154,11 @@ ggclust.heatmap<-function(
                                                 fill = value)) +
       scale_fill_gradientn(colors = palette)
   } else {
-    Clustheatmap<- ggplot(data = melt_data, aes(x = variable, y = rn,
-                                                fill = value,colour="")) +
-      scale_fill_gradientn(colors = palette,na.value = na.col) +
-      scale_colour_manual(values=NA) +
-      guides(colour=guide_legend("N.A.", override.aes=list(fill=na.col)))
+    Clustheatmap <- ggplot(data = melt_data, aes(x = variable, y = rn,
+                                                 fill = value, colour = "")) +
+      scale_fill_gradientn(colors = palette, na.value = na.col) +
+      scale_colour_manual(values = NA) +
+      guides(colour = guide_legend("N.A.", override.aes = list(fill = na.col)))
   }
   Clustheatmap<-Clustheatmap +
     geom_tile() +
@@ -176,16 +172,16 @@ ggclust.heatmap<-function(
           strip.text = element_text(size = 12,face = "bold"),
           strip.text.y = element_text(angle = 180),
           plot.title = element_text(hjust = 0.5)) +
-    labs(title = paste(title,"\n",row_count,"regions ordered by",order.type,
-                       "using",capitalize(distance.method),"distance."),
+    labs(title = paste(title, "\n", row_count, "regions ordered by", order.type,
+                       "using", distance.method, "distance."),
          x = "Samples", y = "Clusters")
 
   if(is.null(groups) == F){
     Clustheatmap <- Clustheatmap +
-      facet_grid(Clusters ~ Groups, scales = "free", switch="y")
+      facet_grid(Clusters ~ Groups, scales = "free", switch = "y")
   } else {
     Clustheatmap <- Clustheatmap +
-      facet_grid(Clusters ~ ., scales = "free", switch="y")
+      facet_grid(Clusters ~ ., scales = "free", switch = "y")
   }
   Clustheatmap
 }
