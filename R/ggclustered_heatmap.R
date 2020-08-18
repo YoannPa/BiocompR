@@ -124,7 +124,7 @@ ggclust.heatmap<-function(
     data_list <- lapply(X = data_list, FUN = as.matrix)
     row_dist <- lapply(X = data_list, FUN = parallelDist::parDist,
                        method = distance.method, threads = 7)
-    row_hclust <- lapply(X = row_dist, FUN = hclust)
+    row_hclust <- lapply(X = row_dist, FUN = fastcluster::hclust)
     Dend_list <- lapply(X = row_hclust, FUN = as.dendrogram)
     row.order <- lapply(X = Dend_list, FUN = order.dendrogram)
     namesdata <- names(data_list)

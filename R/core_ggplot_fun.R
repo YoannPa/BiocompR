@@ -73,9 +73,10 @@ is.elt_blank<-function(arg){
 #' @keywords internal
 #' @references \href{https://github.com/tidyverse/ggplot2/wiki/Share-a-legend-between-two-ggplot2-graphs}{Share a legend between two ggplot2 graphs - Mara Averick}
 
-get.lgd<-function(gg2.obj){
+get.lgd <- function(gg2.obj){
   tmp <- ggplot_gtable(ggplot_build(gg2.obj))
-  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  leg <- which(vapply(X = tmp$grobs, FUN = function(x) x$name,
+                      FUN.VALUE = character(length = 1)) == "guide-box")
   legend <- tmp$grobs[[leg]]
   return(legend)
 }

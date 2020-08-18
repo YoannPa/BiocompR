@@ -189,7 +189,7 @@ fused.view<-function(
       correlation.order<-seq(ncol(upper.mat))}
     if(dendro.pos != "none"){
       #Generate Hierarchy Cluster
-      hierarchy.clust <- hclust(
+      hierarchy.clust <- fastcluster::hclust(
         d = as.dist(1-upper.mat), method = hclust.method)
     }
   } else {
@@ -204,7 +204,8 @@ fused.view<-function(
       correlation.order<-seq(ncol(lower.mat))}
     if(dendro.pos != "none"){
       #Generate Hierarchy Cluster
-      hierarchy.clust<-hclust(d = as.dist(1-lower.mat), method = hclust.method)
+      hierarchy.clust <- fastcluster::hclust(
+        d = as.dist(1-lower.mat), method = hclust.method)
     }
   }
   #Generate Dendrogram

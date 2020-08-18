@@ -226,7 +226,7 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
     #Create Rows Dendrogram
     row_dist <- parallelDist::parDist(
       dend_mat, method = method.rows, threads = ncores)
-    row_hclust<-hclust(row_dist)
+    row_hclust <- fastcluster::hclust(row_dist)
     rm(row_dist)
     rowclust<-as.dendrogram(row_hclust)
     #Get dendrogram segments and order matrix rows
@@ -239,7 +239,7 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
 
   if(dd.cols & method.cols != 'none'){
     #Create Columns Dendrogram
-    ddgr <- as.dendrogram(hclust(parallelDist::parDist(
+    ddgr <- as.dendrogram(fastcluster::hclust(parallelDist::parDist(
       t(dend_mat), method = method.cols, threads = ncores)))
     #Get dendrogram data
     ddgr_dat<-ggdendro::dendro_data(ddgr)
