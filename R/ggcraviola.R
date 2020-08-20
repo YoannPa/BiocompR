@@ -26,10 +26,6 @@
 #'   data.frame format. the "minimal" format also do not support the binning.
 #'  }
 #' }
-#'
-#' @param fill.color     A \code{character} vector of length 2 containing colors
-#'                       to use to fill the craviolas\cr
-#'                       (Default: fill.color = c("blue","red")).
 #' @param craviola.width A \code{double} value to specify the width of
 #'                       craviolas\cr(Default: craviola.width = 1).
 #' @param boxplots       A \code{logical} specifying if boxplots should be
@@ -60,82 +56,81 @@
 #' @examples
 #' #Using a 'minimal' data.frame:
 #' df.minimal = data.frame(
-#'   Samples = rep(paste0("Sample",c(1:2)),each = 1000),
-#'   Values=c(rnorm(1000,0), rnorm(1000, 0.5)))
+#'   Samples = rep(paste0("Sample", c(1:2)), each = 1000),
+#'   Values = c(rnorm(1000, 0), rnorm(1000, 0.5)))
 #' ggcraviola(data = df.minimal, lines.col = "black")
 #'
 #' #Using a 'complete' data.frame:
 #' df.complete = data.frame(
-#'   Samples=rep(paste0("Sample",c(1:6)),each = 1000),
-#'   Groups=rep(c('A','B','C'),each = 2000),
-#'   Conditions=rep(c('I','J'),each = 1000,3),
-#'   Values=c(rnorm(1000,0), rnorm(1000, 0.5),
+#'   Samples = rep(paste0("Sample", c(1:6)), each = 1000),
+#'   Groups = rep(c('A', 'B', 'C'), each = 2000),
+#'   Conditions = rep(c('I', 'J'), each = 1000,3),
+#'   Values = c(rnorm(1000, 0), rnorm(1000, 0.5),
 #'     rnorm(1000, 3), rnorm(1000, 3.5),
-#'     rnorm(1000,-3), rnorm(1000, -3.5)))
+#'     rnorm(1000, -3), rnorm(1000, -3.5)))
 #' ggcraviola(data = df.complete, lines.col = "black")
 #'
 #' #Using a 'complete' data.frame with support of an additional variable:
 #' df.complete2 = data.frame(
-#'   Samples=rep(paste0("Sample",c(1:6)),each = 1000),
-#'   Groups=rep(c('A','B','C'),each = 2000),
-#'   Conditions=rep(c('I','J'),each = 1000,3),
-#'   Values=c(rnorm(1000,0), rnorm(1000, 0.5),
+#'   Samples = rep(paste0("Sample", c(1:6)), each = 1000),
+#'   Groups = rep(c('A', 'B', 'C'), each = 2000),
+#'   Conditions = rep(c('I', 'J'), each = 1000, 3),
+#'   Values = c(rnorm(1000, 0), rnorm(1000, 0.5),
 #'     rnorm(1000, 3), rnorm(1000, 3.5),
-#'     rnorm(1000,-3), rnorm(1000, -3.5)),
-#'   Scnd.Var = rep(rep(x =c(60,50,40,30,20,10,30,40,50,60),
-#'                                each=100),6))
+#'     rnorm(1000, -3), rnorm(1000, -3.5)),
+#'   Scnd.Var = rep(rep(x = c(60, 50, 40, 30, 20, 10, 30, 40, 50, 60),
+#'                      each = 100), 6))
 #' ggcraviola(data = df.complete2, lines.col = "black", bins = TRUE)
 #'
 #' #Use ggplot2 to add components and customize the Craviola plot
 #' ggcraviola(data = df.complete2, lines.col = "black", bins = TRUE) +
-#' labs(alpha = "SD(2nd Variable)") +
-#' ggtitle("This is a Craviola plot!") +
+#' labs(alpha = "SD(2nd Variable)") + # Rename alpha legend
+#' ggtitle("This is a Craviola plot!") + # Add title
 #' theme(plot.title = element_text(hjust = 0.5),
-#'       axis.text = element_text(size = 14, color = "black"),
+#'       axis.text = element_text(size = 14, color = "black"),# Custom axis text
 #'       axis.title = element_text(size = 15),
-#'       legend.title = element_text(size = 13),
+#'       legend.title = element_text(size = 13), # Change legend font size
 #'       legend.text = element_text(size = 12),
-#'       panel.background = element_blank(),
+#'       panel.background = element_blank(), # Change panel appearance
 #'       panel.grid.major.x = element_blank(),
 #'       panel.grid.minor.x = element_blank(),
 #'       panel.grid.major.y = element_line(color = "grey"),
 #'       panel.grid.minor.y = element_line(color = "grey")) +
-#' scale_y_continuous(expand = c(0,0)) +
-#' scale_fill_manual(labels = c("Control","Case"),
-#'                   values = c("dodgerblue","darkorange"))
+#' scale_y_continuous(expand = c(0, 0)) + #Expand fully plot panel on Y-axis
+#' scale_fill_manual(labels = c("Control", "Case"), # Rename conditions
+#'                   values = c("dodgerblue", "darkorange")) # Change colors
 #' @export
 
 ggcraviola <- function(
-  data, fill.color = c("blue", "red"), craviola.width = 1, boxplots = TRUE,
-  boxplot.width = 0.04, mean.value = TRUE, bins = FALSE,
-  bins.quantiles = seq(0.1,0.9,0.1), bin.fun = "sd", lines.col = NA){
+  data, craviola.width = 1, boxplots = TRUE, boxplot.width = 0.04,
+  mean.value = TRUE, bins = FALSE, bins.quantiles = seq(0.1, 0.9, 0.1),
+  bin.fun = "sd", lines.col = NA){
   #Check if data is a data.table and convert if not
-  if (!is.data.table(data)){data<-as.data.table(data)}
+  if(!is.data.table(data)){ data <- as.data.table(data) }
   #Make annotation table
-  if (ncol(data) < 4){
-    if (nrow(data[!duplicated(data[[1]])]) == 2) {
-      if(is.factor(data[!duplicated(data[[1]])][[1]])){
-        Annot.table<-data.table("Samples"=data[!duplicated(data[[1]])][[1]],
-                                "Groups"=as.factor(c(1,1)),
-                                "Conditions"=data[!duplicated(data[[1]])][[1]],
-                                data[!duplicated(data[[1]]),2])
-        colnames(data)[1] <- "Samples"
-        data <- merge(
-          x = Annot.table[, -4], y = data, by = "Samples", all.y = TRUE)
-      } else {
-        stop("Column 1 in data is not of type 'factor'.")
+  unique.dt <- unique(x = data, by = 1)
+  if(ncol(data) < 4){
+    if(nrow(unique.dt) == 2) {
+      colnames(data)[1] <- "Samples"
+      if(!is.factor(unique.dt[[1]])){ #Convert as factor column 1
+        unique.dt[, Samples := as.factor(Samples)]
       }
-    } else{
-      stop("Missing columns in the data provided.")
-    }
-  } else {
-    Annot.table <- data[!duplicated(data[[1]]), 1:3]
-  }
-  if(length(unique(Annot.table[[3]])) > 2){
+      Annot.table <- data.table(
+        unique.dt[,1], "Groups" = as.factor(c(1, 1)),
+        "Conditions" = unique.dt[[1]], unique.dt[, 2])
+      data <- merge(
+        x = Annot.table[, -4], y = data, by = "Samples", all.y = TRUE)
+    } else{ stop("Missing columns in the data provided.") }
+  } else { Annot.table <- unique.dt[, 1:3] }
+  if(nrow(unique(Annot.table, by = 3)) > 2){
     stop("More than 2 conditions inputed. Only 2 conditions tolerated.")
   } else {
+    #Check if all conditional variables are factors
+    if(!all(Annot.table[, lapply(X = .SD, FUN = is.factor)] == TRUE)){
+      Annot.table <- Annot.table[, lapply(X = .SD, FUN = as.factor)]
+    }
     original.var.col <- levels(Annot.table[[3]])
-    if (length(levels(Annot.table[[3]])) > 2) {
+    if(length(levels(Annot.table[[3]])) > 2) {
       stop("More levels than possible values. Only 2 conditions tolerated. Remove the excess levels.")
     } else {
       levels(Annot.table[[3]])[1] <- "1"
@@ -268,7 +263,7 @@ ggcraviola <- function(
     labs(fill = colnames(Annot.table)[3], color = "Extrema",
          alpha = colnames(data)[5]) +
     guides(fill = guide_legend(order = 1)) +
-    scale_fill_manual(values = fill.color, labels = original.var.col)
+    scale_fill_manual(values = c("blue", "red"), labels = original.var.col)
 
   #Plot Options
   if(bins){ #bins TRUE

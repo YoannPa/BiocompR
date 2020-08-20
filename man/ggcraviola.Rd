@@ -6,7 +6,6 @@
 \usage{
 ggcraviola(
   data,
-  fill.color = c("blue", "red"),
   craviola.width = 1,
   boxplots = TRUE,
   boxplot.width = 0.04,
@@ -43,10 +42,6 @@ ggcraviola(
   data.frame format. the "minimal" format also do not support the binning.
  }
 }}
-
-\item{fill.color}{A \code{character} vector of length 2 containing colors
-to use to fill the craviolas\cr
-(Default: fill.color = c("blue","red")).}
 
 \item{craviola.width}{A \code{double} value to specify the width of
 craviolas\cr(Default: craviola.width = 1).}
@@ -90,49 +85,49 @@ Draws a craviola plot (half-splitted and percentile-binned violin plot).
 \examples{
 #Using a 'minimal' data.frame:
 df.minimal = data.frame(
-  Samples = rep(paste0("Sample",c(1:2)),each = 1000),
-  Values=c(rnorm(1000,0), rnorm(1000, 0.5)))
+  Samples = rep(paste0("Sample", c(1:2)), each = 1000),
+  Values = c(rnorm(1000, 0), rnorm(1000, 0.5)))
 ggcraviola(data = df.minimal, lines.col = "black")
 
 #Using a 'complete' data.frame:
 df.complete = data.frame(
-  Samples=rep(paste0("Sample",c(1:6)),each = 1000),
-  Groups=rep(c('A','B','C'),each = 2000),
-  Conditions=rep(c('I','J'),each = 1000,3),
-  Values=c(rnorm(1000,0), rnorm(1000, 0.5),
+  Samples = rep(paste0("Sample", c(1:6)), each = 1000),
+  Groups = rep(c('A', 'B', 'C'), each = 2000),
+  Conditions = rep(c('I', 'J'), each = 1000,3),
+  Values = c(rnorm(1000, 0), rnorm(1000, 0.5),
     rnorm(1000, 3), rnorm(1000, 3.5),
-    rnorm(1000,-3), rnorm(1000, -3.5)))
+    rnorm(1000, -3), rnorm(1000, -3.5)))
 ggcraviola(data = df.complete, lines.col = "black")
 
 #Using a 'complete' data.frame with support of an additional variable:
 df.complete2 = data.frame(
-  Samples=rep(paste0("Sample",c(1:6)),each = 1000),
-  Groups=rep(c('A','B','C'),each = 2000),
-  Conditions=rep(c('I','J'),each = 1000,3),
-  Values=c(rnorm(1000,0), rnorm(1000, 0.5),
+  Samples = rep(paste0("Sample", c(1:6)), each = 1000),
+  Groups = rep(c('A', 'B', 'C'), each = 2000),
+  Conditions = rep(c('I', 'J'), each = 1000, 3),
+  Values = c(rnorm(1000, 0), rnorm(1000, 0.5),
     rnorm(1000, 3), rnorm(1000, 3.5),
-    rnorm(1000,-3), rnorm(1000, -3.5)),
-  Scnd.Var = rep(rep(x =c(60,50,40,30,20,10,30,40,50,60),
-                               each=100),6))
+    rnorm(1000, -3), rnorm(1000, -3.5)),
+  Scnd.Var = rep(rep(x = c(60, 50, 40, 30, 20, 10, 30, 40, 50, 60),
+                     each = 100), 6))
 ggcraviola(data = df.complete2, lines.col = "black", bins = TRUE)
 
 #Use ggplot2 to add components and customize the Craviola plot
 ggcraviola(data = df.complete2, lines.col = "black", bins = TRUE) +
-labs(alpha = "SD(2nd Variable)") +
-ggtitle("This is a Craviola plot!") +
+labs(alpha = "SD(2nd Variable)") + # Rename alpha legend
+ggtitle("This is a Craviola plot!") + # Add title
 theme(plot.title = element_text(hjust = 0.5),
-      axis.text = element_text(size = 14, color = "black"),
+      axis.text = element_text(size = 14, color = "black"),# Custom axis text
       axis.title = element_text(size = 15),
-      legend.title = element_text(size = 13),
+      legend.title = element_text(size = 13), # Change legend font size
       legend.text = element_text(size = 12),
-      panel.background = element_blank(),
+      panel.background = element_blank(), # Change panel appearance
       panel.grid.major.x = element_blank(),
       panel.grid.minor.x = element_blank(),
       panel.grid.major.y = element_line(color = "grey"),
       panel.grid.minor.y = element_line(color = "grey")) +
-scale_y_continuous(expand = c(0,0)) +
-scale_fill_manual(labels = c("Control","Case"),
-                  values = c("dodgerblue","darkorange"))
+scale_y_continuous(expand = c(0, 0)) + #Expand fully plot panel on Y-axis
+scale_fill_manual(labels = c("Control", "Case"), # Rename conditions
+                  values = c("dodgerblue", "darkorange")) # Change colors
 }
 \author{
 Yoann Pageaud.

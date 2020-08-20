@@ -76,9 +76,9 @@ bin.polygons <- function(list_oriented_dens, list.quant.lim, Annot.table){
   #Define bin numbers and Map them to each list of dataframes
   splitted.dens.df <- lapply(seq_along(splitted.dens.df), function(i){
     bin.names<-names(splitted.dens.df[[i]])
-    Map(cbind,bin = bin.names,splitted.dens.df[[i]])
+    Map(cbind, bin = bin.names, splitted.dens.df[[i]])
   })
-  lim.vect <- lapply(seq_along(lim.vect),function(i){
+  lim.vect <- lapply(seq_along(lim.vect), function(i){
     bin.names <- lapply(seq(0, length(lim.vect[[i]])-1), function(bin){
       c(bin, bin, bin+1, bin+1)
     })
