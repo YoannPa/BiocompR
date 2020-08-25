@@ -101,6 +101,7 @@
 #'                   values = c("dodgerblue", "darkorange")) # Change colors
 #' @export
 
+#TODO: Add ncores option to speed-up ggcraviola using multiple cores
 ggcraviola <- function(
   data, craviola.width = 1, boxplots = TRUE, boxplot.width = 0.04,
   mean.value = TRUE, bins = FALSE, bins.quantiles = seq(0.1, 0.9, 0.1),
@@ -127,7 +128,10 @@ ggcraviola <- function(
   } else {
     #Check if all conditional variables are factors
     if(!all(Annot.table[, lapply(X = .SD, FUN = is.factor)] == TRUE)){
+      #Convert annotations and data conditional variable into factors
       Annot.table <- Annot.table[, lapply(X = .SD, FUN = as.factor)]
+      cols <- colnames(data)[1:3]
+      data[, (cols) := lapply(X = .SD, FUN = as.factor), .SDcols = cols]
     }
     original.var.col <- levels(Annot.table[[3]])
     if(length(levels(Annot.table[[3]])) > 2) {
@@ -146,10 +150,9 @@ ggcraviola <- function(
       levels(Annot.table[[2]])[i] <<- i
     }))
   }
-  mylist_data <- split(data, f = data[[1]])
-  list_val1 <- lapply(mylist_data, subset, select = 4)
-  list_vect.val1 <- lapply(list_val1, unlist)
-
+  mylist_data <- split(x = data, f = data[[1]])
+  list_val1 <- lapply(X = mylist_data, FUN = subset, select = 4)
+  list_vect.val1 <- lapply(X = list_val1, FUN = unlist, use.names = FALSE)
   #Create stats plots
   list.bp.stat <- lapply(seq_along(list_vect.val1), function(i){
     qiles <- quantile(list_vect.val1[[i]])
@@ -158,36 +161,52 @@ ggcraviola <- function(
       x.pos <- -boxplot.width
     } else { x.pos <- boxplot.width }
     if(Annot.table[Annot.table[[1]] == names(list_vect.val1)[i], 2] != 1){
-      x.pos<-x.pos + (as.integer(Annot.table[Annot.table[[1]] ==
-                                               names(list_vect.val1)[i], 2])-1)
+      x.pos <- x.pos + (as.integer(Annot.table[
+        Annot.table[[1]] == names(list_vect.val1)[i], 2])-1)
     }
-    data.frame(Var.col = Annot.table[Annot.table[[1]] ==
-                                       names(list_vect.val1)[i], 3],
-               x=x.pos, min = qiles[1], low=qiles[2], mid=qiles[3],
-               top=qiles[4], max = qiles[5], mean = means,
+    # data.frame(Var.col = Annot.table[Annot.table[[1]] ==
+    #                                    names(list_vect.val1)[i], 3],
+    #            x=x.pos, min = qiles[1], low=qiles[2], mid=qiles[3],
+    #            top=qiles[4], max = qiles[5], mean = means,
+    #            pos.crav = round(x.pos))
+    data.table(Annot.table[Annot.table[[1]] == names(list_vect.val1)[i], 3],
+               x = x.pos, min = qiles[1], low = qiles[2], mid = qiles[3],
+               top = qiles[4], max = qiles[5], mean = means,
                pos.crav = round(x.pos))
   })
-  box.dframe<-do.call(rbind, list.bp.stat)
+  box.dframe <- rbindlist(list.bp.stat)
+  # box.dframe<-do.call(rbind, list.bp.stat)
 
   #Create Craviola plot
-  list_dens.res <- lapply(list_vect.val1,density)
+  list_dens.res <- lapply(list_vect.val1, density)
   list_dens.df <- lapply(list_dens.res, function(i){
     data.frame(y.pos = i$x, dens.curv = i$y*craviola.width)
   })
-  list_oriented_dens <- lapply(seq_along(list_dens.df), function(i){
-    if(Annot.table[Annot.table[[1]] == names(list_dens.df)[i], 3] == 1){
+  # list_oriented_dens <- lapply(seq_along(list_dens.df), function(i){
+  #   if(Annot.table[Annot.table[[1]] == names(list_dens.df)[i], 3] == 1){
+  #     list_dens.df[[i]]$dens.curv <<- list_dens.df[[i]]$dens.curv * -1
+  #     list_dens.df[[i]]
+  #   } else { list_dens.df[[i]] }
+  #   if(Annot.table[Annot.table[[1]] == names(list_dens.df)[i], 2] != 1){
+  #     list_dens.df[[i]]$dens.curv <<- list_dens.df[[i]]$dens.curv +
+  #       (as.integer(Annot.table[Annot.table[[1]] ==
+  #                                 names(list_dens.df)[i], 2]) - 1)
+  #     list_dens.df[[i]]
+  #   } else { list_dens.df[[i]] }
+  # })
+  list_oriented_dens <- lapply(names(list_dens.df), function(i){
+    if(as.integer(Annot.table[Annot.table[[1]] == i, 3]) == 1){
       list_dens.df[[i]]$dens.curv <<- list_dens.df[[i]]$dens.curv * -1
       list_dens.df[[i]]
     } else { list_dens.df[[i]] }
-    if(Annot.table[Annot.table[[1]] == names(list_dens.df)[i], 2] != 1){
+    if(as.integer(Annot.table[Annot.table[[1]] == i, 2]) > 1){
       list_dens.df[[i]]$dens.curv <<- list_dens.df[[i]]$dens.curv +
-        (as.integer(Annot.table[Annot.table[[1]] ==
-                                  names(list_dens.df)[i], 2]) - 1)
+        as.integer(Annot.table[Annot.table[[1]] == i, 2]) - 1
       list_dens.df[[i]]
     } else { list_dens.df[[i]] }
   })
   #Remove density values outside the extrema
-  xtrems<-ls.quantile(ls = list_vect.val1, qtiles = c(0, 1))
+  xtrems <- ls.quantile(ls = list_vect.val1, qtiles = c(0, 1))
   bined.xtrm.dens <- bin.polygons(
     list_oriented_dens = list_oriented_dens, list.quant.lim = xtrems,
     Annot.table = Annot.table)
@@ -198,6 +217,8 @@ ggcraviola <- function(
     df
   })
   names(list_oriented_dens) <- names(list_dens.df)
+  #Reorder Annotation table following order of dataframes
+  Annot.table <- Annot.table[order(match(Sample, names(list_oriented_dens)))]
   #Create Bins based on a third variable
   if(bins){ #Create bin polygons
     #Bin polygons
@@ -205,6 +226,7 @@ ggcraviola <- function(
     list.dfs <- bin.polygons(list_oriented_dens = list_oriented_dens,
                              list.quant.lim = list.quant.lim,
                              Annot.table = Annot.table)
+    names(list.dfs) <- names(list.quant.lim)
     #Calculate average value on 3rd variable for each bin
     list.fun.val2 <- lapply(seq_along(list.quant.lim), function(i){
       smpl.data <- data[data[[1]] == names(list.quant.lim)[i], ]
