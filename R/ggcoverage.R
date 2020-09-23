@@ -76,9 +76,12 @@ ggcoverage <- function(
     display.count.cutoff <- 0.02
     coeff.max.margin <- 0.05
   }
+  # data$IDs <-
+  #   factor(data$IDs, levels = unique(
+  #     data[order(Total, value, IDs, decreasing = decreasing.order)]$IDs))
   data$IDs <-
-    factor(data$IDs, levels = unique(
-      data[order(Total, value, IDs, decreasing = decreasing.order)]$IDs))
+    factor(data$IDs, levels = data[variable == "remainings"][
+      order(Total, -value, IDs, decreasing = decreasing.order)]$IDs)
   if(rev.stack){
     data$variable <- factor(data$variable, levels = rev(levels(data$variable)))
   }
