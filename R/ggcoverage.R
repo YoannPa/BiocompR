@@ -32,7 +32,7 @@
 #' @author Yoann Pageaud.
 #' @export
 
-#TODO: Fix the way stacked bars are plotted
+#TODO: Add examples!
 ggcoverage <- function(
   data, round.unit = 2, rev.stack = FALSE, invert.percent = FALSE,
   horizontal = FALSE, log.scaled = FALSE, decreasing.order = FALSE){
@@ -50,8 +50,13 @@ ggcoverage <- function(
   data[, percents := .(paste0(percents, "%"))]
   if(log.scaled){
     data[Subset == 0, Subset := 1]
-    data[, c("logTotal", "logSubset") := .(log10(Total), log10(Subset))]
-    data[, logremainings := .(logTotal-logSubset)]
+    if(rev.stack){
+      data[, c("logTotal", "logSubset") := .(log10(Total), log10(Subset))]
+      data[, logremainings := .(logTotal-logSubset)]
+    } else {
+      data[, c("logTotal", "logremainings") := .(log10(Total), log10(remainings))]
+      data[, logSubset := .(logTotal-logremainings)]
+    }
     data <- melt(data, id.vars = c(
       "IDs", "Total", "Subset", "logTotal", "remainings", "percents"),
       measure.vars = c("logSubset", "logremainings"))
@@ -59,29 +64,34 @@ ggcoverage <- function(
     data <- melt(data, id.vars = c("IDs", "Total", "percents"),
                  measure.vars = c("Subset", "remainings"))
   }
-  if(!rev.stack){
-  data <- data[order(variable, decreasing = TRUE)] #Change order for cumsum
+  if(!rev.stack){ #Change order for value before cumsum
+  data <- data[order(variable, decreasing = TRUE)]
   }
   data[, label_ypos := .(cumsum(value) - 0.5*value), by = IDs]
   if(log.scaled){
-    data[["value.char"]] <- as.character(melt(unique(data[, c(
-      "IDs", "remainings", "Subset")]), id.vars = "IDs")[
-        order(variable, decreasing = TRUE)]$value)
+    # data[["value.char"]] <- as.character(melt(unique(data[, c(
+    #   "IDs", "remainings", "Subset"), ]), id.vars = "IDs")[
+    #     order(variable, decreasing = TRUE)]$value)
+    data[variable == "logremainings", value.char := remainings]
+    data[variable == "logSubset", value.char := Subset]
   } else { data[, value.char := .(as.character(value))] }
   #Set the orientation of interest
-  if (isTRUE(horizontal)) {
+  if (horizontal) {
     display.count.cutoff <- 0.04
     coeff.max.margin <- 0.1
   } else {
     display.count.cutoff <- 0.02
     coeff.max.margin <- 0.05
   }
-  # data$IDs <-
-  #   factor(data$IDs, levels = unique(
-  #     data[order(Total, value, IDs, decreasing = decreasing.order)]$IDs))
-  data$IDs <-
-    factor(data$IDs, levels = data[variable == "remainings"][
-      order(Total, -value, IDs, decreasing = decreasing.order)]$IDs)
+  if(log.scaled){
+    data$IDs <-
+      factor(data$IDs, levels = data[variable == "logremainings"][
+        order(Total, -value, IDs, decreasing = decreasing.order)]$IDs)
+  } else {
+    data$IDs <-
+      factor(data$IDs, levels = data[variable == "remainings"][
+        order(Total, -value, IDs, decreasing = decreasing.order)]$IDs)
+  }
   if(rev.stack){
     data$variable <- factor(data$variable, levels = rev(levels(data$variable)))
   }
@@ -89,13 +99,13 @@ ggcoverage <- function(
   data[, filter.val := .(value - display.count.cutoff*max(data$value))]
   data[filter.val < 0, value.char := " "]
   data[variable == "Subset", percents := " "]
-  if(log.scaled){ data[, "Total" := .(logTotal)] }
+  if(log.scaled){ data[, "Total" := logTotal] }
   #Barplot
   ggcov <- ggplot(data = data, aes(x = IDs, y = value, fill = variable)) +
     geom_bar(stat = "identity") +
     geom_text(aes(y = label_ypos, label = value.char), vjust = 0.5,
               color = "white", size = 4, fontface = "bold")
-  if (isTRUE(horizontal)) {
+  if (horizontal) {
     ggcov <- ggcov +
       geom_text(aes(y = Total, label = percents), hjust = -0.1) +
       coord_flip()
