@@ -28,7 +28,8 @@ be kept when rounding percentages
 
 \item{rev.stack}{A \code{logical} to specify whether the stacking
 order of bars should be reversed or not
-(Default: rev.stack = FALSE).}
+(Warning: color display order will remain unchanged.
+Default: rev.stack = FALSE).}
 
 \item{invert.percent}{A \code{logical} to specify whether the calculated
 percentage should reflect the share of the subset

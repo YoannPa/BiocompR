@@ -12,7 +12,8 @@
 #'                         (Default: round.unit = 2).
 #' @param rev.stack        A \code{logical} to specify whether the stacking
 #'                         order of bars should be reversed or not
-#'                         (Default: rev.stack = FALSE).
+#'                         (Warning: color display order will remain unchanged.
+#'                         Default: rev.stack = FALSE).
 #' @param invert.percent   A \code{logical} to specify whether the calculated
 #'                         percentage should reflect the share of the subset
 #'                         initially defined in the data.table
@@ -54,7 +55,8 @@ ggcoverage <- function(
       data[, c("logTotal", "logSubset") := .(log10(Total), log10(Subset))]
       data[, logremainings := .(logTotal-logSubset)]
     } else {
-      data[, c("logTotal", "logremainings") := .(log10(Total), log10(remainings))]
+      data[, c("logTotal", "logremainings") := .(
+        log10(Total), log10(remainings))]
       data[, logSubset := .(logTotal-logremainings)]
     }
     data <- melt(data, id.vars = c(
@@ -65,13 +67,10 @@ ggcoverage <- function(
                  measure.vars = c("Subset", "remainings"))
   }
   if(!rev.stack){ #Change order for value before cumsum
-  data <- data[order(variable, decreasing = TRUE)]
+    data <- data[order(variable, decreasing = TRUE)]
   }
   data[, label_ypos := .(cumsum(value) - 0.5*value), by = IDs]
   if(log.scaled){
-    # data[["value.char"]] <- as.character(melt(unique(data[, c(
-    #   "IDs", "remainings", "Subset"), ]), id.vars = "IDs")[
-    #     order(variable, decreasing = TRUE)]$value)
     data[variable == "logremainings", value.char := remainings]
     data[variable == "logSubset", value.char := Subset]
   } else { data[, value.char := .(as.character(value))] }
@@ -97,7 +96,9 @@ ggcoverage <- function(
   }
   #Removing duplicated strings to not display it
   data[, filter.val := .(value - display.count.cutoff*max(data$value))]
-  data[filter.val < 0, value.char := " "]
+  warn.handle(
+    pattern = "Coercing 'character' RHS to 'double' to match the type of the target column",
+    data[filter.val < 0, value.char := " "])
   data[variable == "Subset", percents := " "]
   if(log.scaled){ data[, "Total" := logTotal] }
   #Barplot

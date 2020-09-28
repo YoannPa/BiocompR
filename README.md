@@ -2,7 +2,7 @@
 _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots dedicated to data comparison and dataset exploration and ultimately provides users with versatile and customizable graphics._  
 
 **Author: PAGEAUD Y.<sup>1</sup>**  
-**Contributors: SCHEFZIK R.<sup>2</sup>; HRUSKA D.<sup>1</sup>; KURILOV R.<sup>1</sup>; WURSTHORN A.<sup>4</sup>; MAYAKONDA A.<sup>3</sup>; FEUERBACH L.<sup>1</sup>; TOTH R.<sup>3</sup>.**  
+**Contributors: SCHEFZIK R.<sup>2</sup>; HRUSKA D.<sup>1</sup>; KURILOV R.<sup>1</sup>; BEUMER N.<sup>1</sup>; WURSTHORN A.<sup>4</sup>; MAYAKONDA A.<sup>3</sup>; FEUERBACH L.<sup>1</sup>; TOTH R.<sup>3</sup>.**  
 **1-** [**DKFZ - Division of Applied Bioinformatics, Germany.**](https://www.dkfz.de/en/applied-bioinformatics/index.php)  
 **2-** [**Klinik für Anästhesiologie und Operative Intensivmedizin, Medizinische Fakultät Mannheim, Universität Heidelberg, Germany.**](https://www.umm.de/klinik-fuer-anaesthesiologie-und-operative-intensivmedizin/)  
 **3-** [**DKFZ - Computational Cancer Epigenomics, Germany.**](https://www.dkfz.de/en/CanEpi/CompEpigen/index.html)  
@@ -10,7 +10,7 @@ _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots 
 
 **Version: 0.0.79 (Beta)**  
 **R Compatibility: Version 3.6.3**  
-**Last Update: 25/08/2020**  
+**Last Update: 28/09/2020**  
 **How to cite:** _Pageaud Y. et al., BiomcompR - Advanced visualizations for data comparison._  
 
 ## Content
