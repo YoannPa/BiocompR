@@ -31,47 +31,101 @@
 #'                         order can be inverted with: decreasing.order = TRUE.
 #' @return A \code{gg} stacked barplot with annotations.
 #' @author Yoann Pageaud.
+#' @examples
+#' # Basic use of ggcoverage()
+#' df <- data.frame(
+#'  col1 = LETTERS[1:6], col2 = 100:105, col3 = 35:40,
+#'  col4 = rep(x = paste0("Group", 1:3), each = 2))
+#' ggcoverage(data = df)
+#' # Set the number of decimal for the percentage rounding to 0
+#' ggcoverage(data = df, round.unit = 0)
+#' # Compute percentages on the Subset share instead of the Remaining share
+#' ggcoverage(data = df, round.unit = 0, invert.percent = TRUE)
+#' # Order bars in decreasing order
+#' ggcoverage(
+#'  data = df, round.unit = 0, invert.percent = TRUE, decreasing.order = TRUE)
+#' # Reverse stackings (Warning: color mapping does not change)
+#' ggcoverage(
+#'  data = df, round.unit = 0, invert.percent = TRUE, decreasing.order = TRUE,
+#'  rev.stack = TRUE)
+#' # Apply log-transformation to the barplot
+#' ggcoverage(
+#'  data = df, round.unit = 0, invert.percent = TRUE, decreasing.order = TRUE,
+#'  rev.stack = TRUE, horizontal = TRUE, log.scaled = TRUE)
+#' # Add elements of customization
+#' ggcoverage(
+#'  data = df, round.unit = 0, invert.percent = TRUE, decreasing.order = TRUE,
+#'  rev.stack = TRUE, horizontal = TRUE, log.scaled = TRUE) +
+#' ggtitle("This is a ggcoverage Barplot!") + # Add title
+#' labs(x = "Samples", y = "Coverages") + #Set X and Y axis titles
+#' theme(
+#'  plot.title = element_text(hjust = 0.5),
+#'  axis.text = element_text(size = 14, color = "black"), # Custom axis text
+#'  axis.title = element_text(size = 15),
+#'  # Change legend appearance
+#'  legend.title = element_text(size = 13),
+#'  legend.text = element_text(size = 12),
+#'  # Change panel appearance
+#'  panel.background = element_rect(color = "black", fill = NA),
+#'  panel.grid.major.y = element_blank(),
+#'  panel.grid.minor.y = element_blank(),
+#'  panel.grid.major.x = element_line(color = "grey"),
+#'  panel.grid.minor.x = element_line(color = "grey"),
+#'  # Change strips appearance
+#'  strip.background = element_rect(color = "black"),
+#'  strip.text.y = element_text(size = 14, angle = 0)) +
+#' scale_x_discrete(expand = c(0, 0)) + # Expand fully plot panel on Y-axis
+#' scale_y_continuous(
+#'  # Expand fully plot panel on X-axis and set new limits
+#'  # (useful if some percentages do not appear on the default plot)
+#'  expand = c(0, 0), limits = c(0, log10(max(df$col2, na.rm = TRUE)) +
+#'                                0.1*log10(max(df$col2, na.rm = TRUE)))) +
+#'  guides(fill = guide_legend(title = "Coverage legend")) + # Set legend title
+#'  scale_fill_manual(labels = c("Remaining", "Subset"), # Rename conditions
+#'                    values = c("#D6604D", "#4393C3")) + # Change colors
+#'  facet_grid(df$col4 ~ ., scales = "free", space = "free_y") # Add grouping
 #' @export
 
-#TODO: Add examples!
 ggcoverage <- function(
   data, round.unit = 2, rev.stack = FALSE, invert.percent = FALSE,
   horizontal = FALSE, log.scaled = FALSE, decreasing.order = FALSE){
+  #Check if data is a data.table and convert if not
+  if(!is.data.table(data)){ data <- as.data.table(data) }
   colnames(data)[1:3] <- c("IDs", "Total", "Subset")
   #Replace NAs by zeros
   data[is.na(Total), c("Total", "Subset") := 0]
   data[is.na(Subset), Subset := 0]
   #Calculate remaining amounts
-  data[, remainings := .(Total-Subset)]
+  data[, Remaining := .(Total-Subset)]
   if(invert.percent){
     data[, percents := .(round((Subset/Total)*100, round.unit))]
   } else {
-    data[, percents := .(round((remainings/Total)*100, round.unit))]
+    data[, percents := .(round((Remaining/Total)*100, round.unit))]
   }
   data[, percents := .(paste0(percents, "%"))]
   if(log.scaled){
     data[Subset == 0, Subset := 1]
     if(rev.stack){
       data[, c("logTotal", "logSubset") := .(log10(Total), log10(Subset))]
-      data[, logremainings := .(logTotal-logSubset)]
+      data[, logRemaining := .(logTotal-logSubset)]
     } else {
-      data[, c("logTotal", "logremainings") := .(
-        log10(Total), log10(remainings))]
-      data[, logSubset := .(logTotal-logremainings)]
+      data[, c("logTotal", "logRemaining") := .(
+        log10(Total), log10(Remaining))]
+      data[, logSubset := .(logTotal-logRemaining)]
     }
     data <- melt(data, id.vars = c(
-      "IDs", "Total", "Subset", "logTotal", "remainings", "percents"),
-      measure.vars = c("logSubset", "logremainings"))
+      "IDs", "Total", "Subset", "logTotal", "Remaining", "percents"),
+      measure.vars = c("logSubset", "logRemaining"))
   } else {
     data <- melt(data, id.vars = c("IDs", "Total", "percents"),
-                 measure.vars = c("Subset", "remainings"))
+                 measure.vars = c("Subset", "Remaining"))
   }
   if(!rev.stack){ #Change order for value before cumsum
     data <- data[order(variable, decreasing = TRUE)]
   }
   data[, label_ypos := .(cumsum(value) - 0.5*value), by = IDs]
   if(log.scaled){
-    data[variable == "logremainings", value.char := remainings]
+    data[variable == "logRemaining", value.char := Remaining]
     data[variable == "logSubset", value.char := Subset]
   } else { data[, value.char := .(as.character(value))] }
   #Set the orientation of interest
@@ -84,11 +138,11 @@ ggcoverage <- function(
   }
   if(log.scaled){
     data$IDs <-
-      factor(data$IDs, levels = data[variable == "logremainings"][
+      factor(data$IDs, levels = data[variable == "logRemaining"][
         order(Total, -value, IDs, decreasing = decreasing.order)]$IDs)
   } else {
     data$IDs <-
-      factor(data$IDs, levels = data[variable == "remainings"][
+      factor(data$IDs, levels = data[variable == "Remaining"][
         order(Total, -value, IDs, decreasing = decreasing.order)]$IDs)
   }
   if(rev.stack){
