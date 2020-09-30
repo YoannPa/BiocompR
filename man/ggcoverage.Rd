@@ -79,36 +79,40 @@ ggcoverage(
  rev.stack = TRUE, horizontal = TRUE, log.scaled = TRUE)
 # Add elements of customization
 ggcoverage(
- data = df, round.unit = 0, invert.percent = TRUE, decreasing.order = TRUE,
- rev.stack = TRUE, horizontal = TRUE, log.scaled = TRUE) +
-ggtitle("This is a ggcoverage Barplot!") + # Add title
-labs(x = "Samples", y = "Coverages") + #Set X and Y axis titles
-theme(
- plot.title = element_text(hjust = 0.5),
- axis.text = element_text(size = 14, color = "black"), # Custom axis text
- axis.title = element_text(size = 15),
- # Change legend appearance
- legend.title = element_text(size = 13),
- legend.text = element_text(size = 12),
- # Change panel appearance
- panel.background = element_rect(color = "black", fill = NA),
- panel.grid.major.y = element_blank(),
- panel.grid.minor.y = element_blank(),
- panel.grid.major.x = element_line(color = "grey"),
- panel.grid.minor.x = element_line(color = "grey"),
- # Change strips appearance
- strip.background = element_rect(color = "black"),
- strip.text.y = element_text(size = 14, angle = 0)) +
-scale_x_discrete(expand = c(0, 0)) + # Expand fully plot panel on Y-axis
-scale_y_continuous(
- # Expand fully plot panel on X-axis and set new limits
- # (useful if some percentages do not appear on the default plot)
- expand = c(0, 0), limits = c(0, log10(max(df$col2, na.rm = TRUE)) +
-                               0.1*log10(max(df$col2, na.rm = TRUE)))) +
- guides(fill = guide_legend(title = "Coverage legend")) + # Set legend title
- scale_fill_manual(labels = c("Remaining", "Subset"), # Rename conditions
-                   values = c("#D6604D", "#4393C3")) + # Change colors
- facet_grid(df$col4 ~ ., scales = "free", space = "free_y") # Add grouping
+  data = df, round.unit = 0, invert.percent = TRUE, decreasing.order = TRUE,
+  rev.stack = TRUE, horizontal = TRUE, log.scaled = TRUE) +
+  ggtitle("This is a ggcoverage barplot!") + # Add title
+  labs(x = "Samples", y = "Coverages") + #Set X and Y axis titles
+ theme(
+    plot.title = element_text(hjust = 0.5),
+   axis.text = element_text(size = 14, color = "black"), # Custom axis text
+    axis.title = element_text(size = 15),
+    # Change legend appearance
+    legend.title = element_text(size = 13),
+    legend.text = element_text(size = 12),
+    # Change panel appearance
+    panel.background = element_rect(color = "black", fill = NA),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    panel.grid.major.x = element_line(color = "grey"),
+    panel.grid.minor.x = element_line(color = "grey"),
+    # Change strips appearance
+    strip.background = element_rect(color = "black"),
+    strip.text.y = element_text(size = 14, angle = 0)) +
+  scale_y_continuous(
+   # Expand fully plot panel on X-axis (coordinates have been flipped)
+    expand = c(0, 0),
+    # Set new limits (useful if percentages do not appear on the default plot)
+    limits = c(0, log10(max(df$col2, na.rm = TRUE)) +
+                 0.1*log10(max(df$col2, na.rm = TRUE))),
+    # Change number of breaks
+   breaks = c(0, 1, 2),
+    # Change X-axis labels
+    labels = c("0" = 1, "1" = 10, "2.0" = 100)) +
+  guides(fill = guide_legend(title = "Coverage legend")) + # Set legend title
+  scale_fill_manual(labels = c("Remaining", "Subset"), # Rename conditions
+                    values = c("#D6604D", "#4393C3")) + # Change colors
+  facet_grid(df$col4 ~ ., scales = "free", space = "free_y") # Add grouping
 }
 \author{
 Yoann Pageaud.
