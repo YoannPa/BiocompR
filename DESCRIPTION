@@ -1,5 +1,5 @@
 Package: BiocompR
-Title: BiomcompR - Advanced visualizations for data comparison
+Title: BiocompR - Advanced visualizations for data comparison
 Version: 0.0.81
 Authors@R: 
     person(given = "Yoann",

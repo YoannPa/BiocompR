@@ -1,4 +1,4 @@
-# BiomcompR - Advanced visualizations for data comparison
+# BiocompR - Advanced visualizations for data comparison
 _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots dedicated to data comparison and dataset exploration and ultimately provides users with versatile and customizable graphics._  
 
 **Author: PAGEAUD Y.<sup>1</sup>**  
@@ -11,7 +11,7 @@ _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots 
 **Version: 0.0.81 (Beta)**  
 **R Compatibility: Version 3.6.3**  
 **Last Update: 30/09/2020**  
-**How to cite:** _Pageaud Y. et al., BiomcompR - Advanced visualizations for data comparison._  
+**How to cite:** _Pageaud Y. et al., BiocompR - Advanced visualizations for data comparison._  
 
 ## Content
 Currently the package BiocompR contains **18 functions**:
