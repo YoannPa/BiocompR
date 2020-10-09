@@ -30,9 +30,9 @@ gg2heatmap(
     "bold"),
   axis.ticks.x = element_line(color = "black"),
   y.axis.right = FALSE,
-  axis.title.y.right = element_text(size = 12),
-  axis.text.y.right = element_text(size = 12),
-  axis.ticks.y.right = element_line(color = "black")
+  axis.title.y.right = element_blank(),
+  axis.text.y.right = element_blank(),
+  axis.ticks.y.right = element_blank()
 )
 }
 \arguments{

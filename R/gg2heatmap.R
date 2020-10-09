@@ -139,25 +139,21 @@
 #TODO: Merge dend.col.size & dend.row.size into dend.size being a tuple
 #TODO: Create a theme argument using the theme() function
 #TODO: Add some data in return
-gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
-                     rank.fun = NULL, top.rows = NULL, dendrograms = TRUE,
-                     dend.col.size = 1, plot.title = "", row.type = 'rows',
-                     imputation.grps = NULL, ncores = 1,
-                     heatmap.pal = c("steelblue", "gray95", "darkorange"),
-                     annot.grps = list("Groups" = seq(ncol(m))),
-                     annot.pal = rainbow(n = ncol(m)), annot.size = 1,
-                     annot.split = FALSE, lgd.scale.name = 'values',
-                     lgd.bars.name = 'Legends', lgd.merge = FALSE,
-                     lgd.space.width = 1,
-                     axis.title.x = element_text(
-                       size = 12, color = 'black'), axis.text.x = element_text(
-                         size = 11, angle = -45, hjust = 0, vjust = 0.5,
-                         face = 'bold'),
-                     axis.ticks.x = element_line(color = 'black'),
-                     y.axis.right = FALSE,
-                     axis.title.y.right = element_text(size = 12),
-                     axis.text.y.right = element_text(size = 12),
-                     axis.ticks.y.right = element_line(color = 'black')){
+gg2heatmap <- function(
+  m, na.handle = 'remove', dist.method = 'manhattan', rank.fun = NULL,
+  top.rows = NULL, dendrograms = TRUE, dend.col.size = 1, plot.title = "",
+  row.type = 'rows', imputation.grps = NULL, ncores = 1,
+  heatmap.pal = c("steelblue", "gray95", "darkorange"),
+  annot.grps = list("Groups" = seq(ncol(m))), annot.pal = rainbow(n = ncol(m)),
+  annot.size = 1, annot.split = FALSE, lgd.scale.name = 'values',
+  lgd.bars.name = 'Legends', lgd.merge = FALSE, lgd.space.width = 1,
+  axis.title.x = element_text(size = 12, color = 'black'),
+  axis.text.x = element_text(
+    size = 11, angle = -45, hjust = 0, vjust = 0.5, face = 'bold'),
+  axis.ticks.x = element_line(color = 'black'), y.axis.right = FALSE,
+  axis.title.y.right = element_blank(), axis.text.y.right = element_blank(),
+  axis.ticks.y.right = element_blank()){
+
   #Check m is a matrix
   if(!is.matrix(m)){ stop("m must be a matrix.") }
   #Check if na.handle method  supported
@@ -194,19 +190,29 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
   }
   #Check logicals for dendrograms
   if(length(dendrograms) == 1){
-    dd.rows<-dendrograms
-    dd.cols<-dendrograms
+    dd.rows <- dendrograms
+    dd.cols <- dendrograms
   } else if(length(dendrograms) == 2){
-    dd.rows<-dendrograms[1]
-    dd.cols<-dendrograms[2]
+    dd.rows <- dendrograms[1]
+    dd.cols <- dendrograms[2]
   } else { stop("'dendrograms' length > 2. Too many values.") }
+
+
+  #Check if y.axis.right = TRUE when axis.text.y.right or axis.title.y.right or
+  # axis.ticks.y.right are not element_blank()
+  if((is.elt_blank(axis.text.y.right) | is.elt_blank(axis.title.y.right) |
+      is.elt_blank(axis.ticks.y.right)) & !y.axis.right){
+    warning(
+      paste("'y.axis.right' has to be set to TRUE in order to display the",
+            "Y-axis on the right side of the heatmap."))
+  }
 
   #Check annotations groups and palettes matching
   check.annotations(data = m, annot.grps = annot.grps, annot.pal = annot.pal)
 
   #Handle NAs
-  m<-manage.na(data = m, method = na.handle, groups = imputation.grps,
-               ncores = ncores)
+  m <- manage.na(
+    data = m, method = na.handle, groups = imputation.grps, ncores = ncores)
 
   #Apply ranking function if any function defined
   if(!is.null(rank.fun)){
@@ -219,7 +225,7 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
   }
 
   #Remove NAs if some for dendrogram matrix
-  dend_mat<- m[complete.cases(m),]
+  dend_mat <- m[complete.cases(m), ]
 
   #Create Dendrograms
   if(dd.rows & method.rows != 'none'){
@@ -228,11 +234,11 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
       dend_mat, method = method.rows, threads = ncores)
     row_hclust <- fastcluster::hclust(row_dist)
     rm(row_dist)
-    rowclust<-as.dendrogram(row_hclust)
+    rowclust <- as.dendrogram(row_hclust)
     #Get dendrogram segments and order matrix rows
     ddgr_seg_row <- ggdend(df = ggdendro::dendro_data(rowclust)$segments,
                            orientation = "left")
-    row.order<-order.dendrogram(rowclust)
+    row.order <- order.dendrogram(rowclust)
   } else if(dd.rows & method.rows == 'none'){
     stop("Cannot plot rows dendrogram with method.rows = 'none'.")
   }
@@ -252,10 +258,13 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
 
   #Reorder rows and columns matrix following dendrograms orders
   if(dd.rows & method.rows != 'none' & dd.cols & method.cols != 'none'){
+    # All dendrograms on and all methods specified
     dframe <- m[row.order, column.order, drop = FALSE]
   } else if(dd.rows & method.rows != 'none' & is.null(rank.fun) & !dd.cols){
+    # row.dendrogram on, col.dendrogram off, method.row specified
     dframe <- m[row.order, , drop = FALSE]
   } else if(!dd.rows & dd.cols & method.cols != 'none'){
+    # row.dendrogram off, col.dendrogram on, method.col specified
     dframe <- m[, column.order, drop = FALSE]
   }
 
@@ -278,13 +287,13 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
             axis.ticks.y.left = element_blank(),
             axis.ticks.length.y.left = unit(0, "pt"),
             axis.text.y.left = element_blank(),
-            plot.margin=unit(c(0,0,0,0),"cm"))
+            plot.margin = unit(c(0, 0, 0, 0), "cm"))
   }
   htmp <- htmp +
-    theme(legend.text=element_text(size= 11),
+    theme(legend.text = element_text(size= 11),
           legend.title = element_text(size = 12, vjust = 0.8),
           legend.position = "bottom",
-          legend.justification = c(0.2,0.5),
+          legend.justification = c(0.4,0.5),
           axis.title.x = axis.title.x, axis.text.x = axis.text.x,
           axis.ticks.x = axis.ticks.x, axis.title.y.right = axis.title.y.right,
           axis.ticks.y.right = axis.ticks.y.right,
@@ -325,6 +334,7 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
   ddgr_seg_row <- ggplotGrob(ddgr_seg_row)
   htmp <- ggplotGrob(htmp + theme(legend.position="none"))
   #Resize grobs
+
   upd.grob_w<-resize.grobs(ls.grobs = list(
     'dd_col' = ddgr_seg_col, 'sidebar' = col_sidebar_grob, 'htmp' = htmp),
     dimensions = "widths", start.unit = 4, end.unit = 7)
@@ -355,12 +365,10 @@ gg2heatmap<-function(m, na.handle = 'remove', dist.method = 'manhattan',
     #   layout_matrix = cbind(c(1,1,1,2), c(2,2,2,2), c(3,3,3,3), c(2,2,2,2)),
     #   vp = grid::viewport(x= lgd.pos.x-0.6, y = lgd.pos.y))
     #Final plot
-    final.plot<-gridExtra::grid.arrange(gridExtra::arrangeGrob(
-      top = grid::textGrob(
-        plot.title, gp = grid::gpar(fontsize = 15, font = 1)),
+    final.plot <- gridExtra::grid.arrange(gridExtra::arrangeGrob(
+      top = grid::textGrob(plot.title, gp = grid::gpar(fontsize = 15, font = 1)),
       grobs = list(
-        grid::textGrob(paste0(
-          "Columns ordered by ", method.cols, " distance; Rows ordered by ",
+        grid::textGrob(paste0("Columns ordered by ", method.cols, " distance; Rows ordered by ",
           method.rows, " distance; ", nrow(m), " ", row.type, "."),
           gp = grid::gpar(fontsize = 12, fontface = 3L)),
         gridExtra::arrangeGrob(grobs = list(main_grob, right.legends), ncol = 2,

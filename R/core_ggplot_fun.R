@@ -59,7 +59,7 @@ check.annotations<-function(data, annot.grps, annot.pal){
 #' @export
 #' @keywords internal
 
-is.elt_blank<-function(arg){
+is.elt_blank <- function(arg){
   bool<-attributes(arg)$class[1] == "element_blank"
   return(bool)
 }
@@ -459,13 +459,13 @@ resize.grobs<-function(ls.grobs, dimensions, start.unit, end.unit){
   ls.dim<-lapply(X = ls.grobs, FUN = function(i){
     i[[dimensions]][start.unit:end.unit]
   })
-  #Calculate maxilum of all unit objects including the main grob.
+  #Calculate maximum of all unit objects including the main grob.
   max.dim <-eval(parse(
     text = paste("grid::unit.pmax(",paste(paste(
       rep("ls.dim[[",length(ls.dim)), seq(length(ls.dim)),"]]", sep = ""),
       collapse = ", "), ")", sep = "")))
   #Apply changes to grobs dimensions
-  ls.grobs<-lapply(X = ls.grobs, FUN = function(i){
+  ls.grobs <- lapply(X = ls.grobs, FUN = function(i){
     i[[dimensions]][start.unit:end.unit]<-as.list(max.dim)
     i
   })
