@@ -202,27 +202,34 @@ basic.ggplot.tri<-function(melt.tri, grid.col, grid.thickness, lgd.title,
 
 #' Draws a ggplot2 of a basic sidebar.
 #'
-#' @param data    A \code{data.frame} with the column names 'Samples','.id' and
-#'                'Groups' in this order.
-#' @param palette A \code{character} vector containing R colors like a palette.
+#' @param data      A \code{data.frame} with the column names 'Samples','.id'
+#'                  and 'Groups' in this order.
+#' @param palette   A \code{character} vector containing R colors like a
+#'                  palette.
+#' @param annot.sep A \code{double} specifying the width of the separation
+#'                  spaces between annotations (Default: annot.sep = 0).
+#' @param annot.cut A \code{double} specifying the width of cuts separating
+#'                  annotation cells (Default: annot.cut = 0).
 #' @return A \code{gg} object of the basic sidebar (a 'geom_tile()').
 #' @author Yoann Pageaud.
 #' @export
 
-basic.sidebar<-function(data, palette){
+basic.sidebar <- function(data, palette, annot.sep = 0, annot.cut = 0){
   ggplot(data = data) +
-    geom_tile(aes(x = Samples, y = .id, fill = Groups)) +
-    theme(legend.justification = c(0,1),
-          legend.position = c(0,1),
-          legend.text=element_text(size= 12),
-          legend.title = element_text(size = 12),
+    geom_tile(mapping = aes(
+      x = Samples, y = .id, fill = Groups, height = 1 - annot.sep,
+      width = 1 - annot.cut)) +
+    theme(legend.justification = c(0, 1),
+          legend.position = c(0, 1),
+          # legend.text = element_text(size = 12),
+          # legend.title = element_text(size = 12),
           # legend.margin = margin(-35,0,0,-35), #Seems to fit in grid
           axis.text = element_text(size = 12),
           panel.grid = element_blank(),
-          plot.margin = margin(0,0,0,0),
+          plot.margin = margin(0, 0, 0, 0),
           strip.background = element_blank(),
           strip.text = element_blank()) +
-    scale_fill_manual(values=as.character(palette)) +
+    scale_fill_manual(values = as.character(palette)) +
     guides(fill = guide_legend(ncol = 1))
 }
 
@@ -249,11 +256,12 @@ basic.sidebar<-function(data, palette){
 #' @param annot.pos    A \code{character} specifying the position of the
 #'                     annotation sidebar.\cr Possible values are: 'top',
 #'                     'left' or 'both'.
+#' @param annot.sep    A \code{double} specifying the width of the separation
+#'                     spaces between annotations (Default: annot.sep = 0).
+#' @param annot.cut    A \code{double} specifying the width of cuts separating
+#'                     annotation cells (Default: annot.cut = 0).
 #' @param cor.order    An \code{integer} vector to be used to reorder the labels
 #'                     in 'sample.names'.
-#' @param split.annot  A \code{logical} to specify whether a separating space
-#'                     should be inserted between annotation bars or not
-#'                     (Default: split.annot = FALSE).
 #' @param merge.lgd    A \code{logical} to specify whether annotation legends
 #'                     should be merged (annot.lgd.merge = TRUE) or remain
 #'                     separated (annot.lgd.merge = FALSE)
@@ -261,11 +269,13 @@ basic.sidebar<-function(data, palette){
 #' @param right        A \code{logical} to specify that Y-axis should be
 #'                     displayed on the right side of the plot
 #'                     (Default: right = FALSE).
-#' @param lgd.lab      A \code{character} to specify a title to the legend of
+#' @param lgd.name      A \code{character} to specify a title to the legend of
 #'                     the plot, only if 'merge.lgd' = TRUE
-#'                     (Default: lgd.lab = "Legends").
+#'                     (Default: lgd.name = "Legends").
 #' @param lgd.title    An \code{element_text} object to setup legend titles
-#'                     (Default: lgd.title = NULL).
+#'                     (Default: lgd.title = element_blank()).
+#' @param lgd.text     An \code{element_text} object to setup legend labels
+#'                     (Default: lgd.text = element_blank()).
 #' @param axis.text.x  An \code{element_text} object to setup X axis text
 #'                     (Default: axis.text.x = element_text(size = 12)).
 #' @param axis.text.y  An \code{element_text} object to setup Y axis text
@@ -298,23 +308,22 @@ basic.sidebar<-function(data, palette){
 #' @author Yoann Pageaud.
 #' @export
 
-plot.col.sidebar<-function(
+plot.col.sidebar <- function(
   #TODO: change name of parameter cor.order to see if it can be remove
-  sample.names, annot.grps, annot.pal, annot.pos, cor.order,
-  split.annot = FALSE, merge.lgd = FALSE, right = FALSE, lgd.lab = "Legends",
-  lgd.title = NULL, axis.text.x = element_text(size = 12),
-  axis.text.y = element_text(size = 12), axis.ticks.x, axis.ticks.y,
-  axis.title.x, axis.title.y, set.x.title, set.y.title, dendro.pos){
+  sample.names, annot.grps, annot.pal, annot.pos = 0, annot.sep = 0, annot.cut,
+  cor.order, merge.lgd = FALSE, right = FALSE, lgd.name = "Legends",
+  lgd.title = element_blank(), lgd.text = element_blank(),
+  axis.text.x = element_text(size = 12), axis.text.y = element_text(size = 12),
+  axis.ticks.x, axis.ticks.y, axis.title.x, axis.title.y, set.x.title,
+  set.y.title, dendro.pos){
 
   #Create list of groups in their original order
-  origin.grps<-lapply(X = annot.grps, FUN = function(i){
+  origin.grps <- lapply(X = annot.grps, FUN = function(i){
     if(is.factor(i)){ levels(i) } else { levels(as.factor(i)) }
   })
-
   #Update levels following the new order of the annotation
-  groups<-lapply(X = lapply(X = annot.grps, FUN = function(i){
+  groups <- lapply(X = lapply(X = annot.grps, FUN = function(i){
     factor(x = i, levels =  unique(i))}), FUN = levels)
-
   #Create list of color tables
   #TODO: try to merge with check.annotations()
   if(is.list(annot.pal)) { #If a list of palettes is provided
@@ -336,11 +345,11 @@ plot.col.sidebar<-function(
       stop("The number of annotations does not match the number of palettes provided.")
     }
   } else if(is.vector(annot.pal)){ #if a single palette is provided
-    col_table<-lapply(seq_along(groups), function(i){
+    col_table <- lapply(seq_along(groups), function(i){
       if(length(groups[[i]]) == length(annot.pal)){ #if groups match colors
-        data.frame("Grps"=groups[[i]],"Cols"=annot.pal)
+        data.frame("Grps" = groups[[i]], "Cols" = annot.pal)
       } else {
-        stop(paste0("The length of annotation '",names(groups)[i],
+        stop(paste0("The length of annotation '", names(groups)[i],
                     "' levels do not match the length of the corresponding ",
                     "palette."))}
     })
@@ -354,83 +363,83 @@ plot.col.sidebar<-function(
   })
   #Order samples following the correlation order provided
   # and categories by alphabetical order
-  if(annot.pos == "left"){ cor.order<-rev(cor.order) }
-  dframe.annot<-lapply(dframe.annot, function(i){
-    i[["Samples"]]<-factor(i[["Samples"]], levels = i[["Samples"]][cor.order])
-    i[["Groups"]]<-factor(i[["Groups"]], levels = unique(i[["Groups"]]))
+  if(annot.pos == "left"){ cor.order <- rev(cor.order) }
+  dframe.annot <- lapply(dframe.annot, function(i){
+    i[["Samples"]] <- factor(i[["Samples"]], levels = i[["Samples"]][cor.order])
+    i[["Groups"]] <- factor(i[["Groups"]], levels = unique(i[["Groups"]]))
     i
   })
   #Rbind all annotations
   dframe.annot <- rbindlist(dframe.annot, idcol = TRUE)
-  dframe.annot$.id <- factor(dframe.annot$.id, levels=unique(dframe.annot$.id))
-  if(!split.annot){
-    if(annot.pos == "top"){
-      #Change order of levels
-      dframe.annot$.id <- factor(x = dframe.annot$.id,
-                                 levels = rev(levels(dframe.annot$.id)))
-    }
+  dframe.annot$.id <- factor(
+    dframe.annot$.id, levels = unique(dframe.annot$.id))
+  # if(!split.annot){
+  if(annot.pos == "top"){
+    #Change order of levels
+    dframe.annot$.id <- factor(
+      x = dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
   }
-  col_table<-rbindlist(col_table, idcol = TRUE)
+  # }
+  col_table <- rbindlist(col_table, idcol = TRUE)
   if(any(duplicated(col_table$Grps))){
     warning("Duplicated group name provided. Removing duplicated...")
-    col_table<-col_table[!duplicated(Grps)]
+    col_table <- col_table[!duplicated(Grps)]
   }
   #Plot color sidebars
-  col_sidebar<-basic.sidebar(data = dframe.annot, palette = col_table$Cols)
-
-  if(!is.null(lgd.title)){ #Add legend parameters if some
-    col_sidebar <- col_sidebar + theme(legend.title = lgd.title)
-  }
+  col_sidebar <- basic.sidebar(data = dframe.annot, palette = col_table$Cols,
+                               annot.sep = annot.sep, annot.cut = annot.cut)
+  #Add legend parameters if some
+  col_sidebar <- col_sidebar + theme(legend.title = lgd.title)
   #Modify base plot following its position
   if(annot.pos == "top"){
     col_sidebar <- col_sidebar +
       theme(axis.text.x.top = axis.text.x, axis.text.y = axis.text.y,
             axis.ticks.x = axis.ticks.x, axis.ticks.y = axis.ticks.y) +
-      scale_x_discrete(expand = c(0,0), position = "top") + xlab(set.x.title)
+      scale_x_discrete(expand = c(0, 0), position = "top") + xlab(set.x.title)
     if(right){
       col_sidebar <- col_sidebar +
-        scale_y_discrete(position = 'right', expand = c(0,0))
-    } else { col_sidebar <- col_sidebar + scale_y_discrete(expand = c(0,0)) }
-    if(dendro.pos !="top"){
+        scale_y_discrete(position = 'right', expand = c(0, 0))
+    } else { col_sidebar <- col_sidebar + scale_y_discrete(expand = c(0, 0)) }
+    if(dendro.pos != "top"){
       col_sidebar<-col_sidebar +
         theme(axis.title.x = axis.title.x, axis.title.y = element_blank())
     } else { col_sidebar <- col_sidebar + theme(axis.title = element_blank()) }
-    if(split.annot){
-      col_sidebar<-col_sidebar +
-        facet_grid(.id ~ ., scales = "free", space = "free_y")
-    }
+    # if(split.annot){
+    #   col_sidebar <- col_sidebar +
+    #     facet_grid(.id ~ ., scales = "free", space = "free_y")
+    # }
   } else if(annot.pos == "left"){
     col_sidebar<-col_sidebar +
       coord_flip() +
       theme(axis.text.y = axis.text.y, axis.ticks.y = axis.ticks.y,
             axis.text.x.top = axis.text.x) +
-      scale_x_discrete(expand = c(0,0)) +
-      scale_y_discrete(expand = c(0,0), position = "right") +
+      scale_x_discrete(expand = c(0, 0)) +
+      scale_y_discrete(expand = c(0, 0), position = "right") +
       xlab(set.y.title)
     if(dendro.pos !="left"){
       col_sidebar<-col_sidebar +
         theme(axis.title.x = element_blank(), axis.title.y = axis.title.y)
     } else { col_sidebar <- col_sidebar + theme(axis.title = element_blank()) }
-    if(split.annot){
-      stop("A geom_tile vertically faceted in ggplot2_3.2.0 does not support heights redimensioning after being converted into a grob.")
-    }
+    # if(split.annot){
+    #   stop("A geom_tile vertically faceted in ggplot2_3.2.0 does not support heights redimensioning after being converted into a grob.")
+    # }
   }
-
   if(merge.lgd){ # Do not split legends
-    sidebar.lgd<-list(get.lgd(col_sidebar + labs(fill = lgd.lab)))
+    sidebar.lgd <- list(get.lgd(col_sidebar + labs(fill = lgd.name)))
   } else { # Split legends and return a list of legends
-    if(!split.annot){
-      if(annot.pos == "top"){
-        dframe.annot$.id<-factor(
-          dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
-      }
+    # if(!split.annot){
+    if(annot.pos == "top"){
+      dframe.annot$.id <- factor(
+        dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
     }
+    # }
 
     #Get all legends separately
-    sidebar.lgd<-lapply(seq_along(levels(dframe.annot$.id)), function(i){
+    sidebar.lgd <- lapply(seq_along(levels(dframe.annot$.id)), function(i){
       get.lgd(
         basic.sidebar(data = dframe.annot[.id == levels(dframe.annot$.id)[i]],
                       palette = col_table[.id == i]$Cols) +
+          theme(legend.title = lgd.title, legend.text = lgd.text) +
           labs(fill = levels(dframe.annot$.id)[i])
       )
     })
@@ -454,7 +463,7 @@ plot.col.sidebar<-function(
 #' @export
 #' @references \href{https://github.com/tidyverse/ggplot2/wiki/Align-two-plots-on-a-page}{Align two plots on a page - Mara Averick}
 
-resize.grobs<-function(ls.grobs, dimensions, start.unit, end.unit){
+resize.grobs <- function(ls.grobs, dimensions, start.unit, end.unit){
   #Get dimension units from the list of grobs to redimension
   ls.dim<-lapply(X = ls.grobs, FUN = function(i){
     i[[dimensions]][start.unit:end.unit]
@@ -466,7 +475,7 @@ resize.grobs<-function(ls.grobs, dimensions, start.unit, end.unit){
       collapse = ", "), ")", sep = "")))
   #Apply changes to grobs dimensions
   ls.grobs <- lapply(X = ls.grobs, FUN = function(i){
-    i[[dimensions]][start.unit:end.unit]<-as.list(max.dim)
+    i[[dimensions]][start.unit:end.unit] <- as.list(max.dim)
     i
   })
   return(ls.grobs)
@@ -484,7 +493,7 @@ resize.grobs<-function(ls.grobs, dimensions, start.unit, end.unit){
 #' @keywords internal
 
 stack.grobs.legends<-function(grobs.list, annot.grps, height.lgds.space){
-  size_lgd<-unlist(lapply(X = annot.grps, FUN = function(i){
+  size_lgd <- unlist(lapply(X = annot.grps, FUN = function(i){
     length(unique(i)) + 1
   }))
   #Add a ending space in the legend to stack them to the top

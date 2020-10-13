@@ -91,16 +91,20 @@
 #'                        }
 #' @param annot.size      A \code{numeric} defining the width of the annotation
 #'                        bars (Default: annot.size = 1).
-#' @param annot.split     A \code{logical} to specify whether a space should be
-#'                        added between each annotation (annot.split = TRUE) or
-#'                        not (annot.split = FALSE)
-#'                        (Default: annot.split = FALSE).
+#' @param annot.sep       A \code{double} specifying the width of the separation
+#'                        spaces between annotations (Default: annot.sep = 0).
+#' @param annot.cut       A \code{double} specifying the width of cuts
+#'                        separating annotation cells (Default: annot.cut = 0).
 #' @param lgd.scale.name  A \code{character} to be used as legend title for the
 #'                        heatmap scale (Default: lgd.scale.name = 'values').
 #' @param lgd.bars.name   A \code{character} specifying the name of annotation
 #'                        side bar legends, when legends are merged
 #'                        (lgd.merge = TRUE)
 #'                        (Default: lgd.bars.name = 'Legends').
+#' @param lgd.title       An \code{element_text} object to setup legend titles
+#'                        (Default: lgd.title = element_blank()).
+#' @param lgd.text        An \code{element_text} object to setup legend labels
+#'                        (Default: lgd.text = element_blank()).
 #' @param lgd.merge       A \code{logical} specifying whether the legends of
 #'                        multiple annotation bars should be merged
 #'                        (lgd.merge = TRUE) or remain separated
@@ -145,8 +149,9 @@ gg2heatmap <- function(
   row.type = 'rows', imputation.grps = NULL, ncores = 1,
   heatmap.pal = c("steelblue", "gray95", "darkorange"),
   annot.grps = list("Groups" = seq(ncol(m))), annot.pal = rainbow(n = ncol(m)),
-  annot.size = 1, annot.split = FALSE, lgd.scale.name = 'values',
-  lgd.bars.name = 'Legends', lgd.merge = FALSE, lgd.space.width = 1,
+  annot.size = 1, annot.sep = 0, annot.cut = 0, lgd.scale.name = 'values',
+  lgd.bars.name = 'Legends', lgd.title = element_text(size = 12),
+  lgd.text = element_text(size = 11), lgd.merge = FALSE, lgd.space.width = 1,
   axis.title.x = element_text(size = 12, color = 'black'),
   axis.text.x = element_text(
     size = 11, angle = -45, hjust = 0, vjust = 0.5, face = 'bold'),
@@ -197,7 +202,6 @@ gg2heatmap <- function(
     dd.cols <- dendrograms[2]
   } else { stop("'dendrograms' length > 2. Too many values.") }
 
-
   #Check if y.axis.right = TRUE when axis.text.y.right or axis.title.y.right or
   # axis.ticks.y.right are not element_blank()
   if((is.elt_blank(axis.text.y.right) | is.elt_blank(axis.title.y.right) |
@@ -206,7 +210,7 @@ gg2heatmap <- function(
       paste("'y.axis.right' has to be set to TRUE in order to display the",
             "Y-axis on the right side of the heatmap."))
   }
-
+  #TODO: Add verbose=TRUE option on check.annotations
   #Check annotations groups and palettes matching
   check.annotations(data = m, annot.grps = annot.grps, annot.pal = annot.pal)
 
@@ -220,9 +224,7 @@ gg2heatmap <- function(
     m <- m[order(apply(m, 1, sd, na.rm = T), decreasing = TRUE), , drop = FALSE]
   }
   #Subset top rows if any value defined
-  if(!is.null(top.rows)){
-    m <- head(x = m, n = top.rows)
-  }
+  if(!is.null(top.rows)){ m <- head(x = m, n = top.rows) }
 
   #Remove NAs if some for dendrogram matrix
   dend_mat <- m[complete.cases(m), ]
@@ -267,14 +269,17 @@ gg2heatmap <- function(
     # row.dendrogram off, col.dendrogram on, method.col specified
     dframe <- m[, column.order, drop = FALSE]
   }
-
-  melted_mat <- melt(dframe) #Melt Matrix into a dataframe
-  #TODO: rm this
-  # colnames(melted_mat)[3]<-"Methylation"
+  #Melt Matrix into a data.table
+  dt.frame <- as.data.table(x = dframe, keep.rownames = TRUE)
+  dt.frame[, rn := factor(x = rn, levels = rownames(dframe))]
+  melted_mat <- melt.data.table(
+    data = dt.frame, id.vars = "rn", measure.vars = colnames(dt.frame)[-c(1)])
+  # melted_mat <- melt(dframe) #Melt Matrix into a dataframe
 
   #Plot Heatmap
-  htmp <-ggplot() +
-    geom_tile(data = melted_mat, aes(x = Var2, y = Var1, fill = value)) +
+  htmp <- ggplot() +
+    geom_tile(data = melted_mat, aes(x = variable, y = rn, fill = value)) +
+    # geom_tile(data = melted_mat, aes(x = Var2, y = Var1, fill = value)) +
     scale_fill_gradientn(colours = heatmap.pal) +
     scale_x_discrete(expand = c(0,0)) +
     theme(plot.margin = margin(0, 0, 0, 0),
@@ -299,7 +304,7 @@ gg2heatmap <- function(
           axis.ticks.y.right = axis.ticks.y.right,
           axis.text.y.right = axis.text.y.right) +
     guides(fill = guide_colorbar(ticks=TRUE, label=TRUE, barwidth=15,
-                                  ticks.linewidth = 1)) +
+                                 ticks.linewidth = 1)) +
     xlab("Samples") +
     labs(fill = lgd.scale.name)
   if(y.axis.right){
@@ -314,12 +319,12 @@ gg2heatmap <- function(
   annot.grps <- lapply(X = annot.grps, FUN = function(i){i[column.order]})
 
   #Create Color Sidebar
-  col_sidebar<-plot.col.sidebar(
+  col_sidebar <- plot.col.sidebar(
     sample.names = colnames(m[, column.order]), annot.grps = annot.grps,
-    annot.pal = annot.pal, annot.pos = 'top',
-    cor.order = seq_along(colnames(dframe)), split.annot = annot.split,
-    merge.lgd = lgd.merge, right = TRUE, lgd.lab = lgd.bars.name,
-    axis.text.x = element_blank(),
+    annot.pal = annot.pal, annot.pos = 'top', annot.sep = annot.sep,
+    annot.cut = annot.cut, cor.order = seq_along(colnames(dframe)),
+    merge.lgd = lgd.merge, right = TRUE, lgd.name = lgd.bars.name,
+    lgd.title = lgd.title, lgd.text = lgd.text, axis.text.x = element_blank(),
     axis.text.y = element_text(size = 12, color = "black"),
     axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
     axis.title.x = element_blank(), axis.title.y = element_blank(),
@@ -366,11 +371,12 @@ gg2heatmap <- function(
     #   vp = grid::viewport(x= lgd.pos.x-0.6, y = lgd.pos.y))
     #Final plot
     final.plot <- gridExtra::grid.arrange(gridExtra::arrangeGrob(
-      top = grid::textGrob(plot.title, gp = grid::gpar(fontsize = 15, font = 1)),
-      grobs = list(
-        grid::textGrob(paste0("Columns ordered by ", method.cols, " distance; Rows ordered by ",
-          method.rows, " distance; ", nrow(m), " ", row.type, "."),
-          gp = grid::gpar(fontsize = 12, fontface = 3L)),
+      top = grid::textGrob(
+        plot.title, gp = grid::gpar(fontsize = 15, font = 1)),
+      grobs = list(grid::textGrob(paste0(
+        "Columns ordered by ", method.cols, " distance; Rows ordered by ",
+        method.rows, " distance; ", nrow(m), " ", row.type, "."),
+        gp = grid::gpar(fontsize = 12, fontface = 3L)),
         gridExtra::arrangeGrob(grobs = list(main_grob, right.legends), ncol = 2,
                                widths = c(20, 2 + lgd.space.width)),
         htmp_legend), nrow = 3, heights = c(3,50,6)))

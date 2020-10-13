@@ -8,13 +8,15 @@
   sample.names,
   annot.grps,
   annot.pal,
-  annot.pos,
+  annot.pos = 0,
+  annot.sep = 0,
+  annot.cut,
   cor.order,
-  split.annot = FALSE,
   merge.lgd = FALSE,
   right = FALSE,
-  lgd.lab = "Legends",
-  lgd.title = NULL,
+  lgd.name = "Legends",
+  lgd.title = element_blank(),
+  lgd.text = element_blank(),
   axis.text.x = element_text(size = 12),
   axis.text.y = element_text(size = 12),
   axis.ticks.x,
@@ -52,12 +54,14 @@ listed in 'annot.grps'.
 annotation sidebar.\cr Possible values are: 'top',
 'left' or 'both'.}
 
+\item{annot.sep}{A \code{double} specifying the width of the separation
+spaces between annotations (Default: annot.sep = 0).}
+
+\item{annot.cut}{A \code{double} specifying the width of cuts separating
+annotation cells (Default: annot.cut = 0).}
+
 \item{cor.order}{An \code{integer} vector to be used to reorder the labels
 in 'sample.names'.}
-
-\item{split.annot}{A \code{logical} to specify whether a separating space
-should be inserted between annotation bars or not
-(Default: split.annot = FALSE).}
 
 \item{merge.lgd}{A \code{logical} to specify whether annotation legends
 should be merged (annot.lgd.merge = TRUE) or remain
@@ -68,12 +72,15 @@ separated (annot.lgd.merge = FALSE)
 displayed on the right side of the plot
 (Default: right = FALSE).}
 
-\item{lgd.lab}{A \code{character} to specify a title to the legend of
+\item{lgd.name}{A \code{character} to specify a title to the legend of
 the plot, only if 'merge.lgd' = TRUE
-(Default: lgd.lab = "Legends").}
+(Default: lgd.name = "Legends").}
 
 \item{lgd.title}{An \code{element_text} object to setup legend titles
-(Default: lgd.title = NULL).}
+(Default: lgd.title = element_blank()).}
+
+\item{lgd.text}{An \code{element_text} object to setup legend labels
+(Default: lgd.text = element_blank()).}
 
 \item{axis.text.x}{An \code{element_text} object to setup X axis text
 (Default: axis.text.x = element_text(size = 12)).}

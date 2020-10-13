@@ -20,9 +20,12 @@ gg2heatmap(
   annot.grps = list(Groups = seq(ncol(m))),
   annot.pal = rainbow(n = ncol(m)),
   annot.size = 1,
-  annot.split = FALSE,
+  annot.sep = 0,
+  annot.cut = 0,
   lgd.scale.name = "values",
   lgd.bars.name = "Legends",
+  lgd.title = element_text(size = 12),
+  lgd.text = element_text(size = 11),
   lgd.merge = FALSE,
   lgd.space.width = 1,
   axis.title.x = element_text(size = 12, color = "black"),
@@ -142,10 +145,11 @@ vectors listed in 'annot.grps'.
 \item{annot.size}{A \code{numeric} defining the width of the annotation
 bars (Default: annot.size = 1).}
 
-\item{annot.split}{A \code{logical} to specify whether a space should be
-added between each annotation (annot.split = TRUE) or
-not (annot.split = FALSE)
-(Default: annot.split = FALSE).}
+\item{annot.sep}{A \code{double} specifying the width of the separation
+spaces between annotations (Default: annot.sep = 0).}
+
+\item{annot.cut}{A \code{double} specifying the width of cuts
+separating annotation cells (Default: annot.cut = 0).}
 
 \item{lgd.scale.name}{A \code{character} to be used as legend title for the
 heatmap scale (Default: lgd.scale.name = 'values').}
@@ -154,6 +158,12 @@ heatmap scale (Default: lgd.scale.name = 'values').}
 side bar legends, when legends are merged
 (lgd.merge = TRUE)
 (Default: lgd.bars.name = 'Legends').}
+
+\item{lgd.title}{An \code{element_text} object to setup legend titles
+(Default: lgd.title = element_blank()).}
+
+\item{lgd.text}{An \code{element_text} object to setup legend labels
+(Default: lgd.text = element_blank()).}
 
 \item{lgd.merge}{A \code{logical} specifying whether the legends of
 multiple annotation bars should be merged

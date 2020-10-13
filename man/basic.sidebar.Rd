@@ -4,13 +4,20 @@
 \alias{basic.sidebar}
 \title{Draws a ggplot2 of a basic sidebar.}
 \usage{
-basic.sidebar(data, palette)
+basic.sidebar(data, palette, annot.sep = 0, annot.cut = 0)
 }
 \arguments{
-\item{data}{A \code{data.frame} with the column names 'Samples','.id' and
-'Groups' in this order.}
+\item{data}{A \code{data.frame} with the column names 'Samples','.id'
+and 'Groups' in this order.}
 
-\item{palette}{A \code{character} vector containing R colors like a palette.}
+\item{palette}{A \code{character} vector containing R colors like a
+palette.}
+
+\item{annot.sep}{A \code{double} specifying the width of the separation
+spaces between annotations (Default: annot.sep = 0).}
+
+\item{annot.cut}{A \code{double} specifying the width of cuts separating
+annotation cells (Default: annot.cut = 0).}
 }
 \value{
 A \code{gg} object of the basic sidebar (a 'geom_tile()').
