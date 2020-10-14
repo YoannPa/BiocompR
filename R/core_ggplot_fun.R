@@ -224,6 +224,7 @@ basic.sidebar <- function(
       width = 1 - annot.cut)) +
     theme(legend.justification = c(0, 1),
           legend.position = c(0, 1),
+          legend.spacing.y = unit(0.05, 'cm'),
           # legend.text = element_text(size = 12),
           # legend.title = element_text(size = 12),
           # legend.margin = margin(-35,0,0,-35), #Seems to fit in grid
@@ -233,7 +234,7 @@ basic.sidebar <- function(
           strip.background = element_blank(),
           strip.text = element_blank()) +
     scale_fill_manual(values = as.character(palette)) +
-    guides(fill = guide_legend(ncol = lgd.ncol))
+    guides(fill = guide_legend(ncol = lgd.ncol, byrow = TRUE))
 }
 
 #' Creates a colored side annotation bars in ggplot2.
@@ -443,8 +444,9 @@ plot.col.sidebar <- function(
     #Get all legends separately
     sidebar.lgd <- lapply(seq_along(levels(dframe.annot$.id)), function(i){
       get.lgd(
-        basic.sidebar(data = dframe.annot[.id == levels(dframe.annot$.id)[i]],
-                      palette = col_table[.id == i]$Cols, lgd.ncol = lgd.ncol) +
+        basic.sidebar(
+          data = dframe.annot[.id == levels(dframe.annot$.id)[i]],
+          palette = col_table[.id == i]$Cols, lgd.ncol = lgd.ncol) +
           theme(legend.title = lgd.title, legend.text = lgd.text) +
           labs(fill = levels(dframe.annot$.id)[i])
       )
