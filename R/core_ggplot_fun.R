@@ -210,11 +210,14 @@ basic.ggplot.tri<-function(melt.tri, grid.col, grid.thickness, lgd.title,
 #'                  spaces between annotations (Default: annot.sep = 0).
 #' @param annot.cut A \code{double} specifying the width of cuts separating
 #'                  annotation cells (Default: annot.cut = 0).
+#' @param lgd.ncol  An \code{integer} specifying the number of columns to be
+#'                  used to display a legend (Default: lgd.ncol = 1).
 #' @return A \code{gg} object of the basic sidebar (a 'geom_tile()').
 #' @author Yoann Pageaud.
 #' @export
 
-basic.sidebar <- function(data, palette, annot.sep = 0, annot.cut = 0){
+basic.sidebar <- function(
+  data, palette, annot.sep = 0, annot.cut = 0, lgd.ncol = 1){
   ggplot(data = data) +
     geom_tile(mapping = aes(
       x = Samples, y = .id, fill = Groups, height = 1 - annot.sep,
@@ -230,7 +233,7 @@ basic.sidebar <- function(data, palette, annot.sep = 0, annot.cut = 0){
           strip.background = element_blank(),
           strip.text = element_blank()) +
     scale_fill_manual(values = as.character(palette)) +
-    guides(fill = guide_legend(ncol = 1))
+    guides(fill = guide_legend(ncol = lgd.ncol))
 }
 
 #' Creates a colored side annotation bars in ggplot2.
@@ -276,6 +279,8 @@ basic.sidebar <- function(data, palette, annot.sep = 0, annot.cut = 0){
 #'                     (Default: lgd.title = element_blank()).
 #' @param lgd.text     An \code{element_text} object to setup legend labels
 #'                     (Default: lgd.text = element_blank()).
+#' @param lgd.ncol     An \code{integer} specifying the number of columns to be
+#'                     used to display a legend (Default: lgd.ncol = 1).
 #' @param axis.text.x  An \code{element_text} object to setup X axis text
 #'                     (Default: axis.text.x = element_text(size = 12)).
 #' @param axis.text.y  An \code{element_text} object to setup Y axis text
@@ -312,7 +317,7 @@ plot.col.sidebar <- function(
   #TODO: change name of parameter cor.order to see if it can be remove
   sample.names, annot.grps, annot.pal, annot.pos = 0, annot.sep = 0, annot.cut,
   cor.order, merge.lgd = FALSE, right = FALSE, lgd.name = "Legends",
-  lgd.title = element_blank(), lgd.text = element_blank(),
+  lgd.title = element_blank(), lgd.text = element_blank(), lgd.ncol = 1,
   axis.text.x = element_text(size = 12), axis.text.y = element_text(size = 12),
   axis.ticks.x, axis.ticks.y, axis.title.x, axis.title.y, set.x.title,
   set.y.title, dendro.pos){
@@ -331,7 +336,7 @@ plot.col.sidebar <- function(
       #Map groups to palettes
       ls.df.grp.pal<-Map(data.frame, "Grps" = origin.grps, "Cols" = annot.pal,
                          stringsAsFactors = FALSE)
-      col_table<-lapply(seq_along(groups), function(i){
+      col_table <- lapply(seq_along(groups), function(i){
         if(length(groups[[i]]) == length(annot.pal[[i]])){
           #if groups match colors
           ls.df.grp.pal[[i]][match(groups[[i]], ls.df.grp.pal[[i]]$Grps),]
@@ -386,8 +391,9 @@ plot.col.sidebar <- function(
     col_table <- col_table[!duplicated(Grps)]
   }
   #Plot color sidebars
-  col_sidebar <- basic.sidebar(data = dframe.annot, palette = col_table$Cols,
-                               annot.sep = annot.sep, annot.cut = annot.cut)
+  col_sidebar <- basic.sidebar(
+    data = dframe.annot, palette = col_table$Cols, annot.sep = annot.sep,
+    annot.cut = annot.cut, lgd.ncol = lgd.ncol)
   #Add legend parameters if some
   col_sidebar <- col_sidebar + theme(legend.title = lgd.title)
   #Modify base plot following its position
@@ -438,7 +444,7 @@ plot.col.sidebar <- function(
     sidebar.lgd <- lapply(seq_along(levels(dframe.annot$.id)), function(i){
       get.lgd(
         basic.sidebar(data = dframe.annot[.id == levels(dframe.annot$.id)[i]],
-                      palette = col_table[.id == i]$Cols) +
+                      palette = col_table[.id == i]$Cols, lgd.ncol = lgd.ncol) +
           theme(legend.title = lgd.title, legend.text = lgd.text) +
           labs(fill = levels(dframe.annot$.id)[i])
       )

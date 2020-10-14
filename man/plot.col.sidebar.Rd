@@ -17,6 +17,7 @@
   lgd.name = "Legends",
   lgd.title = element_blank(),
   lgd.text = element_blank(),
+  lgd.ncol = 1,
   axis.text.x = element_text(size = 12),
   axis.text.y = element_text(size = 12),
   axis.ticks.x,
@@ -81,6 +82,9 @@ the plot, only if 'merge.lgd' = TRUE
 
 \item{lgd.text}{An \code{element_text} object to setup legend labels
 (Default: lgd.text = element_blank()).}
+
+\item{lgd.ncol}{An \code{integer} specifying the number of columns to be
+used to display a legend (Default: lgd.ncol = 1).}
 
 \item{axis.text.x}{An \code{element_text} object to setup X axis text
 (Default: axis.text.x = element_text(size = 12)).}

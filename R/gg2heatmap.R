@@ -114,6 +114,10 @@
 #'                        (Default: lgd.merge = FALSE).
 #' @param lgd.space.width A \code{numeric} specifying the width of the legend
 #'                        space (Default: lgd.space.width = 1).
+#' @param y.lab           A \code{character} to specify Y-axis title
+#'                        (Default: y.lab = 'Values').
+#' @param x.lab           A \code{character} to specify X-axis title
+#'                        (Default: x.lab = 'Samples').
 #' @param axis.title.x    An \code{element_text} object to setup X axis title
 #'                        (Default: axis.title.x = element_text(size = 12,
 #'                        color = 'black')).
@@ -152,6 +156,7 @@ gg2heatmap <- function(
   annot.size = 1, annot.sep = 0, annot.cut = 0, lgd.scale.name = 'values',
   lgd.bars.name = 'Legends', lgd.title = element_text(size = 12),
   lgd.text = element_text(size = 11), lgd.merge = FALSE, lgd.space.width = 1,
+  y.lab = "Values", x.lab = "Samples",
   axis.title.x = element_text(size = 12, color = 'black'),
   axis.text.x = element_text(
     size = 11, angle = -45, hjust = 0, vjust = 0.5, face = 'bold'),
@@ -281,11 +286,22 @@ gg2heatmap <- function(
     geom_tile(data = melted_mat, aes(x = variable, y = rn, fill = value)) +
     # geom_tile(data = melted_mat, aes(x = Var2, y = Var1, fill = value)) +
     scale_fill_gradientn(colours = heatmap.pal) +
-    scale_x_discrete(expand = c(0,0)) +
+    scale_x_discrete(expand = c(0, 0)) +
     theme(plot.margin = margin(0, 0, 0, 0),
           panel.grid = element_blank(),
           panel.background = element_rect(fill = "transparent"),
-          plot.background = element_rect(fill = "transparent"))
+          plot.background = element_rect(fill = "transparent"),
+          legend.text = element_text(size = 11),
+          legend.title = element_text(size = 12, vjust = 0.8),
+          legend.position = "bottom",
+          legend.justification = c(0.4, 0.5),
+          axis.title.x = axis.title.x, axis.text.x = axis.text.x,
+          axis.ticks.x = axis.ticks.x, axis.title.y.right = axis.title.y.right,
+          axis.ticks.y.right = axis.ticks.y.right,
+          axis.text.y.right = axis.text.y.right) +
+    guides(fill = guide_colorbar(ticks = TRUE, label = TRUE, barwidth = 15,
+                                 ticks.linewidth = 1)) +
+    labs(x = x.lab, y = y.lab, fill = lgd.scale.name)
   if(dendrograms[1]){
     htmp <- htmp +
       theme(axis.title.y.left = element_blank(),
@@ -294,29 +310,17 @@ gg2heatmap <- function(
             axis.text.y.left = element_blank(),
             plot.margin = unit(c(0, 0, 0, 0), "cm"))
   }
-  htmp <- htmp +
-    theme(legend.text = element_text(size= 11),
-          legend.title = element_text(size = 12, vjust = 0.8),
-          legend.position = "bottom",
-          legend.justification = c(0.4,0.5),
-          axis.title.x = axis.title.x, axis.text.x = axis.text.x,
-          axis.ticks.x = axis.ticks.x, axis.title.y.right = axis.title.y.right,
-          axis.ticks.y.right = axis.ticks.y.right,
-          axis.text.y.right = axis.text.y.right) +
-    guides(fill = guide_colorbar(ticks=TRUE, label=TRUE, barwidth=15,
-                                 ticks.linewidth = 1)) +
-    xlab("Samples") +
-    labs(fill = lgd.scale.name)
   if(y.axis.right){
-    htmp <- htmp + scale_y_discrete(position = 'right', expand = c(0,0))
-  } else {
-    htmp <- htmp + scale_y_discrete(expand = c(0,0))
-  }
+    htmp <- htmp + scale_y_discrete(position = 'right', expand = c(0, 0))
+  } else { htmp <- htmp + scale_y_discrete(expand = c(0, 0)) }
 
   #Reoder groups and convert as factors
   annot.grps <- lapply(X = annot.grps, FUN = function(i){
     factor(x = i, levels =  unique(i))})
   annot.grps <- lapply(X = annot.grps, FUN = function(i){i[column.order]})
+
+  #Set number of columns to display annotations legends
+  lgd.ncol <- ceiling(ncol(m)/30)
 
   #Create Color Sidebar
   col_sidebar <- plot.col.sidebar(
@@ -324,7 +328,8 @@ gg2heatmap <- function(
     annot.pal = annot.pal, annot.pos = 'top', annot.sep = annot.sep,
     annot.cut = annot.cut, cor.order = seq_along(colnames(dframe)),
     merge.lgd = lgd.merge, right = TRUE, lgd.name = lgd.bars.name,
-    lgd.title = lgd.title, lgd.text = lgd.text, axis.text.x = element_blank(),
+    lgd.title = lgd.title, lgd.text = lgd.text, lgd.ncol = lgd.ncol,
+    axis.text.x = element_blank(),
     axis.text.y = element_text(size = 12, color = "black"),
     axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
     axis.title.x = element_blank(), axis.title.y = element_blank(),
@@ -337,13 +342,13 @@ gg2heatmap <- function(
   ddgr_seg_col <- ggplotGrob(ddgr_seg_col)
   col_sidebar_grob <- ggplotGrob(col_sidebar$sidebar)
   ddgr_seg_row <- ggplotGrob(ddgr_seg_row)
-  htmp <- ggplotGrob(htmp + theme(legend.position="none"))
+  htmp <- ggplotGrob(htmp + theme(legend.position = "none"))
   #Resize grobs
 
-  upd.grob_w<-resize.grobs(ls.grobs = list(
+  upd.grob_w <- resize.grobs(ls.grobs = list(
     'dd_col' = ddgr_seg_col, 'sidebar' = col_sidebar_grob, 'htmp' = htmp),
     dimensions = "widths", start.unit = 4, end.unit = 7)
-  upd.grob_h<- resize.grobs(ls.grobs = list(
+  upd.grob_h <- resize.grobs(ls.grobs = list(
     'dd_row' = ddgr_seg_row, 'htmp' = upd.grob_w$htmp), dimensions = 'heights',
     start.unit = 7, end.unit = 9)
 
@@ -379,7 +384,7 @@ gg2heatmap <- function(
         gp = grid::gpar(fontsize = 12, fontface = 3L)),
         gridExtra::arrangeGrob(grobs = list(main_grob, right.legends), ncol = 2,
                                widths = c(20, 2 + lgd.space.width)),
-        htmp_legend), nrow = 3, heights = c(3,50,6)))
+        htmp_legend), nrow = 3, heights = c(3, 50, 6)))
   }
   return(final.plot)
 }

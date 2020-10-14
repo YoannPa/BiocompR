@@ -28,6 +28,8 @@ gg2heatmap(
   lgd.text = element_text(size = 11),
   lgd.merge = FALSE,
   lgd.space.width = 1,
+  y.lab = "Values",
+  x.lab = "Samples",
   axis.title.x = element_text(size = 12, color = "black"),
   axis.text.x = element_text(size = 11, angle = -45, hjust = 0, vjust = 0.5, face =
     "bold"),
@@ -175,6 +177,12 @@ multiple annotations sharing the same values
 
 \item{lgd.space.width}{A \code{numeric} specifying the width of the legend
 space (Default: lgd.space.width = 1).}
+
+\item{y.lab}{A \code{character} to specify Y-axis title
+(Default: y.lab = 'Values').}
+
+\item{x.lab}{A \code{character} to specify X-axis title
+(Default: x.lab = 'Samples').}
 
 \item{axis.title.x}{An \code{element_text} object to setup X axis title
 (Default: axis.title.x = element_text(size = 12,

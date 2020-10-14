@@ -4,7 +4,7 @@
 \alias{basic.sidebar}
 \title{Draws a ggplot2 of a basic sidebar.}
 \usage{
-basic.sidebar(data, palette, annot.sep = 0, annot.cut = 0)
+basic.sidebar(data, palette, annot.sep = 0, annot.cut = 0, lgd.ncol = 1)
 }
 \arguments{
 \item{data}{A \code{data.frame} with the column names 'Samples','.id'
@@ -18,6 +18,9 @@ spaces between annotations (Default: annot.sep = 0).}
 
 \item{annot.cut}{A \code{double} specifying the width of cuts separating
 annotation cells (Default: annot.cut = 0).}
+
+\item{lgd.ncol}{An \code{integer} specifying the number of columns to be
+used to display a legend (Default: lgd.ncol = 1).}
 }
 \value{
 A \code{gg} object of the basic sidebar (a 'geom_tile()').
