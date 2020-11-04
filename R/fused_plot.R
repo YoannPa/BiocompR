@@ -59,6 +59,7 @@ fix.corrMatOrder.alphabet<-function(cor.order,str){
 #' @author Yoann Pageaud.
 #' @export
 
+#TODO: Adapt fused.view() to the new functions of core_ggplot_fun.R
 #TODO: Write documentation!
 fused.view<-function(
   sample.names, upper.mat, lower.mat,

@@ -305,11 +305,12 @@ basic.sidebar <- function(
 #' @param set.x.title  A \code{character}to be used as the title for the X axis.
 #' @param set.y.title  A \code{character}to be used as the title for the Y axis.
 #' @param dendro.pos   A \code{character} specifying the position of the
-#'                     dendrogram (Supported: dendro.pos = c('top','left')).
+#'                     dendrogram (Supported: dendro.pos = c('top', 'left')).
 #' @return A \code{list} of length 2:
 #'         \itemize{
 #'          \item{'sidebar' contains the colored sidebar plot.}
-#'          \item{'legends' contains a list of legends as \code{gg} objects.}
+#'          \item{'legends' lists legends of the matching sidebar as \code{gg}
+#'                objects.}
 #'         }
 #' @author Yoann Pageaud.
 #' @export
@@ -335,25 +336,31 @@ plot.col.sidebar <- function(
   if(is.list(annot.pal)) { #If a list of palettes is provided
     if(length(groups) == length(annot.pal)){ #if annotations match palettes
       #Map groups to palettes
-      ls.df.grp.pal<-Map(data.frame, "Grps" = origin.grps, "Cols" = annot.pal,
-                         stringsAsFactors = FALSE)
+      ls.df.grp.pal <- Map(data.frame, "Grps" = origin.grps, "Cols" = annot.pal,
+                           stringsAsFactors = FALSE)
       col_table <- lapply(seq_along(groups), function(i){
         if(length(groups[[i]]) == length(annot.pal[[i]])){
           #if groups match colors
-          ls.df.grp.pal[[i]][match(groups[[i]], ls.df.grp.pal[[i]]$Grps),]
+          ls.df.grp.pal[[i]][match(groups[[i]], ls.df.grp.pal[[i]]$Grps), ]
           # data.frame("Grps"=groups[[i]],"Cols"=annot.pal[[i]])
         } else {
-          stop(paste0("The length of annotation '",names(groups)[i],
-                      "' levels do not match the length of the corresponding ",
-                      "palette."))}
+          stop(paste0(
+            "The length of annotation '", names(groups)[i],
+            "' levels does not match the length of the corresponding palette."))
+        }
       })
     } else {
       stop("The number of annotations does not match the number of palettes provided.")
     }
   } else if(is.vector(annot.pal)){ #if a single palette is provided
+    #Map groups to the same palette
+    ls.df.grp.pal <- lapply(X = origin.grps, FUN = function(grp){
+      data.frame("Grps" = grp, "Cols" = annot.pal, stringsAsFactors = FALSE)
+    })
     col_table <- lapply(seq_along(groups), function(i){
       if(length(groups[[i]]) == length(annot.pal)){ #if groups match colors
-        data.frame("Grps" = groups[[i]], "Cols" = annot.pal)
+        ls.df.grp.pal[[i]][match(groups[[i]], ls.df.grp.pal[[i]]$Grps), ]
+        # data.frame("Grps" = groups[[i]], "Cols" = annot.pal)
       } else {
         stop(paste0("The length of annotation '", names(groups)[i],
                     "' levels do not match the length of the corresponding ",
@@ -365,7 +372,7 @@ plot.col.sidebar <- function(
 
   #Create list of annotation data.frames
   dframe.annot <- lapply(annot.grps, function(i){
-    data.frame("Samples" = sample.names,"Groups" = i)
+    data.frame("Samples" = sample.names, "Groups" = i)
   })
   #Order samples following the correlation order provided
   # and categories by alphabetical order
@@ -377,20 +384,39 @@ plot.col.sidebar <- function(
   })
   #Rbind all annotations
   dframe.annot <- rbindlist(dframe.annot, idcol = TRUE)
+  #Convert .id as factors
   dframe.annot$.id <- factor(
-    dframe.annot$.id, levels = unique(dframe.annot$.id))
+    x = dframe.annot$.id, levels = unique(dframe.annot$.id))
   # if(!split.annot){
-  if(annot.pos == "top"){
-    #Change order of levels
+  if(annot.pos == "top"){ #Change order of levels
     dframe.annot$.id <- factor(
       x = dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
   }
   # }
+
+  #Check color tables
+  col_table <- lapply(X = col_table, FUN = function(tbl){
+    if(any(duplicated(tbl$Cols))){ #Check palette consistency
+      stop("1 color in a palette has been associated to more than 1 group.")
+    }
+    if(any(duplicated(tbl$Grps))){ #Check annotation consistency
+      warning("Duplicated group name provided. Removing duplicated...")
+      tbl <- tbl[!duplicated(Grps)]
+    } else { tbl }
+  })
   col_table <- rbindlist(col_table, idcol = TRUE)
-  if(any(duplicated(col_table$Grps))){
-    warning("Duplicated group name provided. Removing duplicated...")
-    col_table <- col_table[!duplicated(Grps)]
+  if(is.vector(annot.pal)){
+    if(any(duplicated(col_table$Cols))){ #Check palette consistency
+      # warning(paste(
+      #   "Some colors have been assigned to more than 1 group in the palette.",
+      #   "Removing duplicated occurences..."))
+      col_table <- col_table[!duplicated(x = Cols)]
+    }
   }
+  # if(any(duplicated(col_table$Grps))){
+  #   warning("Duplicated group name provided. Removing duplicated...")
+  #   col_table <- col_table[!duplicated(Grps)]
+  # }
   #Plot color sidebars
   col_sidebar <- basic.sidebar(
     data = dframe.annot, palette = col_table$Cols, annot.sep = annot.sep,
@@ -441,16 +467,23 @@ plot.col.sidebar <- function(
     }
     # }
 
-    #Get all legends separately
-    sidebar.lgd <- lapply(seq_along(levels(dframe.annot$.id)), function(i){
-      get.lgd(
-        basic.sidebar(
-          data = dframe.annot[.id == levels(dframe.annot$.id)[i]],
-          palette = col_table[.id == i]$Cols, lgd.ncol = lgd.ncol) +
-          theme(legend.title = lgd.title, legend.text = lgd.text) +
-          labs(fill = levels(dframe.annot$.id)[i])
-      )
-    })
+    #Generate separate legends if more than 1 palette available
+    # or if only 1 annotation is used
+    if((is.list(annot.pal) & length(annot.pal) > 1) |
+       length(levels(dframe.annot$.id)) == 1){
+      #Get all legends separately
+      sidebar.lgd <- lapply(seq_along(levels(dframe.annot$.id)), function(i){
+        get.lgd(
+          basic.sidebar(
+            data = dframe.annot[.id == levels(dframe.annot$.id)[i]],
+            palette = col_table[.id == i]$Cols, lgd.ncol = lgd.ncol) +
+            theme(legend.title = lgd.title, legend.text = lgd.text) +
+            labs(fill = levels(dframe.annot$.id)[i])
+        )
+      })
+    } else {
+      stop("Cannot generate separated legends if only one annotation palette is given.")
+    }
   }
   return(list("sidebar" = col_sidebar + theme(legend.position = "none"),
               "legends" = sidebar.lgd))

@@ -117,13 +117,14 @@ used to display a legend (Default: lgd.ncol = 1).}
 \item{set.y.title}{A \code{character}to be used as the title for the Y axis.}
 
 \item{dendro.pos}{A \code{character} specifying the position of the
-dendrogram (Supported: dendro.pos = c('top','left')).}
+dendrogram (Supported: dendro.pos = c('top', 'left')).}
 }
 \value{
 A \code{list} of length 2:
         \itemize{
          \item{'sidebar' contains the colored sidebar plot.}
-         \item{'legends' contains a list of legends as \code{gg} objects.}
+         \item{'legends' lists legends of the matching sidebar as \code{gg}
+               objects.}
         }
 }
 \description{

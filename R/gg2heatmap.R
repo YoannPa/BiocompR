@@ -167,7 +167,7 @@ gg2heatmap <- function(
   #Check m is a matrix
   if(!is.matrix(m)){ stop("m must be a matrix.") }
   #Check if na.handle method  supported
-  na.method <- c('keep','impute','remove')
+  na.method <- c('keep', 'impute', 'remove')
   if(!na.handle %in% na.method){ stop("na.handle method not supported.") }
   #Check dimensions of parameters
   if(length(dist.method) == 1){
@@ -178,8 +178,8 @@ gg2heatmap <- function(
     method.cols <- dist.method[2]
   } else { stop("'dist.method' length > 2. Too many values.") }
   #Check distance methods
-  methods.ls <- c(
-    'euclidean','maximum','manhattan','canberra','binary','minkowski','none')
+  methods.ls <- c('euclidean', 'maximum', 'manhattan', 'canberra',
+                  'binary', 'minkowski', 'none')
   if(!method.rows %in% methods.ls){
     stop("Unknown method for distance computation on rows.")
   }
@@ -215,7 +215,7 @@ gg2heatmap <- function(
       paste("'y.axis.right' has to be set to TRUE in order to display the",
             "Y-axis on the right side of the heatmap."))
   }
-  #TODO: Add verbose=TRUE option on check.annotations
+  #TODO: Add verbose = TRUE option on check.annotations
   #Check annotations groups and palettes matching
   check.annotations(data = m, annot.grps = annot.grps, annot.pal = annot.pal)
 
@@ -317,10 +317,45 @@ gg2heatmap <- function(
   #Reoder groups and convert as factors
   annot.grps <- lapply(X = annot.grps, FUN = function(i){
     factor(x = i, levels =  unique(i))})
-  annot.grps <- lapply(X = annot.grps, FUN = function(i){i[column.order]})
+  annot.grps <- lapply(X = annot.grps, FUN = function(i){ i[column.order] })
 
   #Set number of columns to display annotations legends
-  lgd.ncol <- ceiling(ncol(m)/30)
+  if(lgd.merge){
+    origin.grps <- lapply(X = annot.grps, FUN = function(i){
+      if(is.factor(i)){ levels(i) } else { levels(as.factor(i)) }
+    })
+    if(is.list(annot.pal)){
+      if(length(origin.grps) == length(annot.pal)){
+        ls.df.grp.pal <- Map(
+          data.frame, "Grps" = origin.grps, "Cols" = annot.pal,
+          stringsAsFactors = FALSE)
+      } else {
+        stop("The number of annotations does not match the number of palettes provided.")
+      }
+    } else if(is.vector(annot.pal)){
+      ls.df.grp.pal <- lapply(X = origin.grps, FUN = function(grp){
+        data.frame("Grps" = grp, "Cols" = annot.pal, stringsAsFactors = FALSE)
+      })
+    }
+    #Rbind list color tables
+    col_table <- rbindlist(ls.df.grp.pal, idcol = TRUE)
+    if(is.vector(annot.pal) | length(annot.pal) == 1){
+      #Remove duplicated colors
+      col_table <- col_table[!duplicated(x = Cols)]
+    }
+    #Calculate legend length
+    lgdsizes <- nrow(col_table) + 1
+    #Calculate legend columns
+    lgd.ncol <- ceiling(lgdsizes/24)
+
+  } else {
+    #Calculate legend length
+    lgdsizes <- lapply(X = annot.grps, FUN = function(i){ length(unique(i)) })
+    lgdsizes <- sum(unlist(lgdsizes)) + length(lgdsizes)
+    #Calculate legend columns
+    lgd.ncol <- ceiling(lgdsizes/24)
+  }
+  # lgd.ncol <- ceiling(ncol(m)/30)
 
   #Create Color Sidebar
   col_sidebar <- plot.col.sidebar(
