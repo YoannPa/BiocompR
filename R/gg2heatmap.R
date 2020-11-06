@@ -345,17 +345,14 @@ gg2heatmap <- function(
     }
     #Calculate legend length
     lgdsizes <- nrow(col_table) + 1
-    #Calculate legend columns
-    lgd.ncol <- ceiling(lgdsizes/24)
 
   } else {
     #Calculate legend length
     lgdsizes <- lapply(X = annot.grps, FUN = function(i){ length(unique(i)) })
     lgdsizes <- sum(unlist(lgdsizes)) + length(lgdsizes)
-    #Calculate legend columns
-    lgd.ncol <- ceiling(lgdsizes/24)
   }
-  # lgd.ncol <- ceiling(ncol(m)/30)
+  #Calculate legend columns
+  lgd.ncol <- ceiling(lgdsizes/30)
 
   #Create Color Sidebar
   col_sidebar <- plot.col.sidebar(
