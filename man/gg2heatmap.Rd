@@ -11,7 +11,7 @@ gg2heatmap(
   rank.fun = NULL,
   top.rows = NULL,
   dendrograms = TRUE,
-  dend.col.size = 1,
+  dend.size = 1,
   plot.title = "",
   row.type = "rows",
   imputation.grps = NULL,
@@ -101,8 +101,19 @@ should be plotted with the heatmap.
        made before the computation of dendrograms.}
 }}
 
-\item{dend.col.size}{A \code{numeric} defining the height of the dendrogram
-made on columns (Default: dend.col.size = 1).}
+\item{dend.size}{A \code{numeric} vector defining row and column
+dendrograms size (Default: dend.size = 1).
+\itemize{
+ \item{If dend.size is a \code{numeric}: the value is
+       used to set both the width of the dendrogram
+       built on rows, and the height of the dendrogram
+       built on columns.}
+ \item{If dend.size is a \code{numeric} vector of
+       length 2: the first numeric will apply to the
+       dendrogram built on rows, and the second
+       numeric will apply to the dendrogram built on
+       columns.}
+}}
 
 \item{plot.title}{A \code{character} to be used as title for the plot.}
 
