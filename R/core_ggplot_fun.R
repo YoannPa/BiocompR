@@ -97,26 +97,26 @@ get.lgd <- function(gg2.obj){
 #' @export
 
 ggdend <- function(df, orientation, reverse.x = FALSE) {
-  ddplot<- ggplot() +
-    geom_segment(data = df, aes(x=x, y=y, xend=xend, yend=yend)) +
+  ddplot <- ggplot() +
+    geom_segment(data = df, aes(x = x, y = y, xend = xend, yend = yend)) +
     theme(axis.title = element_blank(), axis.text = element_blank(),
           axis.ticks = element_blank(), panel.grid = element_blank(),
           panel.background = element_rect(fill = "transparent"),
           plot.background = element_rect(fill = "transparent"),
-          axis.ticks.length = unit(0,"pt")) +
-    expand_limits(x = c(0.5,max(df$x)+0.5), y = 0)
+          axis.ticks.length = unit(0, "pt")) +
+    expand_limits(x = c(0.5, max(df$x) + 0.5), y = 0)
   if(orientation == "top"){
     ddplot <- ddplot +
-      scale_x_continuous(expand = c(0,0)) +
-      theme(plot.margin=unit(c(0.1,0,0,0),"cm")) +
+      scale_x_continuous(expand = c(0, 0)) +
+      theme(plot.margin = unit(c(0.1, 0, 0, 0), "cm")) +
       scale_y_continuous(expand = c(0, 0))
   } else if(orientation == "left"){
     ddplot <- ddplot +
-      theme(plot.margin=unit(c(0,0,0,0.1),"cm")) +
-      scale_y_reverse(expand = c(0,0)) +
+      theme(plot.margin = unit(c(0, 0, 0, 0.1), "cm")) +
+      scale_y_reverse(expand = c(0, 0)) +
       coord_flip()
-    if(reverse.x){ ddplot <- ddplot + scale_x_reverse(expand = c(0,0)) }
-    else { ddplot <- ddplot + scale_x_continuous(expand = c(0,0)) }
+    if(reverse.x){ ddplot <- ddplot + scale_x_reverse(expand = c(0, 0)) }
+    else { ddplot <- ddplot + scale_x_continuous(expand = c(0, 0)) }
   } else { stop("dendrogram's orientation value not supported by ggdend().") }
   return(ddplot)
 }

@@ -21,7 +21,6 @@ gg2heatmap(
   annot.pal = rainbow(n = ncol(m)),
   annot.size = 1,
   annot.sep = 0,
-  annot.cut = 0,
   lgd.scale.name = "values",
   lgd.bars.name = "Legends",
   lgd.title = element_text(size = 12),
@@ -158,11 +157,19 @@ vectors listed in 'annot.grps'.
 \item{annot.size}{A \code{numeric} defining the width of the annotation
 bars (Default: annot.size = 1).}
 
-\item{annot.sep}{A \code{double} specifying the width of the separation
-spaces between annotations (Default: annot.sep = 0).}
-
-\item{annot.cut}{A \code{double} specifying the width of cuts
-separating annotation cells (Default: annot.cut = 0).}
+\item{annot.sep}{A \code{numeric} vector specifying the width of the
+separations between annotations
+(Default: annot.sep = 0):
+\itemize{
+ \item{If annot.sep is a \code{numeric}: the value is
+       used to set the width of both horizontal and
+       vertical separations of annotations.}
+ \item{If annot.sep is a \code{numeric} vector of
+       length 2: the first numeric will apply to the
+       width of horizontal separations, and the second
+       numeric will apply to the
+       width of vertical separations.}
+}}
 
 \item{lgd.scale.name}{A \code{character} to be used as legend title for the
 heatmap scale (Default: lgd.scale.name = 'values').}

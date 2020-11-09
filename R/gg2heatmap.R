@@ -102,10 +102,19 @@
 #'                        }
 #' @param annot.size      A \code{numeric} defining the width of the annotation
 #'                        bars (Default: annot.size = 1).
-#' @param annot.sep       A \code{double} specifying the width of the separation
-#'                        spaces between annotations (Default: annot.sep = 0).
-#' @param annot.cut       A \code{double} specifying the width of cuts
-#'                        separating annotation cells (Default: annot.cut = 0).
+#' @param annot.sep       A \code{numeric} vector specifying the width of the
+#'                        separations between annotations
+#'                        (Default: annot.sep = 0):
+#'                        \itemize{
+#'                         \item{If annot.sep is a \code{numeric}: the value is
+#'                               used to set the width of both horizontal and
+#'                               vertical separations of annotations.}
+#'                         \item{If annot.sep is a \code{numeric} vector of
+#'                               length 2: the first numeric will apply to the
+#'                               width of horizontal separations, and the second
+#'                               numeric will apply to the
+#'                               width of vertical separations.}
+#'                        }
 #' @param lgd.scale.name  A \code{character} to be used as legend title for the
 #'                        heatmap scale (Default: lgd.scale.name = 'values').
 #' @param lgd.bars.name   A \code{character} specifying the name of annotation
@@ -153,10 +162,7 @@
 #' @author Yoann Pageaud.
 #' @export
 
-#TODO: Fix ranking displayed in reverse !
-#TODO: Add possibility to run dendrograms on distances to order rows and columns without displaying dendrograms
-#TODO: Merge annot.sep & annot.cut under annot.sep (1st value horizontal, 2nd value vertical)
-#TODO: Create a theme argument using the theme() function
+#TODO: Create a theme argument using the theme() function.
 #TODO: Add some data in return such as the ordered matrix.
 gg2heatmap <- function(
   m, na.handle = 'remove', dist.method = 'manhattan', rank.fun = NULL,
@@ -164,7 +170,7 @@ gg2heatmap <- function(
   row.type = 'rows', imputation.grps = NULL, ncores = 1,
   heatmap.pal = c("steelblue", "gray95", "darkorange"),
   annot.grps = list("Groups" = seq(ncol(m))), annot.pal = rainbow(n = ncol(m)),
-  annot.size = 1, annot.sep = 0, annot.cut = 0, lgd.scale.name = 'values',
+  annot.size = 1, annot.sep = 0, lgd.scale.name = 'values',
   lgd.bars.name = 'Legends', lgd.title = element_text(size = 12),
   lgd.text = element_text(size = 11), lgd.merge = FALSE, lgd.space.width = 1,
   y.lab = "Values", x.lab = "Samples",
@@ -174,7 +180,7 @@ gg2heatmap <- function(
   axis.ticks.x = element_line(color = 'black'), y.axis.right = FALSE,
   axis.title.y.right = element_blank(), axis.text.y.right = element_blank(),
   axis.ticks.y.right = element_blank()){
-
+  
   #Check m is a matrix
   if(!is.matrix(m)){ stop("m must be a matrix.") }
   #Check if na.handle method  supported
@@ -217,7 +223,7 @@ gg2heatmap <- function(
     dd.rows <- dendrograms[1]
     dd.cols <- dendrograms[2]
   } else { stop("'dendrograms' length > 2. Too many values.") }
-
+  
   #Check dendrogram sizes
   if(length(dend.size) == 1){
     dend.row.size <- dend.size
@@ -226,7 +232,16 @@ gg2heatmap <- function(
     dend.row.size <- dend.size[1]
     dend.col.size <- dend.size[2]
   } else { stop("'dend.size' length > 2. Too many values.") }
-
+  
+  #Check annotation separation widths
+  if(length(annot.sep) == 1){
+    annot.cut <- annot.sep
+    annot.sep <- annot.sep
+  } else if(length(annot.sep) == 2){
+    annot.cut <- annot.sep[2]
+    annot.sep <- annot.sep[1]
+  } else { stop("'annot.sep' length > 2. Too many values.") }
+  
   #Check if y.axis.right = TRUE when axis.text.y.right or axis.title.y.right or
   # axis.ticks.y.right are not element_blank()
   if((!is.elt_blank(axis.text.y.right) | !is.elt_blank(axis.title.y.right) |
@@ -238,11 +253,11 @@ gg2heatmap <- function(
   #TODO: Add verbose = TRUE option on check.annotations
   #Check annotations groups and palettes matching
   check.annotations(data = m, annot.grps = annot.grps, annot.pal = annot.pal)
-
+  
   #Handle NAs
   m <- manage.na(
     data = m, method = na.handle, groups = imputation.grps, ncores = ncores)
-
+  
   #Apply ranking function if any function defined
   if(!is.null(rank.fun)){
     #TODO: improve this part to support more function with eval() & parse()
@@ -250,49 +265,50 @@ gg2heatmap <- function(
   }
   #Subset top rows if any value defined
   if(!is.null(top.rows)){ m <- head(x = m, n = top.rows) }
-
+  
   #Remove NAs if some for dendrogram matrix
-  if(dd.rows | dd.cols){
+  if(method.rows != 'none' | method.cols != 'none'){
     dend_mat <- m[complete.cases(m), ]
   }
-
-  #Create Dendrograms
-  if(dd.rows & method.rows != 'none'){
-    #Create Rows Dendrogram
+  #Compute rows distances & create rows dendrogram
+  if(method.rows != 'none'){
     row_dist <- parallelDist::parDist(
       dend_mat, method = method.rows, threads = ncores)
     row_hclust <- fastcluster::hclust(row_dist)
     rm(row_dist)
     rowclust <- as.dendrogram(row_hclust)
-    #Get dendrogram segments and order matrix rows
-    ddgr_seg_row <- ggdend(df = ggdendro::dendro_data(rowclust)$segments,
-                           orientation = "left")
     row.order <- order.dendrogram(rowclust)
+    if(dd.rows){
+      #Get dendrogram segments and order matrix rows
+      ddgr_seg_row <- ggdend(df = ggdendro::dendro_data(rowclust)$segments,
+                             orientation = "left", reverse.x = TRUE)
+    }
   } else if(dd.rows & method.rows == 'none'){
     stop("Cannot plot dendrogram on rows with method.rows = 'none'.")
   }
-
-  if(dd.cols & method.cols != 'none'){
-    #Create Columns Dendrogram
+  #Compute columns distances & create columns dendrogram
+  if(method.cols != 'none'){
     ddgr <- as.dendrogram(fastcluster::hclust(parallelDist::parDist(
       t(dend_mat), method = method.cols, threads = ncores)))
-    #Get dendrogram data
-    ddgr_dat<-ggdendro::dendro_data(ddgr)
-    #Get dendrogram segments and order matrix columns
-    ddgr_seg_col <- ggdend(df = ddgr_dat$segments, orientation = "top")
-    column.order<-order.dendrogram(ddgr)
+    column.order <- order.dendrogram(ddgr)
+    if(dd.cols){
+      #Get dendrogram data
+      ddgr_dat <- ggdendro::dendro_data(ddgr)
+      #Get dendrogram segments and order matrix columns
+      ddgr_seg_col <- ggdend(df = ddgr_dat$segments, orientation = "top") 
+    }
   } else if(dd.cols & method.cols == 'none'){
     stop("Cannot plot dendrogram on columns with method.cols = 'none'.")
   }
-
+  
   #Reorder rows and columns matrix following dendrograms orders
-  if(dd.rows & method.rows != 'none' & dd.cols & method.cols != 'none'){
+  if(method.rows != 'none' & method.cols != 'none'){
     # All dendrograms on and all methods specified
     dframe <- m[row.order, column.order, drop = FALSE]
-  } else if(dd.rows & method.rows != 'none' & is.null(rank.fun) & !dd.cols){
+  } else if(method.rows != 'none' & is.null(rank.fun) & method.cols == 'none'){
     # row.dendrogram on, col.dendrogram off, method.row specified
     dframe <- m[row.order, , drop = FALSE]
-  } else if(!dd.rows & dd.cols & method.cols != 'none'){
+  } else if(method.rows == 'none' & method.cols != 'none'){
     # row.dendrogram off, col.dendrogram on, method.col specified
     dframe <- m[, column.order, drop = FALSE]
   } else { #Leave matrix unchanged
@@ -300,10 +316,11 @@ gg2heatmap <- function(
   }
   #Melt Matrix into a data.table
   dt.frame <- as.data.table(x = dframe, keep.rownames = TRUE)
-  dt.frame[, rn := factor(x = rn, levels = rownames(dframe))]
+  dt.frame[, rn := factor(x = rn, levels = rev(rn))]
+  # dt.frame[, rn := factor(x = rn, levels = rownames(dframe))]
   melted_mat <- melt.data.table(
     data = dt.frame, id.vars = "rn", measure.vars = colnames(dt.frame)[-c(1)])
-
+  
   #Plot Heatmap
   htmp <- ggplot() +
     geom_tile(data = melted_mat, aes(x = variable, y = rn, fill = value)) +
@@ -335,7 +352,7 @@ gg2heatmap <- function(
   if(y.axis.right){
     htmp <- htmp + scale_y_discrete(position = 'right', expand = c(0, 0))
   } else { htmp <- htmp + scale_y_discrete(expand = c(0, 0)) }
-
+  
   #Reoder groups and convert as factors
   annot.grps <- lapply(X = annot.grps, FUN = function(i){
     factor(x = i, levels =  unique(i))})
@@ -343,7 +360,7 @@ gg2heatmap <- function(
   if(method.cols != "none"){
     annot.grps <- lapply(X = annot.grps, FUN = function(i){ i[column.order] })
   }
-
+  
   #Set number of columns to display annotations legends
   if(lgd.merge){
     origin.grps <- lapply(X = annot.grps, FUN = function(i){
@@ -377,11 +394,11 @@ gg2heatmap <- function(
   }
   #Calculate legend columns
   lgd.ncol <- ceiling(lgdsizes/30)
-
+  
   #Get ordered sample names
   if(method.cols != "none"){ sample.names <- colnames(m[, column.order])
   } else { sample.names <- colnames(m) }
-
+  
   #Create Color Sidebar
   col_sidebar <- plot.col.sidebar(
     sample.names = sample.names, annot.grps = annot.grps,
@@ -394,7 +411,7 @@ gg2heatmap <- function(
     axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
     axis.title.x = element_blank(), axis.title.y = element_blank(),
     set.x.title = NULL, set.y.title = NULL, dendro.pos = 'top')
-
+  
   #Extract Legend
   htmp_legend <- get.lgd(gg2.obj = htmp)
   sidebar_legend <- col_sidebar$legends
@@ -404,11 +421,16 @@ gg2heatmap <- function(
   col_sidebar_grob <- ggplotGrob(col_sidebar$sidebar)
   htmp <- ggplotGrob(htmp + theme(legend.position = "none"))
   #Resize grobs
-  if(dd.cols){
+  if(dd.cols & dd.rows){
     ls.w.grobs <- list(
       'dd_col' = ddgr_seg_col, 'sidebar' = col_sidebar_grob, 'htmp' = htmp)
     upd.grob_w <- resize.grobs(ls.grobs = ls.w.grobs, dimensions = "widths",
                                start.unit = 4, end.unit = 7)
+  } else if(dd.cols & !dd.rows){
+    ls.w.grobs <- list(
+      'dd_col' = ddgr_seg_col, 'sidebar' = col_sidebar_grob, 'htmp' = htmp)
+    upd.grob_w <- resize.grobs(ls.grobs = ls.w.grobs, dimensions = "widths",
+                               start.unit = 3, end.unit = 7)
   } else {
     ls.w.grobs <- list('sidebar' = col_sidebar_grob, 'htmp' = htmp)
     upd.grob_w <- resize.grobs(ls.grobs = ls.w.grobs, dimensions = "widths",
@@ -419,13 +441,13 @@ gg2heatmap <- function(
     upd.grob_h <- resize.grobs(ls.grobs = ls.h.grobs, dimensions = 'heights',
                                start.unit = 7, end.unit = 9)
   } else { upd.grob_h <- list("htmp" = upd.grob_w$htmp) }
-
+  
   #Create the Right Panel for legends
   sidebar_legend.grob <- stack.grobs.legends(
     grobs.list = sidebar_legend, annot.grps = annot.grps,
     height.lgds.space = 29)
   right.legends <- sidebar_legend.grob
-
+  
   #Combine Dendrogram with Color Sidebar and Heatmap
   if(dd.rows & dd.cols){
     #Create main grob
@@ -437,11 +459,26 @@ gg2heatmap <- function(
       widths = c(dend.row.size + 1, 10))
     #Set default legend width space
     def.lgd.width <- 2
-  } else if(!(dd.rows & dd.cols)){
+  } else if(!dd.rows & !dd.cols){
     #Create main grob
     main_grob <- gridExtra::arrangeGrob(grobs = list(
       upd.grob_w$sidebar, upd.grob_h$htmp), ncol = 1, nrow = 2,
       heights = c(annot.size, 30), widths = 10)
+    #Set default legend width space
+    def.lgd.width <- 1
+  } else if(dd.rows & !dd.cols){
+    #Create main grob
+    main_grob <- gridExtra::arrangeGrob(grobs = list(
+      grid::textGrob(""), upd.grob_w$sidebar, upd.grob_h$dd_row,
+      upd.grob_h$htmp), ncol = 2, nrow = 2, heights = c(annot.size, 30),
+      widths = c(dend.row.size + 1, 10))
+    #Set default legend width space
+    def.lgd.width <- 2
+  } else if(!dd.rows & dd.cols){
+    #Create main grob
+    main_grob <- gridExtra::arrangeGrob(grobs = list(
+      upd.grob_w$dd_col, upd.grob_w$sidebar, upd.grob_h$htmp), ncol = 1,
+      nrow = 3, heights = c(dend.col.size + 2, annot.size, 30), widths = 10)
     #Set default legend width space
     def.lgd.width <- 1
   }
