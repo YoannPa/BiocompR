@@ -113,6 +113,7 @@ ggcraviola <- function(
   if(ncol(data) < 4){
     if(nrow(unique.dt) == 2) {
       colnames(data)[1] <- "Samples"
+      colnames(unique.dt)[1] <- "Samples"
       if(!is.factor(unique.dt[[1]])){ #Convert as factor column 1
         unique.dt[, Samples := as.factor(Samples)]
       }
@@ -218,7 +219,7 @@ ggcraviola <- function(
   })
   names(list_oriented_dens) <- names(list_dens.df)
   #Reorder Annotation table following order of dataframes
-  Annot.table <- Annot.table[order(match(Sample, names(list_oriented_dens)))]
+  Annot.table <- Annot.table[order(match(Samples, names(list_oriented_dens)))]
   #Create Bins based on a third variable
   if(bins){ #Create bin polygons
     #Bin polygons
