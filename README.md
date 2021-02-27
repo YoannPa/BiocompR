@@ -115,6 +115,17 @@ warn.handle(
 Nevertheless, using `ggvolcano.corr()` without additionnal ggplot2 components
 should not raise this warning.  
 
+**⚠️ ggrepel: ## unlabeled data points (too many overlaps). Consider increasing max.overlaps.**
+```R
+Warning message:
+ggrepel: ## unlabeled data points (too many overlaps). Consider increasing max.overlaps
+```
+This warning can arise when using the function `ggbipca()`. If the scale is too small, and you want to display too many loadings labels, then those overlapping will not be displayed, and this warning will be printed. Using this function has shown that this specific warning can persist, and be printed randomly afterward when running other commands. It is unclear why this is happening. But it can be fixed by executing the following command, once you ran ggbipca():  
+```R
+assign("last.warning", NULL, envir = baseenv())
+```
+The current statues of this issue can be tracked [**here**](https://github.com/slowkow/ggrepel/issues/187).  
+
 ## Technical questions / Development / Feature request
 If you encounters issues or if a feature you would expect is not available in of BiocompR functions, please check if an existing issue adresses your point [here](https://github.com/YoannPa/BiocompR/issues/). If not, create a [new issue here](https://github.com/YoannPa/BiocompR/issues/new).  
 

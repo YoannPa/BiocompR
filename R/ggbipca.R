@@ -290,6 +290,8 @@ ggbipca <- function(
         data = loadings.data, mapping = aes(x = PCx, y = PCy, label = labels),
         size = 3)
   }
-  #Return plot
-  return(biplt)
+  #Return PCA biplot
+  return(warn.handle(
+    pattern = "unlabeled data points \\(too many overlaps\\). Consider increasing max.overlaps",
+    print(biplt)))
 }
