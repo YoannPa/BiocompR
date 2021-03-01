@@ -13,8 +13,6 @@ ggbipca(
   point.size = 1,
   color.data = NULL,
   shape.data = NULL,
-  scale.color.manual = NULL,
-  scale.shape.manual = NULL,
   loadings = FALSE,
   loadings.col = "red",
   top.load.by.quad = NULL,
@@ -46,14 +44,6 @@ values to display on Y-axis.}
 
 \item{shape.data}{A \code{character} specifying the column name in
 'data' to be used to map shapes to points.}
-
-\item{scale.color.manual}{A \code{character} vector specifying a palette of
-colors, matching the number of categories specified
-in 'color.data'.}
-
-\item{scale.shape.manual}{A \code{character} vector specifying point shapes,
-matching the number of categories specified in
-'shape.data'.}
 
 \item{loadings}{A \code{logical} specifying whether the loadings
 should be displayed (TRUE) or not (FALSE).}
@@ -110,43 +100,44 @@ ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
         color.data = "Species", shape.data = "Species")
 #Map custom colors:
 ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
-        color.data = "Species", shape.data = "Species",
-        scale.color.manual = c("green", "red", "orange"))
+       color.data = "Species", shape.data = "Species") +
+  scale_color_manual(values = c("green", "red", "orange"))
 #Map custom point shapes:
 ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
-        color.data = "Species", shape.data = "Species",
-        scale.color.manual = c("green", "red", "orange"),
-        scale.shape.manual = c(83, 8, 25))
+        color.data = "Species", shape.data = "Species") +
+  scale_color_manual(values = c("green", "red", "orange")) +
+  scale_shape_manual(values = c(83, 8, 25))
 #Show loadings:
 ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
-        color.data = "Species", shape.data = "Species",
-        scale.color.manual = c("green", "red", "orange"),
-        scale.shape.manual = c(83, 8, 25), loadings = TRUE)
+        color.data = "Species", shape.data = "Species", loadings = TRUE) +
+  scale_color_manual(values = c("green", "red", "orange")) +
+  scale_shape_manual(values = c(83, 8, 25))
 #Change loadings color:
 ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
-        color.data = "Species", shape.data = "Species",
-        scale.color.manual = c("green", "red", "orange"),
-        scale.shape.manual = c(83, 8, 25), loadings = TRUE,
-        loadings.col = "purple")
+        color.data = "Species", shape.data = "Species", loadings = TRUE,
+        loadings.col = "purple") +
+  scale_color_manual(values = c("green", "red", "orange")) +
+  scale_shape_manual(values = c(83, 8, 25))
 #Display the top 1 loading in each quadrant:
 ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
-        color.data = "Species", shape.data = "Species",
-        scale.color.manual = c("green", "red", "orange"),
-        scale.shape.manual = c(83, 8, 25), loadings = TRUE,
-        loadings.col = "purple", top.load.by.quad = 1)
-#Display loadings for which X-coordinates are above 0.05 and Y-coordinates are
-# above 0:
+        color.data = "Species", shape.data = "Species", loadings = TRUE,
+        loadings.col = "purple", top.load.by.quad = 1) +
+  scale_color_manual(values = c("green", "red", "orange")) +
+  scale_shape_manual(values = c(83, 8, 25))
+#Display loadings for which X-coordinates are above 0.05 and Y-coordinates
+# are above 0:
 ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
-        color.data = "Species", shape.data = "Species",
-        scale.color.manual = c("green", "red", "orange"),
-        scale.shape.manual = c(83, 8, 25), loadings = TRUE,
-        loadings.col = "purple", load.above.x = 0.05, load.above.y = 0)
-#Display top 1 loading in each quadrant, for which X-coordinates are above 0.1:
+        color.data = "Species", shape.data = "Species", loadings = TRUE,
+        loadings.col = "purple", load.above.x = 0.05, load.above.y = 0) +
+  scale_color_manual(values = c("green", "red", "orange")) +
+  scale_shape_manual(values = c(83, 8, 25))
+#Display top 1 loading in each quadrant, for which X-coordinates are
+# above 0.1:
 ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
-        color.data = "Species", shape.data = "Species",
-        scale.color.manual = c("green", "red", "orange"),
-        scale.shape.manual = c(83, 8, 25), loadings = TRUE,
-        loadings.col = "purple", top.load.by.quad = 1, load.above.x = 0.1)
+        color.data = "Species", shape.data = "Species", loadings = TRUE,
+        loadings.col = "purple", top.load.by.quad = 1, load.above.x = 0.1) +
+  scale_color_manual(values = c("green", "red", "orange")) +
+  scale_shape_manual(values = c(83, 8, 25))
 }
 \references{
 \itemize{

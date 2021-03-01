@@ -15,12 +15,6 @@
 #'                           'data' to be used to map colors to points.
 #' @param shape.data         A \code{character} specifying the column name in
 #'                           'data' to be used to map shapes to points.
-#' @param scale.color.manual A \code{character} vector specifying a palette of
-#'                           colors, matching the number of categories specified
-#'                           in 'color.data'.
-#' @param scale.shape.manual A \code{character} vector specifying point shapes,
-#'                           matching the number of categories specified in
-#'                           'shape.data'.
 #' @param loadings           A \code{logical} specifying whether the loadings
 #'                           should be displayed (TRUE) or not (FALSE).
 #' @param loadings.col       A \code{character} specifying a color to be used
@@ -66,43 +60,44 @@
 #'         color.data = "Species", shape.data = "Species")
 #' #Map custom colors:
 #' ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
-#'         color.data = "Species", shape.data = "Species",
-#'         scale.color.manual = c("green", "red", "orange"))
+#'        color.data = "Species", shape.data = "Species") +
+#'   scale_color_manual(values = c("green", "red", "orange"))
 #' #Map custom point shapes:
 #' ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
-#'         color.data = "Species", shape.data = "Species",
-#'         scale.color.manual = c("green", "red", "orange"),
-#'         scale.shape.manual = c(83, 8, 25))
+#'         color.data = "Species", shape.data = "Species") +
+#'   scale_color_manual(values = c("green", "red", "orange")) +
+#'   scale_shape_manual(values = c(83, 8, 25))
 #' #Show loadings:
 #' ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
-#'         color.data = "Species", shape.data = "Species",
-#'         scale.color.manual = c("green", "red", "orange"),
-#'         scale.shape.manual = c(83, 8, 25), loadings = TRUE)
+#'         color.data = "Species", shape.data = "Species", loadings = TRUE) +
+#'   scale_color_manual(values = c("green", "red", "orange")) +
+#'   scale_shape_manual(values = c(83, 8, 25))
 #' #Change loadings color:
 #' ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
-#'         color.data = "Species", shape.data = "Species",
-#'         scale.color.manual = c("green", "red", "orange"),
-#'         scale.shape.manual = c(83, 8, 25), loadings = TRUE,
-#'         loadings.col = "purple")
+#'         color.data = "Species", shape.data = "Species", loadings = TRUE,
+#'         loadings.col = "purple") +
+#'   scale_color_manual(values = c("green", "red", "orange")) +
+#'   scale_shape_manual(values = c(83, 8, 25))
 #' #Display the top 1 loading in each quadrant:
 #' ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
-#'         color.data = "Species", shape.data = "Species",
-#'         scale.color.manual = c("green", "red", "orange"),
-#'         scale.shape.manual = c(83, 8, 25), loadings = TRUE,
-#'         loadings.col = "purple", top.load.by.quad = 1)
-#' #Display loadings for which X-coordinates are above 0.05 and Y-coordinates are
-#' # above 0:
+#'         color.data = "Species", shape.data = "Species", loadings = TRUE,
+#'         loadings.col = "purple", top.load.by.quad = 1) +
+#'   scale_color_manual(values = c("green", "red", "orange")) +
+#'   scale_shape_manual(values = c(83, 8, 25))
+#' #Display loadings for which X-coordinates are above 0.05 and Y-coordinates
+#' # are above 0:
 #' ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
-#'         color.data = "Species", shape.data = "Species",
-#'         scale.color.manual = c("green", "red", "orange"),
-#'         scale.shape.manual = c(83, 8, 25), loadings = TRUE,
-#'         loadings.col = "purple", load.above.x = 0.05, load.above.y = 0)
-#' #Display top 1 loading in each quadrant, for which X-coordinates are above 0.1:
+#'         color.data = "Species", shape.data = "Species", loadings = TRUE,
+#'         loadings.col = "purple", load.above.x = 0.05, load.above.y = 0) +
+#'   scale_color_manual(values = c("green", "red", "orange")) +
+#'   scale_shape_manual(values = c(83, 8, 25))
+#' #Display top 1 loading in each quadrant, for which X-coordinates are
+#' # above 0.1:
 #' ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
-#'         color.data = "Species", shape.data = "Species",
-#'         scale.color.manual = c("green", "red", "orange"),
-#'         scale.shape.manual = c(83, 8, 25), loadings = TRUE,
-#'         loadings.col = "purple", top.load.by.quad = 1, load.above.x = 0.1)
+#'         color.data = "Species", shape.data = "Species", loadings = TRUE,
+#'         loadings.col = "purple", top.load.by.quad = 1, load.above.x = 0.1) +
+#'   scale_color_manual(values = c("green", "red", "orange")) +
+#'   scale_shape_manual(values = c(83, 8, 25))
 #' @references
 #' \itemize{
 #'  \item{\href{https://cran.r-project.org/web/packages/ggfortify/index.html}{ggfortify: Data Visualization Tools for Statistical Analysis Results}}
@@ -111,11 +106,10 @@
 #'  \item{\href{https://stats.stackexchange.com/questions/119746/what-is-the-proper-association-measure-of-a-variable-with-a-pca-component-on-a/}{What is the proper association measure of a variable with a PCA component?}}
 #' }
 
-#TODO: Add handle.warn() to handle overlapping labels warning
+#TODO: Remove scale.manual.shape & scale.manual.color (give possibility to add it manually after the function the ggplot2 way).
 ggbipca <- function(
   prcomp.res, data, PCx = 1, PCy = 2, scale = 1, point.size = 1,
-  color.data = NULL, shape.data = NULL, scale.color.manual = NULL,
-  scale.shape.manual = NULL, loadings = FALSE, loadings.col = "red",
+  color.data = NULL, shape.data = NULL, loadings = FALSE, loadings.col = "red",
   top.load.by.quad = NULL, load.above.x = NULL, load.above.y = NULL,
   load.below.x = NULL, load.below.y = NULL){
 
@@ -144,24 +138,25 @@ ggbipca <- function(
   }
   #Check length of scale.shape.manual & scale.color.manual match levels of
   # shape.data & color.data respectively
-  if(!is.null(scale.color.manual) & !is.null(color.data)){
-    if(length(scale.color.manual) != length(levels(dt.annot$color.data))){
-      stop("'scale.color.manual' color palette length doesn't match 'color.data' levels.")
-    }
-  }
-  if(!is.null(scale.shape.manual) & !is.null(shape.data)){
-    if(is.double(scale.shape.manual)){
-      if(shape.data != color.data){
-        if(length(scale.shape.manual) != length(levels(dt.annot$shape.data))){
-          stop("'scale.shape.manual' length doesn't match 'shape.data' levels.")
-        }
-      } else {
-        if(length(scale.shape.manual) != length(levels(dt.annot$color.data))){
-          stop("'scale.shape.manual' length doesn't match 'shape.data' levels.")
-        }
-      }
-    } else { stop("Unsupported values for point shape.") }
-  }
+
+  # if(!is.null(scale.color.manual) & !is.null(color.data)){
+  #   if(length(scale.color.manual) != length(levels(dt.annot$color.data))){
+  #     stop("'scale.color.manual' color palette length doesn't match 'color.data' levels.")
+  #   }
+  # }
+  # if(!is.null(scale.shape.manual) & !is.null(shape.data)){
+  #   if(is.double(scale.shape.manual)){
+  #     if(shape.data != color.data){
+  #       if(length(scale.shape.manual) != length(levels(dt.annot$shape.data))){
+  #         stop("'scale.shape.manual' length doesn't match 'shape.data' levels.")
+  #       }
+  #     } else {
+  #       if(length(scale.shape.manual) != length(levels(dt.annot$color.data))){
+  #         stop("'scale.shape.manual' length doesn't match 'shape.data' levels.")
+  #       }
+  #     }
+  #   } else { stop("Unsupported values for point shape.") }
+  # }
 
   #Get sdev from selected PCs
   lam <- prcomp.res$sdev[c(PCx, PCy)]
@@ -274,12 +269,12 @@ ggbipca <- function(
         color = "black", size = point.size) +
       labs(x = lab.PC[1], y = lab.PC[2], shape = shape.data)
   }
-  if(!is.null(scale.color.manual)){
-    biplt <- biplt + scale_color_manual(values = scale.color.manual)
-  }
-  if(!is.null(scale.shape.manual)){
-    biplt <- biplt + scale_shape_manual(values = scale.shape.manual)
-  }
+  # if(!is.null(scale.color.manual)){
+  #   biplt <- biplt + scale_color_manual(values = scale.color.manual)
+  # }
+  # if(!is.null(scale.shape.manual)){
+  #   biplt <- biplt + scale_shape_manual(values = scale.shape.manual)
+  # }
   #Draw loadings
   if(loadings){
     biplt <- biplt + geom_segment(
@@ -291,7 +286,5 @@ ggbipca <- function(
         size = 3)
   }
   #Return PCA biplot
-  return(warn.handle(
-    pattern = "unlabeled data points \\(too many overlaps\\). Consider increasing max.overlaps",
-    print(biplt)))
+  return(biplt)
 }
