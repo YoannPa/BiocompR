@@ -8,9 +8,9 @@ _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots 
 **3-** [**DKFZ - Computational Cancer Epigenomics, Germany.**](https://www.dkfz.de/en/CanEpi/CompEpigen/index.html)  
 **4-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
-**Version: 0.0.97 (Beta)**  
+**Version: 0.0.100 (Beta)**  
 **R Compatibility: Version 4.0.2**  
-**Last Update: 19/02/2021**  
+**Last Update: 04/03/2021**  
 **How to cite:** _Pageaud Y. et al., BiocompR - Advanced visualizations for data comparison._  
 
 ## Content
@@ -31,6 +31,7 @@ Currently the package BiocompR contains **19 functions**:
 * `ggpanel.corr()` - Plots results of correlation test between a single variable and multiple others as jittered scatter plot divided into 4 different panels.  
 * `ggvolcano.corr()` - Plots results of correlation test between a single variable and multiple others as volcano plot.  
 * `ks.plot()` - Computes pairwise Kolmogorov-Smirnov tests on a matrix and display results in a fused plot.  
+* `load.palettes()` - Loads pre-defined palettes.  
 * `plot.col.sidebar()` - Creates a colored side annotation bars in ggplot2.  
 * `resize.grobs()` - Resizes heights or widths of multiple grobs based on a given grob dimensions.  
 * `sunset()` - Draws a sunset plot showing the completeness of a dataset.  

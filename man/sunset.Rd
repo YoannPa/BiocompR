@@ -6,8 +6,8 @@
 \usage{
 sunset(
   mat,
-  title,
-  col.pal = pal_sunset,
+  title = "Number of rows without missing data",
+  col.pal = c("red", "gold", "blue4"),
   horizontal = FALSE,
   reverse = FALSE,
   keep_2nd_ticks = FALSE,

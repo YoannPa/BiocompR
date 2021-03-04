@@ -1,13 +1,4 @@
 
-##DATA
-#TODO: use data() function to load the predefined palettes.
-pal_sunset <- c("red","gold","blue4")
-pal_westworld <- c("sienna1","lightgoldenrod","skyblue3")
-pal_startrek <- c("red","goldenrod1","dodgerblue")
-pal_margesimpson <- c("lightgreen","gold","dodgerblue2")
-pal_eighties <- c("darkviolet","deeppink","blue4")
-pal_insta <- c("deeppink","red","goldenrod1")
-
 #' Draws a sunset plot showing the completeness of a dataset.
 #'
 #' @param mat              A \code{matrix}.
@@ -46,10 +37,12 @@ pal_insta <- c("deeppink","red","goldenrod1")
 #' @author Yoann Pageaud.
 #' @export
 
-sunset<-function(mat, title, col.pal = pal_sunset, horizontal = FALSE,
-                 reverse=FALSE, keep_2nd_ticks = FALSE, n.grad = 15,
-                 display.cutoff = 0.03, display.num.smpl = 0.01,
-                 display.sep = 0.005, lgd.pos = "bottom"){
+sunset <- function(
+  mat, title = "Number of rows without missing data",
+  col.pal = c("red","gold","blue4"), horizontal = FALSE, reverse = FALSE,
+  keep_2nd_ticks = FALSE, n.grad = 15, display.cutoff = 0.03,
+  display.num.smpl = 0.01, display.sep = 0.005, lgd.pos = "bottom"){
+
   #Calculate number values not being NAs for each row in the matrix
   pos.cov<-as.integer(rowSums(!is.na(mat)))
 
