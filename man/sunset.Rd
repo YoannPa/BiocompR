@@ -14,7 +14,6 @@ sunset(
   n.grad = 15,
   display.cutoff = 0.03,
   display.num.smpl = 0.01,
-  display.sep = 0.005,
   lgd.pos = "bottom"
 )
 }
@@ -55,10 +54,6 @@ side margin\cr
 \item{display.num.smpl}{A \code{double} specifying the minimum height of a
 bin to display the number of samples in the side
 margin\cr(Default: display.num.smpl = 0.01).}
-
-\item{display.sep}{A \code{double} specifying the minimum height of a
-bin to display the separations between itself and the
-neighboring ones.}
 }
 \value{
 A \code{gg} sunset plot.
