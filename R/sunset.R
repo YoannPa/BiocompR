@@ -40,6 +40,7 @@ sunset <- function(
   keep_2nd_ticks = FALSE, n.grad = 15, display.cutoff = 0.03,
   display.num.smpl = 0.01, lgd.pos = "bottom"){
 
+  if(!is.matrix(mat)){ stop("'mat' must be a matrix.") }
   #Calculate number values not being NAs for each row in the matrix
   pos.cov <- as.integer(rowSums(!is.na(mat)))
   #Get total number of samples

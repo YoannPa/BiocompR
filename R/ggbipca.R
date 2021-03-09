@@ -1,8 +1,9 @@
 
 #' Computes and draws a custom PCA biplot.
 #'
-#' @param prcomp.res         A \code{prcomp} object resulting from the
-#'                           stats::prcomp().
+#' @param prcomp.res         A PCA result of classes \code{prcomp} or
+#'                           \code{irlba_prcomp} resulting from stats::prcomp()
+#'                           or irlba::prcomp_irlba().
 #' @param data               A \code{data.table} containing all the matching
 #'                           data related to the principal component analysis.
 #' @param PCx                An \code{integer} matching the principal component
@@ -106,7 +107,6 @@
 #'  \item{\href{https://stats.stackexchange.com/questions/119746/what-is-the-proper-association-measure-of-a-variable-with-a-pca-component-on-a/}{What is the proper association measure of a variable with a PCA component?}}
 #' }
 
-#TODO: Remove scale.manual.shape & scale.manual.color (give possibility to add it manually after the function the ggplot2 way).
 ggbipca <- function(
   prcomp.res, data, PCx = 1, PCy = 2, scale = 1, point.size = 1,
   color.data = NULL, shape.data = NULL, loadings = FALSE, loadings.col = "red",
@@ -176,9 +176,16 @@ ggbipca <- function(
 
   #Get loadings data for PCx & PCy
   if(loadings){
-    loadings.data <- as.data.table(
-      prcomp.res$rotation, keep.rownames = "labels")[, c("labels", PC),
-                                                     with = FALSE]
+    if(class(prcomp.res)[1] == "prcomp"){
+      loadings.data <- as.data.table(
+        prcomp.res$rotation, keep.rownames = "labels")[, c("labels", PC),
+                                                       with = FALSE]
+    } else if(class(prcomp.res)[1] == "irlba_prcomp"){
+      loadings.data <- cbind(
+        "labels" = names(prcomp.res$center),
+        as.data.table(prcomp.res$rotation))[, c("labels", PC), with = FALSE]
+    }
+
     setnames(x = loadings.data, old = PC[1], new = "PCx")
     setnames(x = loadings.data, old = PC[2], new = "PCy")
 

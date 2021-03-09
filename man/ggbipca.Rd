@@ -23,8 +23,9 @@ ggbipca(
 )
 }
 \arguments{
-\item{prcomp.res}{A \code{prcomp} object resulting from the
-stats::prcomp().}
+\item{prcomp.res}{A PCA result of classes \code{prcomp} or
+\code{irlba_prcomp} resulting from stats::prcomp()
+or irlba::prcomp_irlba().}
 
 \item{data}{A \code{data.table} containing all the matching
 data related to the principal component analysis.}
