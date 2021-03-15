@@ -255,10 +255,12 @@ sunset <- function(
     scale_fill_gradient2(low = col.pal[1], mid = col.pal[2], high = col.pal[3],
                          midpoint = round(N/2)) +
     scale_y_continuous(
-      expand = c(0, 0), breaks = seq(0, N.rows, length.out = n.grad),
+      expand = c(0, 0),
+      breaks = seq(0, N.rows, length.out = n.grad),
       labels = function(x) format(x, digits = 2, scientific = TRUE),
       sec.axis = sec_axis(
-        trans = ~., breaks = dt.data[right.y.hiden == FALSE]$right.y.label.pos,
+        trans = ~.,
+        breaks = dt.data[right.y.hiden == FALSE]$right.y.label.pos,
         labels = dt.data[right.y.hiden == FALSE]$sample.string)) +
     scale_x_continuous(expand = c(0, 0)) +
     geom_hline(data = dt.data[white.line.hide == FALSE],

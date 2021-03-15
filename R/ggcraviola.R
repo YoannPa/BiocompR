@@ -7,7 +7,8 @@
 #'  \item{A "complete" data.frame of 5 columns:
 #'   \itemize{
 #'    \item{column 1 must be the samples column.}
-#'    \item{column 2 must be the "grouping" variable column.}
+#'    \item{column 2 must be the "grouping" variable column. There must not be
+#'          more than 2 samples in each group}
 #'    \item{column 3 must be the "filling color" variable column.}
 #'    \item{column 4 must be the "value" column.}
 #'    \item{column 5 can be the additionnal "opacity" variable column to be used
@@ -126,21 +127,25 @@ ggcraviola <- function(
   } else { Annot.table <- unique.dt[, 1:3] }
   if(nrow(unique(Annot.table, by = 3)) > 2){
     stop("More than 2 conditions inputed. Only 2 conditions tolerated.")
+  }
+  if(any(Annot.table[, .N, by = "Groups"]$N > 2)){
+    stop(paste(
+      "At least 1 group contains data for more than 2 samples.",
+      "A craviola cannot represent more than 2 distributions per group."))
+  }
+  #Check if all conditional variables are factors
+  if(!all(Annot.table[, lapply(X = .SD, FUN = is.factor)] == TRUE)){
+    #Convert annotations and data conditional variable into factors
+    Annot.table <- Annot.table[, lapply(X = .SD, FUN = as.factor)]
+    cols <- colnames(data)[1:3]
+    data[, (cols) := lapply(X = .SD, FUN = as.factor), .SDcols = cols]
+  }
+  original.var.col <- levels(Annot.table[[3]])
+  if(length(levels(Annot.table[[3]])) > 2) {
+    stop("More levels than possible values. Only 2 conditions tolerated. Remove the excess levels.")
   } else {
-    #Check if all conditional variables are factors
-    if(!all(Annot.table[, lapply(X = .SD, FUN = is.factor)] == TRUE)){
-      #Convert annotations and data conditional variable into factors
-      Annot.table <- Annot.table[, lapply(X = .SD, FUN = as.factor)]
-      cols <- colnames(data)[1:3]
-      data[, (cols) := lapply(X = .SD, FUN = as.factor), .SDcols = cols]
-    }
-    original.var.col <- levels(Annot.table[[3]])
-    if(length(levels(Annot.table[[3]])) > 2) {
-      stop("More levels than possible values. Only 2 conditions tolerated. Remove the excess levels.")
-    } else {
-      levels(Annot.table[[3]])[1] <- "1"
-      levels(Annot.table[[3]])[2] <- "2"
-    }
+    levels(Annot.table[[3]])[1] <- "1"
+    levels(Annot.table[[3]])[2] <- "2"
   }
   if (length(Annot.table[[1]]) < length(levels(Annot.table[[1]]))){
     stop("More levels than matching values found in column 1 of data.")
