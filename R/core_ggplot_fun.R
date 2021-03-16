@@ -26,20 +26,32 @@ load.palettes <- function(){
 #'                   vectors has to match the number of levels of vectors listed
 #'                   in 'annot.grps'. If a list is provided, its length must
 #'                   match the length of the list provided to 'annot.grps'.
+#' @param verbose    A \code{logical} to specify wether the function should be
+#'                   run on verbose mode (verbose = TRUE) or not
+#'                   (Default: verbose = FALSE).
 #' @return An error message if something goes wrong during annotations checks.
 #' @author Yoann Pageaud.
 #' @export
 #' @keywords internal
 
-check.annotations<-function(data, annot.grps, annot.pal){
+check.annotations <- function(data, annot.grps, annot.pal, verbose = FALSE){
   #Groups checking
-  if(any(unlist(lapply(annot.grps,length))!= ncol(data))){
-    stop("samples are not all assigned to a group.")
-  } else{#Print groups values
-    invisible(lapply(seq_along(annot.grps), function(i){
-      cat(paste0(names(annot.grps)[i],": ",paste(unique(annot.grps[[i]]),
-                                                 collapse=", "),".\n"))
-    }))
+  if(is.list(annot.grps)){
+    if(any(unlist(lapply(annot.grps, length))!= ncol(data))){
+      stop("samples are not all assigned to a group.")
+    } else{
+      if(verbose){
+        #Print groups values
+        invisible(lapply(seq_along(annot.grps), function(i){
+          cat(paste0(names(annot.grps)[i],": ", paste(unique(annot.grps[[i]]),
+                                                      collapse = ", "), ".\n"))
+        }))
+      }
+    }
+  } else {
+    stop(paste("'annot.grps' must be a named list.",
+               "e.g. annot.grps = list('annotation_name' = annotation_vector)",
+               sep = "\n"))
   }
   #Color checking
   if(is.list(annot.pal)){
@@ -57,9 +69,14 @@ check.annotations<-function(data, annot.grps, annot.pal){
   } else if(is.vector(annot.pal)){ #if a single palette is provided
     invisible(lapply(seq_along(annot.grps), function(i){
       if(length(levels(as.factor(annot.grps[[i]]))) != length(annot.pal)){
-        stop(paste0("The length of annotation '",names(annot.grps)[i],
-                    "' levels do not match the length of the corresponding ",
-                    "palette."))
+        if(all.equal(target = annot.pal, current = rainbow(n = ncol(m)))){
+          stop(paste("A specific palette must be defined in 'annot.pal' to",
+                     "match the annotation provided."))
+        } else {
+          stop(paste0("The length of annotation '",names(annot.grps)[i],
+                      "' levels do not match the length of the corresponding ",
+                      "palette."))
+        }
       }
     }))
   } else { #If not a list or a vector

@@ -180,7 +180,7 @@ gg2heatmap <- function(
   axis.ticks.x = element_line(color = 'black'), y.axis.right = FALSE,
   axis.title.y.right = element_blank(), axis.text.y.right = element_blank(),
   axis.ticks.y.right = element_blank()){
-  
+
   #Check m is a matrix
   if(!is.matrix(m)){ stop("m must be a matrix.") }
   #Check if na.handle method  supported
@@ -223,7 +223,7 @@ gg2heatmap <- function(
     dd.rows <- dendrograms[1]
     dd.cols <- dendrograms[2]
   } else { stop("'dendrograms' length > 2. Too many values.") }
-  
+
   #Check dendrogram sizes
   if(length(dend.size) == 1){
     dend.row.size <- dend.size
@@ -232,7 +232,7 @@ gg2heatmap <- function(
     dend.row.size <- dend.size[1]
     dend.col.size <- dend.size[2]
   } else { stop("'dend.size' length > 2. Too many values.") }
-  
+
   #Check annotation separation widths
   if(length(annot.sep) == 1){
     annot.cut <- annot.sep
@@ -241,7 +241,7 @@ gg2heatmap <- function(
     annot.cut <- annot.sep[2]
     annot.sep <- annot.sep[1]
   } else { stop("'annot.sep' length > 2. Too many values.") }
-  
+
   #Check if y.axis.right = TRUE when axis.text.y.right or axis.title.y.right or
   # axis.ticks.y.right are not element_blank()
   if((!is.elt_blank(axis.text.y.right) | !is.elt_blank(axis.title.y.right) |
@@ -253,11 +253,11 @@ gg2heatmap <- function(
   #TODO: Add verbose = TRUE option on check.annotations
   #Check annotations groups and palettes matching
   check.annotations(data = m, annot.grps = annot.grps, annot.pal = annot.pal)
-  
+
   #Handle NAs
   m <- manage.na(
     data = m, method = na.handle, groups = imputation.grps, ncores = ncores)
-  
+
   #Apply ranking function if any function defined
   if(!is.null(rank.fun)){
     #TODO: improve this part to support more function with eval() & parse()
@@ -265,15 +265,23 @@ gg2heatmap <- function(
   }
   #Subset top rows if any value defined
   if(!is.null(top.rows)){ m <- head(x = m, n = top.rows) }
-  
+
   #Remove NAs if some for dendrogram matrix
   if(method.rows != 'none' | method.cols != 'none'){
     dend_mat <- m[complete.cases(m), ]
   }
   #Compute rows distances & create rows dendrogram
   if(method.rows != 'none'){
-    row_dist <- parallelDist::parDist(
-      dend_mat, method = method.rows, threads = ncores)
+    row_dist <- tryCatch(
+      parallelDist::parDist(dend_mat, method = method.rows, threads = ncores),
+      error = function(cond){
+        if(
+          grepl(pattern = "impossible d'allouer un vecteur de taille", x = cond)
+          | grepl(pattern = "cannot allocate vector of size", x = cond)){
+          cond$message <- paste("Cannot compute distance on rows.",
+                                "Too many rows containing too many values.")
+          stop(cond) } else { stop(cond) }
+      }, warning = function(cond){ warning(cond) }, finally = {})
     row_hclust <- fastcluster::hclust(row_dist)
     rm(row_dist)
     rowclust <- as.dendrogram(row_hclust)
@@ -295,12 +303,12 @@ gg2heatmap <- function(
       #Get dendrogram data
       ddgr_dat <- ggdendro::dendro_data(ddgr)
       #Get dendrogram segments and order matrix columns
-      ddgr_seg_col <- ggdend(df = ddgr_dat$segments, orientation = "top") 
+      ddgr_seg_col <- ggdend(df = ddgr_dat$segments, orientation = "top")
     }
   } else if(dd.cols & method.cols == 'none'){
     stop("Cannot plot dendrogram on columns with method.cols = 'none'.")
   }
-  
+
   #Reorder rows and columns matrix following dendrograms orders
   if(method.rows != 'none' & method.cols != 'none'){
     # All dendrograms on and all methods specified
@@ -320,7 +328,7 @@ gg2heatmap <- function(
   # dt.frame[, rn := factor(x = rn, levels = rownames(dframe))]
   melted_mat <- melt.data.table(
     data = dt.frame, id.vars = "rn", measure.vars = colnames(dt.frame)[-c(1)])
-  
+
   #Plot Heatmap
   htmp <- ggplot() +
     geom_tile(data = melted_mat, aes(x = variable, y = rn, fill = value)) +
@@ -352,7 +360,7 @@ gg2heatmap <- function(
   if(y.axis.right){
     htmp <- htmp + scale_y_discrete(position = 'right', expand = c(0, 0))
   } else { htmp <- htmp + scale_y_discrete(expand = c(0, 0)) }
-  
+
   #Reoder groups and convert as factors
   annot.grps <- lapply(X = annot.grps, FUN = function(i){
     factor(x = i, levels =  unique(i))})
@@ -360,7 +368,7 @@ gg2heatmap <- function(
   if(method.cols != "none"){
     annot.grps <- lapply(X = annot.grps, FUN = function(i){ i[column.order] })
   }
-  
+
   #Set number of columns to display annotations legends
   if(lgd.merge){
     origin.grps <- lapply(X = annot.grps, FUN = function(i){
@@ -394,11 +402,11 @@ gg2heatmap <- function(
   }
   #Calculate legend columns
   lgd.ncol <- ceiling(lgdsizes/30)
-  
+
   #Get ordered sample names
   if(method.cols != "none"){ sample.names <- colnames(m[, column.order])
   } else { sample.names <- colnames(m) }
-  
+
   #Create Color Sidebar
   col_sidebar <- plot.col.sidebar(
     sample.names = sample.names, annot.grps = annot.grps,
@@ -411,7 +419,7 @@ gg2heatmap <- function(
     axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
     axis.title.x = element_blank(), axis.title.y = element_blank(),
     set.x.title = NULL, set.y.title = NULL, dendro.pos = 'top')
-  
+
   #Extract Legend
   htmp_legend <- get.lgd(gg2.obj = htmp)
   sidebar_legend <- col_sidebar$legends
@@ -441,13 +449,13 @@ gg2heatmap <- function(
     upd.grob_h <- resize.grobs(ls.grobs = ls.h.grobs, dimensions = 'heights',
                                start.unit = 7, end.unit = 9)
   } else { upd.grob_h <- list("htmp" = upd.grob_w$htmp) }
-  
+
   #Create the Right Panel for legends
   sidebar_legend.grob <- stack.grobs.legends(
     grobs.list = sidebar_legend, annot.grps = annot.grps,
     height.lgds.space = 29)
   right.legends <- sidebar_legend.grob
-  
+
   #Combine Dendrogram with Color Sidebar and Heatmap
   if(dd.rows & dd.cols){
     #Create main grob

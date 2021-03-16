@@ -4,7 +4,7 @@
 \alias{check.annotations}
 \title{Checks matching between annotation groups and annotation palettes.}
 \usage{
-check.annotations(data, annot.grps, annot.pal)
+check.annotations(data, annot.grps, annot.pal, verbose = FALSE)
 }
 \arguments{
 \item{data}{A \code{matrix} or a \code{data.frame} with column names.}
@@ -18,6 +18,10 @@ characters for the annotation sidebars. The length of
 vectors has to match the number of levels of vectors listed
 in 'annot.grps'. If a list is provided, its length must
 match the length of the list provided to 'annot.grps'.}
+
+\item{verbose}{A \code{logical} to specify wether the function should be
+run on verbose mode (verbose = TRUE) or not
+(Default: verbose = FALSE).}
 }
 \value{
 An error message if something goes wrong during annotations checks.
