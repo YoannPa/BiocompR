@@ -250,9 +250,9 @@ gg2heatmap <- function(
       paste("'y.axis.right' has to be set to TRUE in order to display the",
             "Y-axis on the right side of the heatmap."))
   }
-  #TODO: Add verbose = TRUE option on check.annotations
   #Check annotations groups and palettes matching
-  check.annotations(data = m, annot.grps = annot.grps, annot.pal = annot.pal)
+  check.annotations(data = m, annot.grps = annot.grps, annot.pal = annot.pal,
+                    verbose = FALSE)
 
   #Handle NAs
   m <- manage.na(
@@ -269,6 +269,15 @@ gg2heatmap <- function(
   #Remove NAs if some for dendrogram matrix
   if(method.rows != 'none' | method.cols != 'none'){
     dend_mat <- m[complete.cases(m), ]
+    if(nrow(dend_mat) != nrow(m)){
+      warning(paste("Distance method selected need complete data.",
+                    nrow(m) - nrow(dend_mat), "incomplete rows removed out of",
+                    nrow(m), "rows selected."))
+    }
+    #Check how many rows dend_mat has
+    if(nrow(dend_mat) == 0){
+      stop("Cannot compute distances on rows. All rows are missing values.")
+    }
   }
   #Compute rows distances & create rows dendrogram
   if(method.rows != 'none'){
@@ -278,10 +287,10 @@ gg2heatmap <- function(
         if(
           grepl(pattern = "impossible d'allouer un vecteur de taille", x = cond)
           | grepl(pattern = "cannot allocate vector of size", x = cond)){
-          cond$message <- paste("Cannot compute distance on rows.",
+          cond$message <- paste("Cannot compute distances on rows.",
                                 "Too many rows containing too many values.")
           stop(cond) } else { stop(cond) }
-      }, warning = function(cond){ warning(cond) }, finally = {})
+      }, warning = function(cond){ warning(cond$message) }, finally = {})
     row_hclust <- fastcluster::hclust(row_dist)
     rm(row_dist)
     rowclust <- as.dendrogram(row_hclust)
@@ -311,9 +320,13 @@ gg2heatmap <- function(
 
   #Reorder rows and columns matrix following dendrograms orders
   if(method.rows != 'none' & method.cols != 'none'){
+    # Keep rows selected for the method applied on rows
+    m <- m[row_hclust$labels, ]
     # All dendrograms on and all methods specified
     dframe <- m[row.order, column.order, drop = FALSE]
   } else if(method.rows != 'none' & is.null(rank.fun) & method.cols == 'none'){
+    # Keep rows selected for the method applied on rows
+    m <- m[row_hclust$labels, ]
     # row.dendrogram on, col.dendrogram off, method.row specified
     dframe <- m[row.order, , drop = FALSE]
   } else if(method.rows == 'none' & method.cols != 'none'){
