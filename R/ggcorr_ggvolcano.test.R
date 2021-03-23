@@ -41,7 +41,6 @@ ggvolcano.test <- function(data, p.cutoff = 0.01, fc.cutoff = 0.0, label = NULL,
   } else { stop("Column 3 type must be numeric.") }
   #
   ##
-
   ggvol <- ggplot()
 
   if(ncol(data) == 4){
