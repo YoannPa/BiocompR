@@ -67,6 +67,13 @@
 #'                               numeric will apply to the dendrogram built on
 #'                               columns.}
 #'                        }
+#' @param raster          A \code{character} to be used as a filter for matrix
+#'                        rasterization. The list of the supported rasterization
+#'                        filters is available in magick::filter_types(). If no
+#'                        value is specified for 'raster' the original ggplot2
+#'                        heatmap is displayed (Default: raster = NULL).
+#'                        Warning: Be aware that rasterization may take several
+#'                        more minutes than the usual process time.
 #' @param plot.title      A \code{character} to be used as title for the plot.
 #' @param row.type        A \code{character} to be used in the plot subtitle
 #'                        description as a definition of the rows (e.g. 'loci',
@@ -177,11 +184,12 @@
 #TODO: Add some data in return such as the ordered matrix.
 gg2heatmap <- function(
   m, na.handle = 'remove', dist.method = 'manhattan', rank.fun = NULL,
-  top.rows = NULL, dendrograms = TRUE, dend.size = 1, plot.title = "",
+  top.rows = NULL, dendrograms = TRUE, dend.size = 1, raster = NULL,
+  plot.title = "",
   row.type = 'rows', imputation.grps = NULL, ncores = 1,
   heatmap.pal = c("steelblue", "gray95", "darkorange"), na.col = "black",
   annot.grps = list("Groups" = seq(ncol(m))), annot.pal = rainbow(n = ncol(m)),
-  annot.size = 1, annot.sep = 0, lgd.scale.name = 'values',
+  annot.size = 1, annot.sep = 0, lgd.scale.name = 'Values',
   lgd.bars.name = 'Legends', lgd.title = element_text(size = 12),
   lgd.text = element_text(size = 11), lgd.merge = FALSE, lgd.space.width = 1,
   y.lab = "Values", x.lab = "Samples",
@@ -460,7 +468,57 @@ gg2heatmap <- function(
   if(dd.cols){ ddgr_seg_col <- ggplotGrob(ddgr_seg_col) }
   if(dd.rows){ ddgr_seg_row <- ggplotGrob(ddgr_seg_row) }
   col_sidebar_grob <- ggplotGrob(col_sidebar$sidebar)
-  htmp <- ggplotGrob(htmp + theme(legend.position = "none"))
+  htmp <- htmp + theme(legend.position = "none")
+
+  #Heatmap rasterization
+  if(!is.null(raster)){
+    if(raster %in% magick::filter_types()){
+      #Remove all customization
+      htmp <- htmp + theme(
+        plot.margin = margin(0, 0, 0, 0), panel.grid = element_blank(),
+        panel.background = element_rect(fill = "transparent"),
+        plot.background = element_rect(fill = "transparent"),
+        axis.title.x = element_blank(), axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(), axis.title.y.right = element_blank(),
+        axis.ticks.y.right = element_blank(),
+        axis.text.y.right = element_blank(),
+        axis.title.y.left = element_blank(),
+        axis.ticks.y.left = element_blank(), axis.text.y.left = element_blank(),
+        axis.ticks.length = unit(0, "pt"))
+      #Catch heatmap in magick::image_graph()
+      fig <- magick::image_graph(width = 2160, height = 2160, res = 96)
+      print(htmp)
+      dev.off()
+      rastered <- magick::image_resize(
+        image = fig, geometry = "1080x1080", filter = raster)
+      #Create raster grob
+      raster.grob <- grid::rasterGrob(
+        rastered, width = unit(1, "npc"), height = unit(1, "npc"),
+        interpolate = TRUE)
+      raster.annot <- ggplot2::annotation_custom(
+        raster.grob, -Inf, Inf, -Inf, Inf)
+      #Fit the raster grob into a ggplot
+      htmp <- ggplot(
+        data = melted_mat, aes(x = variable, y = rn, fill = value)) +
+        raster.annot +
+        theme(
+          plot.margin = margin(0, 0, 0, 0), panel.grid = element_blank(),
+          panel.background = element_rect(fill = "transparent"),
+          plot.background = element_rect(fill = "transparent"),
+          axis.title.x = axis.title.x, axis.text.x = axis.text.x,
+          axis.ticks.x = axis.ticks.x, axis.title.y.right = axis.title.y.right,
+          axis.ticks.y.right = axis.ticks.y.right,
+          axis.text.y.right = axis.text.y.right,
+          axis.title.y.left = axis.title.y.left,
+          axis.ticks.y.left = axis.ticks.y.left,
+          axis.text.y.left = axis.text.y.left) +
+        labs(x = x.lab, y = y.lab)
+      #TODO: rm this
+      # ggsave(plot = htmp, filename = "PCAWG_Paper/graphs/interaster.pdf",
+      #        device = "pdf", width = 10, height = 10)
+    } else { stop("Rasterization filter not supported.") }
+  }
+  htmp <- ggplotGrob(x = htmp)
   #Resize grobs
   if(dd.cols & dd.rows){
     ls.w.grobs <- list(

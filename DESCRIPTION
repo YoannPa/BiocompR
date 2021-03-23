@@ -28,7 +28,8 @@ Imports:
     psych,
     parallel,
     parallelDist,
-    quantmod
+    quantmod,
+    magick
 RoxygenNote: 7.1.1
 Suggests: 
     knitr,

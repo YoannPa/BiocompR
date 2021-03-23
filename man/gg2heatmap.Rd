@@ -12,6 +12,7 @@ gg2heatmap(
   top.rows = NULL,
   dendrograms = TRUE,
   dend.size = 1,
+  raster = NULL,
   plot.title = "",
   row.type = "rows",
   imputation.grps = NULL,
@@ -22,7 +23,7 @@ gg2heatmap(
   annot.pal = rainbow(n = ncol(m)),
   annot.size = 1,
   annot.sep = 0,
-  lgd.scale.name = "values",
+  lgd.scale.name = "Values",
   lgd.bars.name = "Legends",
   lgd.title = element_text(size = 12),
   lgd.text = element_text(size = 11),
@@ -117,6 +118,14 @@ dendrograms size (Default: dend.size = 1).
        numeric will apply to the dendrogram built on
        columns.}
 }}
+
+\item{raster}{A \code{character} to be used as a filter for matrix
+rasterization. The list of the supported rasterization
+filters is available in magick::filter_types(). If no
+value is specified for 'raster' the original ggplot2
+heatmap is displayed (Default: raster = NULL).
+Warning: Be aware that rasterization may take several
+more minutes than the usual process time.}
 
 \item{plot.title}{A \code{character} to be used as title for the plot.}
 

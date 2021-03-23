@@ -41,7 +41,7 @@ Currently the package BiocompR contains **19 functions**:
 ### Install Linux dependencies
 In the terminal do:  
 ```bash
-sudo apt-get install libcurl4-openssl-dev libxml2-dev
+sudo apt-get install libcurl4-openssl-dev libxml2-dev libmagick++-dev
 ```
 ### Install Bioconductor dependencies
 In R do:
