@@ -17,6 +17,7 @@ gg2heatmap(
   imputation.grps = NULL,
   ncores = 1,
   heatmap.pal = c("steelblue", "gray95", "darkorange"),
+  na.col = "black",
   annot.grps = list(Groups = seq(ncol(m))),
   annot.pal = rainbow(n = ncol(m)),
   annot.size = 1,
@@ -36,7 +37,10 @@ gg2heatmap(
   y.axis.right = FALSE,
   axis.title.y.right = element_blank(),
   axis.text.y.right = element_blank(),
-  axis.ticks.y.right = element_blank()
+  axis.ticks.y.right = element_blank(),
+  axis.title.y.left = element_blank(),
+  axis.text.y.left = element_blank(),
+  axis.ticks.y.left = element_blank()
 )
 }
 \arguments{
@@ -135,6 +139,9 @@ for dendrograms.}
 \item{heatmap.pal}{A \code{character} vector to be used as a color
 palette for the heatmap.}
 
+\item{na.col}{A \code{character} to be used as a color for missing
+values on the heatmap (Default: na.col = "black").}
+
 \item{annot.grps}{A \code{list} of vectors of groups to which variables
 belongs for the annotation sidebars. Vectors' lengths
 have to match the number of variables.}
@@ -227,7 +234,18 @@ text
 (Default: axis.text.y.right = element_blank()).}
 
 \item{axis.ticks.y.right}{An \code{element_line} object to setup right Y axis
-ticks (Default: axis.ticks.x = element_blank()).}
+ticks (Default: axis.ticks.y.right = element_blank()).}
+
+\item{axis.title.y.left}{An \code{element_text} object to setup left Y axis
+title
+(Default: axis.title.y.left = element_blank()).}
+
+\item{axis.text.y.left}{An \code{element_text} object to setup left Y axis
+text (Default: axis.text.y.left = element_blank()).}
+
+\item{axis.ticks.y.left}{An \code{element_line} object to setup left Y axis
+ticks
+(Default: axis.ticks.y.left = element_blank()).}
 }
 \value{
 A \code{grob} of a heatmap plotted with ggplot2.

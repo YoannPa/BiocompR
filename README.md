@@ -2,15 +2,15 @@
 _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots dedicated to data comparison and dataset exploration and ultimately provides users with versatile and customizable graphics._  
 
 **Author: PAGEAUD Y.<sup>1</sup>**  
-**Contributors: SCHEFZIK R.<sup>2</sup>; HRUSKA D.<sup>1</sup>; KURILOV R.<sup>1</sup>; BEUMER N.<sup>1</sup>; WURSTHORN A.<sup>4</sup>; MAYAKONDA A.<sup>3</sup>; FEUERBACH L.<sup>1</sup>; TOTH R.<sup>3</sup>.**  
+**Contributors: SCHEFZIK R.<sup>2</sup>; HRUSKA D.<sup>1</sup>; BITTO V.<sup>1</sup>; KURILOV R.<sup>1</sup>; BEUMER N.<sup>1</sup>; WURSTHORN A.<sup>4</sup>; MAYAKONDA A.<sup>3</sup>; FEUERBACH L.<sup>1</sup>; TOTH R.<sup>3</sup>.**  
 **1-** [**DKFZ - Division of Applied Bioinformatics, Germany.**](https://www.dkfz.de/en/applied-bioinformatics/index.php)  
 **2-** [**Klinik für Anästhesiologie und Operative Intensivmedizin, Medizinische Fakultät Mannheim, Universität Heidelberg, Germany.**](https://www.umm.de/klinik-fuer-anaesthesiologie-und-operative-intensivmedizin/)  
 **3-** [**DKFZ - Computational Cancer Epigenomics, Germany.**](https://www.dkfz.de/en/CanEpi/CompEpigen/index.html)  
 **4-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
-**Version: 0.0.100 (Beta)**  
+**Version: 0.0.107 (Beta)**  
 **R Compatibility: Version 4.0.2**  
-**Last Update: 04/03/2021**  
+**Last Update: 23/03/2021**  
 **How to cite:** _Pageaud Y. et al., BiocompR - Advanced visualizations for data comparison._  
 
 ## Content
@@ -126,6 +126,16 @@ This warning can arise when using the function `ggbipca()`. If the scale is too 
 assign("last.warning", NULL, envir = baseenv())
 ```
 The current statues of this issue can be tracked [**here**](https://github.com/slowkow/ggrepel/issues/187).  
+
+**⚠️ In min(x) : no non-missing arguments to min; returning Inf / In max(x) : no non-missing arguments to max; returning -Inf**
+
+```R
+Warning messages:
+1: In min(x) : no non-missing arguments to min; returning Inf
+2: In max(x) : no non-missing arguments to max; returning -Inf
+```
+This warning can arise when using the function `sunset()`when there is only 1 label displayed on the right Y axis. This warning does not compromise the result and should be ignored.  
+The current statues of this issue can be tracked [**here**](https://github.com/tidyverse/ggplot2/issues/4368).  
 
 ## Technical questions / Development / Feature request
 If you encounters issues or if a feature you would expect is not available in of BiocompR functions, please check if an existing issue adresses your point [here](https://github.com/YoannPa/BiocompR/issues/). If not, create a [new issue here](https://github.com/YoannPa/BiocompR/issues/new).  

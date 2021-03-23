@@ -83,6 +83,8 @@
 #'                        for dendrograms.
 #' @param heatmap.pal     A \code{character} vector to be used as a color
 #'                        palette for the heatmap.
+#' @param na.col          A \code{character} to be used as a color for missing
+#'                        values on the heatmap (Default: na.col = "black").
 #' @param annot.grps      A \code{list} of vectors of groups to which variables
 #'                        belongs for the annotation sidebars. Vectors' lengths
 #'                        have to match the number of variables.
@@ -150,6 +152,14 @@
 #'                        should be displayed on the right (y.axis.right = TRUE)
 #'                        or not (y.axis.right = FALSE)
 #'                        (Default: y.axis.right = FALSE).
+#' @param axis.title.y.left  An \code{element_text} object to setup left Y axis
+#'                           title
+#'                           (Default: axis.title.y.left = element_blank()).
+#' @param axis.text.y.left   An \code{element_text} object to setup left Y axis
+#'                           text (Default: axis.text.y.left = element_blank()).
+#' @param axis.ticks.y.left  An \code{element_line} object to setup left Y axis
+#'                           ticks
+#'                           (Default: axis.ticks.y.left = element_blank()).
 #' @param axis.title.y.right An \code{element_text} object to setup right Y axis
 #'                           title
 #'                           (Default: axis.title.y.right = element_blank()).
@@ -157,18 +167,19 @@
 #'                           text
 #'                           (Default: axis.text.y.right = element_blank()).
 #' @param axis.ticks.y.right An \code{element_line} object to setup right Y axis
-#'                           ticks (Default: axis.ticks.x = element_blank()).
+#'                           ticks (Default: axis.ticks.y.right = element_blank()).
 #' @return A \code{grob} of a heatmap plotted with ggplot2.
 #' @author Yoann Pageaud.
 #' @export
 
+#TODO: Add an option to rasterize the heatmap.
 #TODO: Create a theme argument using the theme() function.
 #TODO: Add some data in return such as the ordered matrix.
 gg2heatmap <- function(
   m, na.handle = 'remove', dist.method = 'manhattan', rank.fun = NULL,
   top.rows = NULL, dendrograms = TRUE, dend.size = 1, plot.title = "",
   row.type = 'rows', imputation.grps = NULL, ncores = 1,
-  heatmap.pal = c("steelblue", "gray95", "darkorange"),
+  heatmap.pal = c("steelblue", "gray95", "darkorange"), na.col = "black",
   annot.grps = list("Groups" = seq(ncol(m))), annot.pal = rainbow(n = ncol(m)),
   annot.size = 1, annot.sep = 0, lgd.scale.name = 'values',
   lgd.bars.name = 'Legends', lgd.title = element_text(size = 12),
@@ -179,7 +190,8 @@ gg2heatmap <- function(
     size = 11, angle = -45, hjust = 0, vjust = 0.5, face = 'bold'),
   axis.ticks.x = element_line(color = 'black'), y.axis.right = FALSE,
   axis.title.y.right = element_blank(), axis.text.y.right = element_blank(),
-  axis.ticks.y.right = element_blank()){
+  axis.ticks.y.right = element_blank(), axis.title.y.left = element_blank(),
+  axis.text.y.left = element_blank(), axis.ticks.y.left = element_blank()){
 
   #Check m is a matrix
   if(!is.matrix(m)){ stop("m must be a matrix.") }
@@ -301,7 +313,8 @@ gg2heatmap <- function(
                              orientation = "left", reverse.x = TRUE)
     }
   } else if(dd.rows & method.rows == 'none'){
-    stop("Cannot plot dendrogram on rows with method.rows = 'none'.")
+    stop(paste("Cannot plot dendrogram on rows with method.rows = 'none'. To",
+               "avoid this error message, set 'dendrograms' to FALSE."))
   }
   #Compute columns distances & create columns dendrogram
   if(method.cols != 'none'){
@@ -345,7 +358,7 @@ gg2heatmap <- function(
   #Plot Heatmap
   htmp <- ggplot() +
     geom_tile(data = melted_mat, aes(x = variable, y = rn, fill = value)) +
-    scale_fill_gradientn(colours = heatmap.pal) +
+    scale_fill_gradientn(colours = heatmap.pal, na.value = na.col) +
     scale_x_discrete(expand = c(0, 0)) +
     theme(plot.margin = margin(0, 0, 0, 0),
           panel.grid = element_blank(),
@@ -361,6 +374,7 @@ gg2heatmap <- function(
           axis.text.y.right = axis.text.y.right) +
     guides(fill = guide_colorbar(ticks = TRUE, label = TRUE, barwidth = 15,
                                  ticks.linewidth = 1)) +
+    guides(colour=guide_legend("No data", override.aes=list(fill="black"))) +
     labs(x = x.lab, y = y.lab, fill = lgd.scale.name)
   if(dd.rows){
     htmp <- htmp +
@@ -368,6 +382,12 @@ gg2heatmap <- function(
             axis.ticks.y.left = element_blank(),
             axis.ticks.length.y.left = unit(0, "pt"),
             axis.text.y.left = element_blank(),
+            plot.margin = unit(c(0, 0, 0, 0), "cm"))
+  } else {
+    htmp <- htmp +
+      theme(axis.title.y.left = axis.title.y.left,
+            axis.ticks.y.left = axis.ticks.y.left,
+            axis.text.y.left = axis.text.y.left,
             plot.margin = unit(c(0, 0, 0, 0), "cm"))
   }
   if(y.axis.right){
