@@ -41,7 +41,8 @@ gg2heatmap(
   axis.ticks.y.right = element_blank(),
   axis.title.y.left = element_blank(),
   axis.text.y.left = element_blank(),
-  axis.ticks.y.left = element_blank()
+  axis.ticks.y.left = element_blank(),
+  verbose = FALSE
 )
 }
 \arguments{

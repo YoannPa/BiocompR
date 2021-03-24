@@ -8,9 +8,9 @@ _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots 
 **3-** [**DKFZ - Computational Cancer Epigenomics, Germany.**](https://www.dkfz.de/en/CanEpi/CompEpigen/index.html)  
 **4-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
-**Version: 0.0.107 (Beta)**  
+**Version: 0.0.110 (Beta)**  
 **R Compatibility: Version 4.0.2**  
-**Last Update: 23/03/2021**  
+**Last Update: 24/03/2021**  
 **How to cite:** _Pageaud Y. et al., BiocompR - Advanced visualizations for data comparison._  
 
 ## Content
@@ -55,7 +55,7 @@ BiocManager::install("IRanges")
 ```R
 inst.pkgs = c('corrplot', 'data.table', 'devtools', 'fastcluster', 'ggdendro',
 	      'ggplot2', 'ggrepel', 'grid', 'gridExtra', 'psych', 'parallel',
-	      'parallelDist', 'quantmod')
+	      'parallelDist', 'quantmod', 'magick')
 install.packages(inst.pkgs)
 ```
 

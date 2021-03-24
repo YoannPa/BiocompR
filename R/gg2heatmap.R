@@ -199,7 +199,8 @@ gg2heatmap <- function(
   axis.ticks.x = element_line(color = 'black'), y.axis.right = FALSE,
   axis.title.y.right = element_blank(), axis.text.y.right = element_blank(),
   axis.ticks.y.right = element_blank(), axis.title.y.left = element_blank(),
-  axis.text.y.left = element_blank(), axis.ticks.y.left = element_blank()){
+  axis.text.y.left = element_blank(), axis.ticks.y.left = element_blank(),
+  verbose = FALSE){
 
   #Check m is a matrix
   if(!is.matrix(m)){ stop("m must be a matrix.") }
@@ -272,7 +273,7 @@ gg2heatmap <- function(
   }
   #Check annotations groups and palettes matching
   check.annotations(data = m, annot.grps = annot.grps, annot.pal = annot.pal,
-                    verbose = FALSE)
+                    verbose = verbose)
 
   #Handle NAs
   m <- manage.na(
@@ -363,36 +364,49 @@ gg2heatmap <- function(
   melted_mat <- melt.data.table(
     data = dt.frame, id.vars = "rn", measure.vars = colnames(dt.frame)[-c(1)])
 
+  #Create theme_heatmap
+  theme_heatmap <- theme(
+    plot.margin = margin(0, 0, 0, 0), panel.grid = element_blank(),
+    panel.background = element_rect(fill = "transparent"),
+    plot.background = element_rect(fill = "transparent"),
+    legend.text = element_text(size = 11),
+    legend.title = element_text(size = 12), legend.position = "bottom",
+    legend.justification = c(0.4, 0.5), axis.title.x = axis.title.x,
+    axis.text.x = axis.text.x, axis.ticks.x = axis.ticks.x,
+    axis.title.y.right = axis.title.y.right,
+    axis.ticks.y.right = axis.ticks.y.right,
+    axis.text.y.right = axis.text.y.right)
+
   #Plot Heatmap
   htmp <- ggplot() +
-    geom_tile(data = melted_mat, aes(x = variable, y = rn, fill = value)) +
     scale_fill_gradientn(colours = heatmap.pal, na.value = na.col) +
+    scale_color_manual(values = NA) +
     scale_x_discrete(expand = c(0, 0)) +
-    theme(plot.margin = margin(0, 0, 0, 0),
-          panel.grid = element_blank(),
-          panel.background = element_rect(fill = "transparent"),
-          plot.background = element_rect(fill = "transparent"),
-          legend.text = element_text(size = 11),
-          legend.title = element_text(size = 12, vjust = 0.8),
-          legend.position = "bottom",
-          legend.justification = c(0.4, 0.5),
-          axis.title.x = axis.title.x, axis.text.x = axis.text.x,
-          axis.ticks.x = axis.ticks.x, axis.title.y.right = axis.title.y.right,
-          axis.ticks.y.right = axis.ticks.y.right,
-          axis.text.y.right = axis.text.y.right) +
     guides(fill = guide_colorbar(ticks = TRUE, label = TRUE, barwidth = 15,
-                                 ticks.linewidth = 1)) +
-    guides(colour=guide_legend("No data", override.aes=list(fill="black"))) +
+                                 ticks.linewidth = 1, title.vjust = 0.86)) +
+    guides(color = guide_legend("NA", override.aes = list(fill = na.col),
+                                title.vjust = 0.5)) +
     labs(x = x.lab, y = y.lab, fill = lgd.scale.name)
+  #Display legend of missing values if any
+  if(nrow(melted_mat[is.na(value)]) != 0){
+    htmp <- htmp + geom_tile(
+      data = melted_mat, aes(x = variable, y = rn, fill = value, color = " "))
+  } else {
+    htmp <- htmp + geom_tile(
+      data = melted_mat, aes(x = variable, y = rn, fill = value))
+  }
+
   if(dd.rows){
-    htmp <- htmp +
+    # htmp <- htmp +
+    theme_heatmap <- theme_heatmap +
       theme(axis.title.y.left = element_blank(),
             axis.ticks.y.left = element_blank(),
             axis.ticks.length.y.left = unit(0, "pt"),
             axis.text.y.left = element_blank(),
             plot.margin = unit(c(0, 0, 0, 0), "cm"))
   } else {
-    htmp <- htmp +
+    # htmp <- htmp +
+    theme_heatmap <- theme_heatmap +
       theme(axis.title.y.left = axis.title.y.left,
             axis.ticks.y.left = axis.ticks.y.left,
             axis.text.y.left = axis.text.y.left,
@@ -462,16 +476,17 @@ gg2heatmap <- function(
     set.x.title = NULL, set.y.title = NULL, dendro.pos = 'top')
 
   #Extract Legend
-  htmp_legend <- get.lgd(gg2.obj = htmp)
+  htmp_legend <- get.lgd(gg2.obj = htmp + theme_heatmap)
   sidebar_legend <- col_sidebar$legends
   #Convert ggplots into grobs
   if(dd.cols){ ddgr_seg_col <- ggplotGrob(ddgr_seg_col) }
   if(dd.rows){ ddgr_seg_row <- ggplotGrob(ddgr_seg_row) }
   col_sidebar_grob <- ggplotGrob(col_sidebar$sidebar)
-  htmp <- htmp + theme(legend.position = "none")
+  htmp <- htmp + theme_heatmap + theme(legend.position = "none")
 
   #Heatmap rasterization
   if(!is.null(raster)){
+    if(verbose){ cat("Rasterizing...") }
     if(raster %in% magick::filter_types()){
       #Remove all customization
       htmp <- htmp + theme(
@@ -495,28 +510,14 @@ gg2heatmap <- function(
       raster.grob <- grid::rasterGrob(
         rastered, width = unit(1, "npc"), height = unit(1, "npc"),
         interpolate = TRUE)
-      raster.annot <- ggplot2::annotation_custom(
-        raster.grob, -Inf, Inf, -Inf, Inf)
+      raster.annot <- ggplot2::annotation_custom(raster.grob, -Inf, Inf, -Inf, Inf)
       #Fit the raster grob into a ggplot
       htmp <- ggplot(
         data = melted_mat, aes(x = variable, y = rn, fill = value)) +
-        raster.annot +
-        theme(
-          plot.margin = margin(0, 0, 0, 0), panel.grid = element_blank(),
-          panel.background = element_rect(fill = "transparent"),
-          plot.background = element_rect(fill = "transparent"),
-          axis.title.x = axis.title.x, axis.text.x = axis.text.x,
-          axis.ticks.x = axis.ticks.x, axis.title.y.right = axis.title.y.right,
-          axis.ticks.y.right = axis.ticks.y.right,
-          axis.text.y.right = axis.text.y.right,
-          axis.title.y.left = axis.title.y.left,
-          axis.ticks.y.left = axis.ticks.y.left,
-          axis.text.y.left = axis.text.y.left) +
-        labs(x = x.lab, y = y.lab)
-      #TODO: rm this
-      # ggsave(plot = htmp, filename = "PCAWG_Paper/graphs/interaster.pdf",
-      #        device = "pdf", width = 10, height = 10)
+        geom_blank() + raster.annot + theme_heatmap +
+        theme(legend.position = "none") + labs(x = x.lab, y = y.lab)
     } else { stop("Rasterization filter not supported.") }
+    if(verbose){ cat("Done.\n") }
   }
   htmp <- ggplotGrob(x = htmp)
   #Resize grobs
