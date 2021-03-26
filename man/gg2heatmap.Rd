@@ -13,6 +13,7 @@ gg2heatmap(
   dendrograms = TRUE,
   dend.size = 1,
   raster = NULL,
+  facet = NULL,
   plot.title = "",
   row.type = "rows",
   imputation.grps = NULL,
@@ -127,6 +128,10 @@ value is specified for 'raster' the original ggplot2
 heatmap is displayed (Default: raster = NULL).
 Warning: Be aware that rasterization may take several
 more minutes than the usual process time.}
+
+\item{facet}{A \code{character} matching an annotation name in
+'annot.grps' to be used to split heatmap in separate
+panels following the annotation.}
 
 \item{plot.title}{A \code{character} to be used as title for the plot.}
 

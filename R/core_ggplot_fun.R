@@ -250,11 +250,8 @@ basic.ggplot.tri<-function(melt.tri, grid.col, grid.thickness, lgd.title,
 #' @export
 
 basic.sidebar <- function(
-  data, palette, annot.sep = 0, annot.cut = 0, lgd.ncol = 1){
-  ggplot(data = data) +
-    geom_tile(mapping = aes(
-      x = Samples, y = .id, fill = Groups, height = 1 - annot.sep,
-      width = 1 - annot.cut)) +
+  data, palette, annot.sep = 0, annot.cut = 0, lgd.ncol = 1, facet = NULL){
+  basic <- ggplot() +
     theme(legend.justification = c(0, 1),
           legend.position = c(0, 1),
           legend.spacing.y = unit(0.05, 'cm'),
@@ -264,10 +261,31 @@ basic.sidebar <- function(
           axis.text = element_text(size = 12),
           panel.grid = element_blank(),
           plot.margin = margin(0, 0, 0, 0),
-          strip.background = element_blank(),
-          strip.text = element_blank()) +
+          # strip.background = element_blank(),
+          # strip.text = element_blank()
+          ) +
     scale_fill_manual(values = as.character(palette)) +
     guides(fill = guide_legend(ncol = lgd.ncol, byrow = TRUE))
+
+  if(!is.null(facet)){
+    #Add faceting
+    dt.facet <- data[.id == facet]
+    dt.facet[, facet.annot := Groups]
+    data <- merge(x = data, y = dt.facet[, c("Samples", "facet.annot"), ],
+          by = "Samples", all.x = TRUE)
+    #Plot annotation bar with facet
+    basic <- basic + geom_tile(data = data, mapping = aes(
+      x = Samples, y = .id, fill = Groups, height = 1 - annot.sep,
+      width = 1 - annot.cut)) +
+      facet_grid(. ~ facet.annot, scales = "free", space = "free") +
+      theme(panel.spacing = unit(0, "lines"),
+            strip.background = element_rect(color = "black", size = 0.5))
+  } else {
+    basic <- basic + geom_tile(data = data, mapping = aes(
+      x = Samples, y = .id, fill = Groups, height = 1 - annot.sep,
+      width = 1 - annot.cut))
+  }
+  return(basic)
 }
 
 #' Creates a colored side annotation bars in ggplot2.
@@ -355,7 +373,7 @@ plot.col.sidebar <- function(
   lgd.title = element_blank(), lgd.text = element_blank(), lgd.ncol = 1,
   axis.text.x = element_text(size = 12), axis.text.y = element_text(size = 12),
   axis.ticks.x, axis.ticks.y, axis.title.x, axis.title.y, set.x.title,
-  set.y.title, dendro.pos){
+  set.y.title, dendro.pos, facet = NULL){
 
   #Create list of groups in their original order
   origin.grps <- lapply(X = annot.grps, FUN = function(i){
@@ -453,7 +471,7 @@ plot.col.sidebar <- function(
   #Plot color sidebars
   col_sidebar <- basic.sidebar(
     data = dframe.annot, palette = col_table$Cols, annot.sep = annot.sep,
-    annot.cut = annot.cut, lgd.ncol = lgd.ncol)
+    annot.cut = annot.cut, lgd.ncol = lgd.ncol, facet = facet)
   #Add legend parameters if some
   col_sidebar <- col_sidebar + theme(legend.title = lgd.title)
   #Modify base plot following its position
@@ -475,7 +493,7 @@ plot.col.sidebar <- function(
     #     facet_grid(.id ~ ., scales = "free", space = "free_y")
     # }
   } else if(annot.pos == "left"){
-    col_sidebar<-col_sidebar +
+    col_sidebar <- col_sidebar +
       coord_flip() +
       theme(axis.text.y = axis.text.y, axis.ticks.y = axis.ticks.y,
             axis.text.x.top = axis.text.x) +
@@ -539,11 +557,13 @@ plot.col.sidebar <- function(
 
 resize.grobs <- function(ls.grobs, dimensions, start.unit, end.unit){
   #Get dimension units from the list of grobs to redimension
-  ls.dim<-lapply(X = ls.grobs, FUN = function(i){
-    i[[dimensions]][start.unit:end.unit]
+  ls.dim <- lapply(X = ls.grobs, FUN = function(i){
+    if(length(i[[dimensions]]) < end.unit){
+      i[[dimensions]][start.unit:length(i[[dimensions]])]
+    } else { i[[dimensions]][start.unit:end.unit] }
   })
   #Calculate maximum of all unit objects including the main grob.
-  max.dim <-eval(parse(
+  max.dim <- eval(parse(
     text = paste("grid::unit.pmax(",paste(paste(
       rep("ls.dim[[",length(ls.dim)), seq(length(ls.dim)),"]]", sep = ""),
       collapse = ", "), ")", sep = "")))
@@ -555,7 +575,40 @@ resize.grobs <- function(ls.grobs, dimensions, start.unit, end.unit){
   return(ls.grobs)
 }
 
+#' Resizes heights or widths of a grob based on the dimensions of another grob
+#'
+#' @param grob1      A \code{grob} to be modified.
+#' @param grob2      A \code{grob} to be used as reference for dimensions
+#'                   modifications.
+#' @param dimensions A \code{character} specifying the type of dimensions to
+#'                   resize, either 'heights' or 'widths'.
+#' @return A \code{grob} for which the dimensions have been modified.
+#' @author Yoann Pageaud.
+#' @export
+
+resize.grobs.oneway <- function(grob1, grob2, dimensions){
+  #Get dimension units from the list of grobs to redimension
+  ls.dim <- lapply(X = ls.grobs, FUN = function(i){
+    if(length(i[[dimensions]]) < end.unit){
+      i[[dimensions]][start.unit:length(i[[dimensions]])]
+    } else { i[[dimensions]][start.unit:end.unit] }
+  })
+  #Calculate maximum of all unit objects including the main grob.
+  max.dim <- eval(parse(
+    text = paste("grid::unit.pmax(",paste(paste(
+      rep("ls.dim[[",length(ls.dim)), seq(length(ls.dim)),"]]", sep = ""),
+      collapse = ", "), ")", sep = "")))
+  #Apply changes to grobs dimensions
+  ls.grobs <- lapply(X = ls.grobs, FUN = function(i){
+    i[[dimensions]][start.unit:end.unit] <- as.list(max.dim)
+    i
+  })
+  return(ls.grobs)
+}
+
+
 #' Stack grobs legends vertically in separate spaces of specific heights
+#'
 #' @param grobs.list A \code{list} of legends as grid objects.
 #' @param annot.grps A \code{factor} list mapped to the legends.
 #' @param height.lgds.space An \code{integer} specifying the height of the total
@@ -566,7 +619,7 @@ resize.grobs <- function(ls.grobs, dimensions, start.unit, end.unit){
 #' @export
 #' @keywords internal
 
-stack.grobs.legends<-function(grobs.list, annot.grps, height.lgds.space){
+stack.grobs.legends <- function(grobs.list, annot.grps, height.lgds.space){
   size_lgd <- unlist(lapply(X = annot.grps, FUN = function(i){
     length(unique(i)) + 1
   }))
@@ -576,4 +629,53 @@ stack.grobs.legends<-function(grobs.list, annot.grps, height.lgds.space){
   hghts <- c(size_lgd, height.lgds.space-sum(size_lgd))
   sidebar_legend <- gridExtra::arrangeGrob(grobs = grobs.list, heights = hghts)
   return(sidebar_legend)
+}
+
+#' Rasterize a gg plot into a raster grob
+#'
+#' @param gg.plot A \code{gg} plot to be rasterized.
+#' @param filter  A \code{character} to be used as a filter for ggplot
+#'                rasterization. The list of the supported rasterization
+#'                filters is available in magick::filter_types()
+#'                (Default: raster = "Lanczos"). Warning: Be aware that
+#'                rasterization may take several minutes to process the ggplot.
+#' @return A \code{grob} of the rasterized ggplot.
+#' @author Yoann Pageaud.
+#' @export
+
+raster.ggplot.to.grob <- function(gg.plot, filter = "Lanczos"){
+  #Catch heatmap in magick::image_graph()
+  fig <- magick::image_graph(width = 2160, height = 2160, res = 96)
+  print(gg.plot)
+  dev.off()
+  rastered <- magick::image_resize(
+    image = fig, geometry = "1080x1080", filter = filter)
+  #Create raster grob
+  raster.grob <- grid::rasterGrob(
+    rastered, width = unit(1, "npc"), height = unit(1, "npc"),
+    interpolate = TRUE)
+  #Return grob annotation
+  return(raster.grob)
+}
+
+#' This is a special geom intended for use as static annotations derived from
+#' ggplot2::annotation_custom() matching a specific panel on a faceted ggplot
+#'
+#' @param grob      A \code{grob} to display.
+#' @param xmin,xmax x location (in data coordinates) giving horizontal location
+#'                  of raster.
+#' @param ymin,ymax y location (in data coordinates) giving vertical location
+#'                  of raster.
+#' @param data      A subset of a \code{data.table} matching the panel where the
+#'                  grob annotation should be displayed.
+#' @return A \code{type} object returned description.
+#' @export
+#' @keywords internal
+
+annotation_custom2 <- function(
+  grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, data){
+  layer(data = data, stat = StatIdentity, position = PositionIdentity,
+        geom = ggplot2:::GeomCustomAnn, inherit.aes = TRUE,
+        params = list(
+          grob = grob, xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax))
 }

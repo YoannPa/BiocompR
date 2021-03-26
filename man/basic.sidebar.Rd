@@ -4,7 +4,14 @@
 \alias{basic.sidebar}
 \title{Draws a ggplot2 of a basic sidebar.}
 \usage{
-basic.sidebar(data, palette, annot.sep = 0, annot.cut = 0, lgd.ncol = 1)
+basic.sidebar(
+  data,
+  palette,
+  annot.sep = 0,
+  annot.cut = 0,
+  lgd.ncol = 1,
+  facet = NULL
+)
 }
 \arguments{
 \item{data}{A \code{data.frame} with the column names 'Samples','.id'

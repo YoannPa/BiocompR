@@ -74,6 +74,9 @@
 #'                        heatmap is displayed (Default: raster = NULL).
 #'                        Warning: Be aware that rasterization may take several
 #'                        more minutes than the usual process time.
+#' @param facet           A \code{character} matching an annotation name in
+#'                        'annot.grps' to be used to split heatmap in separate
+#'                        panels following the annotation.
 #' @param plot.title      A \code{character} to be used as title for the plot.
 #' @param row.type        A \code{character} to be used in the plot subtitle
 #'                        description as a definition of the rows (e.g. 'loci',
@@ -185,14 +188,13 @@
 gg2heatmap <- function(
   m, na.handle = 'remove', dist.method = 'manhattan', rank.fun = NULL,
   top.rows = NULL, dendrograms = TRUE, dend.size = 1, raster = NULL,
-  plot.title = "",
-  row.type = 'rows', imputation.grps = NULL, ncores = 1,
-  heatmap.pal = c("steelblue", "gray95", "darkorange"), na.col = "black",
-  annot.grps = list("Groups" = seq(ncol(m))), annot.pal = rainbow(n = ncol(m)),
-  annot.size = 1, annot.sep = 0, lgd.scale.name = 'Values',
-  lgd.bars.name = 'Legends', lgd.title = element_text(size = 12),
-  lgd.text = element_text(size = 11), lgd.merge = FALSE, lgd.space.width = 1,
-  y.lab = "Values", x.lab = "Samples",
+  facet = NULL, plot.title = "", row.type = 'rows', imputation.grps = NULL,
+  ncores = 1, heatmap.pal = c("steelblue", "gray95", "darkorange"),
+  na.col = "black", annot.grps = list("Groups" = seq(ncol(m))),
+  annot.pal = rainbow(n = ncol(m)), annot.size = 1, annot.sep = 0,
+  lgd.scale.name = 'Values', lgd.bars.name = 'Legends',
+  lgd.title = element_text(size = 12), lgd.text = element_text(size = 11),
+  lgd.merge = FALSE, lgd.space.width = 1, y.lab = "Values", x.lab = "Samples",
   axis.title.x = element_text(size = 12, color = 'black'),
   axis.text.x = element_text(
     size = 11, angle = -45, hjust = 0, vjust = 0.5, face = 'bold'),
@@ -358,12 +360,20 @@ gg2heatmap <- function(
     dframe <- m
   }
   #Melt Matrix into a data.table
+  if(verbose){ cat("Melting matrix...") }
   dt.frame <- as.data.table(x = dframe, keep.rownames = TRUE)
   dt.frame[, rn := factor(x = rn, levels = rev(rn))]
   # dt.frame[, rn := factor(x = rn, levels = rownames(dframe))]
   melted_mat <- melt.data.table(
     data = dt.frame, id.vars = "rn", measure.vars = colnames(dt.frame)[-c(1)])
-
+  if(!is.null(facet)){
+    dt.facet <- data.table("variable" = colnames(dt.frame)[-c(1)],
+                           "facet.annot" = annot.grps[[facet]])
+    melted_mat <- merge(
+      x = melted_mat, y = dt.facet, by = "variable", all.x = TRUE, sort = FALSE)
+  }
+  if(verbose){ cat("Done.\n") }
+  if(verbose){ cat("Configure heatmap...") }
   #Create theme_heatmap
   theme_heatmap <- theme(
     plot.margin = margin(0, 0, 0, 0), panel.grid = element_blank(),
@@ -382,11 +392,22 @@ gg2heatmap <- function(
     scale_fill_gradientn(colours = heatmap.pal, na.value = na.col) +
     scale_color_manual(values = NA) +
     scale_x_discrete(expand = c(0, 0)) +
-    guides(fill = guide_colorbar(ticks = TRUE, label = TRUE, barwidth = 15,
-                                 ticks.linewidth = 1, title.vjust = 0.86)) +
-    guides(color = guide_legend("NA", override.aes = list(fill = na.col),
-                                title.vjust = 0.5)) +
+    guides(fill = guide_colorbar(
+      ticks = TRUE, label = TRUE, barwidth = 15, ticks.linewidth = 1,
+      title.vjust = 0.86, order = 1)) +
+    guides(color = guide_legend(
+      "NA", override.aes = list(fill = na.col), title.vjust = 0.5, order = 2)) +
     labs(x = x.lab, y = y.lab, fill = lgd.scale.name)
+
+  #If facetting is on
+  if(!is.null(facet)){
+    htmp <- htmp +
+      facet_grid(. ~ facet.annot, scales = "free", space = "free") +
+      theme(panel.spacing = unit(0, "lines"),
+            strip.background = element_blank(),
+            strip.text = element_blank())
+  }
+
   #Display legend of missing values if any
   if(nrow(melted_mat[is.na(value)]) != 0){
     htmp <- htmp + geom_tile(
@@ -415,6 +436,9 @@ gg2heatmap <- function(
   if(y.axis.right){
     htmp <- htmp + scale_y_discrete(position = 'right', expand = c(0, 0))
   } else { htmp <- htmp + scale_y_discrete(expand = c(0, 0)) }
+
+  if(verbose){ cat("Done.\n") }
+  if(verbose){ cat("Configure annotations...") }
 
   #Reoder groups and convert as factors
   annot.grps <- lapply(X = annot.grps, FUN = function(i){
@@ -473,9 +497,12 @@ gg2heatmap <- function(
     axis.text.y = element_text(size = 12, color = "black"),
     axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
     axis.title.x = element_blank(), axis.title.y = element_blank(),
-    set.x.title = NULL, set.y.title = NULL, dendro.pos = 'top')
+    set.x.title = NULL, set.y.title = NULL, dendro.pos = 'top', facet = facet)
+
+  if(verbose){ cat("Done.\n") }
 
   #Extract Legend
+  if(verbose){ cat("Extracting legends...") }
   htmp_legend <- get.lgd(gg2.obj = htmp + theme_heatmap)
   sidebar_legend <- col_sidebar$legends
   #Convert ggplots into grobs
@@ -484,12 +511,14 @@ gg2heatmap <- function(
   col_sidebar_grob <- ggplotGrob(col_sidebar$sidebar)
   htmp <- htmp + theme_heatmap + theme(legend.position = "none")
 
+  if(verbose){ cat("Done.\n") }
+
   #Heatmap rasterization
   if(!is.null(raster)){
-    if(verbose){ cat("Rasterizing...") }
+    if(verbose){ cat("Rasterizing...\n") }
     if(raster %in% magick::filter_types()){
-      #Remove all customization
-      htmp <- htmp + theme(
+      #Create "empty" theme
+      theme_empty <- theme(
         plot.margin = margin(0, 0, 0, 0), panel.grid = element_blank(),
         panel.background = element_rect(fill = "transparent"),
         plot.background = element_rect(fill = "transparent"),
@@ -500,22 +529,75 @@ gg2heatmap <- function(
         axis.title.y.left = element_blank(),
         axis.ticks.y.left = element_blank(), axis.text.y.left = element_blank(),
         axis.ticks.length = unit(0, "pt"))
-      #Catch heatmap in magick::image_graph()
-      fig <- magick::image_graph(width = 2160, height = 2160, res = 96)
-      print(htmp)
-      dev.off()
-      rastered <- magick::image_resize(
-        image = fig, geometry = "1080x1080", filter = raster)
-      #Create raster grob
-      raster.grob <- grid::rasterGrob(
-        rastered, width = unit(1, "npc"), height = unit(1, "npc"),
-        interpolate = TRUE)
-      raster.annot <- ggplot2::annotation_custom(raster.grob, -Inf, Inf, -Inf, Inf)
-      #Fit the raster grob into a ggplot
-      htmp <- ggplot(
-        data = melted_mat, aes(x = variable, y = rn, fill = value)) +
-        geom_blank() + raster.annot + theme_heatmap +
-        theme(legend.position = "none") + labs(x = x.lab, y = y.lab)
+
+      #If facet is used
+      if(!is.null(facet)){
+        if(verbose){ cat("Facet rasterization:\n") }
+        ls.rasters <- lapply(
+          X = levels(melted_mat$facet.annot), FUN = function(i){
+            if(verbose){ cat(paste(i,"\n")) }
+            #Create sub DT
+            sub.melted <- melted_mat[facet.annot == i]
+            #Create sub heatmap and remove all customization
+            sub.htmp <- ggplot() +
+              geom_tile(data = sub.melted,
+                        aes(x = variable, y = rn, fill = value, color = " ")) +
+              scale_fill_gradientn(colours = heatmap.pal, na.value = na.col) +
+              scale_color_manual(values = NA) +
+              scale_x_discrete(expand = c(0, 0)) +
+              scale_y_discrete(expand = c(0, 0)) +
+              guides(fill = guide_colorbar(
+                ticks = TRUE, label = TRUE, barwidth = 15, ticks.linewidth = 1,
+                title.vjust = 0.86, order = 1)) +
+              guides(color = guide_legend(
+                "NA", override.aes = list(fill = na.col), title.vjust = 0.5,
+                order = 2)) +
+              labs(x = x.lab, y = y.lab, fill = lgd.scale.name) + theme_empty +
+              theme(legend.position = "none")
+            #Rasterize ggplot into a grob
+            raster.grob <- raster.ggplot.to.grob(
+              gg.plot = sub.htmp, filter = raster)
+            #Make grob annotation
+            raster.annot <- annotation_custom2(
+              grob = raster.grob, xmin = -Inf, xmax = Inf, ymin = -Inf,
+              ymax = Inf, data = melted_mat[facet.annot == i])
+            return(raster.annot)
+        })
+        #Fit the list of raster grobs into a ggplot
+        htmp <- ggplot(
+          data = melted_mat, aes(x = variable, y = rn, fill = value)) +
+          geom_blank() + theme_heatmap + theme(legend.position = "none") +
+          labs(x = x.lab, y = y.lab) +
+          facet_grid(. ~ facet.annot, scales = "free", space = "free") +
+          theme(
+            panel.spacing = unit(0, "lines"),
+            strip.background = element_blank(), strip.text = element_blank()) +
+          ls.rasters
+
+      } else {
+        #Remove all customization
+        htmp <- htmp + theme_empty
+        #Catch heatmap in magick::image_graph()
+        raster.annot <- raster.ggplot.to.grob(gg.plot = htmp, filter = raster)
+        # fig <- magick::image_graph(width = 2160, height = 2160, res = 96)
+        # print(htmp)
+        # dev.off()
+        # rastered <- magick::image_resize(
+        #   image = fig, geometry = "1080x1080", filter = raster)
+        # #Create raster grob
+        # raster.grob <- grid::rasterGrob(
+        #   rastered, width = unit(1, "npc"), height = unit(1, "npc"),
+        #   interpolate = TRUE)
+
+        #Make grob annotation
+        raster.annot <- ggplot2::annotation_custom(
+          raster.grob, -Inf, Inf, -Inf, Inf)
+        #Fit the raster grob into a ggplot
+        htmp <- ggplot(
+          data = melted_mat, aes(x = variable, y = rn, fill = value)) +
+          geom_blank() + raster.annot + theme_heatmap +
+          theme(legend.position = "none") + labs(x = x.lab, y = y.lab)
+      }
     } else { stop("Rasterization filter not supported.") }
     if(verbose){ cat("Done.\n") }
   }
@@ -533,9 +615,31 @@ gg2heatmap <- function(
                                start.unit = 3, end.unit = 7)
   } else {
     ls.w.grobs <- list('sidebar' = col_sidebar_grob, 'htmp' = htmp)
-    upd.grob_w <- resize.grobs(ls.grobs = ls.w.grobs, dimensions = "widths",
-                               start.unit = 3, end.unit = 7)
+    if(is.null(facet)){
+      upd.grob_w <- resize.grobs(ls.grobs = ls.w.grobs, dimensions = "widths",
+                                 start.unit = 3, end.unit = 7)
+    } else {
+      upd.grob_w <- resize.grobs(ls.grobs = ls.w.grobs, dimensions = "widths",
+                                 start.unit = 1, end.unit = 55)
+
+      # grob1 = ls.w.grobs$sidebar
+      # grob2 = ls.w.grobs$htmp
+      # # grob1$widths[3:55] <- grob2$widths[3:55]
+      # grob1$widths[3] <- grob2$widths[3]
+      # grob1$widths[4] <- grob2$widths[4]
+      # # grob1$widths[5] <- grob2$widths[5]
+      # upd.grob_w <- list('sidebar' = grob1, 'htmp' = grob2)
+
+      # ls.dim <- lapply(X = ls.w.grobs, FUN = function(i){
+      #   if(length(i$widths) < end.unit){
+      #     i[[dimensions]][start.unit:length(i$widths)]
+      #   } else { i$widths[start.unit:end.unit] }
+      # })
+      #
+      # upd.grob_w <-
+    }
   }
+
   if(dd.rows){
     ls.h.grobs <- list('dd_row' = ddgr_seg_row, 'htmp' = upd.grob_w$htmp)
     upd.grob_h <- resize.grobs(ls.grobs = ls.h.grobs, dimensions = 'heights',

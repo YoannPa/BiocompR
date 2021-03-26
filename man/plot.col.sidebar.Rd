@@ -26,7 +26,8 @@
   axis.title.y,
   set.x.title,
   set.y.title,
-  dendro.pos
+  dendro.pos,
+  facet = NULL
 )
 }
 \arguments{
