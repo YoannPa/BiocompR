@@ -2,18 +2,24 @@
 % Please edit documentation in R/ggcorr.R
 \name{chk.dt}
 \alias{chk.dt}
-\title{Checks the data.table provided to ggpanel.corr() and ggvolcano.corr().}
+\title{Checks the data.table provided to ggpanel.corr(), ggvolcano.corr() and
+ggvolcano.test().}
 \usage{
-chk.dt(data)
+chk.dt(data, data.type)
 }
 \arguments{
-\item{data}{A \code{data.table} which contains correlation data.}
+\item{data}{A \code{data.table} which contains test result data.}
+
+\item{data.type}{A \code{character} to specify the type of test used to
+generate 'data'.
+(Supported: data.type = c("t.test", "corr")).}
 }
 \value{
-A \code{data.table} with new column names.
+A valid \code{data.table} with new column names.
 }
 \description{
-Checks the data.table provided to ggpanel.corr() and ggvolcano.corr().
+Checks the data.table provided to ggpanel.corr(), ggvolcano.corr() and
+ggvolcano.test().
 }
 \author{
 Yoann Pageaud.

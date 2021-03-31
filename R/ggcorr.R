@@ -1,19 +1,25 @@
 
-#' Checks the data.table provided to ggpanel.corr() and ggvolcano.corr().
+#' Checks the data.table provided to ggpanel.corr(), ggvolcano.corr() and
+#' ggvolcano.test().
 #'
-#' @param data A \code{data.table} which contains correlation data.
-#' @return A \code{data.table} with new column names.
+#' @param data      A \code{data.table} which contains test result data.
+#' @param data.type A \code{character} to specify the type of test used to
+#'                  generate 'data'.
+#'                  (Supported: data.type = c("t.test", "corr")).
+#' @return A valid \code{data.table} with new column names.
 #' @author Yoann Pageaud.
 #' @export
 #' @keywords internal
 
-chk.dt <- function(data){
+chk.dt <- function(data, data.type){
   #Check col2
   if(is.numeric(data[[2]])){
-    if(any(data[,2] < -1) | any(data[,2] > 1)){
-      stop("Correlation values in column 2 must be comprised between -1 and 1.")
+    if(data.type == "corr"){
+      if(any(data[,2] < -1) | any(data[,2] > 1)){
+        stop("Correlation values in column 2 must be comprised between -1 and 1.")
+      }
     }
-  } else {stop("Column 2 type must be numeric.")}
+  } else { stop("Column 2 type must be numeric.") }
   #Check col3
   if(is.numeric(data[[3]])){
     if(any(data[,3] < 0) | any(data[,3] > 1)){
@@ -133,7 +139,7 @@ ggpanel.corr <- function(
   #Convert as a data.table
   if(!is.data.table(data)){ data<-as.data.table(data) }
   #Check & format data.table
-  data <- chk.dt(data = data)
+  data <- chk.dt(data = data, data.type = "corr")
   #Check corr.label.cutoff values
   cutoff.values <- chk.corr.lbl.cutoff(corr.label.cutoff = corr.label.cutoff)
   #Define P-value intervals
@@ -247,9 +253,9 @@ ggvolcano.corr <- function(
   #Convert as a data.table
   if(!is.data.table(data)){ data<-as.data.table(data) }
   #Check & format data.table
-  data <- chk.dt(data = data)
+  data <- chk.dt(data = data, data.type = "corr")
   #Check corr.label.cutoff values
-  cutoff.values<-chk.corr.lbl.cutoff(corr.label.cutoff = corr.label.cutoff)
+  cutoff.values <- chk.corr.lbl.cutoff(corr.label.cutoff = corr.label.cutoff)
 
   #Create shading conditions
   data[pval > p.cutoff, "P-value" := as.factor(paste0("> ", p.cutoff))]

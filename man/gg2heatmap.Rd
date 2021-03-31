@@ -261,6 +261,10 @@ text (Default: axis.text.y.left = element_blank()).}
 \item{axis.ticks.y.left}{An \code{element_line} object to setup left Y axis
 ticks
 (Default: axis.ticks.y.left = element_blank()).}
+
+\item{verbose}{A \code{logical} to display information about the
+step-by-step processing of the data if TRUE
+(Default: verbose = FALSE).}
 }
 \value{
 A \code{grob} of a heatmap plotted with ggplot2.

@@ -127,6 +127,9 @@
 #'                               numeric will apply to the
 #'                               width of vertical separations.}
 #'                        }
+#' @param verbose         A \code{logical} to display information about the
+#'                        step-by-step processing of the data if TRUE
+#'                        (Default: verbose = FALSE).
 #' @param lgd.scale.name  A \code{character} to be used as legend title for the
 #'                        heatmap scale (Default: lgd.scale.name = 'values').
 #' @param lgd.bars.name   A \code{character} specifying the name of annotation
@@ -182,9 +185,8 @@
 #' @author Yoann Pageaud.
 #' @export
 
-#TODO: Add an option to rasterize the heatmap.
+#TODO: try to improve display for the annotation when a lot of columns used.
 #TODO: Create a theme argument using the theme() function.
-#TODO: Add some data in return such as the ordered matrix.
 gg2heatmap <- function(
   m, na.handle = 'remove', dist.method = 'manhattan', rank.fun = NULL,
   top.rows = NULL, dendrograms = TRUE, dend.size = 1, raster = NULL,
@@ -278,19 +280,25 @@ gg2heatmap <- function(
                     verbose = verbose)
 
   #Handle NAs
+  if(verbose){ cat("Managing missing values...") }
   m <- manage.na(
     data = m, method = na.handle, groups = imputation.grps, ncores = ncores)
+  if(verbose){ cat("Done.\n") }
 
   #Apply ranking function if any function defined
+  if(verbose){ cat("Ranking data by rows...") }
   if(!is.null(rank.fun)){
     #TODO: improve this part to support more function with eval() & parse()
     m <- m[order(apply(m, 1, sd, na.rm = T), decreasing = TRUE), , drop = FALSE]
   }
+  if(verbose){ cat("Done.\n") }
+
   #Subset top rows if any value defined
   if(!is.null(top.rows)){ m <- head(x = m, n = top.rows) }
 
   #Remove NAs if some for dendrogram matrix
   if(method.rows != 'none' | method.cols != 'none'){
+    if(verbose){ cat("Clustering data...") }
     dend_mat <- m[complete.cases(m), ]
     if(nrow(dend_mat) != nrow(m)){
       warning(paste("Distance method selected need complete data.",
@@ -359,6 +367,11 @@ gg2heatmap <- function(
   } else { #Leave matrix unchanged
     dframe <- m
   }
+  rm(m)
+  if(method.rows != 'none' | method.cols != 'none'){
+    if(verbose){ cat("Done.\n") }
+  }
+
   #Melt Matrix into a data.table
   if(verbose){ cat("Melting matrix...") }
   dt.frame <- as.data.table(x = dframe, keep.rownames = TRUE)
@@ -372,7 +385,9 @@ gg2heatmap <- function(
     melted_mat <- merge(
       x = melted_mat, y = dt.facet, by = "variable", all.x = TRUE, sort = FALSE)
   }
+  rm(dt.frame)
   if(verbose){ cat("Done.\n") }
+
   if(verbose){ cat("Configure heatmap...") }
   #Create theme_heatmap
   theme_heatmap <- theme(
@@ -387,8 +402,8 @@ gg2heatmap <- function(
     axis.ticks.y.right = axis.ticks.y.right,
     axis.text.y.right = axis.text.y.right)
 
-  #Plot Heatmap
-  htmp <- ggplot() +
+  #Set heatmap source parameters
+  htmp.source <- ggplot() +
     scale_fill_gradientn(colours = heatmap.pal, na.value = na.col) +
     scale_color_manual(values = NA) +
     scale_x_discrete(expand = c(0, 0)) +
@@ -401,12 +416,12 @@ gg2heatmap <- function(
 
   #If facetting is on
   if(!is.null(facet)){
-    htmp <- htmp +
+    htmp <- htmp.source +
       facet_grid(. ~ facet.annot, scales = "free", space = "free") +
       theme(panel.spacing = unit(0, "lines"),
             strip.background = element_blank(),
             strip.text = element_blank())
-  }
+  } else { htmp <- htmp.source }
 
   #Display legend of missing values if any
   if(nrow(melted_mat[is.na(value)]) != 0){
@@ -438,8 +453,8 @@ gg2heatmap <- function(
   } else { htmp <- htmp + scale_y_discrete(expand = c(0, 0)) }
 
   if(verbose){ cat("Done.\n") }
-  if(verbose){ cat("Configure annotations...") }
 
+  if(verbose){ cat("Configure annotations...") }
   #Reoder groups and convert as factors
   annot.grps <- lapply(X = annot.grps, FUN = function(i){
     factor(x = i, levels =  unique(i))})
@@ -483,8 +498,8 @@ gg2heatmap <- function(
   lgd.ncol <- ceiling(lgdsizes/30)
 
   #Get ordered sample names
-  if(method.cols != "none"){ sample.names <- colnames(m[, column.order])
-  } else { sample.names <- colnames(m) }
+  if(method.cols != "none"){ sample.names <- colnames(dframe)
+  } else { sample.names <- colnames(dframe) }
 
   #Create Color Sidebar
   col_sidebar <- plot.col.sidebar(
@@ -503,14 +518,26 @@ gg2heatmap <- function(
 
   #Extract Legend
   if(verbose){ cat("Extracting legends...") }
-  htmp_legend <- get.lgd(gg2.obj = htmp + theme_heatmap)
+  #Create a subsetted plot of the original heatmap
+  xtrm.melted_mat <- melted_mat[
+    value %in% c(min(value, na.rm = TRUE), max(value, na.rm = TRUE))]
+  if(nrow(melted_mat[is.na(value)]) != 0){
+    subplot.htmp <- htmp.source +
+      geom_tile(data = xtrm.melted_mat,
+                aes(x = variable, y = rn, fill = value, color = " "))
+  } else {
+    subplot.htmp <- htmp.source +
+      geom_tile(data = xtrm.melted_mat, aes(x = variable, y = rn, fill = value))
+  }
+  htmp_legend <- get.lgd(gg2.obj = subplot.htmp + theme_heatmap)
+
   sidebar_legend <- col_sidebar$legends
   #Convert ggplots into grobs
   if(dd.cols){ ddgr_seg_col <- ggplotGrob(ddgr_seg_col) }
   if(dd.rows){ ddgr_seg_row <- ggplotGrob(ddgr_seg_row) }
   col_sidebar_grob <- ggplotGrob(col_sidebar$sidebar)
+  rm(col_sidebar)
   htmp <- htmp + theme_heatmap + theme(legend.position = "none")
-
   if(verbose){ cat("Done.\n") }
 
   #Heatmap rasterization
@@ -535,7 +562,7 @@ gg2heatmap <- function(
         if(verbose){ cat("Facet rasterization:\n") }
         ls.rasters <- lapply(
           X = levels(melted_mat$facet.annot), FUN = function(i){
-            if(verbose){ cat(paste(i,"\n")) }
+            if(verbose){ cat(paste("\t", i, "\n")) }
             #Create sub DT
             sub.melted <- melted_mat[facet.annot == i]
             #Create sub heatmap and remove all customization
@@ -554,15 +581,18 @@ gg2heatmap <- function(
                 order = 2)) +
               labs(x = x.lab, y = y.lab, fill = lgd.scale.name) + theme_empty +
               theme(legend.position = "none")
+            rm(sub.melted)
             #Rasterize ggplot into a grob
             raster.grob <- raster.ggplot.to.grob(
               gg.plot = sub.htmp, filter = raster)
+            rm(sub.htmp)
             #Make grob annotation
             raster.annot <- annotation_custom2(
               grob = raster.grob, xmin = -Inf, xmax = Inf, ymin = -Inf,
               ymax = Inf, data = melted_mat[facet.annot == i])
+            rm(raster.grob)
             return(raster.annot)
-        })
+          })
         #Fit the list of raster grobs into a ggplot
         htmp <- ggplot(
           data = melted_mat, aes(x = variable, y = rn, fill = value)) +
@@ -601,18 +631,24 @@ gg2heatmap <- function(
     } else { stop("Rasterization filter not supported.") }
     if(verbose){ cat("Done.\n") }
   }
+
+  if(verbose){ cat("Converting ggplot into grid object...") }
   htmp <- ggplotGrob(x = htmp)
-  #Resize grobs
+  if(verbose){ cat("Done.\n") }
+  #Resize grobs widths
+  if(verbose){ cat("Redimensioning grobs...") }
   if(dd.cols & dd.rows){
     ls.w.grobs <- list(
       'dd_col' = ddgr_seg_col, 'sidebar' = col_sidebar_grob, 'htmp' = htmp)
     upd.grob_w <- resize.grobs(ls.grobs = ls.w.grobs, dimensions = "widths",
                                start.unit = 4, end.unit = 7)
+    rm(ddgr_seg_col)
   } else if(dd.cols & !dd.rows){
     ls.w.grobs <- list(
       'dd_col' = ddgr_seg_col, 'sidebar' = col_sidebar_grob, 'htmp' = htmp)
     upd.grob_w <- resize.grobs(ls.grobs = ls.w.grobs, dimensions = "widths",
                                start.unit = 3, end.unit = 7)
+    rm(ddgr_seg_col)
   } else {
     ls.w.grobs <- list('sidebar' = col_sidebar_grob, 'htmp' = htmp)
     if(is.null(facet)){
@@ -621,38 +657,30 @@ gg2heatmap <- function(
     } else {
       upd.grob_w <- resize.grobs(ls.grobs = ls.w.grobs, dimensions = "widths",
                                  start.unit = 1, end.unit = 55)
-
-      # grob1 = ls.w.grobs$sidebar
-      # grob2 = ls.w.grobs$htmp
-      # # grob1$widths[3:55] <- grob2$widths[3:55]
-      # grob1$widths[3] <- grob2$widths[3]
-      # grob1$widths[4] <- grob2$widths[4]
-      # # grob1$widths[5] <- grob2$widths[5]
-      # upd.grob_w <- list('sidebar' = grob1, 'htmp' = grob2)
-
-      # ls.dim <- lapply(X = ls.w.grobs, FUN = function(i){
-      #   if(length(i$widths) < end.unit){
-      #     i[[dimensions]][start.unit:length(i$widths)]
-      #   } else { i$widths[start.unit:end.unit] }
-      # })
-      #
-      # upd.grob_w <-
     }
   }
-
+  rm(htmp, col_sidebar_grob)
+  #Resize grobs heights
   if(dd.rows){
     ls.h.grobs <- list('dd_row' = ddgr_seg_row, 'htmp' = upd.grob_w$htmp)
     upd.grob_h <- resize.grobs(ls.grobs = ls.h.grobs, dimensions = 'heights',
                                start.unit = 7, end.unit = 9)
+    rm(ddgr_seg_row)
   } else { upd.grob_h <- list("htmp" = upd.grob_w$htmp) }
+  rm(upd.grob_w$htmp)
+  if(verbose){ cat("Done.\n") }
 
   #Create the Right Panel for legends
-  sidebar_legend.grob <- stack.grobs.legends(
+  if(verbose){ cat("Stacking legends...") }
+  right.legends <- stack.grobs.legends(
     grobs.list = sidebar_legend, annot.grps = annot.grps,
     height.lgds.space = 29)
-  right.legends <- sidebar_legend.grob
+  rm(sidebar_legend)
+
+  if(verbose){ cat("Done.\n") }
 
   #Combine Dendrogram with Color Sidebar and Heatmap
+  if(verbose){ cat("Creating final plot...") }
   if(dd.rows & dd.cols){
     #Create main grob
     main_grob <- gridExtra::arrangeGrob(
@@ -692,11 +720,13 @@ gg2heatmap <- function(
       plot.title, gp = grid::gpar(fontsize = 15, font = 1)),
     grobs = list(grid::textGrob(paste0(
       "Columns ordered by ", method.cols, " distance; Rows ordered by ",
-      method.rows, " distance; ", nrow(m), " ", row.type, "."),
+      method.rows, " distance; ", nrow(dframe), " ", row.type, "."),
       gp = grid::gpar(fontsize = 12, fontface = 3L)),
       gridExtra::arrangeGrob(grobs = list(main_grob, right.legends), ncol = 2,
                              widths = c(20, def.lgd.width + lgd.space.width)),
       htmp_legend), nrow = 3, heights = c(3, 50, 6)))
+  rm(main_grob, right.legends)
+  if(verbose){ cat("Done.\n") }
   #Return the gtable of the heatmap
   return(final.plot)
 }
