@@ -13,12 +13,14 @@ fancy.hist(
   round.grad = 1,
   ncores = 1,
   bin.col = "#0570b0",
-  show.annot = FALSE
+  show.annot = FALSE,
+  facet = NULL
 )
 }
 \arguments{
-\item{x}{A \code{numeric} vector to be used for plotting the
-histogram.}
+\item{x}{A \code{numeric} or \code{character} vector to be used for
+plotting the histogram (if x is a character vector, 'xmax',
+'ngrad' and 'round.grad' will not be available).}
 
 \item{xmax}{A \code{numeric} specifying the maximum limit on the X-axis
 to display values. All values above this limit will be
@@ -45,6 +47,10 @@ fill the histogram bins (Default: bin.col = "#0570b0").}
 \item{show.annot}{A \code{logical} specifying whether the median and the
 cut-off annotation should be displayed (show.annot = TRUE)
 or not (Default: show.annot = FALSE).}
+
+\item{facet}{A \code{numeric} or \code{character} vector of n levels to
+be used to generate n histograms in separate panels (Only
+works if x is a character vector).}
 }
 \value{
 A \code{gg} plot of an histogram.

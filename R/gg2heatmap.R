@@ -185,8 +185,11 @@
 #' @author Yoann Pageaud.
 #' @export
 
-#TODO: try to improve display for the annotation when a lot of columns used.
+#TODO: Try to improve display for the annotation when a lot of columns used (try geom_raster()).
 #TODO: Create a theme argument using the theme() function.
+#TODO: Create a guide argument using guide().
+#TODO: Add option to change final resolution of rasterized heatmap.
+#TODO: Add some objects in return (Heatmap, Annotation & Dendrograms)
 gg2heatmap <- function(
   m, na.handle = 'remove', dist.method = 'manhattan', rank.fun = NULL,
   top.rows = NULL, dendrograms = TRUE, dend.size = 1, raster = NULL,
@@ -667,7 +670,6 @@ gg2heatmap <- function(
                                start.unit = 7, end.unit = 9)
     rm(ddgr_seg_row)
   } else { upd.grob_h <- list("htmp" = upd.grob_w$htmp) }
-  rm(upd.grob_w$htmp)
   if(verbose){ cat("Done.\n") }
 
   #Create the Right Panel for legends
@@ -714,6 +716,7 @@ gg2heatmap <- function(
     #Set default legend width space
     def.lgd.width <- 1
   }
+  rm(upd.grob_w, upd.grob_h)
   #Final plot
   final.plot <- gridExtra::grid.arrange(gridExtra::arrangeGrob(
     top = grid::textGrob(
