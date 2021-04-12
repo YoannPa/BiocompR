@@ -33,6 +33,8 @@ Currently the package BiocompR contains **19 functions**:
 * `ks.plot()` - Computes pairwise Kolmogorov-Smirnov tests on a matrix and display results in a fused plot.  
 * `load.palettes()` - Loads pre-defined palettes.  
 * `plot.col.sidebar()` - Creates a colored side annotation bars in ggplot2.  
+* `raster.ggplot.to.grob()` - Rasterize a gg plot into a raster grob.  
+* `resize.grob.oneway()` - Resizes heights or widths of a grob based on the dimensions of another grob.  
 * `resize.grobs()` - Resizes heights or widths of multiple grobs based on a given grob dimensions.  
 * `sunset()` - Draws a sunset plot showing the completeness of a dataset.  
 * `warn.handle()` - Filters unrelevant warnings matching a regular expression.  

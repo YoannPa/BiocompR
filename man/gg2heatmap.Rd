@@ -267,7 +267,8 @@ step-by-step processing of the data if TRUE
 (Default: verbose = FALSE).}
 }
 \value{
-A \code{grob} of a heatmap plotted with ggplot2.
+A \code{grob} list containing the final plot, and also each grob
+        generated separately.
 }
 \description{
 Creates a custom heatmap with dendrograms and annotations.

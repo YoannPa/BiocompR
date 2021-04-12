@@ -263,16 +263,16 @@ basic.sidebar <- function(
           plot.margin = margin(0, 0, 0, 0),
           # strip.background = element_blank(),
           # strip.text = element_blank()
-          ) +
+    ) +
     scale_fill_manual(values = as.character(palette)) +
     guides(fill = guide_legend(ncol = lgd.ncol, byrow = TRUE))
-
+  
   if(!is.null(facet)){
     #Add faceting
     dt.facet <- data[.id == facet]
     dt.facet[, facet.annot := Groups]
     data <- merge(x = data, y = dt.facet[, c("Samples", "facet.annot"), ],
-          by = "Samples", all.x = TRUE)
+                  by = "Samples", all.x = TRUE)
     #Plot annotation bar with facet
     basic <- basic + geom_tile(data = data, mapping = aes(
       x = Samples, y = .id, fill = Groups, height = 1 - annot.sep,
@@ -374,7 +374,7 @@ plot.col.sidebar <- function(
   axis.text.x = element_text(size = 12), axis.text.y = element_text(size = 12),
   axis.ticks.x, axis.ticks.y, axis.title.x, axis.title.y, set.x.title,
   set.y.title, dendro.pos, facet = NULL){
-
+  
   #Create list of groups in their original order
   origin.grps <- lapply(X = annot.grps, FUN = function(i){
     if(is.factor(i)){ levels(i) } else { levels(as.factor(i)) }
@@ -420,7 +420,7 @@ plot.col.sidebar <- function(
   } else { #If not a list or a vector
     stop("Unknown type for 'annot.pal'. 'annot.pal' should be either a list or a vector.")
   }
-
+  
   #Create list of annotation data.frames
   dframe.annot <- lapply(annot.grps, function(i){
     data.frame("Samples" = sample.names, "Groups" = i)
@@ -444,7 +444,7 @@ plot.col.sidebar <- function(
       x = dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
   }
   # }
-
+  
   #Check color tables
   col_table <- lapply(X = col_table, FUN = function(tbl){
     if(any(duplicated(tbl$Cols))){ #Check palette consistency
@@ -517,7 +517,7 @@ plot.col.sidebar <- function(
         dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
     }
     # }
-
+    
     #Generate separate legends if more than 1 palette available
     # or if only 1 annotation is used
     if((is.list(annot.pal) & length(annot.pal) > 1) |
@@ -582,30 +582,24 @@ resize.grobs <- function(ls.grobs, dimensions, start.unit, end.unit){
 #'                   modifications.
 #' @param dimensions A \code{character} specifying the type of dimensions to
 #'                   resize, either 'heights' or 'widths'.
+#' @param positions  An \code{integer} vector specifying indexes of the
+#'                   dimensions to change.
 #' @return A \code{grob} for which the dimensions have been modified.
 #' @author Yoann Pageaud.
 #' @export
 
-resize.grobs.oneway <- function(grob1, grob2, dimensions){
+resize.grob.oneway <- function(grob1, grob2, dimensions, positions){
   #Get dimension units from the list of grobs to redimension
-  ls.dim <- lapply(X = ls.grobs, FUN = function(i){
-    if(length(i[[dimensions]]) < end.unit){
-      i[[dimensions]][start.unit:length(i[[dimensions]])]
-    } else { i[[dimensions]][start.unit:end.unit] }
-  })
-  #Calculate maximum of all unit objects including the main grob.
-  max.dim <- eval(parse(
-    text = paste("grid::unit.pmax(",paste(paste(
-      rep("ls.dim[[",length(ls.dim)), seq(length(ls.dim)),"]]", sep = ""),
-      collapse = ", "), ")", sep = "")))
-  #Apply changes to grobs dimensions
-  ls.grobs <- lapply(X = ls.grobs, FUN = function(i){
-    i[[dimensions]][start.unit:end.unit] <- as.list(max.dim)
-    i
-  })
-  return(ls.grobs)
+  if(max(positions) > length(grob2[[dimensions]]) | min(positions) < 1){
+    stop("positions out of range in grob2.")
+  }
+  if(max(positions) > length(grob1[[dimensions]])){
+    warning("some positions out of range in grob1 ignored.")
+    positions <- positions[positions <= length(grob1[[dimensions]])]
+  }
+  grob1[[dimensions]][positions] <- grob2[[dimensions]][positions]
+  return(grob1)
 }
-
 
 #' Stack grobs legends vertically in separate spaces of specific heights
 #'
