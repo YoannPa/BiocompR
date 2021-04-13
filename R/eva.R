@@ -12,7 +12,7 @@
 var.accounted <- function(colname, eigen.values){
   vect.num <- gsub(pattern = "[^0-9.]", replacement = "", x = colname)
   var.accounted <- round(
-    eigen.values[as.integer(vect.num)]/length(eigen.values)*100,2)
+    eigen.values[as.integer(vect.num)]/length(eigen.values)*100, 2)
   paste0("Eigenvector ", vect.num,
          " (Variance accounted = ", var.accounted, "%)")
 }
@@ -43,25 +43,27 @@ var.accounted <- function(colname, eigen.values){
 #' @export
 
 ggeigenvector <- function(
+  #TODO: Replace aes_string() by aes()
   data, xcol, ycol, eigenvalues, colors, label = TRUE, title){
-  ev.plot <- ggplot(data = data) +
-    ggtitle(title) +
-    geom_point(aes_string(x = xcol, y = ycol, color = "Groups")) +
-    geom_segment(aes_string(xend = xcol, yend = ycol, color = "Groups"),
-                 x = 0, y = 0, size = 1,
-                 arrow = grid::arrow(length = grid::unit(0.3, "cm"))) +
-    scale_color_manual(values = colors) +
-    xlab(var.accounted(colname = xcol, eigen.values = eigenvalues)) +
-    ylab(var.accounted(colname = ycol, eigen.values = eigenvalues)) +
-    theme(plot.title = element_text(hjust = 0.5),
-          axis.title = element_text(size = 13),
-          legend.text = element_text(size=12)) +
-    geom_hline(yintercept = 0, linetype = "dashed") +
-    geom_vline(xintercept = 0, linetype = "dashed")
+  ev.plot <- ggplot2::ggplot(data = data) +
+    ggplot2::ggtitle(title) +
+    ggplot2::geom_point(
+      ggplot2::aes_string(x = xcol, y = ycol, color = "Groups")) +
+    ggplot2::geom_segment(
+      ggplot2::aes_string(xend = xcol, yend = ycol, color = "Groups"), x = 0,
+      y = 0, size = 1, arrow = grid::arrow(length = grid::unit(0.3, "cm"))) +
+    ggplot2::scale_color_manual(values = colors) +
+    ggplot2::labs(
+      x = BiocompR::var.accounted(colname = xcol, eigen.values = eigenvalues),
+      y = BiocompR::var.accounted(colname = ycol, eigen.values = eigenvalues)) +
+    ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5),
+                   axis.title = ggplot2::element_text(size = 13),
+                   legend.text = ggplot2::element_text(size = 12)) +
+    ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
+    ggplot2::geom_vline(xintercept = 0, linetype = "dashed")
   if(label){
-    ev.plot <- ev.plot +
-      ggrepel::geom_label_repel(aes_string(x = xcol, y = ycol,
-                                           label = "Labels"))
+    ev.plot <- ev.plot + ggrepel::geom_label_repel(
+      ggplot2::aes_string(x = xcol, y = ycol, label = "Labels"))
   }
   ev.plot
 }
@@ -110,7 +112,8 @@ EVA <- function(data, use = "pairwise", method = "pearson", adjust = "none",
   #How many eigenvalues are above the minimum threshold for variance accounted
   true.eigvals <- length(var.acc[var.acc >= var.min])
   if(true.eigvals == 0){
-    stop("No eigenvalues accounting for more than the var.min minimum of the variance. Please set a lower var.min.")
+    stop(paste("No eigenvalues accounting for more than the var.min minimum of",
+               "the variance. Please set a lower var.min."))
   }
   #Get eigenvectors
   eigvects <- as.data.frame(eigen(M)$vectors[, c(1:true.eigvals)])
@@ -126,10 +129,11 @@ EVA <- function(data, use = "pairwise", method = "pearson", adjust = "none",
   list_EVplots <- lapply(my_cols, function(col1){
     lapply(my_cols, function(col2){
       if(col1 == col2){ return(NULL) } else {
-        ggeigenvector(data = dframe, eigenvalues = eigvals, xcol = col1,
-                      ycol = col2, colors = colors, label = label,
-                      title = paste("Eigenvector Plot - Pairwise",method,
-                                    "correlation with", adjust, "adjustment"))
+        BiocompR::ggeigenvector(
+          data = dframe, eigenvalues = eigvals, xcol = col1, ycol = col2,
+          colors = colors, label = label, title = paste(
+            "Eigenvector Plot - Pairwise", method, "correlation with", adjust,
+            "adjustment"))
       }
     })
   })
@@ -139,7 +143,7 @@ EVA <- function(data, use = "pairwise", method = "pearson", adjust = "none",
   list_EVplots <- Filter(Negate(is.null), list_EVplots)
   names(list_EVplots) <- paste(combs[,1], "&", combs[, 2])
   #Scaling the matrix values.
-  data <- scale(data[complete.cases(data), ])
+  data <- scale(data[stats::complete.cases(data), ])
   #Matricial product of scaled values and eigenvectors.
   pca.scores <- data %*% eigen(M)$vectors
   colnames(pca.scores) <- paste("EV", seq(ncol(data)), sep = "")

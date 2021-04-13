@@ -15,11 +15,11 @@
   merge.lgd = FALSE,
   right = FALSE,
   lgd.name = "Legends",
-  lgd.title = element_blank(),
-  lgd.text = element_blank(),
+  lgd.title = ggplot2::element_blank(),
+  lgd.text = ggplot2::element_blank(),
   lgd.ncol = 1,
-  axis.text.x = element_text(size = 12),
-  axis.text.y = element_text(size = 12),
+  axis.text.x = ggplot2::element_text(size = 12),
+  axis.text.y = ggplot2::element_text(size = 12),
   axis.ticks.x,
   axis.ticks.y,
   axis.title.x,
@@ -79,19 +79,19 @@ the plot, only if 'merge.lgd' = TRUE
 (Default: lgd.name = "Legends").}
 
 \item{lgd.title}{An \code{element_text} object to setup legend titles
-(Default: lgd.title = element_blank()).}
+(Default: lgd.title = ggplot2::element_blank()).}
 
 \item{lgd.text}{An \code{element_text} object to setup legend labels
-(Default: lgd.text = element_blank()).}
+(Default: lgd.text = ggplot2::element_blank()).}
 
 \item{lgd.ncol}{An \code{integer} specifying the number of columns to be
 used to display a legend (Default: lgd.ncol = 1).}
 
 \item{axis.text.x}{An \code{element_text} object to setup X axis text
-(Default: axis.text.x = element_text(size = 12)).}
+(Default: axis.text.x = ggplot2::element_text(size = 12)).}
 
 \item{axis.text.y}{An \code{element_text} object to setup Y axis text
-(Default: axis.text.y = element_text(size = 12)).}
+(Default: axis.text.y = ggplot2::element_text(size = 12)).}
 
 \item{axis.ticks.x}{An \code{element_line} object to setup X axis ticks.}
 
@@ -100,17 +100,17 @@ used to display a legend (Default: lgd.ncol = 1).}
 \item{axis.title.x}{An \code{element_text} object to setup X axis title.
 \itemize{Exceptions:
  \item{If annot.pos == 'left', then axis.title.x =
- element_blank().}
+ ggplot2::element_blank().}
  \item{If annot.pos == dendro.pos == 'top', then
- axis.title.x = element_blank().}
+ axis.title.x = ggplot2::element_blank().}
 }}
 
 \item{axis.title.y}{An \code{element_text} object to setup Y axis title.
 \itemize{Exceptions:
  \item{If annot.pos == 'top', then axis.title.y =
- element_blank().}
+ ggplot2::element_blank().}
  \item{If annot.pos == dendro.pos == 'left', then
- axis.title.y = element_blank().}
+ axis.title.y = ggplot2::element_blank().}
 }}
 
 \item{set.x.title}{A \code{character}to be used as the title for the X axis.}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/core_ggplot_fun.R
 \name{resize.grob.oneway}
 \alias{resize.grob.oneway}
-\title{Resizes heights or widths of a grob based on the dimensions of another grob}
+\title{Resizes heights or widths of a grob based on the dimensions of another grob.}
 \usage{
 resize.grob.oneway(grob1, grob2, dimensions, positions)
 }
@@ -22,7 +22,7 @@ dimensions to change.}
 A \code{grob} for which the dimensions have been modified.
 }
 \description{
-Resizes heights or widths of a grob based on the dimensions of another grob
+Resizes heights or widths of a grob based on the dimensions of another grob.
 }
 \author{
 Yoann Pageaud.

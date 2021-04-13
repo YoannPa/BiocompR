@@ -2,7 +2,7 @@
 % Please edit documentation in R/core_ggplot_fun.R
 \name{raster.ggplot.to.grob}
 \alias{raster.ggplot.to.grob}
-\title{Rasterize a gg plot into a raster grob}
+\title{Rasterize a gg plot into a raster grob.}
 \usage{
 raster.ggplot.to.grob(gg.plot, filter = "Lanczos")
 }
@@ -19,7 +19,7 @@ rasterization may take several minutes to process the ggplot.}
 A \code{grob} of the rasterized ggplot.
 }
 \description{
-Rasterize a gg plot into a raster grob
+Rasterize a gg plot into a raster grob.
 }
 \author{
 Yoann Pageaud.

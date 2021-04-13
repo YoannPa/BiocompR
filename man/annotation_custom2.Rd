@@ -3,7 +3,7 @@
 \name{annotation_custom2}
 \alias{annotation_custom2}
 \title{This is a special geom intended for use as static annotations derived from
-ggplot2::annotation_custom() matching a specific panel on a faceted ggplot}
+ggplot2::annotation_custom() matching a specific panel on a faceted ggplot.}
 \usage{
 annotation_custom2(
   grob,
@@ -31,6 +31,6 @@ A \code{type} object returned description.
 }
 \description{
 This is a special geom intended for use as static annotations derived from
-ggplot2::annotation_custom() matching a specific panel on a faceted ggplot
+ggplot2::annotation_custom() matching a specific panel on a faceted ggplot.
 }
 \keyword{internal}

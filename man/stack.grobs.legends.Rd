@@ -2,7 +2,7 @@
 % Please edit documentation in R/core_ggplot_fun.R
 \name{stack.grobs.legends}
 \alias{stack.grobs.legends}
-\title{Stack grobs legends vertically in separate spaces of specific heights}
+\title{Stack grobs legends vertically in separate spaces of specific heights.}
 \usage{
 \method{stack}{grobs.legends}(grobs.list, annot.grps, height.lgds.space)
 }
@@ -19,7 +19,7 @@ grobs.list.}
 A \code{grob} containing all legends with their respective heights.
 }
 \description{
-Stack grobs legends vertically in separate spaces of specific heights
+Stack grobs legends vertically in separate spaces of specific heights.
 }
 \author{
 Yoann Pageaud.

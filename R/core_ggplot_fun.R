@@ -69,7 +69,8 @@ check.annotations <- function(data, annot.grps, annot.pal, verbose = FALSE){
   } else if(is.vector(annot.pal)){ #if a single palette is provided
     invisible(lapply(seq_along(annot.grps), function(i){
       if(length(levels(as.factor(annot.grps[[i]]))) != length(annot.pal)){
-        if(all.equal(target = annot.pal, current = rainbow(n = ncol(m)))){
+        if(all.equal(
+          target = annot.pal, current = grDevices::rainbow(n = ncol(m)))){
           stop(paste("A specific palette must be defined in 'annot.pal' to",
                      "match the annotation provided."))
         } else {
@@ -107,7 +108,7 @@ is.elt_blank <- function(arg){
 #' @references \href{https://github.com/tidyverse/ggplot2/wiki/Share-a-legend-between-two-ggplot2-graphs}{Share a legend between two ggplot2 graphs - Mara Averick}
 
 get.lgd <- function(gg2.obj){
-  tmp <- ggplot_gtable(ggplot_build(gg2.obj))
+  tmp <- ggplot2::ggplot_gtable(ggplot2::ggplot_build(gg2.obj))
   leg <- which(vapply(X = tmp$grobs, FUN = function(x) x$name,
                       FUN.VALUE = character(length = 1)) == "guide-box")
   legend <- tmp$grobs[[leg]]
@@ -130,26 +131,31 @@ get.lgd <- function(gg2.obj){
 #' @export
 
 ggdend <- function(df, orientation, reverse.x = FALSE) {
-  ddplot <- ggplot() +
-    geom_segment(data = df, aes(x = x, y = y, xend = xend, yend = yend)) +
-    theme(axis.title = element_blank(), axis.text = element_blank(),
-          axis.ticks = element_blank(), panel.grid = element_blank(),
-          panel.background = element_rect(fill = "transparent"),
-          plot.background = element_rect(fill = "transparent"),
-          axis.ticks.length = unit(0, "pt")) +
-    expand_limits(x = c(0.5, max(df$x) + 0.5), y = 0)
+  ddplot <- ggplot2::ggplot() +
+    ggplot2::geom_segment(
+      data = df, ggplot2::aes(x = x, y = y, xend = xend, yend = yend)) +
+    ggplot2::theme(
+      axis.title = ggplot2::element_blank(),
+      axis.text = ggplot2::element_blank(),
+      axis.ticks = ggplot2::element_blank(),
+      panel.grid = ggplot2::element_blank(),
+      panel.background = ggplot2::element_rect(fill = "transparent"),
+      plot.background = ggplot2::element_rect(fill = "transparent"),
+      axis.ticks.length = ggplot2::unit(0, "pt")) +
+    ggplot2::expand_limits(x = c(0.5, max(df$x) + 0.5), y = 0)
   if(orientation == "top"){
     ddplot <- ddplot +
-      scale_x_continuous(expand = c(0, 0)) +
-      theme(plot.margin = unit(c(0.1, 0, 0, 0), "cm")) +
-      scale_y_continuous(expand = c(0, 0))
+      ggplot2::scale_x_continuous(expand = c(0, 0)) +
+      ggplot2::theme(plot.margin = ggplot2::unit(c(0.1, 0, 0, 0), "cm")) +
+      ggplot2::scale_y_continuous(expand = c(0, 0))
   } else if(orientation == "left"){
     ddplot <- ddplot +
-      theme(plot.margin = unit(c(0, 0, 0, 0.1), "cm")) +
-      scale_y_reverse(expand = c(0, 0)) +
-      coord_flip()
-    if(reverse.x){ ddplot <- ddplot + scale_x_reverse(expand = c(0, 0)) }
-    else { ddplot <- ddplot + scale_x_continuous(expand = c(0, 0)) }
+      ggplot2::theme(plot.margin = ggplot2::unit(c(0, 0, 0, 0.1), "cm")) +
+      ggplot2::scale_y_reverse(expand = c(0, 0)) +
+      ggplot2::coord_flip()
+    if(reverse.x){
+      ddplot <- ddplot + ggplot2::scale_x_reverse(expand = c(0, 0))
+    } else { ddplot <- ddplot + ggplot2::scale_x_continuous(expand = c(0, 0)) }
   } else { stop("dendrogram's orientation value not supported by ggdend().") }
   return(ddplot)
 }
@@ -207,30 +213,27 @@ basic.ggplot.tri<-function(melt.tri, grid.col, grid.thickness, lgd.title,
                            lgd.round, lgd.ticks, lgd.nbin, lgd.height,lgd.width,
                            rasteri, lgd.ticks.linewidth, lgd.frame.col,
                            lgd.frame.linewidth, diag.col, set.lgd.title){
-  ggplot() +
-    geom_tile(data = melt.tri, aes(x=Var1, y=Var2, fill = value),
-              color = grid.col, size=grid.thickness) +
-    theme(legend.title = lgd.title,
-          legend.text = lgd.text,
-          legend.justification = c(1, 0),
-          plot.margin = margin(0, 0, 0, 0),
-          panel.grid = element_blank(),
-          panel.background = element_rect(fill = "transparent"),
-          plot.background = element_rect(fill = "transparent")) +
-    scale_x_discrete(position = "top",expand = c(0,0)) +
-    scale_y_discrete(expand = c(0,0)) +
-    scale_fill_gradientn(colours = lgd.pal,
-                         breaks = seq(min_tri,max_tri,length.out = lgd.breaks),
-                         labels = round(seq(
-                           min_tri,max_tri,length.out = lgd.breaks),lgd.round),
-                         guide=guide_colourbar(
-                           ticks=lgd.ticks, nbin=lgd.nbin, barheight=lgd.height,
-                           label=TRUE, barwidth=lgd.width, raster = rasteri,
-                           ticks.linewidth = lgd.ticks.linewidth,
-                           frame.colour = lgd.frame.col,
-                           frame.linewidth = lgd.frame.linewidth),
-                         na.value = diag.col, limits=c(min_tri,max_tri),
-                         name = set.lgd.title)
+  ggplot2::ggplot() +
+    ggplot2::geom_tile(
+      data = melt.tri, ggplot2::aes(x = Var1, y = Var2, fill = value),
+      color = grid.col, size=grid.thickness) +
+    ggplot2::theme(
+      legend.title = lgd.title, legend.text = lgd.text,
+      legend.justification = c(1, 0), plot.margin = ggplot2::margin(0, 0, 0, 0),
+      panel.grid = ggplot2::element_blank(),
+      panel.background = ggplot2::element_rect(fill = "transparent"),
+      plot.background = ggplot2::element_rect(fill = "transparent")) +
+    ggplot2::scale_x_discrete(position = "top",expand = c(0, 0)) +
+    ggplot2::scale_y_discrete(expand = c(0, 0)) +
+    ggplot2::scale_fill_gradientn(
+      colours = lgd.pal, breaks = seq(min_tri, max_tri,length.out = lgd.breaks),
+      labels = round(seq(min_tri, max_tri, length.out = lgd.breaks), lgd.round),
+      guide = ggplot2::guide_colourbar(
+        ticks = lgd.ticks, nbin = lgd.nbin, barheight = lgd.height,
+        label = TRUE, barwidth = lgd.width, raster = rasteri,
+        ticks.linewidth = lgd.ticks.linewidth, frame.colour = lgd.frame.col,
+        frame.linewidth = lgd.frame.linewidth), na.value = diag.col,
+      limits = c(min_tri, max_tri), name = set.lgd.title)
 }
 
 #' Draws a ggplot2 of a basic sidebar.
@@ -251,22 +254,22 @@ basic.ggplot.tri<-function(melt.tri, grid.col, grid.thickness, lgd.title,
 
 basic.sidebar <- function(
   data, palette, annot.sep = 0, annot.cut = 0, lgd.ncol = 1, facet = NULL){
-  basic <- ggplot() +
-    theme(legend.justification = c(0, 1),
-          legend.position = c(0, 1),
-          legend.spacing.y = unit(0.05, 'cm'),
-          # legend.text = element_text(size = 12),
-          # legend.title = element_text(size = 12),
-          # legend.margin = margin(-35,0,0,-35), #Seems to fit in grid
-          axis.text = element_text(size = 12),
-          panel.grid = element_blank(),
-          plot.margin = margin(0, 0, 0, 0),
-          # strip.background = element_blank(),
-          # strip.text = element_blank()
+  basic <- ggplot2::ggplot() +
+    ggplot2::theme(legend.justification = c(0, 1),
+                   legend.position = c(0, 1),
+                   legend.spacing.y = ggplot2::unit(0.05, 'cm'),
+                   # legend.text = element_text(size = 12),
+                   # legend.title = element_text(size = 12),
+                   # legend.margin = margin(-35,0,0,-35), #Seems to fit in grid
+                   axis.text = ggplot2::element_text(size = 12),
+                   panel.grid = ggplot2::element_blank(),
+                   plot.margin = ggplot2::margin(0, 0, 0, 0),
+                   # strip.background = element_blank(),
+                   # strip.text = element_blank()
     ) +
-    scale_fill_manual(values = as.character(palette)) +
-    guides(fill = guide_legend(ncol = lgd.ncol, byrow = TRUE))
-  
+    ggplot2::scale_fill_manual(values = as.character(palette)) +
+    ggplot2::guides(fill = ggplot2::guide_legend(ncol = lgd.ncol, byrow = TRUE))
+
   if(!is.null(facet)){
     #Add faceting
     dt.facet <- data[.id == facet]
@@ -274,14 +277,15 @@ basic.sidebar <- function(
     data <- merge(x = data, y = dt.facet[, c("Samples", "facet.annot"), ],
                   by = "Samples", all.x = TRUE)
     #Plot annotation bar with facet
-    basic <- basic + geom_tile(data = data, mapping = aes(
+    basic <- basic + ggplot2::geom_tile(data = data, mapping = ggplot2::aes(
       x = Samples, y = .id, fill = Groups, height = 1 - annot.sep,
       width = 1 - annot.cut)) +
-      facet_grid(. ~ facet.annot, scales = "free", space = "free") +
-      theme(panel.spacing = unit(0, "lines"),
-            strip.background = element_rect(color = "black", size = 0.5))
+      ggplot2::facet_grid(. ~ facet.annot, scales = "free", space = "free") +
+      ggplot2::theme(
+        panel.spacing = ggplot2::unit(0, "lines"),
+        strip.background = ggplot2::element_rect(color = "black", size = 0.5))
   } else {
-    basic <- basic + geom_tile(data = data, mapping = aes(
+    basic <- basic + ggplot2::geom_tile(data = data, mapping = ggplot2::aes(
       x = Samples, y = .id, fill = Groups, height = 1 - annot.sep,
       width = 1 - annot.cut))
   }
@@ -328,30 +332,30 @@ basic.sidebar <- function(
 #'                     the plot, only if 'merge.lgd' = TRUE
 #'                     (Default: lgd.name = "Legends").
 #' @param lgd.title    An \code{element_text} object to setup legend titles
-#'                     (Default: lgd.title = element_blank()).
+#'                     (Default: lgd.title = ggplot2::element_blank()).
 #' @param lgd.text     An \code{element_text} object to setup legend labels
-#'                     (Default: lgd.text = element_blank()).
+#'                     (Default: lgd.text = ggplot2::element_blank()).
 #' @param lgd.ncol     An \code{integer} specifying the number of columns to be
 #'                     used to display a legend (Default: lgd.ncol = 1).
 #' @param axis.text.x  An \code{element_text} object to setup X axis text
-#'                     (Default: axis.text.x = element_text(size = 12)).
+#'                     (Default: axis.text.x = ggplot2::element_text(size = 12)).
 #' @param axis.text.y  An \code{element_text} object to setup Y axis text
-#'                     (Default: axis.text.y = element_text(size = 12)).
+#'                     (Default: axis.text.y = ggplot2::element_text(size = 12)).
 #' @param axis.ticks.x An \code{element_line} object to setup X axis ticks.
 #' @param axis.ticks.y An \code{element_line} object to setup Y axis ticks.
 #' @param axis.title.x An \code{element_text} object to setup X axis title.
 #'                     \itemize{Exceptions:
 #'                      \item{If annot.pos == 'left', then axis.title.x =
-#'                      element_blank().}
+#'                      ggplot2::element_blank().}
 #'                      \item{If annot.pos == dendro.pos == 'top', then
-#'                      axis.title.x = element_blank().}
+#'                      axis.title.x = ggplot2::element_blank().}
 #'                     }
 #' @param axis.title.y An \code{element_text} object to setup Y axis title.
 #'                     \itemize{Exceptions:
 #'                      \item{If annot.pos == 'top', then axis.title.y =
-#'                      element_blank().}
+#'                      ggplot2::element_blank().}
 #'                      \item{If annot.pos == dendro.pos == 'left', then
-#'                      axis.title.y = element_blank().}
+#'                      axis.title.y = ggplot2::element_blank().}
 #'                     }
 #' @param set.x.title  A \code{character}to be used as the title for the X axis.
 #' @param set.y.title  A \code{character}to be used as the title for the Y axis.
@@ -370,11 +374,12 @@ plot.col.sidebar <- function(
   #TODO: change name of parameter cor.order to see if it can be remove
   sample.names, annot.grps, annot.pal, annot.pos = 0, annot.sep = 0, annot.cut,
   cor.order, merge.lgd = FALSE, right = FALSE, lgd.name = "Legends",
-  lgd.title = element_blank(), lgd.text = element_blank(), lgd.ncol = 1,
-  axis.text.x = element_text(size = 12), axis.text.y = element_text(size = 12),
-  axis.ticks.x, axis.ticks.y, axis.title.x, axis.title.y, set.x.title,
-  set.y.title, dendro.pos, facet = NULL){
-  
+  lgd.title = ggplot2::element_blank(), lgd.text = ggplot2::element_blank(),
+  lgd.ncol = 1, axis.text.x = ggplot2::element_text(size = 12),
+  axis.text.y = ggplot2::element_text(size = 12), axis.ticks.x, axis.ticks.y,
+  axis.title.x, axis.title.y, set.x.title, set.y.title, dendro.pos,
+  facet = NULL){
+
   #Create list of groups in their original order
   origin.grps <- lapply(X = annot.grps, FUN = function(i){
     if(is.factor(i)){ levels(i) } else { levels(as.factor(i)) }
@@ -420,7 +425,7 @@ plot.col.sidebar <- function(
   } else { #If not a list or a vector
     stop("Unknown type for 'annot.pal'. 'annot.pal' should be either a list or a vector.")
   }
-  
+
   #Create list of annotation data.frames
   dframe.annot <- lapply(annot.grps, function(i){
     data.frame("Samples" = sample.names, "Groups" = i)
@@ -434,7 +439,7 @@ plot.col.sidebar <- function(
     i
   })
   #Rbind all annotations
-  dframe.annot <- rbindlist(dframe.annot, idcol = TRUE)
+  dframe.annot <- data.table::rbindlist(dframe.annot, idcol = TRUE)
   #Convert .id as factors
   dframe.annot$.id <- factor(
     x = dframe.annot$.id, levels = unique(dframe.annot$.id))
@@ -444,7 +449,7 @@ plot.col.sidebar <- function(
       x = dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
   }
   # }
-  
+
   #Check color tables
   col_table <- lapply(X = col_table, FUN = function(tbl){
     if(any(duplicated(tbl$Cols))){ #Check palette consistency
@@ -455,7 +460,7 @@ plot.col.sidebar <- function(
       tbl <- tbl[!duplicated(Grps)]
     } else { tbl }
   })
-  col_table <- rbindlist(col_table, idcol = TRUE)
+  col_table <- data.table::rbindlist(col_table, idcol = TRUE)
   if(is.vector(annot.pal)){
     if(any(duplicated(col_table$Cols))){ #Check palette consistency
       # warning(paste(
@@ -469,47 +474,59 @@ plot.col.sidebar <- function(
   #   col_table <- col_table[!duplicated(Grps)]
   # }
   #Plot color sidebars
-  col_sidebar <- basic.sidebar(
+  col_sidebar <- BiocompR::basic.sidebar(
     data = dframe.annot, palette = col_table$Cols, annot.sep = annot.sep,
     annot.cut = annot.cut, lgd.ncol = lgd.ncol, facet = facet)
   #Add legend parameters if some
-  col_sidebar <- col_sidebar + theme(legend.title = lgd.title)
+  col_sidebar <- col_sidebar + ggplot2::theme(legend.title = lgd.title)
   #Modify base plot following its position
   if(annot.pos == "top"){
     col_sidebar <- col_sidebar +
-      theme(axis.text.x.top = axis.text.x, axis.text.y = axis.text.y,
-            axis.ticks.x = axis.ticks.x, axis.ticks.y = axis.ticks.y) +
-      scale_x_discrete(expand = c(0, 0), position = "top") + xlab(set.x.title)
+      ggplot2::theme(axis.text.x.top = axis.text.x, axis.text.y = axis.text.y,
+                     axis.ticks.x = axis.ticks.x, axis.ticks.y = axis.ticks.y) +
+      ggplot2::scale_x_discrete(expand = c(0, 0), position = "top") +
+      ggplot2::xlab(set.x.title)
     if(right){
       col_sidebar <- col_sidebar +
-        scale_y_discrete(position = 'right', expand = c(0, 0))
-    } else { col_sidebar <- col_sidebar + scale_y_discrete(expand = c(0, 0)) }
+        ggplot2::scale_y_discrete(position = 'right', expand = c(0, 0))
+    } else {
+      col_sidebar <- col_sidebar + ggplot2::scale_y_discrete(expand = c(0, 0))
+    }
     if(dendro.pos != "top"){
-      col_sidebar<-col_sidebar +
-        theme(axis.title.x = axis.title.x, axis.title.y = element_blank())
-    } else { col_sidebar <- col_sidebar + theme(axis.title = element_blank()) }
+      col_sidebar <- col_sidebar +
+        ggplot2::theme(axis.title.x = axis.title.x,
+                       axis.title.y = ggplot2::element_blank())
+    } else {
+      col_sidebar <- col_sidebar +
+        ggplot2::theme(axis.title = ggplot2::element_blank())
+    }
     # if(split.annot){
     #   col_sidebar <- col_sidebar +
     #     facet_grid(.id ~ ., scales = "free", space = "free_y")
     # }
   } else if(annot.pos == "left"){
     col_sidebar <- col_sidebar +
-      coord_flip() +
-      theme(axis.text.y = axis.text.y, axis.ticks.y = axis.ticks.y,
-            axis.text.x.top = axis.text.x) +
-      scale_x_discrete(expand = c(0, 0)) +
-      scale_y_discrete(expand = c(0, 0), position = "right") +
-      xlab(set.y.title)
+      ggplot2::coord_flip() +
+      ggplot2::theme(axis.text.y = axis.text.y, axis.ticks.y = axis.ticks.y,
+                     axis.text.x.top = axis.text.x) +
+      ggplot2::scale_x_discrete(expand = c(0, 0)) +
+      ggplot2::scale_y_discrete(expand = c(0, 0), position = "right") +
+      ggplot2::xlab(set.y.title)
     if(dendro.pos !="left"){
-      col_sidebar<-col_sidebar +
-        theme(axis.title.x = element_blank(), axis.title.y = axis.title.y)
-    } else { col_sidebar <- col_sidebar + theme(axis.title = element_blank()) }
+      col_sidebar <- col_sidebar +
+        ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+                       axis.title.y = axis.title.y)
+    } else {
+      col_sidebar <- col_sidebar +
+        ggplot2::theme(axis.title = ggplot2::element_blank())
+    }
     # if(split.annot){
     #   stop("A geom_tile vertically faceted in ggplot2_3.2.0 does not support heights redimensioning after being converted into a grob.")
     # }
   }
   if(merge.lgd){ # Do not split legends
-    sidebar.lgd <- list(get.lgd(col_sidebar + labs(fill = lgd.name)))
+    sidebar.lgd <- list(
+      BiocompR::get.lgd(col_sidebar + ggplot2::labs(fill = lgd.name)))
   } else { # Split legends and return a list of legends
     # if(!split.annot){
     if(annot.pos == "top"){
@@ -517,26 +534,27 @@ plot.col.sidebar <- function(
         dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
     }
     # }
-    
+
     #Generate separate legends if more than 1 palette available
     # or if only 1 annotation is used
     if((is.list(annot.pal) & length(annot.pal) > 1) |
        length(levels(dframe.annot$.id)) == 1){
       #Get all legends separately
       sidebar.lgd <- lapply(seq_along(levels(dframe.annot$.id)), function(i){
-        get.lgd(
-          basic.sidebar(
+        BiocompR::get.lgd(
+          BiocompR::basic.sidebar(
             data = dframe.annot[.id == levels(dframe.annot$.id)[i]],
             palette = col_table[.id == i]$Cols, lgd.ncol = lgd.ncol) +
-            theme(legend.title = lgd.title, legend.text = lgd.text) +
-            labs(fill = levels(dframe.annot$.id)[i])
+            ggplot2::theme(legend.title = lgd.title, legend.text = lgd.text) +
+            ggplot2::labs(fill = levels(dframe.annot$.id)[i])
         )
       })
     } else {
       stop("Cannot generate separated legends if only one annotation palette is given.")
     }
   }
-  return(list("sidebar" = col_sidebar + theme(legend.position = "none"),
+  return(list("sidebar" = col_sidebar +
+                ggplot2::theme(legend.position = "none"),
               "legends" = sidebar.lgd))
 }
 
@@ -575,7 +593,7 @@ resize.grobs <- function(ls.grobs, dimensions, start.unit, end.unit){
   return(ls.grobs)
 }
 
-#' Resizes heights or widths of a grob based on the dimensions of another grob
+#' Resizes heights or widths of a grob based on the dimensions of another grob.
 #'
 #' @param grob1      A \code{grob} to be modified.
 #' @param grob2      A \code{grob} to be used as reference for dimensions
@@ -601,7 +619,7 @@ resize.grob.oneway <- function(grob1, grob2, dimensions, positions){
   return(grob1)
 }
 
-#' Stack grobs legends vertically in separate spaces of specific heights
+#' Stack grobs legends vertically in separate spaces of specific heights.
 #'
 #' @param grobs.list A \code{list} of legends as grid objects.
 #' @param annot.grps A \code{factor} list mapped to the legends.
@@ -625,7 +643,7 @@ stack.grobs.legends <- function(grobs.list, annot.grps, height.lgds.space){
   return(sidebar_legend)
 }
 
-#' Rasterize a gg plot into a raster grob
+#' Rasterize a gg plot into a raster grob.
 #'
 #' @param gg.plot A \code{gg} plot to be rasterized.
 #' @param filter  A \code{character} to be used as a filter for ggplot
@@ -641,19 +659,19 @@ raster.ggplot.to.grob <- function(gg.plot, filter = "Lanczos"){
   #Catch heatmap in magick::image_graph()
   fig <- magick::image_graph(width = 2160, height = 2160, res = 96)
   print(gg.plot)
-  dev.off()
+  grDevices::dev.off()
   rastered <- magick::image_resize(
     image = fig, geometry = "1080x1080", filter = filter)
   #Create raster grob
   raster.grob <- grid::rasterGrob(
-    rastered, width = unit(1, "npc"), height = unit(1, "npc"),
+    rastered, width = grid::unit(1, "npc"), height = grid::unit(1, "npc"),
     interpolate = TRUE)
   #Return grob annotation
   return(raster.grob)
 }
 
 #' This is a special geom intended for use as static annotations derived from
-#' ggplot2::annotation_custom() matching a specific panel on a faceted ggplot
+#' ggplot2::annotation_custom() matching a specific panel on a faceted ggplot.
 #'
 #' @param grob      A \code{grob} to display.
 #' @param xmin,xmax x location (in data coordinates) giving horizontal location
@@ -668,8 +686,8 @@ raster.ggplot.to.grob <- function(gg.plot, filter = "Lanczos"){
 
 annotation_custom2 <- function(
   grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, data){
-  layer(data = data, stat = StatIdentity, position = PositionIdentity,
-        geom = ggplot2:::GeomCustomAnn, inherit.aes = TRUE,
-        params = list(
-          grob = grob, xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax))
+  ggplot2::layer(
+    data = data, stat = StatIdentity, position = PositionIdentity,
+    geom = ggplot2:::GeomCustomAnn, inherit.aes = TRUE, params = list(
+      grob = grob, xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax))
 }
