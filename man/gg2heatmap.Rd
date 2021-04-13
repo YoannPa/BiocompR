@@ -21,7 +21,7 @@ gg2heatmap(
   heatmap.pal = c("steelblue", "gray95", "darkorange"),
   na.col = "black",
   annot.grps = list(Groups = seq(ncol(m))),
-  annot.pal = rainbow(n = ncol(m)),
+  annot.pal = grDevices::rainbow(n = ncol(m)),
   annot.size = 1,
   annot.sep = 0,
   lgd.scale.name = "Values",
