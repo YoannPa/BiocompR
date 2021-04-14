@@ -137,9 +137,9 @@
 #'                        (lgd.merge = TRUE)
 #'                        (Default: lgd.bars.name = 'Legends').
 #' @param lgd.title       An \code{element_text} object to setup legend titles
-#'                        (Default: lgd.title = element_blank()).
+#'                        (Default: lgd.title = ggplot2::element_blank()).
 #' @param lgd.text        An \code{element_text} object to setup legend labels
-#'                        (Default: lgd.text = element_blank()).
+#'                        (Default: lgd.text = ggplot2::element_blank()).
 #' @param lgd.merge       A \code{logical} specifying whether the legends of
 #'                        multiple annotation bars should be merged
 #'                        (lgd.merge = TRUE) or remain separated
@@ -154,40 +154,44 @@
 #' @param x.lab           A \code{character} to specify X-axis title
 #'                        (Default: x.lab = 'Samples').
 #' @param axis.title.x    An \code{element_text} object to setup X axis title
-#'                        (Default: axis.title.x = element_text(size = 12,
-#'                        color = 'black')).
+#'                        (Default: axis.title.x =
+#'                        ggplot2::element_text(size = 12, color = 'black')).
 #' @param axis.text.x     An \code{element_text} object to setup X axis text
-#'                        (Default: axis.text.x = element_text(size = 11,
-#'                        angle = -45, hjust = 0, vjust = 0.5, face = 'bold')).
+#'                        (Default: axis.text.x =
+#'                        ggplot2::element_text(size = 11, angle = -45,
+#'                        hjust = 0, vjust = 0.5, face = 'bold')).
 #' @param axis.ticks.x    An \code{element_line} object to setup X axis ticks
-#'                        (Default: axis.ticks.x = element_line(color='black')).
+#'                        (Default: axis.ticks.x =
+#'                        ggplot2::element_line(color = 'black')).
 #' @param y.axis.right    A \code{logical} to specify whether the heatmap Y axis
 #'                        should be displayed on the right (y.axis.right = TRUE)
 #'                        or not (y.axis.right = FALSE)
 #'                        (Default: y.axis.right = FALSE).
 #' @param axis.title.y.left  An \code{element_text} object to setup left Y axis
-#'                           title
-#'                           (Default: axis.title.y.left = element_blank()).
+#'                           title (Default: axis.title.y.left =
+#'                           ggplot2::element_blank()).
 #' @param axis.text.y.left   An \code{element_text} object to setup left Y axis
-#'                           text (Default: axis.text.y.left = element_blank()).
+#'                           text (Default: axis.text.y.left =
+#'                           ggplot2::element_blank()).
 #' @param axis.ticks.y.left  An \code{element_line} object to setup left Y axis
-#'                           ticks
-#'                           (Default: axis.ticks.y.left = element_blank()).
+#'                           ticks (Default: axis.ticks.y.left =
+#'                           ggplot2::element_blank()).
 #' @param axis.title.y.right An \code{element_text} object to setup right Y axis
-#'                           title
-#'                           (Default: axis.title.y.right = element_blank()).
+#'                           title (Default: axis.title.y.right =
+#'                           ggplot2::element_blank()).
 #' @param axis.text.y.right  An \code{element_text} object to setup right Y axis
-#'                           text
-#'                           (Default: axis.text.y.right = element_blank()).
+#'                           text (Default: axis.text.y.right =
+#'                           ggplot2::element_blank()).
 #' @param axis.ticks.y.right An \code{element_line} object to setup right Y axis
-#'                           ticks (Default: axis.ticks.y.right = element_blank()).
+#'                           ticks (Default: axis.ticks.y.right =
+#'                           ggplot2::element_blank()).
 #' @return A \code{grob} list containing the final plot, and also each grob
 #'         generated separately.
 #' @author Yoann Pageaud.
 #' @export
 
 #TODO: Try to improve display for the annotation when a lot of columns used (try geom_raster()).
-#TODO: Create a theme argument using the theme() function.
+#TODO: Create a theme argument using the ggplot2::theme() function.
 #TODO: Create a guide argument using guide().
 #TODO: Create an inpedentent rasterization function.
 #TODO: Add option to change final resolution of rasterized heatmap.
@@ -199,15 +203,19 @@ gg2heatmap <- function(
   na.col = "black", annot.grps = list("Groups" = seq(ncol(m))),
   annot.pal = grDevices::rainbow(n = ncol(m)), annot.size = 1, annot.sep = 0,
   lgd.scale.name = 'Values', lgd.bars.name = 'Legends',
-  lgd.title = element_text(size = 12), lgd.text = element_text(size = 11),
+  lgd.title = ggplot2::element_text(size = 12),
+  lgd.text = ggplot2::element_text(size = 11),
   lgd.merge = FALSE, lgd.space.width = 1, y.lab = "Values", x.lab = "Samples",
-  axis.title.x = element_text(size = 12, color = 'black'),
-  axis.text.x = element_text(
+  axis.title.x = ggplot2::element_text(size = 12, color = 'black'),
+  axis.text.x = ggplot2::element_text(
     size = 11, angle = -45, hjust = 0, vjust = 0.5, face = 'bold'),
-  axis.ticks.x = element_line(color = 'black'), y.axis.right = FALSE,
-  axis.title.y.right = element_blank(), axis.text.y.right = element_blank(),
-  axis.ticks.y.right = element_blank(), axis.title.y.left = element_blank(),
-  axis.text.y.left = element_blank(), axis.ticks.y.left = element_blank(),
+  axis.ticks.x = ggplot2::element_line(color = 'black'), y.axis.right = FALSE,
+  axis.title.y.right = ggplot2::element_blank(),
+  axis.text.y.right = ggplot2::element_blank(),
+  axis.ticks.y.right = ggplot2::element_blank(),
+  axis.title.y.left = ggplot2::element_blank(),
+  axis.text.y.left = ggplot2::element_blank(),
+  axis.ticks.y.left = ggplot2::element_blank(),
   verbose = FALSE){
 
   #Check m is a matrix
@@ -272,20 +280,21 @@ gg2heatmap <- function(
   } else { stop("'annot.sep' length > 2. Too many values.") }
 
   #Check if y.axis.right = TRUE when axis.text.y.right or axis.title.y.right or
-  # axis.ticks.y.right are not element_blank()
-  if((!is.elt_blank(axis.text.y.right) | !is.elt_blank(axis.title.y.right) |
-      !is.elt_blank(axis.ticks.y.right)) & !y.axis.right){
+  # axis.ticks.y.right are not ggplot2::element_blank()
+  if((!BiocompR::is.elt_blank(axis.text.y.right) |
+      !BiocompR::is.elt_blank(axis.title.y.right) |
+      !BiocompR::is.elt_blank(axis.ticks.y.right)) & !y.axis.right){
     warning(
       paste("'y.axis.right' has to be set to TRUE in order to display the",
             "Y-axis on the right side of the heatmap."))
   }
   #Check annotations groups and palettes matching
-  check.annotations(data = m, annot.grps = annot.grps, annot.pal = annot.pal,
-                    verbose = verbose)
+  BiocompR::check.annotations(
+    data = m, annot.grps = annot.grps, annot.pal = annot.pal, verbose = verbose)
 
   #Handle NAs
   if(verbose){ cat("Managing missing values...") }
-  m <- manage.na(
+  m <- BiocompR::manage.na(
     data = m, method = na.handle, groups = imputation.grps, ncores = ncores)
   if(verbose){ cat("Done.\n") }
 
@@ -298,12 +307,12 @@ gg2heatmap <- function(
   if(verbose){ cat("Done.\n") }
 
   #Subset top rows if any value defined
-  if(!is.null(top.rows)){ m <- head(x = m, n = top.rows) }
+  if(!is.null(top.rows)){ m <- utils::head(x = m, n = top.rows) }
 
   #Remove NAs if some for dendrogram matrix
   if(method.rows != 'none' | method.cols != 'none'){
     if(verbose){ cat("Clustering data...") }
-    dend_mat <- m[complete.cases(m), ]
+    dend_mat <- m[stats::complete.cases(m), ]
     if(nrow(dend_mat) != nrow(m)){
       warning(paste("Distance method selected need complete data.",
                     nrow(m) - nrow(dend_mat), "incomplete rows removed out of",
@@ -328,12 +337,13 @@ gg2heatmap <- function(
       }, warning = function(cond){ warning(cond$message) }, finally = {})
     row_hclust <- fastcluster::hclust(row_dist)
     rm(row_dist)
-    rowclust <- as.dendrogram(row_hclust)
-    row.order <- order.dendrogram(rowclust)
+    rowclust <- stats::as.dendrogram(row_hclust)
+    row.order <- stats::order.dendrogram(rowclust)
     if(dd.rows){
       #Get dendrogram segments and order matrix rows
-      ddgr_seg_row <- ggdend(df = ggdendro::dendro_data(rowclust)$segments,
-                             orientation = "left", reverse.x = TRUE)
+      ddgr_seg_row <- BiocompR::ggdend(
+        df = ggdendro::dendro_data(rowclust)$segments, orientation = "left",
+        reverse.x = TRUE)
     }
   } else if(dd.rows & method.rows == 'none'){
     stop(paste(
@@ -343,14 +353,15 @@ gg2heatmap <- function(
   }
   #Compute columns distances & create columns dendrogram
   if(method.cols != 'none'){
-    ddgr <- as.dendrogram(fastcluster::hclust(parallelDist::parDist(
+    ddgr <- stats::as.dendrogram(fastcluster::hclust(parallelDist::parDist(
       t(dend_mat), method = method.cols, threads = ncores)))
-    column.order <- order.dendrogram(ddgr)
+    column.order <- stats::order.dendrogram(ddgr)
     if(dd.cols){
       #Get dendrogram data
       ddgr_dat <- ggdendro::dendro_data(ddgr)
       #Get dendrogram segments and order matrix columns
-      ddgr_seg_col <- ggdend(df = ddgr_dat$segments, orientation = "top")
+      ddgr_seg_col <- BiocompR::ggdend(
+        df = ddgr_dat$segments, orientation = "top")
     }
   } else if(dd.cols & method.cols == 'none'){
     stop("Cannot plot dendrogram on columns with method.cols = 'none'.")
@@ -380,14 +391,14 @@ gg2heatmap <- function(
 
   #Melt Matrix into a data.table
   if(verbose){ cat("Melting matrix...") }
-  dt.frame <- as.data.table(x = dframe, keep.rownames = TRUE)
+  dt.frame <- data.table::as.data.table(x = dframe, keep.rownames = TRUE)
   dt.frame[, rn := factor(x = rn, levels = rev(rn))]
   # dt.frame[, rn := factor(x = rn, levels = rownames(dframe))]
-  melted_mat <- melt.data.table(
+  melted_mat <- data.table::melt.data.table(
     data = dt.frame, id.vars = "rn", measure.vars = colnames(dt.frame)[-c(1)])
   if(!is.null(facet)){
-    dt.facet <- data.table("variable" = colnames(dt.frame)[-c(1)],
-                           "facet.annot" = annot.grps[[facet]])
+    dt.facet <- data.table::data.table("variable" = colnames(dt.frame)[-c(1)],
+                                       "facet.annot" = annot.grps[[facet]])
     melted_mat <- merge(
       x = melted_mat, y = dt.facet, by = "variable", all.x = TRUE, sort = FALSE)
   }
@@ -396,12 +407,13 @@ gg2heatmap <- function(
 
   if(verbose){ cat("Configure heatmap...") }
   #Create theme_heatmap
-  theme_heatmap <- theme(
-    plot.margin = margin(0, 0, 0, 0), panel.grid = element_blank(),
-    panel.background = element_rect(fill = "transparent"),
-    plot.background = element_rect(fill = "transparent"),
-    legend.text = element_text(size = 11),
-    legend.title = element_text(size = 12), legend.position = "bottom",
+  theme_heatmap <- ggplot2::theme(
+    plot.margin = ggplot2::margin(0, 0, 0, 0),
+    panel.grid = ggplot2::element_blank(),
+    panel.background = ggplot2::element_rect(fill = "transparent"),
+    plot.background = ggplot2::element_rect(fill = "transparent"),
+    legend.text = ggplot2::element_text(size = 11),
+    legend.title = ggplot2::element_text(size = 12), legend.position = "bottom",
     legend.justification = c(0.4, 0.5), axis.title.x = axis.title.x,
     axis.text.x = axis.text.x, axis.ticks.x = axis.ticks.x,
     axis.title.y.right = axis.title.y.right,
@@ -409,54 +421,55 @@ gg2heatmap <- function(
     axis.text.y.right = axis.text.y.right)
 
   #Set heatmap source parameters
-  htmp.source <- ggplot() +
-    scale_fill_gradientn(colours = heatmap.pal, na.value = na.col) +
-    scale_color_manual(values = NA) +
-    scale_x_discrete(expand = c(0, 0)) +
-    guides(fill = guide_colorbar(
+  htmp.source <- ggplot2::ggplot() +
+    ggplot2::scale_fill_gradientn(colours = heatmap.pal, na.value = na.col) +
+    ggplot2::scale_color_manual(values = NA) +
+    ggplot2::scale_x_discrete(expand = c(0, 0)) +
+    ggplot2::guides(fill = ggplot2::guide_colorbar(
       ticks = TRUE, label = TRUE, barwidth = 15, ticks.linewidth = 1,
       title.vjust = 0.86, order = 1)) +
-    guides(color = guide_legend(
+    ggplot2::guides(color = ggplot2::guide_legend(
       "NA", override.aes = list(fill = na.col), title.vjust = 0.5, order = 2)) +
-    labs(x = x.lab, y = y.lab, fill = lgd.scale.name)
+    ggplot2::labs(x = x.lab, y = y.lab, fill = lgd.scale.name)
 
   #If facetting is on
   if(!is.null(facet)){
     htmp <- htmp.source +
-      facet_grid(. ~ facet.annot, scales = "free", space = "free") +
-      theme(panel.spacing = unit(0, "lines"),
-            strip.background = element_blank(),
-            strip.text = element_blank())
+      ggplot2::facet_grid(. ~ facet.annot, scales = "free", space = "free") +
+      ggplot2::theme(panel.spacing = ggplot2::unit(0, "lines"),
+                     strip.background = ggplot2::element_blank(),
+                     strip.text = ggplot2::element_blank())
   } else { htmp <- htmp.source }
 
   #Display legend of missing values if any
   if(nrow(melted_mat[is.na(value)]) != 0){
-    htmp <- htmp + geom_tile(
-      data = melted_mat, aes(x = variable, y = rn, fill = value, color = " "))
+    htmp <- htmp + ggplot2::geom_tile(data = melted_mat, ggplot2::aes(
+      x = variable, y = rn, fill = value, color = " "))
   } else {
-    htmp <- htmp + geom_tile(
-      data = melted_mat, aes(x = variable, y = rn, fill = value))
+    htmp <- htmp + ggplot2::geom_tile(
+      data = melted_mat, ggplot2::aes(x = variable, y = rn, fill = value))
   }
 
   if(dd.rows){
     # htmp <- htmp +
     theme_heatmap <- theme_heatmap +
-      theme(axis.title.y.left = element_blank(),
-            axis.ticks.y.left = element_blank(),
-            axis.ticks.length.y.left = unit(0, "pt"),
-            axis.text.y.left = element_blank(),
-            plot.margin = unit(c(0, 0, 0, 0), "cm"))
+      ggplot2::theme(axis.title.y.left = ggplot2::element_blank(),
+                     axis.ticks.y.left = ggplot2::element_blank(),
+                     axis.ticks.length.y.left = ggplot2::unit(0, "pt"),
+                     axis.text.y.left = ggplot2::element_blank(),
+                     plot.margin = ggplot2::unit(c(0, 0, 0, 0), "cm"))
   } else {
     # htmp <- htmp +
     theme_heatmap <- theme_heatmap +
-      theme(axis.title.y.left = axis.title.y.left,
-            axis.ticks.y.left = axis.ticks.y.left,
-            axis.text.y.left = axis.text.y.left,
-            plot.margin = unit(c(0, 0, 0, 0), "cm"))
+      ggplot2::theme(axis.title.y.left = axis.title.y.left,
+                     axis.ticks.y.left = axis.ticks.y.left,
+                     axis.text.y.left = axis.text.y.left,
+                     plot.margin = ggplot2::unit(c(0, 0, 0, 0), "cm"))
   }
   if(y.axis.right){
-    htmp <- htmp + scale_y_discrete(position = 'right', expand = c(0, 0))
-  } else { htmp <- htmp + scale_y_discrete(expand = c(0, 0)) }
+    htmp <- htmp +
+      ggplot2::scale_y_discrete(position = 'right', expand = c(0, 0))
+  } else { htmp <- htmp + ggplot2::scale_y_discrete(expand = c(0, 0)) }
 
   if(verbose){ cat("Done.\n") }
 
@@ -488,7 +501,7 @@ gg2heatmap <- function(
       })
     }
     #Rbind list color tables
-    col_table <- rbindlist(ls.df.grp.pal, idcol = TRUE)
+    col_table <- data.table::rbindlist(ls.df.grp.pal, idcol = TRUE)
     if(is.vector(annot.pal) | length(annot.pal) == 1){
       #Remove duplicated colors
       col_table <- col_table[!duplicated(x = Cols)]
@@ -508,16 +521,18 @@ gg2heatmap <- function(
   } else { sample.names <- colnames(dframe) }
 
   #Create Color Sidebar
-  col_sidebar <- plot.col.sidebar(
+  col_sidebar <- BiocompR:::plot.col.sidebar(
     sample.names = sample.names, annot.grps = annot.grps,
     annot.pal = annot.pal, annot.pos = 'top', annot.sep = annot.sep,
     annot.cut = annot.cut, cor.order = seq_along(colnames(dframe)),
     merge.lgd = lgd.merge, right = TRUE, lgd.name = lgd.bars.name,
     lgd.title = lgd.title, lgd.text = lgd.text, lgd.ncol = lgd.ncol,
-    axis.text.x = element_blank(),
-    axis.text.y = element_text(size = 12, color = "black"),
-    axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
-    axis.title.x = element_blank(), axis.title.y = element_blank(),
+    axis.text.x = ggplot2::element_blank(),
+    axis.text.y = ggplot2::element_text(size = 12, color = "black"),
+    axis.ticks.y = ggplot2::element_blank(),
+    axis.ticks.x = ggplot2::element_blank(),
+    axis.title.x = ggplot2::element_blank(),
+    axis.title.y = ggplot2::element_blank(),
     set.x.title = NULL, set.y.title = NULL, dendro.pos = 'top', facet = facet)
   rm(sample.names)
   if(verbose){ cat("Done.\n") }
@@ -529,22 +544,24 @@ gg2heatmap <- function(
     value %in% c(min(value, na.rm = TRUE), max(value, na.rm = TRUE))]
   if(nrow(melted_mat[is.na(value)]) != 0){
     subplot.htmp <- htmp.source +
-      geom_tile(data = xtrm.melted_mat,
-                aes(x = variable, y = rn, fill = value, color = " "))
+      ggplot2::geom_tile(data = xtrm.melted_mat,
+                         ggplot2::aes(x = variable, y = rn, fill = value, color = " "))
   } else {
     subplot.htmp <- htmp.source +
-      geom_tile(data = xtrm.melted_mat, aes(x = variable, y = rn, fill = value))
+      ggplot2::geom_tile(
+        data = xtrm.melted_mat,
+        mapping = ggplot2::aes(x = variable, y = rn, fill = value))
   }
-  htmp_legend <- get.lgd(gg2.obj = subplot.htmp + theme_heatmap)
+  htmp_legend <- BiocompR::get.lgd(gg2.obj = subplot.htmp + theme_heatmap)
   rm(subplot.htmp)
 
   sidebar_legend <- col_sidebar$legends
   #Convert ggplots into grobs
-  if(dd.cols){ ddgr_seg_col <- ggplotGrob(ddgr_seg_col) }
-  if(dd.rows){ ddgr_seg_row <- ggplotGrob(ddgr_seg_row) }
-  col_sidebar_grob <- ggplotGrob(col_sidebar$sidebar)
+  if(dd.cols){ ddgr_seg_col <- ggplot2::ggplotGrob(ddgr_seg_col) }
+  if(dd.rows){ ddgr_seg_row <- ggplot2::ggplotGrob(ddgr_seg_row) }
+  col_sidebar_grob <- ggplot2::ggplotGrob(col_sidebar$sidebar)
   rm(col_sidebar)
-  htmp <- htmp + theme_heatmap + theme(legend.position = "none")
+  htmp <- htmp + theme_heatmap + ggplot2::theme(legend.position = "none")
   if(verbose){ cat("Done.\n") }
 
   #Heatmap rasterization
@@ -552,17 +569,21 @@ gg2heatmap <- function(
     if(verbose){ cat("Rasterizing...\n") }
     if(raster %in% magick::filter_types()){
       #Create "empty" theme
-      theme_empty <- theme(
-        plot.margin = margin(0, 0, 0, 0), panel.grid = element_blank(),
-        panel.background = element_rect(fill = "transparent"),
-        plot.background = element_rect(fill = "transparent"),
-        axis.title.x = element_blank(), axis.text.x = element_blank(),
-        axis.ticks.x = element_blank(), axis.title.y.right = element_blank(),
-        axis.ticks.y.right = element_blank(),
-        axis.text.y.right = element_blank(),
-        axis.title.y.left = element_blank(),
-        axis.ticks.y.left = element_blank(), axis.text.y.left = element_blank(),
-        axis.ticks.length = unit(0, "pt"))
+      theme_empty <- ggplot2::theme(
+        plot.margin = ggplot2::margin(0, 0, 0, 0),
+        panel.grid = ggplot2::element_blank(),
+        panel.background = ggplot2::element_rect(fill = "transparent"),
+        plot.background = ggplot2::element_rect(fill = "transparent"),
+        axis.title.x = ggplot2::element_blank(),
+        axis.text.x = ggplot2::element_blank(),
+        axis.ticks.x = ggplot2::element_blank(),
+        axis.title.y.right = ggplot2::element_blank(),
+        axis.ticks.y.right = ggplot2::element_blank(),
+        axis.text.y.right = ggplot2::element_blank(),
+        axis.title.y.left = ggplot2::element_blank(),
+        axis.ticks.y.left = ggplot2::element_blank(),
+        axis.text.y.left = ggplot2::element_blank(),
+        axis.ticks.length = ggplot2::unit(0, "pt"))
 
       #If facet is used
       if(!is.null(facet)){
@@ -573,67 +594,62 @@ gg2heatmap <- function(
             #Create sub DT
             sub.melted <- melted_mat[facet.annot == i]
             #Create sub heatmap and remove all customization
-            sub.htmp <- ggplot() +
-              geom_tile(data = sub.melted,
-                        aes(x = variable, y = rn, fill = value, color = " ")) +
-              scale_fill_gradientn(colours = heatmap.pal, na.value = na.col) +
-              scale_color_manual(values = NA) +
-              scale_x_discrete(expand = c(0, 0)) +
-              scale_y_discrete(expand = c(0, 0)) +
-              guides(fill = guide_colorbar(
+            sub.htmp <- ggplot2::ggplot() +
+              ggplot2::geom_tile(data = sub.melted, ggplot2::aes(
+                x = variable, y = rn, fill = value, color = " ")) +
+              ggplot2::scale_fill_gradientn(
+                colours = heatmap.pal, na.value = na.col) +
+              ggplot2::scale_color_manual(values = NA) +
+              ggplot2::scale_x_discrete(expand = c(0, 0)) +
+              ggplot2::scale_y_discrete(expand = c(0, 0)) +
+              ggplot2::guides(fill = ggplot2::guide_colorbar(
                 ticks = TRUE, label = TRUE, barwidth = 15, ticks.linewidth = 1,
                 title.vjust = 0.86, order = 1)) +
-              guides(color = guide_legend(
+              ggplot2::guides(color = ggplot2::guide_legend(
                 "NA", override.aes = list(fill = na.col), title.vjust = 0.5,
                 order = 2)) +
-              labs(x = x.lab, y = y.lab, fill = lgd.scale.name) + theme_empty +
-              theme(legend.position = "none")
+              ggplot2::labs(x = x.lab, y = y.lab, fill = lgd.scale.name) +
+              theme_empty + ggplot2::theme(legend.position = "none")
             rm(sub.melted)
             #Rasterize ggplot into a grob
-            raster.grob <- raster.ggplot.to.grob(
+            raster.grob <- BiocompR::raster.ggplot.to.grob(
               gg.plot = sub.htmp, filter = raster)
             rm(sub.htmp)
             #Make grob annotation
-            raster.annot <- annotation_custom2(
+            raster.annot <- BiocompR::annotation_custom2(
               grob = raster.grob, xmin = -Inf, xmax = Inf, ymin = -Inf,
               ymax = Inf, data = melted_mat[facet.annot == i])
             rm(raster.grob)
             return(raster.annot)
           })
         #Fit the list of raster grobs into a ggplot
-        htmp <- ggplot(
-          data = melted_mat, aes(x = variable, y = rn, fill = value)) +
-          geom_blank() + theme_heatmap + theme(legend.position = "none") +
-          labs(x = x.lab, y = y.lab) +
-          facet_grid(. ~ facet.annot, scales = "free", space = "free") +
-          theme(
-            panel.spacing = unit(0, "lines"),
-            strip.background = element_blank(), strip.text = element_blank()) +
+        htmp <- ggplot2::ggplot(
+          data = melted_mat, ggplot2::aes(x = variable, y = rn, fill = value)) +
+          ggplot2::geom_blank() + theme_heatmap +
+          ggplot2::theme(legend.position = "none") +
+          ggplot2::labs(x = x.lab, y = y.lab) +
+          ggplot2::facet_grid(. ~ facet.annot, scales = "free",
+                              space = "free") +
+          ggplot2::theme(
+            panel.spacing = ggplot2::unit(0, "lines"),
+            strip.background = ggplot2::element_blank(),
+            strip.text = ggplot2::element_blank()) +
           ls.rasters
-
       } else {
         #Remove all customization
         htmp <- htmp + theme_empty
         #Catch heatmap in magick::image_graph()
-        raster.annot <- raster.ggplot.to.grob(gg.plot = htmp, filter = raster)
-        # fig <- magick::image_graph(width = 2160, height = 2160, res = 96)
-        # print(htmp)
-        # dev.off()
-        # rastered <- magick::image_resize(
-        #   image = fig, geometry = "1080x1080", filter = raster)
-        # #Create raster grob
-        # raster.grob <- grid::rasterGrob(
-        #   rastered, width = unit(1, "npc"), height = unit(1, "npc"),
-        #   interpolate = TRUE)
-
+        raster.annot <- BiocompR::raster.ggplot.to.grob(
+          gg.plot = htmp, filter = raster)
         #Make grob annotation
         raster.annot <- ggplot2::annotation_custom(
           raster.grob, -Inf, Inf, -Inf, Inf)
         #Fit the raster grob into a ggplot
-        htmp <- ggplot(
-          data = melted_mat, aes(x = variable, y = rn, fill = value)) +
-          geom_blank() + raster.annot + theme_heatmap +
-          theme(legend.position = "none") + labs(x = x.lab, y = y.lab)
+        htmp <- ggplot2::ggplot(
+          data = melted_mat, ggplot2::aes(x = variable, y = rn, fill = value)) +
+          ggplot2::geom_blank() + raster.annot + theme_heatmap +
+          ggplot2::theme(legend.position = "none") +
+          ggplot2::labs(x = x.lab, y = y.lab)
       }
     } else { stop("Rasterization filter not supported.") }
     if(verbose){ cat("Done.\n") }
@@ -641,45 +657,50 @@ gg2heatmap <- function(
   #Remove melted_mat
   rm(melted_mat)
   if(verbose){ cat("Converting ggplot into grid object...") }
-  htmp <- ggplotGrob(x = htmp)
+  htmp <- ggplot2::ggplotGrob(x = htmp)
   if(verbose){ cat("Done.\n") }
   #Resize grobs widths
   if(verbose){ cat("Redimensioning grobs...") }
   if(dd.cols & dd.rows){
     ls.w.grobs <- list(
       'dd_col' = ddgr_seg_col, 'sidebar' = col_sidebar_grob, 'htmp' = htmp)
-    upd.grob_w <- resize.grobs(ls.grobs = ls.w.grobs, dimensions = "widths",
-                               start.unit = 4, end.unit = 7)
+    upd.grob_w <- BiocompR::resize.grobs(
+      ls.grobs = ls.w.grobs, dimensions = "widths", start.unit = 4,
+      end.unit = 7)
     rm(ddgr_seg_col)
   } else if(dd.cols & !dd.rows){
     ls.w.grobs <- list(
       'dd_col' = ddgr_seg_col, 'sidebar' = col_sidebar_grob, 'htmp' = htmp)
-    upd.grob_w <- resize.grobs(ls.grobs = ls.w.grobs, dimensions = "widths",
-                               start.unit = 3, end.unit = 7)
+    upd.grob_w <- BiocompR::resize.grobs(
+      ls.grobs = ls.w.grobs, dimensions = "widths", start.unit = 3,
+      end.unit = 7)
     rm(ddgr_seg_col)
   } else {
     ls.w.grobs <- list('sidebar' = col_sidebar_grob, 'htmp' = htmp)
     if(is.null(facet)){
-      upd.grob_w <- resize.grobs(ls.grobs = ls.w.grobs, dimensions = "widths",
-                                 start.unit = 3, end.unit = 7)
+      upd.grob_w <- BiocompR::resize.grobs(
+        ls.grobs = ls.w.grobs, dimensions = "widths", start.unit = 3,
+        end.unit = 7)
     } else {
-      upd.grob_w <- resize.grobs(ls.grobs = ls.w.grobs, dimensions = "widths",
-                                 start.unit = 1, end.unit = 55)
+      upd.grob_w <- BiocompR::resize.grobs(
+        ls.grobs = ls.w.grobs, dimensions = "widths", start.unit = 1,
+        end.unit = 55)
     }
   }
   rm(htmp, col_sidebar_grob)
   #Resize grobs heights
   if(dd.rows){
     ls.h.grobs <- list('dd_row' = ddgr_seg_row, 'htmp' = upd.grob_w$htmp)
-    upd.grob_h <- resize.grobs(ls.grobs = ls.h.grobs, dimensions = 'heights',
-                               start.unit = 7, end.unit = 9)
+    upd.grob_h <- BiocompR::resize.grobs(
+      ls.grobs = ls.h.grobs, dimensions = 'heights', start.unit = 7,
+      end.unit = 9)
     rm(ddgr_seg_row)
   } else { upd.grob_h <- list("htmp" = upd.grob_w$htmp) }
   if(verbose){ cat("Done.\n") }
 
   #Create the Right Panel for legends
   if(verbose){ cat("Stacking legends...") }
-  right.legends <- stack.grobs.legends(
+  right.legends <- BiocompR:::stack.grobs.legends(
     grobs.list = sidebar_legend, annot.grps = annot.grps,
     height.lgds.space = 29)
   rm(sidebar_legend)

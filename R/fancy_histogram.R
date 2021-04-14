@@ -85,8 +85,8 @@ fancy.hist <- function(
     histbreaks <- xgrads*(length(histdata)/xmax) + 0.5 #Scale graduations
     histlim <- seq(0, xmax, length.out = ngrad)*(length(histdata)/xmax) + 0.5
     histlim <- c(histlim[1], rev(histlim)[1])
-
-    dframe <- data.table(x = seq(histdata), y = histdata) #Create data.table
+    #Create data.table
+    dframe <- data.table::data.table(x = seq(histdata), y = histdata)
   } else if(is.character(x)){
     uniq.x <- unique(x)
     if(!is.null(facet)){
@@ -94,7 +94,7 @@ fancy.hist <- function(
         stop("facet must be of the same length as unique(x) to be applied.")
       } else {
         #Make dt.facet
-        dt.facet <- data.table(uniq.x = uniq.x, facet = facet)
+        dt.facet <- data.table::data.table(uniq.x = uniq.x, facet = facet)
         #Get facet sizes
         dt.facet[, size := .N, by = "facet"]
         #Calculate number of breaks in each facet
@@ -119,10 +119,10 @@ fancy.hist <- function(
               }
               length(x[x %in% sub.chars])
             })
-          data.table(x = seq(histdata), y = unlist(histdata))
+          data.table::data.table(x = seq(histdata), y = unlist(histdata))
         })
         names(ls.histdata) <- reduce.dt.facet$facet
-        dframe <- rbindlist(l = ls.histdata, idcol = "facet")
+        dframe <- data.table::rbindlist(l = ls.histdata, idcol = "facet")
         dframe[, facet := factor(
           x = facet, levels = levels(reduce.dt.facet$facet))]
         dframe[, x := .I] #Update the rank on all data
@@ -141,7 +141,8 @@ fancy.hist <- function(
           length(x[x %in% sub.chars])
         })
       histdata <- unlist(histdata)
-      dframe <- data.table(x = seq(histdata), y = histdata) #Create data.table
+      #Create data.table
+      dframe <- data.table::data.table(x = seq(histdata), y = histdata)
     }
   } else { stop("format not supported for 'x'.") }
 
@@ -150,56 +151,60 @@ fancy.hist <- function(
     cat("Compute Median and Cutoff\n")
     cutoff.val <- quantmod::findValleys(x = histdata)[1]
     cutoff.pos <- cutoff.val*(length(histdata)/xmax) + 0.5
-    median.val <- median(x, na.rm = TRUE)
+    median.val <- stats::median(x, na.rm = TRUE)
     median.pos <- median.val*(length(histdata)/xmax) + 0.5
   }
   #Default ggplot
-  gghist <- ggplot(data = dframe, aes(x = x, y = y)) +
-    geom_bar(stat = "identity", width = 1, fill = bin.col, alpha = 0.7) +
+  gghist <- ggplot2::ggplot(data = dframe, ggplot2::aes(x = x, y = y)) +
+    ggplot2::geom_bar(
+      stat = "identity", width = 1, fill = bin.col, alpha = 0.7) +
     scale_y_continuous(expand = c(0, 0)) +
     labs(x = "Values", y = "Frequency") +
-    theme(plot.margin = unit(c(0.1,1,0.1,0.1),"cm"),
-          axis.title = element_text(size = 13),
-          axis.text = element_text(size = 11),
-          panel.background = element_rect(fill = "white"))
+    ggplot2::theme(plot.margin = unit(c(0.1,1,0.1,0.1),"cm"),
+                   axis.title = ggplot2::element_text(size = 13),
+                   axis.text = ggplot2::element_text(size = 11),
+                   panel.background = element_rect(fill = "white"))
 
   if(is.character(x)){
     #Plot for x as a character vector
     if(is.null(facet)){
       #Without facet
       gghist <- gghist +
-        scale_x_continuous(expand = c(0, 0)) +
-        theme(panel.grid.major.y = element_line(colour = "grey"),
-              panel.grid.minor.y = element_line(colour = "grey"),
-              panel.grid.major.x = element_blank(),
-              panel.grid.minor.x = element_blank(),
-              axis.ticks.x = element_blank(),
-              axis.text.x = element_blank())
+        ggplot2::scale_x_continuous(expand = c(0, 0)) +
+        ggplot2::theme(
+          panel.grid.major.y = ggplot2::element_line(colour = "grey"),
+          panel.grid.minor.y = ggplot2::element_line(colour = "grey"),
+          panel.grid.major.x = element_blank(),
+          panel.grid.minor.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          axis.text.x = element_blank())
     } else {
       #With facet
       gghist <- gghist +
-        scale_x_continuous(expand = c(0, 0)) +
+        ggplot2::scale_x_continuous(expand = c(0, 0)) +
         facet_grid(. ~ facet, scales = "free", space = "free") +
-        theme(panel.grid.major.y = element_line(colour = "grey"),
-              panel.grid.minor.y = element_line(colour = "grey"),
-              panel.grid.major.x = element_blank(),
-              panel.grid.minor.x = element_blank(),
-              axis.ticks.x = element_blank(),
-              axis.text.x = element_blank())
+        ggplot2::theme(
+          panel.grid.major.y = ggplot2::element_line(colour = "grey"),
+          panel.grid.minor.y = ggplot2::element_line(colour = "grey"),
+          panel.grid.major.x = element_blank(),
+          panel.grid.minor.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          axis.text.x = element_blank())
     }
   } else if(is.numeric(x)){
     #Plot for x as a numeric vector
     gghist <- gghist +
-      scale_x_continuous(breaks = histbreaks, labels = xlabs, limits = histlim,
-                         expand = c(0, 0)) +
-      theme(panel.grid.major = element_line(colour = "grey"),
-            panel.grid.minor = element_line(colour = "grey"))
+      ggplot2::scale_x_continuous(
+        breaks = histbreaks, labels = xlabs, limits = histlim,
+        expand = c(0, 0)) +
+      ggplot2::theme(panel.grid.major = ggplot2::element_line(colour = "grey"),
+                     panel.grid.minor = ggplot2::element_line(colour = "grey"))
   }
   #Add annotations
   if(show.annot){
     gghist <- gghist +
       geom_vline(xintercept = median.pos, color = "#313695", size = 0.7) +
-      ggrepel::geom_label_repel(data = data.frame(), aes(
+      ggrepel::geom_label_repel(data = data.frame(), ggplot2::aes(
         x = median.pos, y = Inf, fontface = 2,
         label = paste0("median = ", round(x = median.val, digits = 2))),
         vjust = 0.5, color = "#313695")
@@ -209,8 +214,9 @@ fancy.hist <- function(
         geom_vline(xintercept = cutoff.pos, color = "#d7191c", size = 0.7) +
         ggrepel::geom_label_repel(
           data = data.frame(),
-          aes(x = cutoff.pos, y = Inf, fontface = 2,
-              label = paste0("cut-off = ", round(x = cutoff.val, digits = 2))),
+          ggplot2::aes(
+            x = cutoff.pos, y = Inf, fontface = 2,
+            label = paste0("cut-off = ", round(x = cutoff.val, digits = 2))),
           vjust = 0.5, color = "#d7191c")
     }
   }

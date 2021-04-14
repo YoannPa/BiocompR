@@ -26,23 +26,23 @@ gg2heatmap(
   annot.sep = 0,
   lgd.scale.name = "Values",
   lgd.bars.name = "Legends",
-  lgd.title = element_text(size = 12),
-  lgd.text = element_text(size = 11),
+  lgd.title = ggplot2::element_text(size = 12),
+  lgd.text = ggplot2::element_text(size = 11),
   lgd.merge = FALSE,
   lgd.space.width = 1,
   y.lab = "Values",
   x.lab = "Samples",
-  axis.title.x = element_text(size = 12, color = "black"),
-  axis.text.x = element_text(size = 11, angle = -45, hjust = 0, vjust = 0.5, face =
-    "bold"),
-  axis.ticks.x = element_line(color = "black"),
+  axis.title.x = ggplot2::element_text(size = 12, color = "black"),
+  axis.text.x = ggplot2::element_text(size = 11, angle = -45, hjust = 0, vjust = 0.5,
+    face = "bold"),
+  axis.ticks.x = ggplot2::element_line(color = "black"),
   y.axis.right = FALSE,
-  axis.title.y.right = element_blank(),
-  axis.text.y.right = element_blank(),
-  axis.ticks.y.right = element_blank(),
-  axis.title.y.left = element_blank(),
-  axis.text.y.left = element_blank(),
-  axis.ticks.y.left = element_blank(),
+  axis.title.y.right = ggplot2::element_blank(),
+  axis.text.y.right = ggplot2::element_blank(),
+  axis.ticks.y.right = ggplot2::element_blank(),
+  axis.title.y.left = ggplot2::element_blank(),
+  axis.text.y.left = ggplot2::element_blank(),
+  axis.ticks.y.left = ggplot2::element_blank(),
   verbose = FALSE
 )
 }
@@ -202,10 +202,10 @@ side bar legends, when legends are merged
 (Default: lgd.bars.name = 'Legends').}
 
 \item{lgd.title}{An \code{element_text} object to setup legend titles
-(Default: lgd.title = element_blank()).}
+(Default: lgd.title = ggplot2::element_blank()).}
 
 \item{lgd.text}{An \code{element_text} object to setup legend labels
-(Default: lgd.text = element_blank()).}
+(Default: lgd.text = ggplot2::element_blank()).}
 
 \item{lgd.merge}{A \code{logical} specifying whether the legends of
 multiple annotation bars should be merged
@@ -225,15 +225,17 @@ space (Default: lgd.space.width = 1).}
 (Default: x.lab = 'Samples').}
 
 \item{axis.title.x}{An \code{element_text} object to setup X axis title
-(Default: axis.title.x = element_text(size = 12,
-color = 'black')).}
+(Default: axis.title.x =
+ggplot2::element_text(size = 12, color = 'black')).}
 
 \item{axis.text.x}{An \code{element_text} object to setup X axis text
-(Default: axis.text.x = element_text(size = 11,
-angle = -45, hjust = 0, vjust = 0.5, face = 'bold')).}
+(Default: axis.text.x =
+ggplot2::element_text(size = 11, angle = -45,
+hjust = 0, vjust = 0.5, face = 'bold')).}
 
 \item{axis.ticks.x}{An \code{element_line} object to setup X axis ticks
-(Default: axis.ticks.x = element_line(color='black')).}
+(Default: axis.ticks.x =
+ggplot2::element_line(color = 'black')).}
 
 \item{y.axis.right}{A \code{logical} to specify whether the heatmap Y axis
 should be displayed on the right (y.axis.right = TRUE)
@@ -241,26 +243,28 @@ or not (y.axis.right = FALSE)
 (Default: y.axis.right = FALSE).}
 
 \item{axis.title.y.right}{An \code{element_text} object to setup right Y axis
-title
-(Default: axis.title.y.right = element_blank()).}
+title (Default: axis.title.y.right =
+ggplot2::element_blank()).}
 
 \item{axis.text.y.right}{An \code{element_text} object to setup right Y axis
-text
-(Default: axis.text.y.right = element_blank()).}
+text (Default: axis.text.y.right =
+ggplot2::element_blank()).}
 
 \item{axis.ticks.y.right}{An \code{element_line} object to setup right Y axis
-ticks (Default: axis.ticks.y.right = element_blank()).}
+ticks (Default: axis.ticks.y.right =
+ggplot2::element_blank()).}
 
 \item{axis.title.y.left}{An \code{element_text} object to setup left Y axis
-title
-(Default: axis.title.y.left = element_blank()).}
+title (Default: axis.title.y.left =
+ggplot2::element_blank()).}
 
 \item{axis.text.y.left}{An \code{element_text} object to setup left Y axis
-text (Default: axis.text.y.left = element_blank()).}
+text (Default: axis.text.y.left =
+ggplot2::element_blank()).}
 
 \item{axis.ticks.y.left}{An \code{element_line} object to setup left Y axis
-ticks
-(Default: axis.ticks.y.left = element_blank()).}
+ticks (Default: axis.ticks.y.left =
+ggplot2::element_blank()).}
 
 \item{verbose}{A \code{logical} to display information about the
 step-by-step processing of the data if TRUE
