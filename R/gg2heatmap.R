@@ -519,7 +519,7 @@ gg2heatmap <- function(
     axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
     axis.title.x = element_blank(), axis.title.y = element_blank(),
     set.x.title = NULL, set.y.title = NULL, dendro.pos = 'top', facet = facet)
-
+  rm(sample.names)
   if(verbose){ cat("Done.\n") }
 
   #Extract Legend
@@ -536,6 +536,7 @@ gg2heatmap <- function(
       geom_tile(data = xtrm.melted_mat, aes(x = variable, y = rn, fill = value))
   }
   htmp_legend <- get.lgd(gg2.obj = subplot.htmp + theme_heatmap)
+  rm(subplot.htmp)
 
   sidebar_legend <- col_sidebar$legends
   #Convert ggplots into grobs
@@ -637,7 +638,8 @@ gg2heatmap <- function(
     } else { stop("Rasterization filter not supported.") }
     if(verbose){ cat("Done.\n") }
   }
-
+  #Remove melted_mat
+  rm(melted_mat)
   if(verbose){ cat("Converting ggplot into grid object...") }
   htmp <- ggplotGrob(x = htmp)
   if(verbose){ cat("Done.\n") }
