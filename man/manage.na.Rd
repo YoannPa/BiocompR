@@ -5,7 +5,15 @@
 \title{Keeps, removes or imputes missing values in a matrix or a data.frame based on
 sample groups.}
 \usage{
-manage.na(data, method = "remove", groups, ncores = 1)
+manage.na(
+  data,
+  method = "remove",
+  groups,
+  impute.fun = "median",
+  vinterpolate = FALSE,
+  row.na.cut = NULL,
+  ncores = 1
+)
 }
 \arguments{
 \item{data}{A \code{matrix} or \code{data.frame} with column names.}
@@ -27,6 +35,23 @@ NAs:
 samples belong. Order of groups in the vector has to match the
 order of column names in data to properly associate samples and
 groups.}
+
+\item{impute.fun}{A \code{character} specifying the function to be used for
+imputation (Default: impute.fun = "median").}
+
+\item{vinterpolate}{A \code{logical} specifying whether vertical
+interpolation should be applied on missing values, based
+on previous and next available values in a column
+(vinterpolate = TRUE) or not
+(Default: vinterpolate = FALSE). It is combined with the
+function use for imputation by group. vinterpolate is not
+use if method is not set to 'impute'.}
+
+\item{row.na.cut}{An \code{integer} specifying the cut-off for imputation
+on rows missing values. if NULL, all rows with missing
+values will be processed. if row.na.cut equals an
+integer, only rows with less NAs than the cut-off will be
+processed (Default: row.na.cut = NULL).}
 
 \item{ncores}{An \code{integer} to specify the number of cores/threads to be
 used to parallel-process the matrix (Default: ncores = 1).}
