@@ -10,7 +10,6 @@ sunset(
   col.pal = c("red", "gold", "blue4"),
   horizontal = FALSE,
   reverse = FALSE,
-  keep_2nd_ticks = FALSE,
   n.grad = 15,
   display.cutoff = 0.03,
   display.num.smpl = 0.01,
@@ -38,10 +37,6 @@ be drawn vertically or horizontally\cr
 displayed of the bins should reversed\cr
 (Default: reverse = FALSE).}
 
-\item{keep_2nd_ticks}{A \code{logical} to specify whether the ticks of the
-secondary axis should be displayed or not\cr
-(Default: keep_2nd_ticks = FALSE).}
-
 \item{n.grad}{An \code{integer} specifying the number of graduation
 to use on the Y-Axis\cr(Default: n.grad = 15).}
 
@@ -54,6 +49,10 @@ side margin\cr
 \item{display.num.smpl}{A \code{double} specifying the minimum height of a
 bin to display the number of samples in the side
 margin\cr(Default: display.num.smpl = 0.01).}
+
+\item{keep_2nd_ticks}{A \code{logical} to specify whether the ticks of the
+secondary axis should be displayed or not\cr
+(Default: keep_2nd_ticks = FALSE).}
 }
 \value{
 A \code{gg} sunset plot.

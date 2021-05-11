@@ -27,8 +27,8 @@ ggbipca(
 \code{irlba_prcomp} resulting from stats::prcomp()
 or irlba::prcomp_irlba().}
 
-\item{data}{A \code{data.table} containing all the matching
-data related to the principal component analysis.}
+\item{data}{A \code{data.table} containing annotations matching
+data in 'prcomp.res'.}
 
 \item{PCx}{An \code{integer} matching the principal component
 values to display on X-axis.}
