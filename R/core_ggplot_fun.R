@@ -70,7 +70,7 @@ check.annotations <- function(data, annot.grps, annot.pal, verbose = FALSE){
     invisible(lapply(seq_along(annot.grps), function(i){
       if(length(levels(as.factor(annot.grps[[i]]))) != length(annot.pal)){
         if(all.equal(
-          target = annot.pal, current = grDevices::rainbow(n = ncol(m)))){
+          target = annot.pal, current = grDevices::rainbow(n = ncol(data)))){
           stop(paste("A specific palette must be defined in 'annot.pal' to",
                      "match the annotation provided."))
         } else {

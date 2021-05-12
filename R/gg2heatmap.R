@@ -684,7 +684,8 @@ gg2heatmap <- function(
     } else {
       upd.grob_w <- BiocompR::resize.grobs(
         ls.grobs = ls.w.grobs, dimensions = "widths", start.unit = 1,
-        end.unit = 55)
+        end.unit = max(unlist(lapply(X = ls.w.grobs, FUN = function(i){
+          length(i[["widths"]]) }))))
     }
   }
   rm(htmp, col_sidebar_grob)
