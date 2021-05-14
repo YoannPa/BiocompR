@@ -379,33 +379,9 @@ cross.biplot <- function(
   ve <- prcomp.res$sdev^2/sum(prcomp.res$sdev^2)
   lab.PC <- paste0(PC, " (", round(ve[PCs] * 100, 2), "%)")
   lab.PC <- data.table::data.table(PC, lab.PC)
-  #Define scale for plot data and loadings based on selected PCs
-  scaler <- min(unlist(lapply(X = PC, FUN = function(p){
-    max(abs(dt.scaled.pc[[p]]))/max(abs(loadings.data[[p]]))
-  })))
-  # scaler <- min(
-  #   max(abs(dt.scaled.pc[["PCx"]]))/max(abs(loadings.data[["PCx"]])),
-  #   max(abs(dt.scaled.pc[["PCy"]]))/max(abs(loadings.data[["PCy"]])))
   #Create possible PCs combinations
   comb.pcs <- data.table::as.data.table(
     expand.grid(PC, PC, stringsAsFactors = FALSE))[Var1 != Var2]
-  #Recreate dt.scaled.pc
-  ls.dt.scaled <- lapply(X = seq(nrow(comb.pcs)), FUN = function(i){
-    pc.select <- unlist(c(comb.pcs[i], colnames(dt.annot)))
-    sub.dt <- dt.scaled.pc[, ..pc.select, ]
-    sub.dt[, c("name.Y", "name.X") := .(pc.select[1], pc.select[2])]
-  })
-  dt.scaled.pc <- data.table::rbindlist(l = ls.dt.scaled, use.names = FALSE)
-  data.table::setnames(x = dt.scaled.pc, old = 1, new = "PCy")
-  data.table::setnames(x = dt.scaled.pc, old = 2, new = "PCx")
-  cols <- c("name.X", "PCx", "name.Y", "PCy", colnames(dt.annot))
-  dt.scaled.pc <- dt.scaled.pc[, ..cols, ]
-  dt.scaled.pc[, c("name.X", "name.Y") := .(
-    as.factor(name.X), as.factor(name.Y))]
-  setattr(dt.scaled.pc$name.X, "levels",
-          lab.PC[order(match(PC, levels(dt.scaled.pc$name.X)))]$lab.PC)
-  setattr(dt.scaled.pc$name.Y, "levels",
-          lab.PC[order(match(PC, levels(dt.scaled.pc$name.Y)))]$lab.PC)
   #Get loadings data for PCx & PCy
   if(loadings){
     if(class(prcomp.res)[1] == "prcomp"){
@@ -421,6 +397,13 @@ cross.biplot <- function(
     # setnames(x = loadings.data, old = PC[1], new = "PCx")
     # setnames(x = loadings.data, old = PC[2], new = "PCy")
 
+    #Define scale for plot data and loadings based on selected PCs
+    scaler <- min(unlist(lapply(X = PC, FUN = function(p){
+      max(abs(dt.scaled.pc[[p]]))/max(abs(loadings.data[[p]]))
+    })))
+    # scaler <- min(
+    #   max(abs(dt.scaled.pc[["PCx"]]))/max(abs(loadings.data[["PCx"]])),
+    #   max(abs(dt.scaled.pc[["PCy"]]))/max(abs(loadings.data[["PCy"]])))
     loadings.data[, c(PC) := lapply(
       X = .SD, FUN = function(i){ i * scaler * 0.8 }), .SDcols = PC]
     #Recreate loadings.data
@@ -455,6 +438,24 @@ cross.biplot <- function(
                                      by = .(name.X, name.Y, quadrant)]
     }
   }
+  #Recreate dt.scaled.pc
+  ls.dt.scaled <- lapply(X = seq(nrow(comb.pcs)), FUN = function(i){
+    pc.select <- unlist(c(comb.pcs[i], colnames(dt.annot)))
+    sub.dt <- dt.scaled.pc[, ..pc.select, ]
+    sub.dt[, c("name.Y", "name.X") := .(pc.select[1], pc.select[2])]
+  })
+  dt.scaled.pc <- data.table::rbindlist(l = ls.dt.scaled, use.names = FALSE)
+  data.table::setnames(x = dt.scaled.pc, old = 1, new = "PCy")
+  data.table::setnames(x = dt.scaled.pc, old = 2, new = "PCx")
+  cols <- c("name.X", "PCx", "name.Y", "PCy", colnames(dt.annot))
+  dt.scaled.pc <- dt.scaled.pc[, ..cols, ]
+  dt.scaled.pc[, c("name.X", "name.Y") := .(
+    as.factor(name.X), as.factor(name.Y))]
+  setattr(dt.scaled.pc$name.X, "levels",
+          lab.PC[order(match(PC, levels(dt.scaled.pc$name.X)))]$lab.PC)
+  setattr(dt.scaled.pc$name.Y, "levels",
+          lab.PC[order(match(PC, levels(dt.scaled.pc$name.Y)))]$lab.PC)
+
   #Make PCA ggplot
   biplt <- ggplot2::ggplot() +  ggplot2::theme(
     panel.background = element_blank(),
