@@ -141,7 +141,7 @@ This warning can arise when using the function `sunset()`when there is only 1 la
 The current statues of this issue can be tracked [**here**](https://github.com/tidyverse/ggplot2/issues/4368).  
 
 ## Technical questions / Development / Feature request
-If you encounters issues or if a feature you would expect is not available in of BiocompR functions, please check if an existing issue adresses your point [here](https://github.com/YoannPa/BiocompR/issues/). If not, create a [new issue here](https://github.com/YoannPa/BiocompR/issues/new).  
+If you encounters issues or if a feature you would expect is not available in a BiocompR function, please check if an existing issue adresses your point [here](https://github.com/YoannPa/BiocompR/issues/). If not, create a [new issue here](https://github.com/YoannPa/BiocompR/issues/new).  
 
 ## References
 ⚠️ **Work in progress !**  
