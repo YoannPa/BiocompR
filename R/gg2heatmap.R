@@ -393,6 +393,7 @@ gg2heatmap <- function(
   if(verbose){ cat("Melting matrix...") }
   dt.frame <- data.table::as.data.table(x = dframe, keep.rownames = TRUE)
   dt.frame[, rn := factor(x = rn, levels = rev(rn))]
+
   # dt.frame[, rn := factor(x = rn, levels = rownames(dframe))]
   melted_mat <- data.table::melt.data.table(
     data = dt.frame, id.vars = "rn", measure.vars = colnames(dt.frame)[-c(1)])
