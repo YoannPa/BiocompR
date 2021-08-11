@@ -1,6 +1,6 @@
 Package: BiocompR
 Title: BiocompR - Advanced visualizations for data comparison
-Version: 0.0.124
+Version: 0.0.125
 Authors@R: 
     person(given = "Yoann",
            family = "Pageaud",
@@ -28,10 +28,10 @@ Imports:
     psych,
     parallel,
     parallelDist,
-    quantmod,
-    magick
+    quantmod
 RoxygenNote: 7.1.1
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    magick
 VignetteBuilder: knitr
