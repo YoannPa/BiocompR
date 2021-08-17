@@ -68,6 +68,7 @@ check.annotations <- function(data, annot.grps, annot.pal, verbose = FALSE){
     }
   } else if(is.vector(annot.pal)){ #if a single palette is provided
     invisible(lapply(seq_along(annot.grps), function(i){
+      if(length(annot.pal) == 0){ stop("'annot.pal' is empty.") }
       if(length(levels(as.factor(annot.grps[[i]]))) != length(annot.pal)){
         if(all.equal(
           target = annot.pal, current = grDevices::rainbow(n = ncol(data)))){
