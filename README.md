@@ -8,7 +8,7 @@ _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots 
 **3-** [**DKFZ - Computational Cancer Epigenomics, Germany.**](https://www.dkfz.de/en/CanEpi/CompEpigen/index.html)  
 **4-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
-**Version: 0.0.127 (Beta)**  
+**Version: 0.0.128 (Beta)**  
 **R Compatibility: Version 4.0.5**  
 **Last Update: 17/08/2021**  
 **How to cite:** _Pageaud Y. et al., BiocompR - Advanced visualizations for data comparison._  
@@ -86,6 +86,15 @@ Error in UseMethod("depth") :
 ```
 This error seems to happen randomly when executing code using the ggplot2 and/or grid packages. Usually executing one more time the chuck of code solve the error. The current statues of this issue can be tracked [**here**](https://github.com/tidyverse/ggplot2/issues/2514).
 
+
+**❎ Error in grid.Call(C_convert, x, as.integer(whatfrom), as.integer(whatto), : Viewport has zero dimension(s)**  
+```R
+Error in grid.Call(C_convert, x, as.integer(whatfrom), as.integer(whatto), :
+  Viewport has zero dimension(s)
+```
+This error can arise when using the `ggbipca()` function: if you define a legend with too many values, the plotting area becomes too small to print the plot in plotting panel of RStudio.  
+When it happens, you can try to manually increase the size of the plotting panel in your RStudio interface. If doing this doesn't solve the error, then it is advised to define a legend with fewer values for colors and/or shapes.  
+
 **⚠️ Reached elapsed time limit.**
 ```
 Warning message:
@@ -139,6 +148,8 @@ Warning messages:
 ```
 This warning can arise when using the function `sunset()`when there is only 1 label displayed on the right Y axis. This warning does not compromise the result and should be ignored.  
 The current statues of this issue can be tracked [**here**](https://github.com/tidyverse/ggplot2/issues/4368).  
+
+
 
 ## Technical questions / Development / Feature request
 If you encounters issues or if a feature you would expect is not available in a BiocompR function, please check if an existing issue adresses your point [here](https://github.com/YoannPa/BiocompR/issues/). If not, create a [new issue here](https://github.com/YoannPa/BiocompR/issues/new).  
