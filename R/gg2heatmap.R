@@ -193,8 +193,11 @@
 #TODO: Try to improve display for the annotation when a lot of columns used (try geom_raster()).
 #TODO: Create a theme argument using the ggplot2::theme() function.
 #TODO: Create a guide argument using guide().
-#TODO: Create an inpedentent rasterization function.
-#TODO: Add option to change final resolution of rasterized heatmap.
+#TODO: Add option to not display any annotation bar.
+#TODO: Add option to make it possible to change delimitation color and size between heatmap cells.
+#TODO: Remove auto-display of heatmap once it is made
+#TODO: Add option to support molten data.frame
+#TODO: Add option to split heatmap by rows in n smaller heatmaps based on a categorical variable from the molten data.frame
 gg2heatmap <- function(
   m, na.handle = 'remove', dist.method = 'manhattan', rank.fun = NULL,
   top.rows = NULL, dendrograms = TRUE, dend.size = 1, raster = NULL,
