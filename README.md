@@ -8,9 +8,9 @@ _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots 
 **3-** [**DKFZ - Computational Cancer Epigenomics, Germany.**](https://www.dkfz.de/en/CanEpi/CompEpigen/index.html)  
 **4-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
-**Version: 0.0.128 (Beta)**  
+**Version: 0.0.130 (Beta)**  
 **R Compatibility: Version 4.0.5**  
-**Last Update: 17/08/2021**  
+**Last Update: 03/09/2021**  
 **How to cite:** _Pageaud Y. et al., BiocompR - Advanced visualizations for data comparison._  
 
 ## Content
@@ -31,6 +31,7 @@ Currently the package BiocompR contains **19 functions**:
 * `ggeigenvector()` - Creates an eigenvector plot using ggplot2.  
 * `ggpanel.corr()` - Plots results of correlation test between a single variable and multiple others as jittered scatter plot divided into 4 different panels.  
 * `ggvolcano.corr()` - Plots results of correlation test between a single variable and multiple others as volcano plot.  
+* `ggvolcano.test()` - Plots results of a Plots results of statistical tests as volcano plot.  
 * `ks.plot()` - Computes pairwise Kolmogorov-Smirnov tests on a matrix and display results in a fused plot.  
 * `load.palettes()` - Loads pre-defined palettes.  
 * `plot.col.sidebar()` - Creates a colored side annotation bars in ggplot2.  

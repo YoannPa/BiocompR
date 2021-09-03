@@ -15,25 +15,29 @@ chk.dt <- function(data, data.type){
   #Check col2
   if(is.numeric(data[[2]])){
     if(data.type == "corr"){
-      if(any(data[,2] < -1) | any(data[,2] > 1)){
+      if(any(data[, 2] < -1) | any(data[, 2] > 1)){
         stop("Correlation values in column 2 must be comprised between -1 and 1.")
       }
     }
   } else { stop("Column 2 type must be numeric.") }
   #Check col3
   if(is.numeric(data[[3]])){
-    if(any(data[,3] < 0) | any(data[,3] > 1)){
+    if(any(data[, 3] < 0) | any(data[, 3] > 1)){
       stop("P-values in column 3 must be comprised between 0 and 1.")}
   } else { stop("Column 3 type must be numeric.") }
-  #Check ncol(data)
+  #Check data.type and select appropriate colnames
+  if(data.type == "corr"){
+    vec.colnames <- c("labels","corr","pval","grp","size")
+  } else if(data.type == "t.test"){
+    vec.colnames <- c("labels","fold","pval","grp","size")
+  }
+  #Check ncol(data) and change column names
   if(ncol(data) < 3){ stop("Data should contain at least 3 columns.")
-  } else if(ncol(data) == 3){
-    colnames(data) <- c("labels","corr","pval")
-  } else if(ncol(data) == 4){
-    colnames(data) <- c("labels","corr","pval","grp")
+  } else if(ncol(data) == 3){ colnames(data) <- vec.colnames[1:3]
+  } else if(ncol(data) == 4){ colnames(data) <- vec.colnames[1:4]
   } else if(ncol(data) == 5){
-    colnames(data) <- c("labels","corr","pval","grp","size")
     if(!is.numeric(data[[5]])){ stop("Column 5 type must be numeric.") }
+    colnames(data) <- vec.colnames[1:5]
   } else if (ncol(data) > 5){
     stop("Too many columns. ncol(data) must be <= 5.")
   }
@@ -146,7 +150,7 @@ ggpanel.corr <- function(
   data$P.value <- cut(
     x = data$pval, breaks=c(min(data$pval), p.cutoff, max(data$pval)),
     labels = c(paste0("<= ", p.cutoff,":\n[ ", formatC(x=min(data$pval),
-                                                      format="e",digits=2),
+                                                       format="e",digits=2),
                       ", ", p.cutoff, " ]"),
                paste0("> ", p.cutoff, ":\n] ",p.cutoff,", ",
                       formatC(x=max(data$pval), format="e",digits=2)," ]")),
@@ -251,7 +255,7 @@ ggvolcano.corr <- function(
   #Get colnames
   orig.cnames <- colnames(data)
   #Convert as a data.table
-  if(!is.data.table(data)){ data<-as.data.table(data) }
+  if(!is.data.table(data)){ data <- as.data.table(data) }
   #Check & format data.table
   data <- chk.dt(data = data, data.type = "corr")
   #Check corr.label.cutoff values
@@ -260,7 +264,7 @@ ggvolcano.corr <- function(
   #Create shading conditions
   data[pval > p.cutoff, "P-value" := as.factor(paste0("> ", p.cutoff))]
   data[pval <= p.cutoff, "P-value" := paste0("<= ", p.cutoff)]
-  #Scatter plot Correlation of L1 Methylation with L1 transposition
+  #Scatter plot of correlation
   ggvol <- ggplot()
   if(ncol(data) == 6){
     ggvol <- ggvol +
@@ -300,6 +304,97 @@ ggvolcano.corr <- function(
     ggvol <- ggvol + ggrepel::geom_label_repel(
       data = data.frame(), aes(x = corr.cutoff, y = Inf, fontface = 1,
                                label = title.corr.cutoff),
+      color = "blue", direction = "y", size = 4)
+  }
+  ggvol <- ggvol +
+    theme(axis.ticks = element_blank(),
+          panel.background = element_blank(),
+          panel.grid.major = element_line(colour = "grey"),
+          axis.title = element_text(size = 13),
+          axis.text = element_text(size = 12),
+          plot.title = element_text(size = 15, hjust = 0.5),
+          legend.title = element_text(size = 13),
+          legend.text = element_text(size = 12),
+          legend.key = element_blank()) +
+    labs(x = orig.cnames[2], y = paste0("-log10(",orig.cnames[3],")"),
+         color = orig.cnames[4], size = orig.cnames[5])
+  #Return plot removing warning about discrete variable given to alpha
+  warn.handle(pattern = "Using alpha for a discrete variable is not advised.",
+              print(ggvol))
+}
+
+
+#' Plots results of statistical tests as volcano plot.
+#'
+#' @param data        A \code{data.table} with 3 to 5 columns:
+#'                    \itemize{
+#'                     \item{column 1 - The labels.}
+#'                     \item{column 2 - log2(fold changes) values.}
+#'                     \item{column 3 - P-values.}
+#'                     \item{
+#'                     column 4 (optional) - groups to be used to color points.
+#'                     If none provided, elements will be divided into
+#'                     3 categories:
+#'                     \itemize{
+#'                      \item{Red - elements above the positive
+#'                      'fc.cutoff' and below 'p.cutoff'.}
+#'                      \item{Blue - elements below the negative
+#'                      'fc.cutoff' and below 'p.cutoff'.}
+#'                      \item{Black - any other element not meeting the
+#'                      requirements in the first nor the second category.}
+#'                     }}
+#'                    }
+#' @param p.cutoff    A \code{numeric} between 0 and 1 to be used as a maximum
+#'                    cut-off on p-values (Default: p.cutoff = 0.01).
+#' @param fc.cutoff   A \code{numeric} to be used as a cut-off on fold changes
+#'                    (Default: fc.cutoff = 0).
+#' @param label       A \code{character} vector to be used to define which
+#'                    elements in the \code{data.table} column 1 should be
+#'                    labeled on the plot. (Default: label = NULL).
+#' @param group.label A \code{logical} to be used to define whether labeling is
+#'                    done on individual (Default: group.label = FALSE) or group
+#'                    level (group.label = TRUE). The parameter is only used
+#'                    when the \code{data.table} column 4 is set.
+#' @return A \code{gg} volcano plot.
+#' @author Verena Bitto, Yoann Pageaud.
+#' @export
+
+ggvolcano.test <- function(
+  data, p.cutoff = 0.01, fc.cutoff = 0, title.fc.cutoff = "Fold change cut-off",
+  label.cutoff){
+
+  #Get colnames
+  orig.cnames <- colnames(data)
+  #Convert as a data.table
+  if(!is.data.table(data)){ data <- as.data.table(data) }
+  #Check & format data.table
+  data <- chk.dt(data = data, data.type = "t.test")
+
+  #Create shading conditions
+  data[pval > p.cutoff, "P-value" := as.factor(paste0("> ", p.cutoff))]
+  data[pval <= p.cutoff, "P-value" := paste0("<= ", p.cutoff)]
+
+  #Scatter plot of test fold-change and p-value
+  ggvol <- ggplot()
+
+  ggvol <- ggvol +
+    geom_point(data = data, aes(x = fold, y = -log10(pval), alpha=`P-value`))
+
+  ggvol <- ggvol + geom_hline(yintercept = -log10(p.cutoff), color = 'red')
+
+  if(!is.null(fc.cutoff)){
+    ggvol <- ggvol + geom_vline(xintercept = fc.cutoff, color = 'blue')
+  }
+
+
+  ggvol <- ggvol + ggrepel::geom_label_repel(
+    data = data.frame(), aes(x = -Inf, y = -log10(p.cutoff), fontface = 1,
+                             label = "P-value cut-off"),
+    color = "red", direction = "x", size = 4)
+  if(!is.null(fc.cutoff)){
+    ggvol <- ggvol + ggrepel::geom_label_repel(
+      data = data.frame(), aes(x = fc.cutoff, y = Inf, fontface = 1,
+                               label = title.fc.cutoff),
       color = "blue", direction = "y", size = 4)
   }
   ggvol <- ggvol +
