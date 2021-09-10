@@ -55,6 +55,7 @@
 
 #TODO: Add facet option for x as a numeric vector
 #TODO: Adapt show.annot to the faceting and when X is a character.
+#TODO: add option to pass hlines & vlines to the function instead of guessing it
 fancy.hist <- function(
   x, xmax = max(x, na.rm = TRUE), nbreaks = 11, ngrad = 11, round.grad = 1,
   ncores = 1, bin.col = "#0570b0", show.annot = FALSE, facet = NULL){

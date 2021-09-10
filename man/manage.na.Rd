@@ -64,7 +64,7 @@ Keeps, removes or imputes missing values in a matrix or a data.frame based on
 sample groups.
 }
 \examples{
-# Creating a dataframe of 4 columns with 50 values in each:
+# Creating a data.frame of 4 columns with 50 values in each:
 df <- data.frame("col1" = rnorm(n = 50, mean = 25, sd = 4),
                  "col2" = rnorm(n = 50, mean = 25, sd = 4),
                  "col3" = rnorm(n = 50, mean = 25, sd = 4),

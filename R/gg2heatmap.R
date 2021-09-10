@@ -153,53 +153,44 @@
 #'                        (Default: y.lab = 'Values').
 #' @param x.lab           A \code{character} to specify X-axis title
 #'                        (Default: x.lab = 'Samples').
-#' @param axis.title.x    An \code{element_text} object to setup X axis title
-#'                        (Default: axis.title.x =
-#'                        ggplot2::element_text(size = 12, color = 'black')).
-#' @param axis.text.x     An \code{element_text} object to setup X axis text
-#'                        (Default: axis.text.x =
-#'                        ggplot2::element_text(size = 11, angle = -45,
-#'                        hjust = 0, vjust = 0.5, face = 'bold')).
-#' @param axis.ticks.x    An \code{element_line} object to setup X axis ticks
-#'                        (Default: axis.ticks.x =
-#'                        ggplot2::element_line(color = 'black')).
+#' @param theme_heatmap   A ggplot2 \code{theme} to specify any theme parameter
+#'                        you wish to custom on the heatmap part of the plot
+#'                        (Default: theme_heatmap = NULL).
+#' @param border.col      A \code{character} to specify an R color code for the
+#'                        border delimitating the heatmap cells
+#'                        (Default: border.col = NA).
+#' @param border.size     A \code{numeric} to specify the linewidth of cells
+#'                        border (Default: border.size = 0.1).
+#' @param cell.size       A \code{numeric} vector of length 2 to specify the
+#'                        width and height of cells taking values between 0 and
+#'                        1.
+#'                        \itemize{
+#'                         \item{If cell.size is a \code{numeric}: the value is
+#'                               used to set both the width and the height of
+#'                               cells.}
+#'                         \item{If cell.size is a \code{numeric} vector of
+#'                               length 2: the first numeric will apply to
+#'                               cell width, and the second
+#'                               numeric will apply to cell height.}
+#'                        }
 #' @param y.axis.right    A \code{logical} to specify whether the heatmap Y axis
 #'                        should be displayed on the right (y.axis.right = TRUE)
 #'                        or not (y.axis.right = FALSE)
 #'                        (Default: y.axis.right = FALSE).
-#' @param axis.title.y.left  An \code{element_text} object to setup left Y axis
-#'                           title (Default: axis.title.y.left =
-#'                           ggplot2::element_blank()).
-#' @param axis.text.y.left   An \code{element_text} object to setup left Y axis
-#'                           text (Default: axis.text.y.left =
-#'                           ggplot2::element_blank()).
-#' @param axis.ticks.y.left  An \code{element_line} object to setup left Y axis
-#'                           ticks (Default: axis.ticks.y.left =
-#'                           ggplot2::element_blank()).
-#' @param axis.title.y.right An \code{element_text} object to setup right Y axis
-#'                           title (Default: axis.title.y.right =
-#'                           ggplot2::element_blank()).
-#' @param axis.text.y.right  An \code{element_text} object to setup right Y axis
-#'                           text (Default: axis.text.y.right =
-#'                           ggplot2::element_blank()).
-#' @param axis.ticks.y.right An \code{element_line} object to setup right Y axis
-#'                           ticks (Default: axis.ticks.y.right =
-#'                           ggplot2::element_blank()).
 #' @return A \code{grob} list containing the final plot, and also each grob
 #'         generated separately.
 #' @author Yoann Pageaud.
 #' @export
 
 #TODO: Try to improve display for the annotation when a lot of columns used (try geom_raster()).
-#TODO: Create a heatmap.theme argument using the ggplot2::theme() function.
 #TODO: Create a guide argument using guide().
 #TODO: Add option to not display any annotation bar.
-#TODO: Add option to make it possible to change delimitation color and size between heatmap cells.
 #TODO: Remove auto-display of heatmap once it is made
 #TODO: Add option to support molten data.frame
 #TODO: Add option to split heatmap by rows in n smaller heatmaps based on a categorical variable from the molten data.frame
 #TODO: Create an annotation.theme argument using the ggplot2::theme() function.
 #TODO: Fix the issue with annotation legends overlapping.
+#TODO: merge y.lab and x.lab using the function ggplot2::labs()
 gg2heatmap <- function(
   m, na.handle = 'remove', dist.method = 'manhattan', rank.fun = NULL,
   top.rows = NULL, dendrograms = TRUE, dend.size = 1, raster = NULL,
@@ -209,18 +200,10 @@ gg2heatmap <- function(
   annot.pal = grDevices::rainbow(n = ncol(m)), annot.size = 1, annot.sep = 0,
   lgd.scale.name = 'Values', lgd.bars.name = 'Legends',
   lgd.title = ggplot2::element_text(size = 12),
-  lgd.text = ggplot2::element_text(size = 11),
-  lgd.merge = FALSE, lgd.space.width = 1, y.lab = "Values", x.lab = "Samples",
-  axis.title.x = ggplot2::element_text(size = 12, color = 'black'),
-  axis.text.x = ggplot2::element_text(
-    size = 11, angle = -45, hjust = 0, vjust = 0.5, face = 'bold'),
-  axis.ticks.x = ggplot2::element_line(color = 'black'), y.axis.right = FALSE,
-  axis.title.y.right = ggplot2::element_blank(),
-  axis.text.y.right = ggplot2::element_blank(),
-  axis.ticks.y.right = ggplot2::element_blank(),
-  axis.title.y.left = ggplot2::element_blank(),
-  axis.text.y.left = ggplot2::element_blank(),
-  axis.ticks.y.left = ggplot2::element_blank(),
+  lgd.text = ggplot2::element_text(size = 11), lgd.merge = FALSE,
+  lgd.space.width = 1, y.lab = "Values", x.lab = "Samples",
+  theme_heatmap = NULL, border.col = NA, border.size = 0.1, cell.size = 1,
+  y.axis.right = FALSE,
   verbose = FALSE){
 
   #Check m is a matrix
@@ -284,14 +267,28 @@ gg2heatmap <- function(
     annot.sep <- annot.sep[1]
   } else { stop("'annot.sep' length > 2. Too many values.") }
 
+  #Check cell size
+  if(length(cell.size) == 1){
+    cell.width <- cell.size
+    cell.height <- cell.size
+  } else if(length(cell.size) == 2){
+    cell.width <- cell.size[1]
+    cell.height <- cell.size[2]
+  } else { stop("'cell.size' length > 2. Too many values.") }
+
+
   #Check if y.axis.right = TRUE when axis.text.y.right or axis.title.y.right or
   # axis.ticks.y.right are not ggplot2::element_blank()
-  if((!BiocompR::is.elt_blank(axis.text.y.right) |
-      !BiocompR::is.elt_blank(axis.title.y.right) |
-      !BiocompR::is.elt_blank(axis.ticks.y.right)) & !y.axis.right){
-    warning(
-      paste("'y.axis.right' has to be set to TRUE in order to display the",
-            "Y-axis on the right side of the heatmap."))
+  theme_to_check <- c(
+    "axis.text.y.right", "axis.title.y.right", "axis.ticks.y.right")
+  thm_val <- theme_to_check[theme_to_check %in% names(theme_heatmap)]
+  if(!identical(thm_val, character(0))){
+    if(any(unlist(lapply(X = thm_val, FUN = function(t){
+      !BiocompR::is.elt_blank(theme_heatmap[[t]])}))) & !y.axis.right){
+      warning(
+        paste("'y.axis.right' has to be set to TRUE in order to display the",
+              "Y-axis on the right side of the heatmap."))
+    }
   }
   #Check annotations groups and palettes matching
   BiocompR::check.annotations(
@@ -302,7 +299,6 @@ gg2heatmap <- function(
   m <- BiocompR::manage.na(
     data = m, method = na.handle, groups = imputation.grps, ncores = ncores)
   if(verbose){ cat("Done.\n") }
-
   #Apply ranking function if any function defined
   if(verbose){ cat("Ranking data by rows...") }
   if(!is.null(rank.fun)){
@@ -317,7 +313,13 @@ gg2heatmap <- function(
   #Remove NAs if some for dendrogram matrix
   if(method.rows != 'none' | method.cols != 'none'){
     if(verbose){ cat("Clustering data...") }
+    print(m)
+    m_rname <- rownames(m)[apply(X = m, MARGIN = 1, FUN = anyNA) == FALSE]
     dend_mat <- m[stats::complete.cases(m), ]
+    if(is.vector(dend_mat)){
+      dend_mat <- matrix(
+        dend_mat, nrow = 1, dimnames = list(m_rname, names(dend_mat)))
+    }
     if(nrow(dend_mat) != nrow(m)){
       warning(paste("Distance method selected need complete data.",
                     nrow(m) - nrow(dend_mat), "incomplete rows removed out of",
@@ -412,19 +414,49 @@ gg2heatmap <- function(
   if(verbose){ cat("Done.\n") }
 
   if(verbose){ cat("Configure heatmap...") }
-  #Create theme_heatmap
-  theme_heatmap <- ggplot2::theme(
+
+  #Set theme_forced_htmp
+  theme_forced_htmp <- ggplot2::theme(
     plot.margin = ggplot2::margin(0, 0, 0, 0),
+    legend.position = "bottom",
+  )
+  #Set theme_default_htmp
+  theme_default_htmp <- ggplot2::theme(
+    axis.title.x = ggplot2::element_text(size = 12, color = 'black'),
+    axis.text.x = ggplot2::element_text(
+      size = 11, angle = -45, hjust = 0, vjust = 0.5, face = 'bold'),
+    axis.ticks.x = ggplot2::element_line(color = 'black'),
+    axis.title.y.right = ggplot2::element_blank(),
+    axis.text.y.right = ggplot2::element_blank(),
+    axis.ticks.y.right = ggplot2::element_blank(),
+    axis.title.y.left = ggplot2::element_blank(),
+    axis.text.y.left = ggplot2::element_blank(),
+    axis.ticks.y.left = ggplot2::element_blank(),
     panel.grid = ggplot2::element_blank(),
     panel.background = ggplot2::element_rect(fill = "transparent"),
     plot.background = ggplot2::element_rect(fill = "transparent"),
     legend.text = ggplot2::element_text(size = 11),
-    legend.title = ggplot2::element_text(size = 12), legend.position = "bottom",
-    legend.justification = c(0.4, 0.5), axis.title.x = axis.title.x,
-    axis.text.x = axis.text.x, axis.ticks.x = axis.ticks.x,
-    axis.title.y.right = axis.title.y.right,
-    axis.ticks.y.right = axis.ticks.y.right,
-    axis.text.y.right = axis.text.y.right)
+    legend.title = ggplot2::element_text(size = 12),
+    legend.justification = c(0.4, 0.5)
+  )
+  #Update theme_heatmap
+  if(is.null(theme_heatmap)){
+    theme_heatmap <- theme_default_htmp + theme_forced_htmp
+  } else{
+    theme_heatmap <- theme_default_htmp + theme_heatmap + theme_forced_htmp
+  }
+  # theme_heatmap <- ggplot2::theme(
+  #   plot.margin = ggplot2::margin(0, 0, 0, 0),
+  #   panel.grid = ggplot2::element_blank(),
+  #   panel.background = ggplot2::element_rect(fill = "transparent"),
+  #   plot.background = ggplot2::element_rect(fill = "transparent"),
+  #   legend.text = ggplot2::element_text(size = 11),
+  #   legend.title = ggplot2::element_text(size = 12), legend.position = "bottom",
+  #   legend.justification = c(0.4, 0.5), axis.title.x = axis.title.x,
+  #   axis.text.x = axis.text.x, axis.ticks.x = axis.ticks.x,
+  #   axis.title.y.right = axis.title.y.right,
+  #   axis.ticks.y.right = axis.ticks.y.right,
+  #   axis.text.y.right = axis.text.y.right)
 
   #Set heatmap source parameters
   htmp.source <- ggplot2::ggplot() +
@@ -447,31 +479,35 @@ gg2heatmap <- function(
                      strip.text = ggplot2::element_blank())
   } else { htmp <- htmp.source }
 
-  #Display legend of missing values if any
+  #Draw heatmap with geom_tile
   if(nrow(melted_mat[is.na(value)]) != 0){
+    #Display legend of missing values if any
     htmp <- htmp + ggplot2::geom_tile(data = melted_mat, ggplot2::aes(
-      x = variable, y = rn, fill = value, color = " "))
+      x = variable, y = rn, fill = value, color = " "), color = border.col,
+      size = border.size, width = cell.width, height = cell.height)
   } else {
     htmp <- htmp + ggplot2::geom_tile(
-      data = melted_mat, ggplot2::aes(x = variable, y = rn, fill = value))
+      data = melted_mat, ggplot2::aes(x = variable, y = rn, fill = value),
+      color = border.col, size = border.size,
+      width = cell.width, height = cell.height)
   }
 
   if(dd.rows){
-    # htmp <- htmp +
     theme_heatmap <- theme_heatmap +
       ggplot2::theme(axis.title.y.left = ggplot2::element_blank(),
                      axis.ticks.y.left = ggplot2::element_blank(),
                      axis.ticks.length.y.left = ggplot2::unit(0, "pt"),
-                     axis.text.y.left = ggplot2::element_blank(),
-                     plot.margin = ggplot2::unit(c(0, 0, 0, 0), "cm"))
-  } else {
-    # htmp <- htmp +
-    theme_heatmap <- theme_heatmap +
-      ggplot2::theme(axis.title.y.left = axis.title.y.left,
-                     axis.ticks.y.left = axis.ticks.y.left,
-                     axis.text.y.left = axis.text.y.left,
-                     plot.margin = ggplot2::unit(c(0, 0, 0, 0), "cm"))
+                     axis.text.y.left = ggplot2::element_blank())
+    # ,
+    #                  plot.margin = ggplot2::unit(c(0, 0, 0, 0), "cm"))
   }
+  # } else {
+  #   theme_heatmap <- theme_heatmap +
+  #     ggplot2::theme(axis.title.y.left = axis.title.y.left,
+  #                    axis.ticks.y.left = axis.ticks.y.left,
+  #                    axis.text.y.left = axis.text.y.left,
+  #                    plot.margin = ggplot2::unit(c(0, 0, 0, 0), "cm"))
+  # }
   if(y.axis.right){
     htmp <- htmp +
       ggplot2::scale_y_discrete(position = 'right', expand = c(0, 0))
@@ -545,7 +581,7 @@ gg2heatmap <- function(
 
   #Extract Legend
   if(verbose){ cat("Extracting legends...") }
-  #Create a subsetted plot of the original heatmap
+  #Create a subset plot of the original heatmap
   xtrm.melted_mat <- melted_mat[
     value %in% c(min(value, na.rm = TRUE), max(value, na.rm = TRUE))]
   if(nrow(melted_mat[is.na(value)]) != 0){

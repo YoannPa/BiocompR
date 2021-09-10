@@ -61,6 +61,7 @@ row.impute.na <- function(
   return(ls.grps)
 }
 
+
 #' Keeps, removes or imputes missing values in a matrix or a data.frame based on
 #' sample groups.
 #'
@@ -100,7 +101,7 @@ row.impute.na <- function(
 #' @return A \code{matrix}.
 #' @author Yoann Pageaud.
 #' @examples
-#' # Creating a dataframe of 4 columns with 50 values in each:
+#' # Creating a data.frame of 4 columns with 50 values in each:
 #' df <- data.frame("col1" = rnorm(n = 50, mean = 25, sd = 4),
 #'                  "col2" = rnorm(n = 50, mean = 25, sd = 4),
 #'                  "col3" = rnorm(n = 50, mean = 25, sd = 4),
@@ -126,7 +127,13 @@ manage.na <- function(
   if(method != "keep"){ #If NA should not be kept
     if(any(is.na(data))) { #If any NA
       if(method == "remove"){ #Remove all rows containing any NA
-        data <- data[complete.cases(data),]
+        data_rname <- rownames(data)[
+          apply(X = data, MARGIN = 1, FUN = anyNA) == FALSE]
+        data <- data[complete.cases(data), ]
+        if(is.vector(data)){
+          data <- matrix(
+            data, nrow = 1, dimnames = list(data_rname, names(data)))
+        }
       } else if(method == "impute"){ #Impute NAs with the median value by group
         #Parallel-remove rows containing only NAs
         data <- data[

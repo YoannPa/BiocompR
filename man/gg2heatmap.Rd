@@ -32,17 +32,11 @@ gg2heatmap(
   lgd.space.width = 1,
   y.lab = "Values",
   x.lab = "Samples",
-  axis.title.x = ggplot2::element_text(size = 12, color = "black"),
-  axis.text.x = ggplot2::element_text(size = 11, angle = -45, hjust = 0, vjust = 0.5,
-    face = "bold"),
-  axis.ticks.x = ggplot2::element_line(color = "black"),
+  theme_heatmap = NULL,
+  border.col = NA,
+  border.size = 0.1,
+  cell.size = 1,
   y.axis.right = FALSE,
-  axis.title.y.right = ggplot2::element_blank(),
-  axis.text.y.right = ggplot2::element_blank(),
-  axis.ticks.y.right = ggplot2::element_blank(),
-  axis.title.y.left = ggplot2::element_blank(),
-  axis.text.y.left = ggplot2::element_blank(),
-  axis.ticks.y.left = ggplot2::element_blank(),
   verbose = FALSE
 )
 }
@@ -224,47 +218,34 @@ space (Default: lgd.space.width = 1).}
 \item{x.lab}{A \code{character} to specify X-axis title
 (Default: x.lab = 'Samples').}
 
-\item{axis.title.x}{An \code{element_text} object to setup X axis title
-(Default: axis.title.x =
-ggplot2::element_text(size = 12, color = 'black')).}
+\item{theme_heatmap}{A ggplot2 \code{theme} to specify any theme parameter
+you wish to custom on the heatmap part of the plot
+(Default: theme_heatmap = NULL).}
 
-\item{axis.text.x}{An \code{element_text} object to setup X axis text
-(Default: axis.text.x =
-ggplot2::element_text(size = 11, angle = -45,
-hjust = 0, vjust = 0.5, face = 'bold')).}
+\item{border.col}{A \code{character} to specify an R color code for the
+border delimitating the heatmap cells
+(Default: border.col = NA).}
 
-\item{axis.ticks.x}{An \code{element_line} object to setup X axis ticks
-(Default: axis.ticks.x =
-ggplot2::element_line(color = 'black')).}
+\item{border.size}{A \code{numeric} to specify the linewidth of cells
+border (Default: border.size = 0.1).}
+
+\item{cell.size}{A \code{numeric} vector of length 2 to specify the
+width and height of cells taking values between 0 and
+1.
+\itemize{
+ \item{If cell.size is a \code{numeric}: the value is
+       used to set both the width and the height of
+       cells.}
+ \item{If cell.size is a \code{numeric} vector of
+       length 2: the first numeric will apply to
+       cell width, and the second
+       numeric will apply to cell height.}
+}}
 
 \item{y.axis.right}{A \code{logical} to specify whether the heatmap Y axis
 should be displayed on the right (y.axis.right = TRUE)
 or not (y.axis.right = FALSE)
 (Default: y.axis.right = FALSE).}
-
-\item{axis.title.y.right}{An \code{element_text} object to setup right Y axis
-title (Default: axis.title.y.right =
-ggplot2::element_blank()).}
-
-\item{axis.text.y.right}{An \code{element_text} object to setup right Y axis
-text (Default: axis.text.y.right =
-ggplot2::element_blank()).}
-
-\item{axis.ticks.y.right}{An \code{element_line} object to setup right Y axis
-ticks (Default: axis.ticks.y.right =
-ggplot2::element_blank()).}
-
-\item{axis.title.y.left}{An \code{element_text} object to setup left Y axis
-title (Default: axis.title.y.left =
-ggplot2::element_blank()).}
-
-\item{axis.text.y.left}{An \code{element_text} object to setup left Y axis
-text (Default: axis.text.y.left =
-ggplot2::element_blank()).}
-
-\item{axis.ticks.y.left}{An \code{element_line} object to setup left Y axis
-ticks (Default: axis.ticks.y.left =
-ggplot2::element_blank()).}
 
 \item{verbose}{A \code{logical} to display information about the
 step-by-step processing of the data if TRUE
