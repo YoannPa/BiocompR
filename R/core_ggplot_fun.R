@@ -692,3 +692,50 @@ annotation_custom2 <- function(
     geom = ggplot2:::GeomCustomAnn, inherit.aes = TRUE, params = list(
       grob = grob, xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax))
 }
+
+
+#' Update a guide_colorbar with values from a new one, with exceptions.
+#'
+#' @param old_guide    A \code{guide} of class 'colorbar' you want to update.
+#' @param new_guide    A \code{guide} of class 'colorbar' updating the old_guide
+#'                     with its values.
+#' @param forced_param A named \code{list} containing guide_colorbar parameters
+#'                     associated with their values to be conserved.
+#'                     Independently from whether the there are differences or
+#'                     not between old and new guides, values passed using
+#'                     'forced_param' will override old and new guide values.
+#' @return An updated \code{guide} of class 'colorbar'.
+#' @author Yoann Pageaud.
+#' @export
+#' @keywords internal
+
+update_guide_colorbar <- function(
+  old_guide = guide_colorbar(), new_guide, forced_param = NULL){
+  new_guide <- lapply(X = names(old_guide), function(i){
+    #If any difference for the parameter between previous guide and new guide
+    if(isTRUE(all.equal(target = new_guide[[i]], current = old_guide[[i]]))){
+      if(!is.null(forced_param)){
+        if(i %in% names(forced_param)){
+          #If different, but also in forced param, keep forced value
+          forced_param[[i]]
+        } else {
+          #if different, but not in forced param, update value
+          old_guide[[i]]
+        }
+      } else { old_guide[[i]] } #No difference: Keep the reference value
+    } else {
+      if(!is.null(forced_param)){
+        if(i %in% names(forced_param)){
+          #If different, but also in forced param, keep forced value
+          forced_param[[i]]
+        } else {
+          #if different, but not in forced param, update value
+          new_guide[[i]]
+        }
+      } else { new_guide[[i]] }
+    }
+  })
+  names(new_guide) <- names(guide_colorbar())
+  class(new_guide) <- c("guide", "colorbar")
+  return(new_guide)
+}
