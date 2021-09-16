@@ -26,6 +26,7 @@ gg2heatmap(
   annot.pal = grDevices::rainbow(n = ncol(m)),
   annot.size = 1,
   annot.sep = 0,
+  show.annot = TRUE,
   lgd.bars.name = "Legends",
   lgd.title = ggplot2::element_text(size = 12),
   lgd.text = ggplot2::element_text(size = 11),
@@ -192,6 +193,10 @@ separations between annotations
        numeric will apply to the
        width of vertical separations.}
 }}
+
+\item{show.annot}{A \code{logical} to specify whether annotations should
+be displayed at the top of the heatmap
+(show.annot = TRUE) or not (show.annot = FALSE).}
 
 \item{lgd.bars.name}{A \code{character} specifying the name of annotation
 side bar legends, when legends are merged

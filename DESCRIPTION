@@ -1,6 +1,6 @@
 Package: BiocompR
 Title: BiocompR - Advanced visualizations for data comparison
-Version: 0.0.132
+Version: 0.0.133
 Authors@R: 
     person(given = "Yoann",
            family = "Pageaud",
@@ -19,6 +19,7 @@ Depends:
 biocViews:
 Imports:
     corrplot,
+    egg,
     fastcluster,
     ggdendro,
     ggrepel,
@@ -29,7 +30,7 @@ Imports:
     parallel,
     parallelDist,
     quantmod
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Suggests: 
     knitr,
     rmarkdown,
