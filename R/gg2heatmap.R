@@ -1,6 +1,15 @@
 #' Creates a custom heatmap with dendrograms and annotations.
 #'
-#' @param m               A \code{matrix}.
+#' @param m               A \code{matrix} with row and column names set, or a
+#'                        molten \code{dataframe}:
+#'                        \itemize{
+#'                         \item{Column 1 will be use for row names.}
+#'                         \item{Column 2 will be use for column names.}
+#'                         \item{Column 3 will be use for values.}
+#'                         \item{Additional columns coming after can be use for
+#'                         categorical splitting heatmap on rows with the
+#'                         'split.by.rows' option.}
+#'                        }
 #' @param na.handle       A \code{character} to specify how missing values
 #'                        should be handled.
 #'                        \itemize{
@@ -77,6 +86,10 @@
 #' @param facet           A \code{character} matching an annotation name in
 #'                        'annot.grps' to be used to split heatmap in separate
 #'                        panels following the annotation.
+#' @param split.by.rows   A \code{character} matching one of the categorical
+#'                        column in m if m is a molten data.frame to split
+#'                        heatmap on rows. split.by.rows will not work if m is
+#'                        matrix.
 #' @param plot.title      A \code{character} to be used as title for the plot.
 #' @param row.type        A \code{character} to be used in the plot subtitle
 #'                        description as a definition of the rows (e.g. 'loci',
@@ -135,6 +148,10 @@
 #' @param show.annot      A \code{logical} to specify whether annotations should
 #'                        be displayed at the top of the heatmap
 #'                        (show.annot = TRUE) or not (show.annot = FALSE).
+#' @param draw            A \code{logical} to specify whether the final heatmap
+#'                        should be drawn automatically when gg2heatmap()
+#'                        execution ends (draw = TRUE), or if it shouldn't
+#'                        (draw = FALSE).
 #' @param verbose         A \code{logical} to display information about the
 #'                        step-by-step processing of the data if TRUE
 #'                        (Default: verbose = FALSE).
@@ -190,9 +207,6 @@
 #' @author Yoann Pageaud.
 #' @export
 
-#TODO: Remove auto-display of heatmap once it is made
-#TODO: Add option to support molten data.frame
-#TODO: Add option to split heatmap by rows in n smaller heatmaps based on a categorical variable from the molten data.frame
 #TODO: Create an annotation.theme argument using the ggplot2::theme() function.
 #TODO: Fix the issue with annotation legends overlapping (using egg package ??).
 #TODO: merge y.lab and x.lab using the function ggplot2::labs()
@@ -200,8 +214,9 @@
 gg2heatmap <- function(
   m, na.handle = 'remove', dist.method = 'manhattan', rank.fun = NULL,
   top.rows = NULL, dendrograms = TRUE, dend.size = 1, raster = NULL,
-  facet = NULL, plot.title = "", row.type = 'rows', imputation.grps = NULL,
-  ncores = 1, guide_custom_bar = ggplot2::guide_colorbar(
+  facet = NULL, split.by.rows = NULL, plot.title = "", row.type = 'rows',
+  imputation.grps = NULL, ncores = 1,
+  guide_custom_bar = ggplot2::guide_colorbar(
     title = "Values", barwidth = 15, ticks.linewidth = 1, title.vjust = 0.86),
   scale_fill_grad = ggplot2::scale_fill_gradientn(
     colors = c("steelblue", "gray95", "darkorange"), na.value = "black"),
@@ -213,11 +228,27 @@ gg2heatmap <- function(
   lgd.text = ggplot2::element_text(size = 11), lgd.merge = FALSE,
   lgd.space.width = 1, y.lab = "Values", x.lab = "Samples",
   theme_heatmap = NULL, border.col = NA, border.size = 0.1, cell.size = 1,
-  y.axis.right = FALSE,
-  verbose = FALSE){
+  y.axis.right = FALSE, draw = TRUE, verbose = FALSE){
 
   #Check m is a matrix
-  if(!is.matrix(m)){ stop("m must be a matrix.") }
+  if(is.matrix(m)){ m.type <- "matrix" } else { if(is.data.frame(m)){
+    #Check if data.table, if not convert into data.table
+    if(!is.data.table(m)){ m <- as.data.table(m) }
+    #Get number columns of data.frame
+    n.col <- ncol(m)
+    #Cast matrix from molten data.frame
+    colnames(m)[1:3] <- c("rows", "cols", "values")
+    m <- data.table::dcast(data = m, formula = ... ~ cols, value.var = "values")
+    #Add index
+    m[, I := .I]
+    #Store additional columns of splitting
+    dt.cat <- m[, c(seq(1, n.col-2), ncol(m)), with = FALSE]
+    dt.cat[, I := as.factor(I)]
+    #Keep matrix with row names
+    m <- m[, -c(seq(1, n.col-2)), with = FALSE]
+    m <- data.table:::as.matrix.data.table(x = m, rownames = "I")
+    m.type <- "molten"
+  } else { stop("m must be a matrix or a molten data.frame.") }}
   #Check if na.handle method  supported
   na.method <- c('keep', 'impute', 'remove')
   if(!na.handle %in% na.method){ stop("na.handle method not supported.") }
@@ -237,6 +268,10 @@ gg2heatmap <- function(
   }
   if(!method.cols %in% methods.ls){
     stop("Unknown method for distance computation on columns.")
+  }
+  #Check is method.rows is not none and split.by.rows is not NULL
+  if(method.rows != 'none' & !is.null(split.by.rows)){
+    stop("Cannot compute distances on rows if heatmap is also splitted on rows.")
   }
   #Check if rank.fun is a supported function
   rank.method <- c("sd")
@@ -413,6 +448,22 @@ gg2heatmap <- function(
   dt.frame[, rn := factor(x = rn, levels = rev(rn))]
   melted_mat <- data.table::melt.data.table(
     data = dt.frame, id.vars = "rn", measure.vars = colnames(dt.frame)[-c(1)])
+  if(m.type == "molten"){
+    #Merge original row names and additional categories stored
+    melted_mat <- data.table::merge.data.table(
+      x = melted_mat, y = dt.cat, by.x = "rn", by.y = "I", all.x = TRUE)
+    #replace rn values by rows values and remove rows column
+    melted_mat[, rn := rows]
+    melted_mat <- melted_mat[, -c("rows"), ]
+    #Apply split.by.rows option
+    if(!is.null(split.by.rows)){
+      #Keep melted_mat with the category specified in split.by.rows
+      melted_mat <- melted_mat[, c("rn", "variable", "value", split.by.rows),
+                               with = FALSE]
+      #Rename splitting categorical column
+      setnames(x = melted_mat, old = split.by.rows, new = "split.by.rows")
+    }
+  }
   if(!is.null(facet)){
     dt.facet <- data.table::data.table("variable" = colnames(dt.frame)[-c(1)],
                                        "facet.annot" = annot.grps[[facet]])
@@ -445,7 +496,9 @@ gg2heatmap <- function(
     plot.background = ggplot2::element_rect(fill = "transparent"),
     legend.text = ggplot2::element_text(size = 11),
     legend.title = ggplot2::element_text(size = 12),
-    legend.justification = c(0.4, 0.5)
+    legend.justification = c(0.4, 0.5),
+    strip.text.y = ggplot2::element_text(size = 12),
+    strip.background.y = ggplot2::element_blank()
   )
   #Update theme_heatmap
   if(is.null(theme_heatmap)){
@@ -482,7 +535,17 @@ gg2heatmap <- function(
           panel.spacing = ggplot2::unit(0, "lines"),
           strip.background = ggplot2::element_rect(color = "black", size = 0.5))
     }
-  } else { htmp <- htmp.source }
+  } else {
+    #If m is a molten data.frame and split.by.rows is on
+    if(m.type == "molten" & !is.null(split.by.rows)){
+      if(!y.axis.right){
+        htmp <- htmp.source + ggplot2::facet_grid(
+          split.by.rows ~ ., scales = "free", space = "free")
+      } else {
+        stop("Cannot split heatmap on rows when 'y.axis.right' TRUE. Please contact the developper.")
+      }
+    } else { htmp <- htmp.source }
+  }
 
   #Draw heatmap with geom_tile
   if(nrow(melted_mat[is.na(value)]) != 0){
@@ -519,7 +582,6 @@ gg2heatmap <- function(
   } else { htmp <- htmp + ggplot2::scale_y_discrete(expand = c(0, 0)) }
 
   if(verbose){ cat("Done.\n") }
-
 
   if(show.annot){
     if(verbose){ cat("Configure annotations...") }
@@ -608,6 +670,7 @@ gg2heatmap <- function(
 
   #Create ggplot2 heatmap
   htmp <- htmp + theme_heatmap + ggplot2::theme(legend.position = "none")
+  htmp
   #Convert ggplots into grobs
   if(is.null(facet)){
     if(dd.cols){ ddgr_seg_col <- ggplot2::ggplotGrob(ddgr_seg_col) }
@@ -789,7 +852,6 @@ gg2heatmap <- function(
     }
   } else {
     if(!(!is.null(facet) & !dd.rows & dd.cols & show.annot)){
-      print("TOTO")
       upd.grob_h <- list("htmp" = upd.grob_w$htmp)
     }
   }
@@ -882,7 +944,7 @@ gg2heatmap <- function(
       widths = c(20, def.lgd.width + lgd.space.width))
   } else { arranged.grob <- main_grob }
 
-  final.plot <- gridExtra::grid.arrange(gridExtra::arrangeGrob(
+  final.plot <- gridExtra::arrangeGrob(gridExtra::arrangeGrob(
     top = grid::textGrob(
       plot.title, gp = grid::gpar(fontsize = 15, font = 1)),
     grobs = list(grid::textGrob(paste0(
@@ -891,6 +953,13 @@ gg2heatmap <- function(
       gp = grid::gpar(fontsize = 12, fontface = 3L)), arranged.grob,
       htmp_legend), nrow = 3, heights = c(3, 50, 6)))
   rm(main_grob)
+  #Plot final heatmap
+  if(draw){
+    grid.newpage()
+    grid::grid.draw(final.plot)
+  } else { if(verbose){
+    message("To draw heatmap use grid::grid.draw() on your_object$result.grob")
+  }}
   #Prepare results
   if(show.annot){
     if(!dd.rows & dd.cols & !is.null(facet)){

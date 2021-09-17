@@ -14,6 +14,7 @@ gg2heatmap(
   dend.size = 1,
   raster = NULL,
   facet = NULL,
+  split.by.rows = NULL,
   plot.title = "",
   row.type = "rows",
   imputation.grps = NULL,
@@ -39,11 +40,21 @@ gg2heatmap(
   border.size = 0.1,
   cell.size = 1,
   y.axis.right = FALSE,
+  draw = TRUE,
   verbose = FALSE
 )
 }
 \arguments{
-\item{m}{A \code{matrix}.}
+\item{m}{A \code{matrix} with row and column names set, or a
+molten \code{dataframe}:
+\itemize{
+ \item{Column 1 will be use for row names.}
+ \item{Column 2 will be use for column names.}
+ \item{Column 3 will be use for values.}
+ \item{Additional columns coming after can be use for
+ categorical splitting heatmap on rows with the
+ 'split.by.rows' option.}
+}}
 
 \item{na.handle}{A \code{character} to specify how missing values
 should be handled.
@@ -128,6 +139,11 @@ more minutes than the usual process time.}
 \item{facet}{A \code{character} matching an annotation name in
 'annot.grps' to be used to split heatmap in separate
 panels following the annotation.}
+
+\item{split.by.rows}{A \code{character} matching one of the categorical
+column in m if m is a molten data.frame to split
+heatmap on rows. split.by.rows will not work if m is
+matrix.}
 
 \item{plot.title}{A \code{character} to be used as title for the plot.}
 
@@ -256,6 +272,11 @@ width and height of cells taking values between 0 and
 should be displayed on the right (y.axis.right = TRUE)
 or not (y.axis.right = FALSE)
 (Default: y.axis.right = FALSE).}
+
+\item{draw}{A \code{logical} to specify whether the final heatmap
+should be drawn automatically when gg2heatmap()
+execution ends (draw = TRUE), or if it shouldn't
+(draw = FALSE).}
 
 \item{verbose}{A \code{logical} to display information about the
 step-by-step processing of the data if TRUE
