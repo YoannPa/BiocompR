@@ -4,7 +4,9 @@
 #' @return Loads \code{character} vectors of colors to be used as palettes.
 #' @author Yoann Pageaud.
 #' @export
-#' @examples load.palettes()
+#' @examples
+#' #To load pre-defined palettes
+#' load.palettes()
 
 load.palettes <- function(){
   pal_sunset <<- c("red", "gold", "blue4")
@@ -259,15 +261,9 @@ basic.sidebar <- function(
     ggplot2::theme(legend.justification = c(0, 1),
                    legend.position = c(0, 1),
                    legend.spacing.y = ggplot2::unit(0.05, 'cm'),
-                   # legend.text = element_text(size = 12),
-                   # legend.title = element_text(size = 12),
-                   # legend.margin = margin(-35,0,0,-35), #Seems to fit in grid
                    axis.text = ggplot2::element_text(size = 12),
                    panel.grid = ggplot2::element_blank(),
-                   plot.margin = ggplot2::margin(0, 0, 0, 0),
-                   # strip.background = element_blank(),
-                   # strip.text = element_blank()
-    ) +
+                   plot.margin = ggplot2::margin(0, 0, 0, 0)) +
     ggplot2::scale_fill_manual(values = as.character(palette)) +
     ggplot2::guides(fill = ggplot2::guide_legend(ncol = lgd.ncol, byrow = TRUE))
 
@@ -320,8 +316,6 @@ basic.sidebar <- function(
 #'                     spaces between annotations (Default: annot.sep = 0).
 #' @param annot.cut    A \code{double} specifying the width of cuts separating
 #'                     annotation cells (Default: annot.cut = 0).
-#' @param cor.order    An \code{integer} vector to be used to reorder the labels
-#'                     in 'sample.names'.
 #' @param merge.lgd    A \code{logical} to specify whether annotation legends
 #'                     should be merged (annot.lgd.merge = TRUE) or remain
 #'                     separated (annot.lgd.merge = FALSE)
@@ -338,26 +332,10 @@ basic.sidebar <- function(
 #'                     (Default: lgd.text = ggplot2::element_blank()).
 #' @param lgd.ncol     An \code{integer} specifying the number of columns to be
 #'                     used to display a legend (Default: lgd.ncol = 1).
-#' @param axis.text.x  An \code{element_text} object to setup X axis text
-#'                     (Default: axis.text.x = ggplot2::element_text(size = 12)).
-#' @param axis.text.y  An \code{element_text} object to setup Y axis text
-#'                     (Default: axis.text.y = ggplot2::element_text(size = 12)).
-#' @param axis.ticks.x An \code{element_line} object to setup X axis ticks.
-#' @param axis.ticks.y An \code{element_line} object to setup Y axis ticks.
-#' @param axis.title.x An \code{element_text} object to setup X axis title.
-#'                     \itemize{Exceptions:
-#'                      \item{If annot.pos == 'left', then axis.title.x =
-#'                      ggplot2::element_blank().}
-#'                      \item{If annot.pos == dendro.pos == 'top', then
-#'                      axis.title.x = ggplot2::element_blank().}
-#'                     }
-#' @param axis.title.y An \code{element_text} object to setup Y axis title.
-#'                     \itemize{Exceptions:
-#'                      \item{If annot.pos == 'top', then axis.title.y =
-#'                      ggplot2::element_blank().}
-#'                      \item{If annot.pos == dendro.pos == 'left', then
-#'                      axis.title.y = ggplot2::element_blank().}
-#'                     }
+#' @param theme_annot  A ggplot2 \code{theme} to specify any theme parameter you
+#'                     wish to custom on the annotation bar
+#'                     (Default: theme_annot = NULL). For more information about
+#'                     how to define a theme, see \link[ggplot2]{theme}.
 #' @param set.x.title  A \code{character}to be used as the title for the X axis.
 #' @param set.y.title  A \code{character}to be used as the title for the Y axis.
 #' @param dendro.pos   A \code{character} specifying the position of the
@@ -369,17 +347,17 @@ basic.sidebar <- function(
 #'                objects.}
 #'         }
 #' @author Yoann Pageaud.
+#' @export plot.col.sidebar
 #' @export
 
 plot.col.sidebar <- function(
-  #TODO: change name of parameter cor.order to see if it can be remove
-  sample.names, annot.grps, annot.pal, annot.pos = 0, annot.sep = 0, annot.cut,
-  cor.order, merge.lgd = FALSE, right = FALSE, lgd.name = "Legends",
+  sample.names, annot.grps, annot.pal, annot.pos = "top", annot.sep = 0,
+  annot.cut = 0, merge.lgd = FALSE, right = FALSE, lgd.name = "Legends",
   lgd.title = ggplot2::element_blank(), lgd.text = ggplot2::element_blank(),
-  lgd.ncol = 1, axis.text.x = ggplot2::element_text(size = 12),
-  axis.text.y = ggplot2::element_text(size = 12), axis.ticks.x, axis.ticks.y,
-  axis.title.x, axis.title.y, set.x.title, set.y.title, dendro.pos,
-  facet = NULL){
+  lgd.ncol = 1, theme_annot = theme(
+    axis.text.x = ggplot2::element_text(size = 12),
+    axis.text.y = ggplot2::element_text(size = 12)),
+  set.x.title, set.y.title, dendro.pos, facet = NULL){
 
   #Create list of groups in their original order
   origin.grps <- lapply(X = annot.grps, FUN = function(i){
@@ -389,7 +367,6 @@ plot.col.sidebar <- function(
   groups <- lapply(X = lapply(X = annot.grps, FUN = function(i){
     factor(x = i, levels =  unique(i))}), FUN = levels)
   #Create list of color tables
-  #TODO: try to merge with check.annotations()
   if(is.list(annot.pal)) { #If a list of palettes is provided
     if(length(groups) == length(annot.pal)){ #if annotations match palettes
       #Map groups to palettes
@@ -433,9 +410,9 @@ plot.col.sidebar <- function(
   })
   #Order samples following the correlation order provided
   # and categories by alphabetical order
-  if(annot.pos == "left"){ cor.order <- rev(cor.order) }
+  # if(annot.pos == "left"){ cor.order <- rev(cor.order) }
   dframe.annot <- lapply(dframe.annot, function(i){
-    i[["Samples"]] <- factor(i[["Samples"]], levels = i[["Samples"]][cor.order])
+    i[["Samples"]] <- factor(i[["Samples"]], levels = i[["Samples"]])
     i[["Groups"]] <- factor(i[["Groups"]], levels = unique(i[["Groups"]]))
     i
   })
@@ -464,16 +441,9 @@ plot.col.sidebar <- function(
   col_table <- data.table::rbindlist(col_table, idcol = TRUE)
   if(is.vector(annot.pal)){
     if(any(duplicated(col_table$Cols))){ #Check palette consistency
-      # warning(paste(
-      #   "Some colors have been assigned to more than 1 group in the palette.",
-      #   "Removing duplicated occurences..."))
       col_table <- col_table[!duplicated(x = Cols)]
     }
   }
-  # if(any(duplicated(col_table$Grps))){
-  #   warning("Duplicated group name provided. Removing duplicated...")
-  #   col_table <- col_table[!duplicated(Grps)]
-  # }
   #Plot color sidebars
   col_sidebar <- BiocompR::basic.sidebar(
     data = dframe.annot, palette = col_table$Cols, annot.sep = annot.sep,
@@ -482,9 +452,9 @@ plot.col.sidebar <- function(
   col_sidebar <- col_sidebar + ggplot2::theme(legend.title = lgd.title)
   #Modify base plot following its position
   if(annot.pos == "top"){
-    col_sidebar <- col_sidebar +
-      ggplot2::theme(axis.text.x.top = axis.text.x, axis.text.y = axis.text.y,
-                     axis.ticks.x = axis.ticks.x, axis.ticks.y = axis.ticks.y) +
+    theme_annot <- theme_annot + theme(
+      axis.text.x.top = theme_annot$axis.text.x, axis.text.x = element_blank())
+    col_sidebar <- col_sidebar + theme_annot +
       ggplot2::scale_x_discrete(expand = c(0, 0), position = "top") +
       ggplot2::xlab(set.x.title)
     if(right){
@@ -494,48 +464,38 @@ plot.col.sidebar <- function(
       col_sidebar <- col_sidebar + ggplot2::scale_y_discrete(expand = c(0, 0))
     }
     if(dendro.pos != "top"){
-      col_sidebar <- col_sidebar +
-        ggplot2::theme(axis.title.x = axis.title.x,
-                       axis.title.y = ggplot2::element_blank())
+      theme_annot <- theme_annot +
+        ggplot2::theme(axis.title.y = ggplot2::element_blank())
+      col_sidebar <- col_sidebar + theme_annot
     } else {
-      col_sidebar <- col_sidebar +
+      theme_annot <- theme_annot +
         ggplot2::theme(axis.title = ggplot2::element_blank())
+      col_sidebar <- col_sidebar + theme_annot
     }
-    # if(split.annot){
-    #   col_sidebar <- col_sidebar +
-    #     facet_grid(.id ~ ., scales = "free", space = "free_y")
-    # }
   } else if(annot.pos == "left"){
-    col_sidebar <- col_sidebar +
-      ggplot2::coord_flip() +
-      ggplot2::theme(axis.text.y = axis.text.y, axis.ticks.y = axis.ticks.y,
-                     axis.text.x.top = axis.text.x) +
+    theme_annot <- theme_annot + ggplot2::theme(
+      axis.text.x.top = theme_annot$axis.text.x,
+      axis.text.x = ggplot2::element_blank())
+    col_sidebar <- col_sidebar + ggplot2::coord_flip() + theme_annot +
       ggplot2::scale_x_discrete(expand = c(0, 0)) +
       ggplot2::scale_y_discrete(expand = c(0, 0), position = "right") +
       ggplot2::xlab(set.y.title)
-    if(dendro.pos !="left"){
-      col_sidebar <- col_sidebar +
-        ggplot2::theme(axis.title.x = ggplot2::element_blank(),
-                       axis.title.y = axis.title.y)
+    if(dendro.pos != "left"){
+      col_sidebar <- col_sidebar + theme_annot +
+        ggplot2::theme(axis.title.x = ggplot2::element_blank())
     } else {
-      col_sidebar <- col_sidebar +
+      col_sidebar <- col_sidebar + theme_annot +
         ggplot2::theme(axis.title = ggplot2::element_blank())
     }
-    # if(split.annot){
-    #   stop("A geom_tile vertically faceted in ggplot2_3.2.0 does not support heights redimensioning after being converted into a grob.")
-    # }
   }
   if(merge.lgd){ # Do not split legends
     sidebar.lgd <- list(
       BiocompR::get.lgd(col_sidebar + ggplot2::labs(fill = lgd.name)))
   } else { # Split legends and return a list of legends
-    # if(!split.annot){
     if(annot.pos == "top"){
       dframe.annot$.id <- factor(
         dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
     }
-    # }
-
     #Generate separate legends if more than 1 palette available
     # or if only 1 annotation is used
     if((is.list(annot.pal) & length(annot.pal) > 1) |

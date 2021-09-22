@@ -145,6 +145,11 @@
 #'                               numeric will apply to the
 #'                               width of vertical separations.}
 #'                        }
+#' @param theme_annot     A ggplot2 \code{theme} to specify any theme parameter
+#'                        you wish to custom on the annotation bar
+#'                        (Default: theme_annot = NULL). For more information
+#'                        about how to define a theme, see
+#'                        \link[ggplot2]{theme}.
 #' @param show.annot      A \code{logical} to specify whether annotations should
 #'                        be displayed at the top of the heatmap
 #'                        (show.annot = TRUE) or not (show.annot = FALSE).
@@ -206,8 +211,10 @@
 #'         generated separately.
 #' @author Yoann Pageaud.
 #' @export
+#' @examples
+#' #Create the basic gg2heatmap
+#' mat <- as.matrix(t(scale(mtcars)))
 
-#TODO: Create an annotation.theme argument using the ggplot2::theme() function.
 #TODO: Fix the issue with annotation legends overlapping (using egg package ??).
 #TODO: merge y.lab and x.lab using the function ggplot2::labs()
 #TODO: rewrite the assembling of plots using egg package functions and handling all unsolved remaining cases.
@@ -221,8 +228,8 @@ gg2heatmap <- function(
   scale_fill_grad = ggplot2::scale_fill_gradientn(
     colors = c("steelblue", "gray95", "darkorange"), na.value = "black"),
   annot.grps = list("Groups" = seq(ncol(m))),
-  annot.pal = grDevices::rainbow(n = ncol(m)), annot.size = 1, annot.sep = 0,
-  show.annot = TRUE,
+  annot.pal = grDevices::rainbow(n = ncol(m)), theme_annot = NULL,
+  annot.size = 1, annot.sep = 0, show.annot = TRUE,
   lgd.bars.name = 'Legends',
   lgd.title = ggplot2::element_text(size = 12),
   lgd.text = ggplot2::element_text(size = 11), lgd.merge = FALSE,
@@ -323,7 +330,6 @@ gg2heatmap <- function(
     cell.height <- cell.size[2]
   } else { stop("'cell.size' length > 2. Too many values.") }
 
-
   #Check if y.axis.right = TRUE when axis.text.y.right or axis.title.y.right or
   # axis.ticks.y.right are not ggplot2::element_blank()
   theme_to_check <- c(
@@ -337,6 +343,7 @@ gg2heatmap <- function(
               "Y-axis on the right side of the heatmap."))
     }
   }
+
   #Check annotations groups and palettes matching
   BiocompR::check.annotations(
     data = m, annot.grps = annot.grps, annot.pal = annot.pal, verbose = verbose)
@@ -566,16 +573,8 @@ gg2heatmap <- function(
                      axis.ticks.y.left = ggplot2::element_blank(),
                      axis.ticks.length.y.left = ggplot2::unit(0, "pt"),
                      axis.text.y.left = ggplot2::element_blank())
-    # ,
-    #                  plot.margin = ggplot2::unit(c(0, 0, 0, 0), "cm"))
   }
-  # } else {
-  #   theme_heatmap <- theme_heatmap +
-  #     ggplot2::theme(axis.title.y.left = axis.title.y.left,
-  #                    axis.ticks.y.left = axis.ticks.y.left,
-  #                    axis.text.y.left = axis.text.y.left,
-  #                    plot.margin = ggplot2::unit(c(0, 0, 0, 0), "cm"))
-  # }
+
   if(y.axis.right){
     htmp <- htmp +
       ggplot2::scale_y_discrete(position = 'right', expand = c(0, 0))
@@ -626,25 +625,38 @@ gg2heatmap <- function(
     }
     #Calculate legend columns
     lgd.ncol <- ceiling(lgdsizes/30)
-
     #Get ordered sample names
     if(method.cols != "none"){ sample.names <- colnames(dframe)
     } else { sample.names <- colnames(dframe) }
 
-    #Create Color Sidebar
-    col_sidebar <- BiocompR:::plot.col.sidebar(
-      sample.names = sample.names, annot.grps = annot.grps,
-      annot.pal = annot.pal, annot.pos = 'top', annot.sep = annot.sep,
-      annot.cut = annot.cut, cor.order = seq_along(colnames(dframe)),
-      merge.lgd = lgd.merge, right = TRUE, lgd.name = lgd.bars.name,
-      lgd.title = lgd.title, lgd.text = lgd.text, lgd.ncol = lgd.ncol,
+    #Set theme_forced_annot
+    theme_forced_annot <- ggplot2::theme(
       axis.text.x = ggplot2::element_blank(),
-      axis.text.y = ggplot2::element_text(size = 12, color = "black"),
-      axis.ticks.y = ggplot2::element_blank(),
       axis.ticks.x = ggplot2::element_blank(),
       axis.title.x = ggplot2::element_blank(),
       axis.title.y = ggplot2::element_blank(),
-      set.x.title = NULL, set.y.title = NULL, dendro.pos = 'top', facet = facet)
+      axis.ticks.length.x.top = ggplot2::unit(0, "pt")
+    )
+    #Set theme_default_htmp
+    theme_default_annot <- ggplot2::theme(
+      axis.text.y = ggplot2::element_text(size = 12, color = "black"),
+      axis.ticks.y = ggplot2::element_blank(),
+      plot.margin = margin(0,0,2,0)
+    )
+    #Update theme_heatmap
+    if(is.null(theme_annot)){
+      theme_annot <- theme_default_annot + theme_forced_annot
+    } else{
+      theme_annot <- theme_default_annot + theme_annot + theme_forced_annot
+    }
+    #Create Color Sidebar
+    col_sidebar <- BiocompR::plot.col.sidebar(
+      sample.names = sample.names, annot.grps = annot.grps,
+      annot.pal = annot.pal, annot.pos = 'top', annot.sep = annot.sep,
+      annot.cut = annot.cut, merge.lgd = lgd.merge, right = TRUE,
+      lgd.name = lgd.bars.name, lgd.title = lgd.title, lgd.text = lgd.text,
+      lgd.ncol = lgd.ncol, theme_annot = theme_annot, set.x.title = NULL,
+      set.y.title = NULL, dendro.pos = 'top', facet = facet)
     rm(sample.names)
     if(verbose){ cat("Done.\n") }
   }
@@ -955,7 +967,7 @@ gg2heatmap <- function(
   rm(main_grob)
   #Plot final heatmap
   if(draw){
-    grid.newpage()
+    grid::grid.newpage()
     grid::grid.draw(final.plot)
   } else { if(verbose){
     message("To draw heatmap use grid::grid.draw() on your_object$result.grob")

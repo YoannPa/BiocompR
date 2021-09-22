@@ -13,6 +13,7 @@ Loads \code{character} vectors of colors to be used as palettes.
 Loads pre-defined palettes.
 }
 \examples{
+#To load pre-defined palettes
 load.palettes()
 }
 \author{

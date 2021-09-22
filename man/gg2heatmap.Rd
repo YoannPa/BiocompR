@@ -25,6 +25,7 @@ gg2heatmap(
     "darkorange"), na.value = "black"),
   annot.grps = list(Groups = seq(ncol(m))),
   annot.pal = grDevices::rainbow(n = ncol(m)),
+  theme_annot = NULL,
   annot.size = 1,
   annot.sep = 0,
   show.annot = TRUE,
@@ -193,6 +194,12 @@ vectors listed in 'annot.grps'.
        another one in 'annot.grps'.}
 }}
 
+\item{theme_annot}{A ggplot2 \code{theme} to specify any theme parameter
+you wish to custom on the annotation bar
+(Default: theme_annot = NULL). For more information
+about how to define a theme, see
+\link[ggplot2]{theme}.}
+
 \item{annot.size}{A \code{numeric} defining the width of the annotation
 bars (Default: annot.size = 1).}
 
@@ -288,6 +295,10 @@ A \code{grob} list containing the final plot, and also each grob
 }
 \description{
 Creates a custom heatmap with dendrograms and annotations.
+}
+\examples{
+#Create the basic gg2heatmap
+mat <- as.matrix(t(scale(mtcars)))
 }
 \author{
 Yoann Pageaud.

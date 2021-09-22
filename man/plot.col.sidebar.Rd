@@ -8,22 +8,17 @@
   sample.names,
   annot.grps,
   annot.pal,
-  annot.pos = 0,
+  annot.pos = "top",
   annot.sep = 0,
-  annot.cut,
-  cor.order,
+  annot.cut = 0,
   merge.lgd = FALSE,
   right = FALSE,
   lgd.name = "Legends",
   lgd.title = ggplot2::element_blank(),
   lgd.text = ggplot2::element_blank(),
   lgd.ncol = 1,
-  axis.text.x = ggplot2::element_text(size = 12),
-  axis.text.y = ggplot2::element_text(size = 12),
-  axis.ticks.x,
-  axis.ticks.y,
-  axis.title.x,
-  axis.title.y,
+  theme_annot = theme(axis.text.x = ggplot2::element_text(size = 12), axis.text.y =
+    ggplot2::element_text(size = 12)),
   set.x.title,
   set.y.title,
   dendro.pos,
@@ -62,9 +57,6 @@ spaces between annotations (Default: annot.sep = 0).}
 \item{annot.cut}{A \code{double} specifying the width of cuts separating
 annotation cells (Default: annot.cut = 0).}
 
-\item{cor.order}{An \code{integer} vector to be used to reorder the labels
-in 'sample.names'.}
-
 \item{merge.lgd}{A \code{logical} to specify whether annotation legends
 should be merged (annot.lgd.merge = TRUE) or remain
 separated (annot.lgd.merge = FALSE)
@@ -87,31 +79,10 @@ the plot, only if 'merge.lgd' = TRUE
 \item{lgd.ncol}{An \code{integer} specifying the number of columns to be
 used to display a legend (Default: lgd.ncol = 1).}
 
-\item{axis.text.x}{An \code{element_text} object to setup X axis text
-(Default: axis.text.x = ggplot2::element_text(size = 12)).}
-
-\item{axis.text.y}{An \code{element_text} object to setup Y axis text
-(Default: axis.text.y = ggplot2::element_text(size = 12)).}
-
-\item{axis.ticks.x}{An \code{element_line} object to setup X axis ticks.}
-
-\item{axis.ticks.y}{An \code{element_line} object to setup Y axis ticks.}
-
-\item{axis.title.x}{An \code{element_text} object to setup X axis title.
-\itemize{Exceptions:
- \item{If annot.pos == 'left', then axis.title.x =
- ggplot2::element_blank().}
- \item{If annot.pos == dendro.pos == 'top', then
- axis.title.x = ggplot2::element_blank().}
-}}
-
-\item{axis.title.y}{An \code{element_text} object to setup Y axis title.
-\itemize{Exceptions:
- \item{If annot.pos == 'top', then axis.title.y =
- ggplot2::element_blank().}
- \item{If annot.pos == dendro.pos == 'left', then
- axis.title.y = ggplot2::element_blank().}
-}}
+\item{theme_annot}{A ggplot2 \code{theme} to specify any theme parameter you
+wish to custom on the annotation bar
+(Default: theme_annot = NULL). For more information about
+how to define a theme, see \link[ggplot2]{theme}.}
 
 \item{set.x.title}{A \code{character}to be used as the title for the X axis.}
 
