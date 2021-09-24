@@ -214,10 +214,13 @@
 #' @examples
 #' #Create the basic gg2heatmap
 #' mat <- as.matrix(t(scale(mtcars)))
+#' gg2heatmap(m = mat)
 
-#TODO: Fix the issue with annotation legends overlapping (using egg package ??).
+#TODO: Read again last commit to set back previous package names and remove printers
+#TODO: Add theme_legend option to pass theme parameters for the legend
 #TODO: merge y.lab and x.lab using the function ggplot2::labs()
 #TODO: rewrite the assembling of plots using egg package functions and handling all unsolved remaining cases.
+#TODO: Fix the issue with annotation legends overlapping (using egg package ??).
 gg2heatmap <- function(
   m, na.handle = 'remove', dist.method = 'manhattan', rank.fun = NULL,
   top.rows = NULL, dendrograms = TRUE, dend.size = 1, raster = NULL,
@@ -233,7 +236,7 @@ gg2heatmap <- function(
   lgd.bars.name = 'Legends',
   lgd.title = ggplot2::element_text(size = 12),
   lgd.text = ggplot2::element_text(size = 11), lgd.merge = FALSE,
-  lgd.space.width = 1, y.lab = "Values", x.lab = "Samples",
+  lgd.space.width = 1, lgd.space.height = 29, y.lab = "Values", x.lab = "Samples",
   theme_heatmap = NULL, border.col = NA, border.size = 0.1, cell.size = 1,
   y.axis.right = FALSE, draw = TRUE, verbose = FALSE){
 
@@ -592,39 +595,6 @@ gg2heatmap <- function(
       annot.grps <- lapply(X = annot.grps, FUN = function(i){ i[column.order] })
     }
 
-    #Set number of columns to display annotations legends
-    if(lgd.merge){
-      origin.grps <- lapply(X = annot.grps, FUN = function(i){
-        if(is.factor(i)){ levels(i) } else { levels(as.factor(i)) }
-      })
-      if(is.list(annot.pal)){
-        if(length(origin.grps) == length(annot.pal)){
-          ls.df.grp.pal <- Map(
-            data.frame, "Grps" = origin.grps, "Cols" = annot.pal,
-            stringsAsFactors = FALSE)
-        } else {
-          stop("The number of annotations does not match the number of palettes provided.")
-        }
-      } else if(is.vector(annot.pal)){
-        ls.df.grp.pal <- lapply(X = origin.grps, FUN = function(grp){
-          data.frame("Grps" = grp, "Cols" = annot.pal, stringsAsFactors = FALSE)
-        })
-      }
-      #Rbind list color tables
-      col_table <- data.table::rbindlist(ls.df.grp.pal, idcol = TRUE)
-      if(is.vector(annot.pal) | length(annot.pal) == 1){
-        #Remove duplicated colors
-        col_table <- col_table[!duplicated(x = Cols)]
-      }
-      #Calculate legend length
-      lgdsizes <- nrow(col_table) + 1
-    } else {
-      #Calculate legend length
-      lgdsizes <- lapply(X = annot.grps, FUN = function(i){ length(unique(i)) })
-      lgdsizes <- sum(unlist(lgdsizes)) + length(lgdsizes)
-    }
-    #Calculate legend columns
-    lgd.ncol <- ceiling(lgdsizes/30)
     #Get ordered sample names
     if(method.cols != "none"){ sample.names <- colnames(dframe)
     } else { sample.names <- colnames(dframe) }
@@ -649,13 +619,40 @@ gg2heatmap <- function(
     } else{
       theme_annot <- theme_default_annot + theme_annot + theme_forced_annot
     }
+
+    #Set number of columns to display annotations legends
+    if(lgd.merge){
+      # Build color tables for legends.
+      col_table <- build.col_table(
+        annot.grps = annot.grps, annot.pal = annot.pal)
+      #Rbind list color tables because lgd.merge is TRUE
+      col_table <- data.table::rbindlist(col_table, idcol = TRUE)
+      if(!(is.list(annot.pal)) | length(annot.pal) == 1){
+        #Remove duplicated colors
+        col_table <- col_table[!duplicated(x = Cols)]
+      }
+      col_table <- list(col_table[, c("Grps", "Cols"), ])
+    } else {
+      # Builds color tables for legends.
+      col_table <- build.col_table(
+        annot.grps = annot.grps, annot.pal = annot.pal)
+    }
+    #Build legends layout
+    lgd.layout <- build.layout(
+      col_table = col_table, height.lgds.space = lgd.space.height)
+    #Calculate legend length
+    lgd_sizes <- get.len.legends(col_table = col_table)
+    #Calculate legend columns
+    lgd.ncol <- ceiling(lgd_sizes/lgd.space.height)
+
     #Create Color Sidebar
-    col_sidebar <- BiocompR::plot.col.sidebar(
+    col_sidebar <- plot.col.sidebar(
       sample.names = sample.names, annot.grps = annot.grps,
       annot.pal = annot.pal, annot.pos = 'top', annot.sep = annot.sep,
       annot.cut = annot.cut, merge.lgd = lgd.merge, right = TRUE,
       lgd.name = lgd.bars.name, lgd.title = lgd.title, lgd.text = lgd.text,
-      lgd.ncol = lgd.ncol, theme_annot = theme_annot, set.x.title = NULL,
+      lgd.ncol = lgd.ncol,
+      theme_annot = theme_annot, set.x.title = NULL,
       set.y.title = NULL, dendro.pos = 'top', facet = facet)
     rm(sample.names)
     if(verbose){ cat("Done.\n") }
@@ -871,10 +868,15 @@ gg2heatmap <- function(
 
   #Create the Right Panel for legends
   if(show.annot){
-    if(verbose){ cat("Stacking legends...") }
-    right.legends <- BiocompR:::stack.grobs.legends(
-      grobs.list = sidebar_legend, annot.grps = annot.grps,
-      height.lgds.space = 29)
+    if(verbose){ cat("Setting legends layout...") }
+    #Update layout with empty grob
+    if(anyNA(lgd.layout)){
+      lgd.layout[is.na(lgd.layout)] <- max(lgd.layout, na.rm = TRUE) + 1
+      #Add an empty grob in the legend to stack them to the top
+      sidebar_legend <- c(sidebar_legend, list(grid::textGrob("")))
+    }
+    right.legends <- gridExtra::arrangeGrob(
+      grobs = sidebar_legend, layout_matrix = lgd.layout)
     rm(sidebar_legend)
 
     if(verbose){ cat("Done.\n") }

@@ -4,12 +4,12 @@
 \alias{stack.grobs.legends}
 \title{Stack grobs legends vertically in separate spaces of specific heights.}
 \usage{
-\method{stack}{grobs.legends}(grobs.list, annot.grps, height.lgds.space)
+\method{stack}{grobs.legends}(grobs.list, mlayout)
 }
 \arguments{
 \item{grobs.list}{A \code{list} of legends as grid objects.}
 
-\item{annot.grps}{A \code{factor} list mapped to the legends.}
+\item{col_table}{A \code{data.table} list mapped to the legends.}
 
 \item{height.lgds.space}{An \code{integer} specifying the height of the total
 space which is supposed to gather all legends in

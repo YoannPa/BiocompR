@@ -34,6 +34,7 @@ gg2heatmap(
   lgd.text = ggplot2::element_text(size = 11),
   lgd.merge = FALSE,
   lgd.space.width = 1,
+  lgd.space.height = 29,
   y.lab = "Values",
   x.lab = "Samples",
   theme_heatmap = NULL,
@@ -299,6 +300,7 @@ Creates a custom heatmap with dendrograms and annotations.
 \examples{
 #Create the basic gg2heatmap
 mat <- as.matrix(t(scale(mtcars)))
+gg2heatmap(m = mat)
 }
 \author{
 Yoann Pageaud.
