@@ -17,8 +17,8 @@
   lgd.ncol = 1,
   theme_legend = ggplot2::theme(legend.title = ggplot2::element_blank(), legend.text =
     ggplot2::element_blank()),
-  theme_annot = theme(axis.text.x = ggplot2::element_text(size = 12), axis.text.y =
-    ggplot2::element_text(size = 12)),
+  theme_annot = ggplot2::theme(axis.text.x = ggplot2::element_text(size = 12),
+    axis.text.y = ggplot2::element_text(size = 12)),
   set.x.title,
   set.y.title,
   dendro.pos,

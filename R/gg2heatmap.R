@@ -85,7 +85,22 @@
 #' @param ncores          An \code{integer} to specify the number of
 #'                        cores/threads to be used to parallel-compute distances
 #'                        for dendrograms.
-#' @param plot.title      A \code{character} to be used as title for the plot.
+#' @param plot.labs       A \code{labels} ggplot2 object to pass labels to be
+#'                        displayed on the final heatmap plot. Currently
+#'                        'plot.labs' supports 4 different labels:
+#'                        \itemize{
+#'                         \item{title - A \code{character} to be used as title
+#'                         for the plot.}
+#'                         \item{x - A \code{character} to specify X-axis title.
+#'                         }
+#'                         \item{y - A \code{character} to specify Y-axis title.
+#'                         }
+#'                         \item{legend - A \code{character} specifying the name
+#'                         of annotation side bar legends, when all legends are
+#'                         merged into a unique one (lgd.merge = TRUE).}
+#'                        }
+#'                        For more information on how to set labels for
+#'                        'plot.labs' see \link[ggplot2]{labs}.
 #' @param row.type        A \code{character} to be used in the plot subtitle
 #'                        description as a definition of the rows (e.g. 'loci',
 #'                        'samples', 'regions', etc.
@@ -97,10 +112,6 @@
 #'                        column in m if m is a molten data.frame to split
 #'                        heatmap on rows. split.by.rows will not work if m is
 #'                        matrix.
-#' @param y.lab           A \code{character} to specify Y-axis title
-#'                        (Default: y.lab = 'Values').
-#' @param x.lab           A \code{character} to specify X-axis title
-#'                        (Default: x.lab = 'Samples').
 #' @param border.col      A \code{character} to specify an R color code for the
 #'                        border delimitating the heatmap cells
 #'                        (Default: border.col = NA).
@@ -186,10 +197,6 @@
 #'                        when you want to map the same color palette to
 #'                        multiple annotations sharing the same values
 #'                        (Default: lgd.merge = FALSE).
-#' @param lgd.bars.name   A \code{character} specifying the name of annotation
-#'                        side bar legends, when legends are merged
-#'                        (lgd.merge = TRUE).
-#'                        (Default: lgd.bars.name = 'Legends').
 #' @param theme_legend    A ggplot2 \code{theme} to specify any theme parameter
 #'                        you wish to custom on legends
 #'                        (Default: theme_legend = NULL). For more information
@@ -219,26 +226,25 @@
 #' mat <- as.matrix(t(scale(mtcars)))
 #' gg2heatmap(m = mat)
 
-#TODO: merge y.lab and x.lab using the function ggplot2::labs()
-#TODO: rewrite the assembling of plots using egg package functions and handling all unsolved remaining cases.
-#TODO: Fix the issue with annotation legends overlapping (using egg package ??).
+#TODO: Rewrite the assembling of plots using egg package functions and handling
+# all unsolved remaining cases.
+#TODO: Fix the issue with annotation legends overlapping by checking length of
+# title and keys labels for each legend.
 gg2heatmap <- function(
   m, na.handle = 'remove', dist.method = 'manhattan', rank.fun = NULL,
-  top.rows = NULL, dendrograms = TRUE, dend.size = 1, raster = NULL,
-  facet = NULL, split.by.rows = NULL, plot.title = "", row.type = 'rows',
-  imputation.grps = NULL, ncores = 1,
+  top.rows = NULL, dendrograms = TRUE, dend.size = 1, imputation.grps = NULL,
+  ncores = 1, plot.labs = NULL, row.type = 'rows', facet = NULL,
+  split.by.rows = NULL, border.col = NA, border.size = 0.1, cell.size = 1,
+  raster = NULL, theme_heatmap = NULL,
   guide_custom_bar = ggplot2::guide_colorbar(
     title = "Values", barwidth = 15, ticks.linewidth = 1, title.vjust = 0.86),
   scale_fill_grad = ggplot2::scale_fill_gradientn(
     colors = c("steelblue", "gray95", "darkorange"), na.value = "black"),
   annot.grps = list("Groups" = seq(ncol(m))),
-  annot.pal = grDevices::rainbow(n = ncol(m)), theme_annot = NULL,
-  annot.size = 1, annot.sep = 0, show.annot = TRUE,
-  lgd.bars.name = 'Legends', lgd.merge = FALSE, lgd.space.width = 1,
-  lgd.space.height = 29, theme_legend = NULL,
-  y.lab = "Values", x.lab = "Samples",
-  theme_heatmap = NULL, border.col = NA, border.size = 0.1, cell.size = 1,
-  y.axis.right = FALSE, draw = TRUE, verbose = FALSE){
+  annot.pal = grDevices::rainbow(n = ncol(m)), annot.size = 1, annot.sep = 0,
+  theme_annot = NULL, show.annot = TRUE, lgd.merge = FALSE,
+  theme_legend = NULL, lgd.space.width = 1,
+  lgd.space.height = 29, y.axis.right = FALSE, draw = TRUE, verbose = FALSE){
 
   #Check m is a matrix
   if(is.matrix(m)){ m.type <- "matrix" } else { if(is.data.frame(m)){
@@ -312,6 +318,16 @@ gg2heatmap <- function(
     dend.row.size <- dend.size[1]
     dend.col.size <- dend.size[2]
   } else { stop("'dend.size' length > 2. Too many values.") }
+
+  #Check plot.labs provided in input
+  if(is.null(plot.labs)){ plot.labs <- ggplot2::labs(
+    title = "", x = "Samples", y = "Values", legend = 'Legends')
+  } else {
+    if(is.null(plot.labs$title)){ plot.labs$title <- "" }
+    if(is.null(plot.labs$x)){ plot.labs$x <- "Samples" }
+    if(is.null(plot.labs$y)){ plot.labs$y <- "Values" }
+    if(is.null(plot.labs$legend)){ plot.labs$legend <- "Legends" }
+  }
 
   #Check annotation separation widths
   if(show.annot){
@@ -528,7 +544,7 @@ gg2heatmap <- function(
     ggplot2::guides(color = ggplot2::guide_legend(
       "NA", override.aes = list(fill = scale_fill_grad$na.value),
       title.vjust = 0.5, order = 2)) +
-    ggplot2::labs(x = x.lab, y = y.lab)
+    ggplot2::labs(x = plot.labs$x, y = plot.labs$y)
 
   #If facetting is on
   if(!is.null(facet)){
@@ -611,7 +627,7 @@ gg2heatmap <- function(
     theme_default_annot <- ggplot2::theme(
       axis.text.y = ggplot2::element_text(size = 12, color = "black"),
       axis.ticks.y = ggplot2::element_blank(),
-      plot.margin = margin(0,0,2,0)
+      plot.margin = ggplot2::margin(0, 0, 2, 0)
     )
     #Update theme_heatmap
     if(is.null(theme_annot)){
@@ -659,7 +675,7 @@ gg2heatmap <- function(
       sample.names = sample.names, annot.grps = annot.grps,
       annot.pal = annot.pal, annot.pos = 'top', annot.sep = annot.sep,
       annot.cut = annot.cut, merge.lgd = lgd.merge, right = TRUE,
-      lgd.name = lgd.bars.name, lgd.ncol = lgd.ncol,
+      lgd.name = plot.labs$legend, lgd.ncol = lgd.ncol,
       theme_legend = theme_legend, theme_annot = theme_annot,
       set.x.title = NULL, set.y.title = NULL, dendro.pos = 'top', facet = facet)
     rm(sample.names)
@@ -753,7 +769,7 @@ gg2heatmap <- function(
               ggplot2::guides(color = ggplot2::guide_legend(
                 "NA", override.aes = list(fill = scale_fill_grad$na.value),
                 title.vjust = 0.5, order = 2)) +
-              ggplot2::labs(x = x.lab, y = y.lab) +
+              ggplot2::labs(x = plot.labs$x, y = plot.labs$y) +
               theme_empty + ggplot2::theme(legend.position = "none")
             rm(sub.melted)
             #Rasterize ggplot into a grob
@@ -772,7 +788,7 @@ gg2heatmap <- function(
           data = melted_mat, ggplot2::aes(x = variable, y = rn, fill = value)) +
           ggplot2::geom_blank() + theme_heatmap +
           ggplot2::theme(legend.position = "none") +
-          ggplot2::labs(x = x.lab, y = y.lab) +
+          ggplot2::labs(x = plot.labs$x, y = plot.labs$y) +
           ggplot2::facet_grid(. ~ facet.annot, scales = "free",
                               space = "free") +
           ggplot2::theme(
@@ -794,7 +810,7 @@ gg2heatmap <- function(
           data = melted_mat, ggplot2::aes(x = variable, y = rn, fill = value)) +
           ggplot2::geom_blank() + raster.annot + theme_heatmap +
           ggplot2::theme(legend.position = "none") +
-          ggplot2::labs(x = x.lab, y = y.lab)
+          ggplot2::labs(x = plot.labs$x, y = plot.labs$y)
       }
     } else { stop("Rasterization filter not supported.") }
     if(verbose){ cat("Done.\n") }
@@ -968,7 +984,7 @@ gg2heatmap <- function(
 
   final.plot <- gridExtra::arrangeGrob(gridExtra::arrangeGrob(
     top = grid::textGrob(
-      plot.title, gp = grid::gpar(fontsize = 15, font = 1)),
+      plot.labs$title, gp = grid::gpar(fontsize = 15, font = 1)),
     grobs = list(grid::textGrob(paste0(
       "Columns ordered by ", method.cols, " distance; Rows ordered by ",
       method.rows, " distance; ", nrow(dframe), " ", row.type, "."),

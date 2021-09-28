@@ -5,7 +5,7 @@
 \title{Update a guide_colorbar with values from a new one, with exceptions.}
 \usage{
 update_guide_colorbar(
-  old_guide = guide_colorbar(),
+  old_guide = ggplot2::guide_colorbar(),
   new_guide,
   forced_param = NULL
 )

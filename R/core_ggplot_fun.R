@@ -413,7 +413,6 @@ basic.sidebar <- function(
   data, palette, annot.sep = 0, annot.cut = 0, lgd.ncol = 1, facet = NULL){
   basic <- ggplot2::ggplot() +
     ggplot2::theme(
-      # legend.justification = c(0, 1),
       legend.justification = c(1, 1),
       legend.spacing.y = ggplot2::unit(0.05, 'cm'),
       legend.margin = ggplot2::margin(0, 0.8, 0, 0, unit = "cm"),
@@ -513,7 +512,7 @@ plot.col.sidebar <- function(
   lgd.ncol = 1, theme_legend = ggplot2::theme(
     legend.title = ggplot2::element_blank(),
     legend.text = ggplot2::element_blank()),
-  theme_annot = theme(
+  theme_annot = ggplot2::theme(
     axis.text.x = ggplot2::element_text(size = 12),
     axis.text.y = ggplot2::element_text(size = 12)),
   set.x.title, set.y.title, dendro.pos, facet = NULL){
@@ -589,8 +588,9 @@ plot.col.sidebar <- function(
   col_sidebar <- col_sidebar + theme_legend
   #Modify base plot following its position
   if(annot.pos == "top"){
-    theme_annot <- theme_annot + theme(
-      axis.text.x.top = theme_annot$axis.text.x, axis.text.x = element_blank())
+    theme_annot <- theme_annot + ggplot2::theme(
+      axis.text.x.top = theme_annot$axis.text.x,
+      axis.text.x = ggplot2::element_blank())
     col_sidebar <- col_sidebar + theme_annot +
       ggplot2::scale_x_discrete(expand = c(0, 0), position = "top") +
       ggplot2::xlab(set.x.title)
@@ -786,7 +786,7 @@ annotation_custom2 <- function(
 #' @keywords internal
 
 update_guide_colorbar <- function(
-  old_guide = guide_colorbar(), new_guide, forced_param = NULL){
+  old_guide = ggplot2::guide_colorbar(), new_guide, forced_param = NULL){
   new_guide <- lapply(X = names(old_guide), function(i){
     #If any difference for the parameter between previous guide and new guide
     if(isTRUE(all.equal(target = new_guide[[i]], current = old_guide[[i]]))){
@@ -811,7 +811,7 @@ update_guide_colorbar <- function(
       } else { new_guide[[i]] }
     }
   })
-  names(new_guide) <- names(guide_colorbar())
+  names(new_guide) <- names(ggplot2::guide_colorbar())
   class(new_guide) <- c("guide", "colorbar")
   return(new_guide)
 }
