@@ -36,7 +36,7 @@ gg2heatmap(
   lgd.merge = FALSE,
   theme_legend = NULL,
   lgd.space.width = 1,
-  lgd.space.height = 29,
+  lgd.space.height = 26,
   y.axis.right = FALSE,
   draw = TRUE,
   verbose = FALSE

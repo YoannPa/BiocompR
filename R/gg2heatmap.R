@@ -244,7 +244,7 @@ gg2heatmap <- function(
   annot.pal = grDevices::rainbow(n = ncol(m)), annot.size = 1, annot.sep = 0,
   theme_annot = NULL, show.annot = TRUE, lgd.merge = FALSE,
   theme_legend = NULL, lgd.space.width = 1,
-  lgd.space.height = 29, y.axis.right = FALSE, draw = TRUE, verbose = FALSE){
+  lgd.space.height = 26, y.axis.right = FALSE, draw = TRUE, verbose = FALSE){
 
   #Check m is a matrix
   if(is.matrix(m)){ m.type <- "matrix" } else { if(is.data.frame(m)){

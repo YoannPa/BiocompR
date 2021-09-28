@@ -365,7 +365,7 @@ build.layout <- function(col_table, height.lgds.space){
   columns <- lapply(X = seq(length(col_table)), FUN = function(i){
     if(i %in% legend_ids){
       lgd_position <- which(cumsum(lgd_sizes) <= height.lgds.space)
-      if(identical(lgd_position, integer(length = 0L))){
+      if(length(lgd_position) == 0){
         lgd_position <- which(
           ceiling(cumsum(lgd_sizes)/ncol.by.lgd[1]) <= height.lgds.space)
       }
