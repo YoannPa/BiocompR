@@ -2,7 +2,6 @@
 
 S3method(min,max.update)
 S3method(plot,col.sidebar)
-S3method(stack,grobs.legends)
 export(EVA)
 export(annotation_custom2)
 export(basic.ggplot.tri)

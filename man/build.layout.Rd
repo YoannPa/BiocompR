@@ -7,18 +7,35 @@
 build.layout(col_table, height.lgds.space)
 }
 \arguments{
-\item{param1}{A \code{type} parameter description.}
+\item{col_table}{A \code{data.table} list of categories with their
+matching color palettes for legends. Each data.table
+contains 2 columns:
+\itemize{
+ \item{'Grps': for annotation categories.}
+ \item{'Cols': for the color palette matching
+ categories.}
+}}
+
+\item{height.lgds.space}{An \code{integer} specifying the height of legend
+space on final plot.}
 }
 \value{
-A \code{type} object returned description.
+A \code{matrix} to be used as a layout for legend grobs display on
+        final plot.
 }
 \description{
 Builds legends layout.
 }
-\references{
-
+\examples{
+#Building the simplest layout with 1 legend and 2 categories
+library(BiocompR)
+build.layout(col_table = list(data.table::data.table(
+  'Grps' = c('cat 1', 'cat 2'), 'Cols' = c('blue', 'red'))),
+  height.lgds.space = 29)
+#If more annotations are passed in the list height.lgds.space let the
+# function stacks legends up to a total size of 29 units on 1 column, before
+# generating a new column if there is not enough space.
 }
 \author{
 Yoann Pageaud.
 }
-\keyword{internal}

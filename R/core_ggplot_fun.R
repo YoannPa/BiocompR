@@ -243,10 +243,15 @@ basic.ggplot.tri<-function(melt.tri, grid.col, grid.thickness, lgd.title,
 
 #' Maps annotations categories to palettes.
 #'
-#' @param origin.grps A \code{type} parameter description.
-#' @param groups
-#' @param annot.pal
-#' @return A \code{type} object returned description.
+#' @param origin.grps A \code{list} of characters or numerics specifying the
+#'                    categories for legends, in their order of input.
+#' @param groups      A \code{list} of characters or numerics specifying the
+#'                    categories for legends, in their order of appearance on
+#'                    the annotation sidebar of the plot.
+#' @param annot.pal   A \code{list} of character vectors matching valid codes
+#'                    for R colors.
+#' @return A \code{list} of data.tables where categories of each annotation are
+#'         matched with their color palette.
 #' @author Yoann Pageaud.
 #' @export
 #' @keywords internal
@@ -260,7 +265,6 @@ map.cat2pal <- function(origin.grps, groups, annot.pal){
       if(length(groups[[i]]) == length(annot.pal[[i]])){
         #if number of groups match number of colors
         ls.dt.grp.pal[[i]][match(groups[[i]], ls.dt.grp.pal[[i]]$Grps), ]
-        # data.frame("Grps"=groups[[i]],"Cols"=annot.pal[[i]])
       } else {
         stop(paste0(
           "The length of annotation '", names(groups)[i],
@@ -268,7 +272,6 @@ map.cat2pal <- function(origin.grps, groups, annot.pal){
       }
     })
   } else {
-
     stop("The number of annotations does not match the number of palettes provided.")
   }
   return(col_table)
@@ -277,8 +280,10 @@ map.cat2pal <- function(origin.grps, groups, annot.pal){
 
 #' Builds color tables for legends.
 #'
-#' @param annot.grps A \code{type} parameter description.
-#' @param annot.pal
+#' @param annot.grps A \code{list} of characters or numerics specifying the
+#'                   categories for legends, in their order of input.
+#' @param annot.pal  A \code{list} of character vectors, or a \code{vector} of
+#'                   characters matching valid codes for R colors.
 #' @return A \code{data.table} list of categories matching their colors for each
 #'         legend.
 #' @author Yoann Pageaud.
@@ -296,7 +301,7 @@ build.col_table <- function(annot.grps, annot.pal){
   #Create list of color tables
   if(is.list(annot.pal)){
     #Map categories to palettes
-    col_table <- map.cat2pal(origin.grps, groups, annot.pal)
+    col_table <- BiocompR::map.cat2pal(origin.grps, groups, annot.pal)
   } else if(!is.list(annot.pal)){
     col_table <- lapply(X = origin.grps, FUN = function(grp){
       data.table::data.table(
@@ -304,6 +309,87 @@ build.col_table <- function(annot.grps, annot.pal){
     })
   }
   return(col_table)
+}
+
+
+#' Gets legend lengths.
+#'
+#' @param col_table A \code{data.table} list of categories with their matching
+#'                  color palettes for legends.
+#' @return An \code{integer} list of sizes, one per legend to be displayed.
+#' @author Yoann Pageaud.
+#' @export
+#' @keywords internal
+
+get.len.legends <- function(col_table){
+  lgd_sizes <- unlist(lapply(X = col_table, FUN = nrow))
+  lgd_sizes <- lgd_sizes + 1
+  return(lgd_sizes)
+}
+
+
+#' Builds legends layout.
+#'
+#' @param col_table         A \code{data.table} list of categories with their
+#'                          matching color palettes for legends. Each data.table
+#'                          contains 2 columns:
+#'                          \itemize{
+#'                           \item{'Grps': for annotation categories.}
+#'                           \item{'Cols': for the color palette matching
+#'                           categories.}
+#'                          }
+#' @param height.lgds.space An \code{integer} specifying the height of legend
+#'                          space on final plot.
+#' @return A \code{matrix} to be used as a layout for legend grobs display on
+#'         final plot.
+#' @author Yoann Pageaud.
+#' @export
+#' @examples
+#' #Building the simplest layout with 1 legend and 2 categories
+#' library(BiocompR)
+#' build.layout(col_table = list(data.table::data.table(
+#'   'Grps' = c('cat 1', 'cat 2'), 'Cols' = c('blue', 'red'))),
+#'   height.lgds.space = 29)
+#' #If more annotations are passed in the list height.lgds.space let the
+#' # function stacks legends up to a total size of 29 units on 1 column, before
+#' # generating a new column if there is not enough space.
+
+build.layout <- function(col_table, height.lgds.space){
+  # Calculate legends length
+  lgd_sizes <- BiocompR::get.len.legends(col_table = col_table)
+  #Compute the number of columns necessary for display of large legends
+  ncol.by.lgd <- ceiling(lgd_sizes/height.lgds.space)
+  # Calculate spatial disposition of legends based on their size and the number
+  # of columns they occupy to create layout matrix by column
+  legend_ids <- seq(length(col_table))
+  columns <- lapply(X = seq(length(col_table)), FUN = function(i){
+    if(i %in% legend_ids){
+      lgd_position <- which(cumsum(lgd_sizes) <= height.lgds.space)
+      if(identical(lgd_position, integer(length = 0L))){
+        lgd_position <- which(
+          ceiling(cumsum(lgd_sizes)/ncol.by.lgd[1]) <= height.lgds.space)
+      }
+      col_lgd <- legend_ids[lgd_position]
+      col_mat <- rep(x = rep(x = col_lgd, times = ceiling(
+        lgd_sizes[lgd_position]/ncol.by.lgd[1])), times = ncol.by.lgd[1])
+      col_mat <- matrix(data = col_mat, ncol = ncol.by.lgd[1])
+      #Make NA matrix to complete missing space
+      NAmat <- matrix(
+        nrow = height.lgds.space - nrow(col_mat), ncol = ncol.by.lgd[1])
+      #Rbind legend matrix with NA matrix
+      col_mat <- rbind(col_mat, NAmat)
+      #Empty vectors from the legend previously used
+      lgd_sizes <<- lgd_sizes[-lgd_position]
+      legend_ids <<- legend_ids[-lgd_position]
+      ncol.by.lgd <<- ncol.by.lgd[-lgd_position]
+      #Return column matrix
+      col_mat
+    }
+  })
+  #Cbind all columns
+  mlayout <- do.call(cbind, columns)
+  #Return legends layout
+  return(mlayout)
 }
 
 
@@ -330,10 +416,8 @@ basic.sidebar <- function(
       # legend.justification = c(0, 1),
       legend.justification = c(1, 1),
       legend.spacing.y = ggplot2::unit(0.05, 'cm'),
-      ##################################################
-      legend.margin = margin(0,0.8,0,0, unit = "cm"),
-      legend.box.margin = margin(3,0,0,0, unit = "cm"),
-      #################################################
+      legend.margin = ggplot2::margin(0, 0.8, 0, 0, unit = "cm"),
+      legend.box.margin = ggplot2::margin(3, 0, 0, 0, unit = "cm"),
       axis.text = ggplot2::element_text(size = 12),
       panel.grid = ggplot2::element_blank(),
       plot.margin = ggplot2::margin(0, 0, 0, 0)) +
@@ -360,6 +444,7 @@ basic.sidebar <- function(
   }
   return(basic)
 }
+
 
 #' Creates a colored side annotation bars in ggplot2.
 #'
@@ -440,7 +525,7 @@ plot.col.sidebar <- function(
   #Create list of color tables
   if(is.list(annot.pal)) { #If a list of palettes is provided
     #Map categories to palettes
-    col_table <- map.cat2pal(origin.grps, groups, annot.pal)
+    col_table <- BiocompR::map.cat2pal(origin.grps, groups, annot.pal)
   } else if(!is.list(annot.pal)){ #if a single palette is provided
     #Map groups to the same palette
     ls.df.grp.pal <- lapply(X = origin.grps, FUN = function(grp){
@@ -463,9 +548,8 @@ plot.col.sidebar <- function(
   dframe.annot <- lapply(annot.grps, function(i){
     data.frame("Samples" = sample.names, "Groups" = i)
   })
-  #Order samples following the correlation order provided
-  # and categories by alphabetical order
-  # if(annot.pos == "left"){ cor.order <- rev(cor.order) }
+  #Order samples following the correlation order provided and categories by
+  # alphabetical order
   dframe.annot <- lapply(dframe.annot, function(i){
     i[["Samples"]] <- factor(i[["Samples"]], levels = i[["Samples"]])
     i[["Groups"]] <- factor(i[["Groups"]], levels = unique(i[["Groups"]]))
@@ -476,13 +560,10 @@ plot.col.sidebar <- function(
   #Convert .id as factors
   dframe.annot$.id <- factor(
     x = dframe.annot$.id, levels = unique(dframe.annot$.id))
-  # if(!split.annot){
   if(annot.pos == "top"){ #Change order of levels
     dframe.annot$.id <- factor(
       x = dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
   }
-  # }
-
   #Check color tables
   col_table <- lapply(X = col_table, FUN = function(tbl){
     if(any(duplicated(tbl$Cols))){ #Check palette consistency
@@ -500,7 +581,7 @@ plot.col.sidebar <- function(
     }
   }
   #Plot color sidebars
-  col_sidebar <- basic.sidebar(
+  col_sidebar <- BiocompR::basic.sidebar(
     data = dframe.annot, palette = col_table$Cols, annot.sep = annot.sep,
     annot.cut = annot.cut, facet = facet, lgd.ncol = lgd.ncol[1])
   #Add legend parameters if some
@@ -552,15 +633,15 @@ plot.col.sidebar <- function(
       dframe.annot$.id <- factor(
         dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
     }
-    #Generate separate legends if more than 1 palette available
-    # or if only 1 annotation is used
+    #Generate separate legends if more than 1 palette available or if only 1
+    # annotation is used
     if((is.list(annot.pal) & length(annot.pal) > 1) |
        length(levels(dframe.annot$.id)) == 1){
       #Get all legends separately
       sidebar.lgd <- lapply(
         X = seq_along(levels(dframe.annot$.id)), FUN = function(i){
           BiocompR::get.lgd(
-            basic.sidebar(
+            BiocompR::basic.sidebar(
               data = dframe.annot[.id == levels(dframe.annot$.id)[i]],
               palette = col_table[.id == i]$Cols, lgd.ncol = lgd.ncol[i]) +
               ggplot2::theme(legend.title = lgd.title, legend.text = lgd.text) +
@@ -575,6 +656,7 @@ plot.col.sidebar <- function(
                 ggplot2::theme(legend.position = "none"),
               "legends" = sidebar.lgd))
 }
+
 
 #' Resizes heights or widths of multiple grobs based on a given grob dimensions.
 #'
@@ -611,6 +693,7 @@ resize.grobs <- function(ls.grobs, dimensions, start.unit, end.unit){
   return(ls.grobs)
 }
 
+
 #' Resizes heights or widths of a grob based on the dimensions of another grob.
 #'
 #' @param grob1      A \code{grob} to be modified.
@@ -637,138 +720,6 @@ resize.grob.oneway <- function(grob1, grob2, dimensions, positions){
   return(grob1)
 }
 
-#' Gets legend lengths.
-#'
-#' @param col_table A \code{data.table} list of categories with their matching
-#'                  colors for legends.
-#' @return A \code{type} object returned description.
-#' @author Yoann Pageaud.
-#' @export
-#' @keywords internal
-
-get.len.legends <- function(col_table){
-  lgd_sizes <- unlist(lapply(X = col_table, FUN = nrow))
-  lgd_sizes <- lgd_sizes + 1
-  return(lgd_sizes)
-}
-
-
-#' Builds legends layout.
-#'
-#' @param param1 A \code{type} parameter description.
-#' @return A \code{type} object returned description.
-#' @author Yoann Pageaud.
-#' @export
-#' @examples
-#' @references
-#' @keywords internal
-
-build.layout <- function(col_table, height.lgds.space){
-  # Calculate legends length
-  lgd_sizes <- get.len.legends(col_table = col_table)
-  #Compute the number of columns necessary for display of large legends
-  ncol.by.lgd <- ceiling(lgd_sizes/height.lgds.space)
-  # Calculate spatial disposition of legends based on their size and the number
-  # of columns they occupy to create layout matrix by column
-  legend_ids <- seq(length(col_table))
-  columns <- lapply(X = seq(length(col_table)), FUN = function(i){
-    if(i %in% legend_ids){
-      lgd_position <- which(cumsum(lgd_sizes) <= height.lgds.space)
-      if(identical(lgd_position, integer(length = 0L))){
-        lgd_position <- which(
-          ceiling(cumsum(lgd_sizes)/ncol.by.lgd[1]) <= height.lgds.space)
-      }
-      col_lgd <- legend_ids[lgd_position]
-      col_mat <- rep(x = rep(x = col_lgd, times = ceiling(
-        lgd_sizes[lgd_position]/ncol.by.lgd[1])), times = ncol.by.lgd[1])
-      col_mat <- matrix(data = col_mat, ncol = ncol.by.lgd[1])
-      #Make NA matrix to complete missing space
-      NAmat <- matrix(
-        nrow = height.lgds.space - nrow(col_mat), ncol = ncol.by.lgd[1])
-      #Rbind legend matrix with NA matrix
-      col_mat <- rbind(col_mat, NAmat)
-      lgd_sizes <<- lgd_sizes[-lgd_position]
-      legend_ids <<- legend_ids[-lgd_position]
-      ncol.by.lgd <<- ncol.by.lgd[-lgd_position]
-      col_mat
-    }
-  })
-  #Cbind all columns
-  mlayout <- do.call(cbind, columns)
-  #Return legends layout
-  return(mlayout)
-}
-
-
-#' Stack grobs legends vertically in separate spaces of specific heights.
-#'
-#' @param grobs.list A \code{list} of legends as grid objects.
-#' @param col_table A \code{data.table} list mapped to the legends.
-#' @param height.lgds.space An \code{integer} specifying the height of the total
-#'                          space which is supposed to gather all legends in
-#'                          grobs.list.
-#' @return A \code{grob} containing all legends with their respective heights.
-#' @author Yoann Pageaud.
-#' @export
-#' @keywords internal
-
-stack.grobs.legends <- function(grobs.list, mlayout){
-  # # Calculate legends length
-  # lgd_sizes <- get.len.legends(col_table = col_table)
-  # #Compute the number of columns necessary for display of large legends
-  # ncol.by.lgd <- ceiling(lgd_sizes/height.lgds.space)
-  #
-  # #Add an ending space in the legend to stack them to the top
-  # grobs.list <- c(grobs.list, list(grid::textGrob("")))
-  #
-  # # Calculate spatial disposition of legends based on their size and the number
-  # # of columns they occupy to create layout matrix by column
-  # legend_ids <- seq(length(col_table))
-  # columns <- lapply(X = seq(length(col_table)), FUN = function(i){
-  #   if(i %in% legend_ids){
-  #     print(i)
-  #     lgd_position <- which(cumsum(lgd_sizes) <= height.lgds.space)
-  #     if(identical(lgd_position, integer(length = 0L))){
-  #       lgd_position <- which(
-  #         ceiling(cumsum(lgd_sizes)/ncol.by.lgd[1]) <= height.lgds.space)
-  #     }
-  #     col_lgd <- legend_ids[lgd_position]
-  #     # print(i)
-  #     col_mat <- rep(x = rep(x = col_lgd, times = ceiling(lgd_sizes[lgd_position]/ncol.by.lgd[1])), times = ncol.by.lgd[1])
-  #     col_mat <- matrix(data = col_mat, ncol = ncol.by.lgd[1])
-  #     #Make NA matrix to complete missing space
-  #     NAmat <- matrix(
-  #       nrow = height.lgds.space - nrow(col_mat), ncol = ncol.by.lgd[1])
-  #     #Rbind legend matrix with NA matrix
-  #     col_mat <- rbind(col_mat, NAmat)
-  #     lgd_sizes <<- lgd_sizes[-col_lgd]
-  #     legend_ids <<- legend_ids[-col_lgd]
-  #     ncol.by.lgd <<- ncol.by.lgd[-col_lgd]
-  #     col_mat
-  #   } else {
-  #     print(i)
-  #     NULL
-  #   }
-  # })
-  # # columns <- lapply(X = seq(n.col), FUN = function(n){
-  # #   lgd_position <- which(cumsum(lgd_sizes) <= height.lgds.space)
-  # #   col_lgd <- legend_ids[lgd_position]
-  # #   col_mat <- rep(x = col_lgd, times = lgd_sizes[lgd_position])
-  # #   col_mat <- c(col_mat, rep(NA, height.lgds.space-length(col_mat)))
-  # #   lgd_sizes <<- lgd_sizes[-col_lgd]
-  # #   legend_ids <<- legend_ids[-col_lgd]
-  # #   col_mat
-  # # })
-  # mlayout <- do.call(cbind, columns)
-  # print(mlayout)
-
-  #Calculate height of the ending space
-  # hghts <- c(lgd_sizes, height.lgds.space-sum(lgd_sizes))
-  # sidebar_legend <- gridExtra::arrangeGrob(grobs = grobs.list, heights = hghts)
-  sidebar_legend <- gridExtra::arrangeGrob(grobs = grobs.list,
-                                           layout_matrix = mlayout)
-  return(sidebar_legend)
-}
 
 #' Rasterize a gg plot into a raster grob.
 #'
@@ -796,6 +747,7 @@ raster.ggplot.to.grob <- function(gg.plot, filter = "Lanczos"){
   #Return grob annotation
   return(raster.grob)
 }
+
 
 #' This is a special geom intended for use as static annotations derived from
 #' ggplot2::annotation_custom() matching a specific panel on a faceted ggplot.

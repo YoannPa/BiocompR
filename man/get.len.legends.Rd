@@ -8,10 +8,10 @@ get.len.legends(col_table)
 }
 \arguments{
 \item{col_table}{A \code{data.table} list of categories with their matching
-colors for legends.}
+color palettes for legends.}
 }
 \value{
-A \code{type} object returned description.
+An \code{integer} list of sizes, one per legend to be displayed.
 }
 \description{
 Gets legend lengths.

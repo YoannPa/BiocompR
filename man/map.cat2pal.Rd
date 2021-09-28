@@ -7,10 +7,19 @@
 map.cat2pal(origin.grps, groups, annot.pal)
 }
 \arguments{
-\item{origin.grps}{A \code{type} parameter description.}
+\item{origin.grps}{A \code{list} of characters or numerics specifying the
+categories for legends, in their order of input.}
+
+\item{groups}{A \code{list} of characters or numerics specifying the
+categories for legends, in their order of appearance on
+the annotation sidebar of the plot.}
+
+\item{annot.pal}{A \code{list} of character vectors matching valid codes
+for R colors.}
 }
 \value{
-A \code{type} object returned description.
+A \code{list} of data.tables where categories of each annotation are
+        matched with their color palette.
 }
 \description{
 Maps annotations categories to palettes.

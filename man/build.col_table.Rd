@@ -7,7 +7,11 @@
 build.col_table(annot.grps, annot.pal)
 }
 \arguments{
-\item{annot.grps}{A \code{type} parameter description.}
+\item{annot.grps}{A \code{list} of characters or numerics specifying the
+categories for legends, in their order of input.}
+
+\item{annot.pal}{A \code{list} of character vectors, or a \code{vector} of
+characters matching valid codes for R colors.}
 }
 \value{
 A \code{data.table} list of categories matching their colors for each

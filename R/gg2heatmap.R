@@ -216,8 +216,7 @@
 #' mat <- as.matrix(t(scale(mtcars)))
 #' gg2heatmap(m = mat)
 
-#TODO: Read again last commit to set back previous package names and remove printers
-#TODO: Add theme_legend option to pass theme parameters for the legend
+#TODO: Add theme_legend option to pass theme parameters to custom legends
 #TODO: merge y.lab and x.lab using the function ggplot2::labs()
 #TODO: rewrite the assembling of plots using egg package functions and handling all unsolved remaining cases.
 #TODO: Fix the issue with annotation legends overlapping (using egg package ??).
@@ -623,7 +622,7 @@ gg2heatmap <- function(
     #Set number of columns to display annotations legends
     if(lgd.merge){
       # Build color tables for legends.
-      col_table <- build.col_table(
+      col_table <- BiocompR::build.col_table(
         annot.grps = annot.grps, annot.pal = annot.pal)
       #Rbind list color tables because lgd.merge is TRUE
       col_table <- data.table::rbindlist(col_table, idcol = TRUE)
@@ -634,25 +633,24 @@ gg2heatmap <- function(
       col_table <- list(col_table[, c("Grps", "Cols"), ])
     } else {
       # Builds color tables for legends.
-      col_table <- build.col_table(
+      col_table <- BiocompR::build.col_table(
         annot.grps = annot.grps, annot.pal = annot.pal)
     }
     #Build legends layout
-    lgd.layout <- build.layout(
+    lgd.layout <- BiocompR::build.layout(
       col_table = col_table, height.lgds.space = lgd.space.height)
     #Calculate legend length
-    lgd_sizes <- get.len.legends(col_table = col_table)
+    lgd_sizes <- BiocompR::get.len.legends(col_table = col_table)
     #Calculate legend columns
     lgd.ncol <- ceiling(lgd_sizes/lgd.space.height)
 
     #Create Color Sidebar
-    col_sidebar <- plot.col.sidebar(
+    col_sidebar <- BiocompR::plot.col.sidebar(
       sample.names = sample.names, annot.grps = annot.grps,
       annot.pal = annot.pal, annot.pos = 'top', annot.sep = annot.sep,
       annot.cut = annot.cut, merge.lgd = lgd.merge, right = TRUE,
       lgd.name = lgd.bars.name, lgd.title = lgd.title, lgd.text = lgd.text,
-      lgd.ncol = lgd.ncol,
-      theme_annot = theme_annot, set.x.title = NULL,
+      lgd.ncol = lgd.ncol, theme_annot = theme_annot, set.x.title = NULL,
       set.y.title = NULL, dendro.pos = 'top', facet = facet)
     rm(sample.names)
     if(verbose){ cat("Done.\n") }

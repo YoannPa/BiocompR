@@ -8,16 +8,17 @@ _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots 
 **3-** [**DKFZ - Computational Cancer Epigenomics, Germany.**](https://www.dkfz.de/en/CanEpi/CompEpigen/index.html)  
 **4-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
-**Version: 0.0.136 (Beta)**  
+**Version: 0.0.137 (Beta)**  
 **R Compatibility: Version 4.0.5**  
-**Last Update: 24/09/2021**  
+**Last Update: 29/09/2021**  
 **How to cite:** _Pageaud Y. et al., BiocompR - Advanced visualizations for data comparison._  
 
 ## Content
-Currently the package BiocompR contains **19 functions**:
+Currently the package BiocompR contains **25 functions**:
 
 * `basic.sidebar()` - Draws a ggplot2 of a basic sidebar.  
 * `bivar.plot()` - Computes boxplots or violins from 1 variable values against ranges of a 2nd one.  
+* `build.layout()` - Builds legends layout.  
 * `cross.biplot()` - Computes and draws biplots for multiple principal components at once.  
 * `EVA()` - Computes eigenvectors, principal component scores and correlations from a correlation test.  
 * `fancy.hist()` - Computes in parallel and plot an histogram using ggplot2 from a given vector of values.  
