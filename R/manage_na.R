@@ -1,12 +1,23 @@
 
 #' Imputes missing data in a matrix row.
 #'
-#' @param param1 A \code{type} parameter description.
-#' @return A \code{type} object returned description.
+#' @param data     A \code{matrix}.
+#' @param miss.mat A logical \code{matrix} where cells are TRUE when there is a
+#'                 numeric value in data, or FALSE when there are NAs in data.
+#' @param grp_tbl  A \code{dataframe} with 2 columns:
+#'                 \itemize{
+#'                  \item{samples - which contains all column names from data.}
+#'                  \item{groups - which contains the groups to which each
+#'                  column belong to.}
+#'                 }
+#' @param nr       An \code{integer} specifying the total number of rows in the
+#'                 matrix data.
+#' @param r        An \code{integer} specifying the position of the row of
+#'                 interest for imputation in the matrix data.
+#' @return A \code{numeric} vector containing the imputed values of the row for
+#'         each groups of columns.
 #' @author Yoann Pageaud.
 #' @export
-#' @examples
-#' @references
 #' @keywords internal
 
 row.impute.na <- function(
@@ -65,25 +76,26 @@ row.impute.na <- function(
 #' Keeps, removes or imputes missing values in a matrix or a data.frame based on
 #' sample groups.
 #'
-#' @param data   A \code{matrix} or \code{data.frame} with column names.
-#' @param method A \code{character} which defines the method to use for managing
-#'               NAs:
-#'               \itemize{
-#'                \item{'keep' does nothing.}
-#'                \item{'remove' removes all rows containing at least 1 NA.}
-#'                \item{'impute' removes rows containing only NAs and impute
-#'                      missing values in remaining rows. The imputation uses
-#'                      the groups defined in the parameter 'groups': e.g. in
-#'                      row 1 if the value of sample_1 is NA, the missing value
-#'                      will be imputed using the median of values from other
-#'                      samples of the same group than sample_1.}
-#'               }
-#' @param groups A vector of length ncol(data) specifying the groups to which
-#'               samples belong. Order of groups in the vector has to match the
-#'               order of column names in data to properly associate samples and
-#'               groups.
-#' @param impute.fun A \code{character} specifying the function to be used for
-#'                   imputation (Default: impute.fun = "median").
+#' @param data         A \code{matrix} or \code{data.frame} with column names.
+#' @param method       A \code{character} which defines the method to use for
+#'                     managing NAs:
+#'                     \itemize{
+#'                      \item{'keep' does nothing.}
+#'                      \item{'remove' removes all rows containing at least 1
+#'                      NA.}
+#'                      \item{'impute' removes rows containing only NAs and
+#'                      impute missing values in remaining rows. The imputation
+#'                      uses the groups defined in the parameter 'groups': e.g.
+#'                      in row 1 if the value of sample_1 is NA, the missing
+#'                      value will be imputed using the median of values from
+#'                      other samples of the same group than sample_1.}
+#'                     }
+#' @param groups       A vector of length ncol(data) specifying the groups to
+#'                     which samples belong. Order of groups in the vector has
+#'                     to match the order of column names in data to properly
+#'                     associate samples and groups.
+#' @param impute.fun   A \code{character} specifying the function to be used for
+#'                     imputation (Default: impute.fun = "median").
 #' @param vinterpolate A \code{logical} specifying whether vertical
 #'                     interpolation should be applied on missing values, based
 #'                     on previous and next available values in a column
@@ -96,8 +108,9 @@ row.impute.na <- function(
 #'                     values will be processed. if row.na.cut equals an
 #'                     integer, only rows with less NAs than the cut-off will be
 #'                     processed (Default: row.na.cut = NULL).
-#' @param ncores An \code{integer} to specify the number of cores/threads to be
-#'               used to parallel-process the matrix (Default: ncores = 1).
+#' @param ncores       An \code{integer} to specify the number of cores/threads
+#'                     to be used to parallel-process the matrix
+#'                     (Default: ncores = 1).
 #' @return A \code{matrix}.
 #' @author Yoann Pageaud.
 #' @examples
@@ -117,8 +130,6 @@ row.impute.na <- function(
 #' # Impute by group the missing data (and remove rows missing all values)
 #' manage.na(data = test, method = "impute", groups = grps)
 #' @export
-#' @references
-#' @keywords internal
 
 manage.na <- function(
   data, method = "remove", groups, impute.fun = "median", vinterpolate = FALSE,
@@ -158,7 +169,7 @@ manage.na <- function(
             data = data, miss.mat = miss.mat, grp_tbl = grp_tbl, nr = nr, r = r,
             impute.fun = impute.fun, vinterpolate = vinterpolate)
           data[r, names(grp.imp)] <<- grp.imp
-          cat(paste0(round((r/max(rows.to.impute))*100, 3),"%\n"))
+          cat(paste0(round((r/max(rows.to.impute))*100, 3), "%\n"))
         }))
         rm(miss.mat)
       }

@@ -7,16 +7,30 @@
 row.impute.na(data, miss.mat, grp_tbl, nr, r, impute.fun, vinterpolate)
 }
 \arguments{
-\item{param1}{A \code{type} parameter description.}
+\item{data}{A \code{matrix}.}
+
+\item{miss.mat}{A logical \code{matrix} where cells are TRUE when there is a
+numeric value in data, or FALSE when there are NAs in data.}
+
+\item{grp_tbl}{A \code{dataframe} with 2 columns:
+\itemize{
+ \item{samples - which contains all column names from data.}
+ \item{groups - which contains the groups to which each
+ column belong to.}
+}}
+
+\item{nr}{An \code{integer} specifying the total number of rows in the
+matrix data.}
+
+\item{r}{An \code{integer} specifying the position of the row of
+interest for imputation in the matrix data.}
 }
 \value{
-A \code{type} object returned description.
+A \code{numeric} vector containing the imputed values of the row for
+        each groups of columns.
 }
 \description{
 Imputes missing data in a matrix row.
-}
-\references{
-
 }
 \author{
 Yoann Pageaud.

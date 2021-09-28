@@ -18,23 +18,24 @@ manage.na(
 \arguments{
 \item{data}{A \code{matrix} or \code{data.frame} with column names.}
 
-\item{method}{A \code{character} which defines the method to use for managing
-NAs:
+\item{method}{A \code{character} which defines the method to use for
+managing NAs:
 \itemize{
  \item{'keep' does nothing.}
- \item{'remove' removes all rows containing at least 1 NA.}
- \item{'impute' removes rows containing only NAs and impute
-       missing values in remaining rows. The imputation uses
-       the groups defined in the parameter 'groups': e.g. in
-       row 1 if the value of sample_1 is NA, the missing value
-       will be imputed using the median of values from other
-       samples of the same group than sample_1.}
+ \item{'remove' removes all rows containing at least 1
+ NA.}
+ \item{'impute' removes rows containing only NAs and
+ impute missing values in remaining rows. The imputation
+ uses the groups defined in the parameter 'groups': e.g.
+ in row 1 if the value of sample_1 is NA, the missing
+ value will be imputed using the median of values from
+ other samples of the same group than sample_1.}
 }}
 
-\item{groups}{A vector of length ncol(data) specifying the groups to which
-samples belong. Order of groups in the vector has to match the
-order of column names in data to properly associate samples and
-groups.}
+\item{groups}{A vector of length ncol(data) specifying the groups to
+which samples belong. Order of groups in the vector has
+to match the order of column names in data to properly
+associate samples and groups.}
 
 \item{impute.fun}{A \code{character} specifying the function to be used for
 imputation (Default: impute.fun = "median").}
@@ -53,8 +54,9 @@ values will be processed. if row.na.cut equals an
 integer, only rows with less NAs than the cut-off will be
 processed (Default: row.na.cut = NULL).}
 
-\item{ncores}{An \code{integer} to specify the number of cores/threads to be
-used to parallel-process the matrix (Default: ncores = 1).}
+\item{ncores}{An \code{integer} to specify the number of cores/threads
+to be used to parallel-process the matrix
+(Default: ncores = 1).}
 }
 \value{
 A \code{matrix}.
@@ -80,10 +82,6 @@ manage.na(data = test, method = "remove", groups = grps)
 # Impute by group the missing data (and remove rows missing all values)
 manage.na(data = test, method = "impute", groups = grps)
 }
-\references{
-
-}
 \author{
 Yoann Pageaud.
 }
-\keyword{internal}
