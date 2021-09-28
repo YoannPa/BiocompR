@@ -483,12 +483,12 @@ basic.sidebar <- function(
 #' @param lgd.name      A \code{character} to specify a title to the legend of
 #'                     the plot, only if 'merge.lgd' = TRUE
 #'                     (Default: lgd.name = "Legends").
-#' @param lgd.title    An \code{element_text} object to setup legend titles
-#'                     (Default: lgd.title = ggplot2::element_blank()).
-#' @param lgd.text     An \code{element_text} object to setup legend labels
-#'                     (Default: lgd.text = ggplot2::element_blank()).
 #' @param lgd.ncol     An \code{integer} specifying the number of columns to be
 #'                     used to display a legend (Default: lgd.ncol = 1).
+#' @param theme_legend A ggplot2 \code{theme} to specify any theme parameter you
+#'                     wish to custom on legends (Default: theme_legend = NULL).
+#'                     For more information about how to define a theme, see
+#'                     \link[ggplot2]{theme}.
 #' @param theme_annot  A ggplot2 \code{theme} to specify any theme parameter you
 #'                     wish to custom on the annotation bar
 #'                     (Default: theme_annot = NULL). For more information about
@@ -510,8 +510,10 @@ basic.sidebar <- function(
 plot.col.sidebar <- function(
   sample.names, annot.grps, annot.pal, annot.pos = "top", annot.sep = 0,
   annot.cut = 0, merge.lgd = FALSE, right = FALSE, lgd.name = "Legends",
-  lgd.title = ggplot2::element_blank(), lgd.text = ggplot2::element_blank(),
-  lgd.ncol = 1, theme_annot = theme(
+  lgd.ncol = 1, theme_legend = ggplot2::theme(
+    legend.title = ggplot2::element_blank(),
+    legend.text = ggplot2::element_blank()),
+  theme_annot = theme(
     axis.text.x = ggplot2::element_text(size = 12),
     axis.text.y = ggplot2::element_text(size = 12)),
   set.x.title, set.y.title, dendro.pos, facet = NULL){
@@ -543,7 +545,6 @@ plot.col.sidebar <- function(
   } else { #If not a list or a vector
     stop("Unknown type for 'annot.pal'. 'annot.pal' should be either a list or a vector.")
   }
-
   #Create list of annotation data.frames
   dframe.annot <- lapply(annot.grps, function(i){
     data.frame("Samples" = sample.names, "Groups" = i)
@@ -584,9 +585,8 @@ plot.col.sidebar <- function(
   col_sidebar <- BiocompR::basic.sidebar(
     data = dframe.annot, palette = col_table$Cols, annot.sep = annot.sep,
     annot.cut = annot.cut, facet = facet, lgd.ncol = lgd.ncol[1])
-  #Add legend parameters if some
-  col_sidebar <- col_sidebar +
-    ggplot2::theme(legend.title = lgd.title, legend.text = lgd.text)
+  #Add legend theme parameters if some
+  col_sidebar <- col_sidebar + theme_legend
   #Modify base plot following its position
   if(annot.pos == "top"){
     theme_annot <- theme_annot + theme(
@@ -644,9 +644,7 @@ plot.col.sidebar <- function(
             BiocompR::basic.sidebar(
               data = dframe.annot[.id == levels(dframe.annot$.id)[i]],
               palette = col_table[.id == i]$Cols, lgd.ncol = lgd.ncol[i]) +
-              ggplot2::theme(legend.title = lgd.title, legend.text = lgd.text) +
-              ggplot2::labs(fill = levels(dframe.annot$.id)[i])
-          )
+              theme_legend + ggplot2::labs(fill = levels(dframe.annot$.id)[i]))
         })
     } else {
       stop("Cannot generate separated legends if only one annotation palette is given.")

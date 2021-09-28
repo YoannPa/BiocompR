@@ -76,25 +76,6 @@
 #'                               numeric will apply to the dendrogram built on
 #'                               columns.}
 #'                        }
-#' @param raster          A \code{character} to be used as a filter for matrix
-#'                        rasterization. The list of the supported rasterization
-#'                        filters is available in magick::filter_types(). If no
-#'                        value is specified for 'raster' the original ggplot2
-#'                        heatmap is displayed (Default: raster = NULL).
-#'                        Warning: Be aware that rasterization may take several
-#'                        more minutes than the usual process time.
-#' @param facet           A \code{character} matching an annotation name in
-#'                        'annot.grps' to be used to split heatmap in separate
-#'                        panels following the annotation.
-#' @param split.by.rows   A \code{character} matching one of the categorical
-#'                        column in m if m is a molten data.frame to split
-#'                        heatmap on rows. split.by.rows will not work if m is
-#'                        matrix.
-#' @param plot.title      A \code{character} to be used as title for the plot.
-#' @param row.type        A \code{character} to be used in the plot subtitle
-#'                        description as a definition of the rows (e.g. 'loci',
-#'                        'samples', 'regions', etc.
-#'                        Default: row.type = 'rows').
 #' @param imputation.grps A \code{character} vector defining groups to which
 #'                        columns of the matrix belong. These groups are use to
 #'                        make group-wise imputation of missing values between
@@ -104,6 +85,51 @@
 #' @param ncores          An \code{integer} to specify the number of
 #'                        cores/threads to be used to parallel-compute distances
 #'                        for dendrograms.
+#' @param plot.title      A \code{character} to be used as title for the plot.
+#' @param row.type        A \code{character} to be used in the plot subtitle
+#'                        description as a definition of the rows (e.g. 'loci',
+#'                        'samples', 'regions', etc.
+#'                        Default: row.type = 'rows').
+#' @param facet           A \code{character} matching an annotation name in
+#'                        'annot.grps' to be used to split heatmap in separate
+#'                        panels following the annotation.
+#' @param split.by.rows   A \code{character} matching one of the categorical
+#'                        column in m if m is a molten data.frame to split
+#'                        heatmap on rows. split.by.rows will not work if m is
+#'                        matrix.
+#' @param y.lab           A \code{character} to specify Y-axis title
+#'                        (Default: y.lab = 'Values').
+#' @param x.lab           A \code{character} to specify X-axis title
+#'                        (Default: x.lab = 'Samples').
+#' @param border.col      A \code{character} to specify an R color code for the
+#'                        border delimitating the heatmap cells
+#'                        (Default: border.col = NA).
+#' @param border.size     A \code{numeric} to specify the linewidth of cells
+#'                        border (Default: border.size = 0.1).
+#' @param cell.size       A \code{numeric} vector of length 2 to specify the
+#'                        width and height of cells taking values between 0 and
+#'                        1.
+#'                        \itemize{
+#'                         \item{If cell.size is a \code{numeric}: the value is
+#'                               used to set both the width and the height of
+#'                               cells.}
+#'                         \item{If cell.size is a \code{numeric} vector of
+#'                               length 2: the first numeric will apply to
+#'                               cell height, and the second numeric will apply
+#'                               to cell width.}
+#'                        }
+#' @param raster          A \code{character} to be used as a filter for matrix
+#'                        rasterization. The list of the supported rasterization
+#'                        filters is available in magick::filter_types(). If no
+#'                        value is specified for 'raster' the original ggplot2
+#'                        heatmap is displayed (Default: raster = NULL).
+#'                        Warning: Be aware that rasterization may take several
+#'                        more minutes than the usual process time.
+#' @param theme_heatmap   A ggplot2 \code{theme} to specify any theme parameter
+#'                        you wish to custom on the heatmap part of the plot
+#'                        (Default: theme_heatmap = NULL). For more information
+#'                        about how to define a theme, see
+#'                        \link[ggplot2]{theme}.
 #' @param guide_custom_bar A \code{guide} object generated by the ggplot2
 #'                         function \link[ggplot2]{guide_colorbar} to custom the
 #'                         heatmap color bar appearance
@@ -153,21 +179,6 @@
 #' @param show.annot      A \code{logical} to specify whether annotations should
 #'                        be displayed at the top of the heatmap
 #'                        (show.annot = TRUE) or not (show.annot = FALSE).
-#' @param draw            A \code{logical} to specify whether the final heatmap
-#'                        should be drawn automatically when gg2heatmap()
-#'                        execution ends (draw = TRUE), or if it shouldn't
-#'                        (draw = FALSE).
-#' @param verbose         A \code{logical} to display information about the
-#'                        step-by-step processing of the data if TRUE
-#'                        (Default: verbose = FALSE).
-#' @param lgd.bars.name   A \code{character} specifying the name of annotation
-#'                        side bar legends, when legends are merged
-#'                        (lgd.merge = TRUE)
-#'                        (Default: lgd.bars.name = 'Legends').
-#' @param lgd.title       An \code{element_text} object to setup legend titles
-#'                        (Default: lgd.title = ggplot2::element_blank()).
-#' @param lgd.text        An \code{element_text} object to setup legend labels
-#'                        (Default: lgd.text = ggplot2::element_blank()).
 #' @param lgd.merge       A \code{logical} specifying whether the legends of
 #'                        multiple annotation bars should be merged
 #'                        (lgd.merge = TRUE) or remain separated
@@ -175,38 +186,30 @@
 #'                        when you want to map the same color palette to
 #'                        multiple annotations sharing the same values
 #'                        (Default: lgd.merge = FALSE).
-#' @param lgd.space.width A \code{numeric} specifying the width of the legend
-#'                        space (Default: lgd.space.width = 1).
-#' @param y.lab           A \code{character} to specify Y-axis title
-#'                        (Default: y.lab = 'Values').
-#' @param x.lab           A \code{character} to specify X-axis title
-#'                        (Default: x.lab = 'Samples').
-#' @param theme_heatmap   A ggplot2 \code{theme} to specify any theme parameter
-#'                        you wish to custom on the heatmap part of the plot
-#'                        (Default: theme_heatmap = NULL). For more information
+#' @param lgd.bars.name   A \code{character} specifying the name of annotation
+#'                        side bar legends, when legends are merged
+#'                        (lgd.merge = TRUE).
+#'                        (Default: lgd.bars.name = 'Legends').
+#' @param theme_legend    A ggplot2 \code{theme} to specify any theme parameter
+#'                        you wish to custom on legends
+#'                        (Default: theme_legend = NULL). For more information
 #'                        about how to define a theme, see
 #'                        \link[ggplot2]{theme}.
-#' @param border.col      A \code{character} to specify an R color code for the
-#'                        border delimitating the heatmap cells
-#'                        (Default: border.col = NA).
-#' @param border.size     A \code{numeric} to specify the linewidth of cells
-#'                        border (Default: border.size = 0.1).
-#' @param cell.size       A \code{numeric} vector of length 2 to specify the
-#'                        width and height of cells taking values between 0 and
-#'                        1.
-#'                        \itemize{
-#'                         \item{If cell.size is a \code{numeric}: the value is
-#'                               used to set both the width and the height of
-#'                               cells.}
-#'                         \item{If cell.size is a \code{numeric} vector of
-#'                               length 2: the first numeric will apply to
-#'                               cell width, and the second
-#'                               numeric will apply to cell height.}
-#'                        }
+#' @param lgd.space.width A \code{numeric} specifying the width of the legend
+#'                        space (Default: lgd.space.width = 1).
+#' @param lgd.space.height An \code{integer} specifying the height of the legend
+#'                         space (Default: lgd.space.height = 29).
 #' @param y.axis.right    A \code{logical} to specify whether the heatmap Y axis
 #'                        should be displayed on the right (y.axis.right = TRUE)
 #'                        or not (y.axis.right = FALSE)
 #'                        (Default: y.axis.right = FALSE).
+#' @param draw            A \code{logical} to specify whether the final heatmap
+#'                        should be drawn automatically when gg2heatmap()
+#'                        execution ends (draw = TRUE), or if it shouldn't
+#'                        (draw = FALSE).
+#' @param verbose         A \code{logical} to display information about the
+#'                        step-by-step processing of the data if TRUE
+#'                        (Default: verbose = FALSE).
 #' @return A \code{grob} list containing the final plot, and also each grob
 #'         generated separately.
 #' @author Yoann Pageaud.
@@ -216,7 +219,6 @@
 #' mat <- as.matrix(t(scale(mtcars)))
 #' gg2heatmap(m = mat)
 
-#TODO: Add theme_legend option to pass theme parameters to custom legends
 #TODO: merge y.lab and x.lab using the function ggplot2::labs()
 #TODO: rewrite the assembling of plots using egg package functions and handling all unsolved remaining cases.
 #TODO: Fix the issue with annotation legends overlapping (using egg package ??).
@@ -232,10 +234,9 @@ gg2heatmap <- function(
   annot.grps = list("Groups" = seq(ncol(m))),
   annot.pal = grDevices::rainbow(n = ncol(m)), theme_annot = NULL,
   annot.size = 1, annot.sep = 0, show.annot = TRUE,
-  lgd.bars.name = 'Legends',
-  lgd.title = ggplot2::element_text(size = 12),
-  lgd.text = ggplot2::element_text(size = 11), lgd.merge = FALSE,
-  lgd.space.width = 1, lgd.space.height = 29, y.lab = "Values", x.lab = "Samples",
+  lgd.bars.name = 'Legends', lgd.merge = FALSE, lgd.space.width = 1,
+  lgd.space.height = 29, theme_legend = NULL,
+  y.lab = "Values", x.lab = "Samples",
   theme_heatmap = NULL, border.col = NA, border.size = 0.1, cell.size = 1,
   y.axis.right = FALSE, draw = TRUE, verbose = FALSE){
 
@@ -325,11 +326,11 @@ gg2heatmap <- function(
 
   #Check cell size
   if(length(cell.size) == 1){
-    cell.width <- cell.size
     cell.height <- cell.size
+    cell.width <- cell.size
   } else if(length(cell.size) == 2){
-    cell.width <- cell.size[1]
-    cell.height <- cell.size[2]
+    cell.height <- cell.size[1]
+    cell.width <- cell.size[2]
   } else { stop("'cell.size' length > 2. Too many values.") }
 
   #Check if y.axis.right = TRUE when axis.text.y.right or axis.title.y.right or
@@ -644,14 +645,23 @@ gg2heatmap <- function(
     #Calculate legend columns
     lgd.ncol <- ceiling(lgd_sizes/lgd.space.height)
 
+    #Set theme_default_legend
+    theme_default_legend <- ggplot2::theme(
+      legend.title = ggplot2::element_text(size = 12),
+      legend.text = ggplot2::element_text(size = 11)
+    )
+    #Update theme_legend
+    if(is.null(theme_legend)){ theme_legend <- theme_default_legend } else{
+      theme_legend <- theme_default_legend + theme_legend }
+
     #Create Color Sidebar
     col_sidebar <- BiocompR::plot.col.sidebar(
       sample.names = sample.names, annot.grps = annot.grps,
       annot.pal = annot.pal, annot.pos = 'top', annot.sep = annot.sep,
       annot.cut = annot.cut, merge.lgd = lgd.merge, right = TRUE,
-      lgd.name = lgd.bars.name, lgd.title = lgd.title, lgd.text = lgd.text,
-      lgd.ncol = lgd.ncol, theme_annot = theme_annot, set.x.title = NULL,
-      set.y.title = NULL, dendro.pos = 'top', facet = facet)
+      lgd.name = lgd.bars.name, lgd.ncol = lgd.ncol,
+      theme_legend = theme_legend, theme_annot = theme_annot,
+      set.x.title = NULL, set.y.title = NULL, dendro.pos = 'top', facet = facet)
     rm(sample.names)
     if(verbose){ cat("Done.\n") }
   }

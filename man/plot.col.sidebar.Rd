@@ -14,9 +14,9 @@
   merge.lgd = FALSE,
   right = FALSE,
   lgd.name = "Legends",
-  lgd.title = ggplot2::element_blank(),
-  lgd.text = ggplot2::element_blank(),
   lgd.ncol = 1,
+  theme_legend = ggplot2::theme(legend.title = ggplot2::element_blank(), legend.text =
+    ggplot2::element_blank()),
   theme_annot = theme(axis.text.x = ggplot2::element_text(size = 12), axis.text.y =
     ggplot2::element_text(size = 12)),
   set.x.title,
@@ -70,14 +70,13 @@ displayed on the right side of the plot
 the plot, only if 'merge.lgd' = TRUE
 (Default: lgd.name = "Legends").}
 
-\item{lgd.title}{An \code{element_text} object to setup legend titles
-(Default: lgd.title = ggplot2::element_blank()).}
-
-\item{lgd.text}{An \code{element_text} object to setup legend labels
-(Default: lgd.text = ggplot2::element_blank()).}
-
 \item{lgd.ncol}{An \code{integer} specifying the number of columns to be
 used to display a legend (Default: lgd.ncol = 1).}
+
+\item{theme_legend}{A ggplot2 \code{theme} to specify any theme parameter you
+wish to custom on legends (Default: theme_legend = NULL).
+For more information about how to define a theme, see
+\link[ggplot2]{theme}.}
 
 \item{theme_annot}{A ggplot2 \code{theme} to specify any theme parameter you
 wish to custom on the annotation bar

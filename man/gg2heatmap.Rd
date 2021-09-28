@@ -30,11 +30,10 @@ gg2heatmap(
   annot.sep = 0,
   show.annot = TRUE,
   lgd.bars.name = "Legends",
-  lgd.title = ggplot2::element_text(size = 12),
-  lgd.text = ggplot2::element_text(size = 11),
   lgd.merge = FALSE,
   lgd.space.width = 1,
   lgd.space.height = 29,
+  theme_legend = NULL,
   y.lab = "Values",
   x.lab = "Samples",
   theme_heatmap = NULL,
@@ -224,14 +223,8 @@ be displayed at the top of the heatmap
 
 \item{lgd.bars.name}{A \code{character} specifying the name of annotation
 side bar legends, when legends are merged
-(lgd.merge = TRUE)
+(lgd.merge = TRUE).
 (Default: lgd.bars.name = 'Legends').}
-
-\item{lgd.title}{An \code{element_text} object to setup legend titles
-(Default: lgd.title = ggplot2::element_blank()).}
-
-\item{lgd.text}{An \code{element_text} object to setup legend labels
-(Default: lgd.text = ggplot2::element_blank()).}
 
 \item{lgd.merge}{A \code{logical} specifying whether the legends of
 multiple annotation bars should be merged
@@ -243,6 +236,15 @@ multiple annotations sharing the same values
 
 \item{lgd.space.width}{A \code{numeric} specifying the width of the legend
 space (Default: lgd.space.width = 1).}
+
+\item{lgd.space.height}{An \code{integer} specifying the height of the legend
+space (Default: lgd.space.height = 29).}
+
+\item{theme_legend}{A ggplot2 \code{theme} to specify any theme parameter
+you wish to custom on legends
+(Default: theme_legend = NULL). For more information
+about how to define a theme, see
+\link[ggplot2]{theme}.}
 
 \item{y.lab}{A \code{character} to specify Y-axis title
 (Default: y.lab = 'Values').}
@@ -272,8 +274,8 @@ width and height of cells taking values between 0 and
        cells.}
  \item{If cell.size is a \code{numeric} vector of
        length 2: the first numeric will apply to
-       cell width, and the second
-       numeric will apply to cell height.}
+       cell height, and the second numeric will apply
+       to cell width.}
 }}
 
 \item{y.axis.right}{A \code{logical} to specify whether the heatmap Y axis
