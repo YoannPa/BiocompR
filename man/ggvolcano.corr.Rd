@@ -10,7 +10,7 @@ ggvolcano.corr(
   p.cutoff = 0.01,
   corr.cutoff = NULL,
   title.corr.cutoff = "Correlation cut-off",
-  corr.label.cutoff
+  label.cutoff = 0
 )
 }
 \arguments{
@@ -49,7 +49,7 @@ the cut-off to it.}
 correlation cut-off vertical blue line
 (Default: title.corr.cutoff="Correlation cut-off").}
 
-\item{corr.label.cutoff}{A \code{numeric} vector of 1 or 2 values, between -1
+\item{label.cutoff}{A \code{numeric} vector of 1 or 2 values, between -1
 and 1 to be used as the minimum cut-off on
 positive and negative correlation values.
 \itemize{
@@ -58,7 +58,7 @@ positive and negative correlation values.
  (positive and negative ones).}
  \item{If 2 values are given, the smalest one will
  be used as a maximum cut-off on negative
- correlation values. the biggest one will be used as
+ correlation values. The biggest one will be used as
  a minimum cut-off on positive correlation values.
  The smalest value must be comprised between -1 and
  0. The biggest value must be comprised between 0

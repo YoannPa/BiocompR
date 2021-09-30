@@ -7,9 +7,9 @@
 ggvolcano.test(
   data,
   p.cutoff = 0.01,
-  fc.cutoff = 0,
-  title.fc.cutoff = "Fold change cut-off",
-  label.cutoff
+  l2fc.cutoff = NULL,
+  title.fc.cutoff = "L2FC cut-off",
+  label.cutoff = 0
 )
 }
 \arguments{
@@ -24,9 +24,9 @@ ggvolcano.test(
  3 categories:
  \itemize{
   \item{Red - elements above the positive
-  'fc.cutoff' and below 'p.cutoff'.}
+  'l2fc.cutoff' and below 'p.cutoff'.}
   \item{Blue - elements below the negative
-  'fc.cutoff' and below 'p.cutoff'.}
+  'l2fc.cutoff' and below 'p.cutoff'.}
   \item{Black - any other element not meeting the
   requirements in the first nor the second category.}
  }}
@@ -35,8 +35,23 @@ ggvolcano.test(
 \item{p.cutoff}{A \code{numeric} between 0 and 1 to be used as a maximum
 cut-off on p-values (Default: p.cutoff = 0.01).}
 
-\item{fc.cutoff}{A \code{numeric} to be used as a cut-off on fold changes
-(Default: fc.cutoff = 0).}
+\item{l2fc.cutoff}{A \code{numeric} to be used as a cut-off on fold changes
+(Default: l2fc.cutoff = 0).}
+
+\item{label.cutoff}{A \code{numeric} vector of 1 or 2 values, to be used as
+the minimum cut-off on positive and negative correlation
+values.
+\itemize{
+ \item{If 1 value is given, it will be define as the
+ minimum cut-off on absolute correlation values (positive
+ and negative ones).}
+ \item{If 2 values are given, the smalest one will be
+ used as a maximum cut-off on negative log2(fold change)
+ values. The biggest one will be used as a minimum
+ cut-off on positive log2(fold change) values.
+ The smalest value must be inferior to 0. The biggest
+ value must be superior to 0.}
+}}
 
 \item{label}{A \code{character} vector to be used to define which
 elements in the \code{data.table} column 1 should be

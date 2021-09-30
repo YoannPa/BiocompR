@@ -21,10 +21,13 @@ dt.test <- data.table(
                  0.007229292, 0.011714971, 0.015301721, 0.016189800,
                  0.017896844, 0.017976486, 0.019790513, 0.019868352,
                  0.020064957, 0.020361514, 0.021650503, 0.026751092,
-                 0.033636934, 0.038799781))
+                 0.033636934, 0.038799781),
+  "gene group" = rep(c("A", "B", "C", "D"), times = c(6, 6, 6, 8)),
+  "ontology weight" = sample.int(n = 26))
 
 # basic
-ggvolcano.test(data = dt.test[, c(1:3)], p.cutoff = 0.00001, fc.cutoff = 2)
+ggvolcano.test(data = dt.test[,c(1:5)], p.cutoff = 0.00001, l2fc.cutoff = 2,
+               label.cutoff = 2)
 
 # basic with label
 ggvolcano.test(data[,c(1:3)], p.cutoff = 0.00001, label = c("CA9", "Sox2"))
