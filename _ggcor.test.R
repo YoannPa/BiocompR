@@ -26,36 +26,33 @@ dt.test <- data.table(
   "ontology weight" = sample.int(n = 26))
 
 # basic
-ggvolcano.test(data = dt.test[,c(1:5)], p.cutoff = 0.00001, l2fc.cutoff = 2,
-               label.cutoff = 2)
+ggvolcano.test(data = dt.test[,c(1:5)], p.cutoff = 0.00001, l2fc.cutoff = 1.5,
+               label.cutoff = 2, y.col.sign = TRUE)
 
-# basic with label
-ggvolcano.test(data[,c(1:3)], p.cutoff = 0.00001, label = c("CA9", "Sox2"))
-
-
-# coloring by groups
-data$groups <- c("base")
-data$groups[2:10] <- c("special")
-ggvolcano.test(data, p.cutoff = 0.0001)
-
-# coloring by multiple groups
-colnames(data)[1] <- "gene"
-cutoff <- data$P.Value<=0.0001 & abs(data$logFC) >= 1
-data$groups <- ifelse(data$P.Value<=0.0001, ifelse(abs(data$logFC) >= 2, "logFC >= |2|", "logFC < |2|"), "not significant")
-
-ggvolcano.test(data, p.cutoff = 0.0001)
-ggvolcano.test(data, p.cutoff = 0.0001, label = c("logFC >= |2|"), group.label = TRUE)
-ggvolcano.test(data, p.cutoff = 0.0001, label = c("Sox2"), group.label = 0)
-
-
-
-## negative checks
-data_fail <- data.table(c("Sox2"), c(1.2692153707), c(1.2692153707))
-ggvolcano.test(data_fail)
-data_fail <- data.table(c("Sox2"),
-                        c("Sox2"),
-                        c(0.05))
-ggvolcano.test(data_fail)
-
-
-
+# # basic with label
+# ggvolcano.test(data[,c(1:3)], p.cutoff = 0.00001, label = c("CA9", "Sox2"))
+#
+#
+# # coloring by groups
+# data$groups <- c("base")
+# data$groups[2:10] <- c("special")
+# ggvolcano.test(data, p.cutoff = 0.0001)
+#
+# # coloring by multiple groups
+# colnames(data)[1] <- "gene"
+# cutoff <- data$P.Value<=0.0001 & abs(data$logFC) >= 1
+# data$groups <- ifelse(data$P.Value<=0.0001, ifelse(abs(data$logFC) >= 2, "logFC >= |2|", "logFC < |2|"), "not significant")
+#
+# ggvolcano.test(data, p.cutoff = 0.0001)
+# ggvolcano.test(data, p.cutoff = 0.0001, label = c("logFC >= |2|"), group.label = TRUE)
+# ggvolcano.test(data, p.cutoff = 0.0001, label = c("Sox2"), group.label = 0)
+#
+#
+#
+# ## negative checks
+# data_fail <- data.table(c("Sox2"), c(1.2692153707), c(1.2692153707))
+# ggvolcano.test(data_fail)
+# data_fail <- data.table(c("Sox2"),
+#                         c("Sox2"),
+#                         c(0.05))
+# ggvolcano.test(data_fail)

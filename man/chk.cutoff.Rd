@@ -2,35 +2,36 @@
 % Please edit documentation in R/ggcorr.R
 \name{chk.cutoff}
 \alias{chk.cutoff}
-\title{Checks the correlation cut-off value(s) given and computes the negative and
-positive correlation cut-offs.}
+\title{Checks cut-off value(s) given and computes the negative and positive
+cut-offs.}
 \usage{
 chk.cutoff(cutoff = 0, data.type)
 }
 \arguments{
-\item{cutoff}{A \code{numeric} vector of 1 or 2 values, between -1
-and 1 to be used as the minimum cut-off on
-positive and negative correlation values.
+\item{cutoff}{A \code{numeric} vector of 1 or 2 values, to be used as a
+cut-off on Y-axis values (Default: cutoff = 0).
 \itemize{
- \item{If 1 value is given, it will be define as the
- minimum cut-off on absolute correlation values
+ \item{If 1 value is given, it will be defined as the
+ minimum cut-off on absolute Y-axis values
  (positive and negative ones).}
- \item{If 2 values are given, the smalest one will
- be used as a maximum cut-off on negative
- correlation values. the biggest one will be used as
- a minimum cut-off on positive correlation values.
- The smalest value must be comprised between -1 and
- 0. The biggest value must be comprised between 0
- and 1.}
+ \item{If 2 values are given: The smallest one will be used
+ as a maximum cut-off on negative Y-axis values. The biggest
+ one will be used as a minimum cut-off on positive Y-axis
+ values. The smallest value must be inferior or equal to 0.
+ The biggest value must be superior or equal to 0.}
 }}
+
+\item{data.type}{A \code{character} to specify the type of test used to
+generate 'data'
+(Supported: data.type = c("t.test", "corr")).}
 }
 \value{
 A \code{numeric} vector of length 2 containing the negative cut-off
-        and the positive cut-off for correlation values.
+        and the positive cut-off for Y-axis values.
 }
 \description{
-Checks the correlation cut-off value(s) given and computes the negative and
-positive correlation cut-offs.
+Checks cut-off value(s) given and computes the negative and positive
+cut-offs.
 }
 \author{
 Yoann Pageaud.

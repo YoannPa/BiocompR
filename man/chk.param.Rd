@@ -7,16 +7,49 @@
 chk.param(data, data.type, label.cutoff)
 }
 \arguments{
-\item{param1}{A \code{type} parameter description.}
+\item{data}{A \code{data.table} with 3 to 5 columns:
+\itemize{
+ \item{column 1 - The labels.}
+ \item{column 2 - Y-axis values.}
+ \item{column 3 - P-values.}
+ \item{column 4 (optional) - groups to be used to color
+ points. If none provided, you can use 'y.col.sign' to
+ color dots based on the Y-axis category they belong
+ to.}
+ \item{column 5 (optional) - values to be used to define
+ dots sizes based on another variable.}
+}}
+
+\item{data.type}{A \code{character} to specify the type of test used to
+generate 'data'
+(Supported: data.type = c("t.test", "corr")).}
+
+\item{label.cutoff}{A \code{numeric} vector of 1 or 2 values, to be used as a
+cut-off on Y-axis values (Default: label.cutoff = 0).
+\itemize{
+ \item{If 1 value is given, it will be defined as the
+ minimum cut-off on absolute Y-axis values
+ (positive and negative ones).}
+ \item{If 2 values are given: The smallest one will be
+ used as a maximum cut-off on negative Y-axis values. The
+ biggest one will be used as a minimum cut-off on
+ positive Y-axis values. The smallest value must be
+ inferior or equal to 0. The biggest value must be
+ superior or equal to 0.}
+}
+Dots outside these limits will be labeled. Dots within
+the range of these limits will remain unlabeled.}
 }
 \value{
-A \code{type} object returned description.
+A \code{list} containing:
+        \itemize{
+         \item{The original columns names from 'data'.}
+         \item{The modified data.}
+         \item{The label cut-off positive and negative values.}
+        }
 }
 \description{
 Checks parameters for tests functions
-}
-\references{
-
 }
 \author{
 Yoann Pageaud.

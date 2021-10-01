@@ -2,14 +2,15 @@
 % Please edit documentation in R/ggcorr.R
 \name{ggvolcano.test}
 \alias{ggvolcano.test}
-\title{Plots results of statistical tests as volcano plot.}
+\title{Plots results of statistical tests as a volcano plot.}
 \usage{
 ggvolcano.test(
   data,
   p.cutoff = 0.01,
   l2fc.cutoff = NULL,
-  title.fc.cutoff = "L2FC cut-off",
-  label.cutoff = 0
+  title.cutoff = "L2FC cut-off",
+  label.cutoff = 0,
+  y.col.sign = FALSE
 )
 }
 \arguments{
@@ -18,56 +19,74 @@ ggvolcano.test(
  \item{column 1 - The labels.}
  \item{column 2 - log2(fold changes) values.}
  \item{column 3 - P-values.}
- \item{
- column 4 (optional) - groups to be used to color points.
- If none provided, elements will be divided into
- 3 categories:
- \itemize{
-  \item{Red - elements above the positive
-  'l2fc.cutoff' and below 'p.cutoff'.}
-  \item{Blue - elements below the negative
-  'l2fc.cutoff' and below 'p.cutoff'.}
-  \item{Black - any other element not meeting the
-  requirements in the first nor the second category.}
- }}
+ \item{column 4 (optional) - groups to be used to color
+ points. If none provided, you can use 'y.col.sign' to
+ color dots based on the fold change category they belong
+ to.}
+ \item{column 5 (optional) - values to be used to define
+ dots sizes based on another variable.}
 }}
 
 \item{p.cutoff}{A \code{numeric} between 0 and 1 to be used as a maximum
 cut-off on p-values (Default: p.cutoff = 0.01).}
 
-\item{l2fc.cutoff}{A \code{numeric} to be used as a cut-off on fold changes
-(Default: l2fc.cutoff = 0).}
-
-\item{label.cutoff}{A \code{numeric} vector of 1 or 2 values, to be used as
-the minimum cut-off on positive and negative correlation
-values.
+\item{l2fc.cutoff}{A \code{numeric} vector of 1 or 2 values, to be used as
+a cut-off on log2(fold change) values
+(Default: l2fc.cutoff = NULL).
 \itemize{
- \item{If 1 value is given, it will be define as the
- minimum cut-off on absolute correlation values (positive
- and negative ones).}
- \item{If 2 values are given, the smalest one will be
+ \item{If 1 value is given, it will be defined as the
+ minimum cut-off on absolute log2(fold change) values
+ (positive and negative ones).}
+ \item{If 2 values are given: The smallest one will be
  used as a maximum cut-off on negative log2(fold change)
  values. The biggest one will be used as a minimum
  cut-off on positive log2(fold change) values.
- The smalest value must be inferior to 0. The biggest
- value must be superior to 0.}
-}}
+ The smallest value must be inferior or equal to 0. The
+ biggest value must be superior or equal to 0.}
+}
+l2fc.cutoff value(s) will be used to draw vertical lines
+on the volcano plot.}
 
-\item{label}{A \code{character} vector to be used to define which
-elements in the \code{data.table} column 1 should be
-labeled on the plot. (Default: label = NULL).}
+\item{title.cutoff}{A \code{character} to specify how you wish to label the
+log2(fold change) limits on the volcano plot
+(Default: title.cutoff = "L2FC cut-off").}
 
-\item{group.label}{A \code{logical} to be used to define whether labeling is
-done on individual (Default: group.label = FALSE) or group
-level (group.label = TRUE). The parameter is only used
-when the \code{data.table} column 4 is set.}
+\item{label.cutoff}{A \code{numeric} vector of 1 or 2 values, to be used as
+a cut-off on log2(fold change) values
+(Default: label.cutoff = 0).
+\itemize{
+ \item{If 1 value is given, it will be defined as the
+ minimum cut-off on absolute log2(fold change) values
+ (positive and negative ones).}
+ \item{If 2 values are given: The smallest one will be
+ used as a maximum cut-off on negative log2(fold change)
+ values. The biggest one will be used as a minimum
+ cut-off on positive log2(fold change) values.
+ The smallest value must be inferior or equal to 0. The
+ biggest value must be superior or equal to 0.}
+}
+Dots outside these limits will be labeled. Dots within
+the range of these limits will remain unlabeled.}
+
+\item{y.col.sign}{A \code{logical} to activate automatic coloring of data
+based on their fold change category. If TRUE, elements
+will be divided into 3 categories:
+\itemize{
+ \item{Blue - elements below the negative 'l2fc.cutoff'.}
+ \item{Red - elements above the positive 'l2fc.cutoff'.}
+ \item{Grey - any other element not meeting the
+ requirements in the first nor the second categories.}
+}
+If FALSE, dots will be colored using groups from data
+(if any provided). If no groups are passed within data,
+dots will remain black.}
 }
 \value{
-A \code{gg} volcano plot.
+A \code{gg} volcano plot of your statistical test results.
 }
 \description{
-Plots results of statistical tests as volcano plot.
+Plots results of statistical tests as a volcano plot.
 }
 \author{
-Verena Bitto, Yoann Pageaud.
+Yoann Pageaud, Verena Bitto.
 }

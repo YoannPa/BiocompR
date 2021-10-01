@@ -2,13 +2,22 @@
 % Please edit documentation in R/ggcorr.R
 \name{chk.dt}
 \alias{chk.dt}
-\title{Checks the data.table provided to ggpanel.corr(), ggvolcano.corr() and
-ggvolcano.test().}
+\title{Checks the data.table provided to ggpanel.corr() and build.ggvolcano().}
 \usage{
 chk.dt(data, data.type)
 }
 \arguments{
-\item{data}{A \code{data.table} which contains test result data.}
+\item{data}{A \code{data.table} with 3 to 5 columns:
+\itemize{
+ \item{column 1 - The labels.}
+ \item{column 2 - Y-axis values.}
+ \item{column 3 - P-values.}
+ \item{column 4 (optional) - groups to be used to color
+ points. If none provided, you can use 'y.col.sign' to color
+ dots based on the Y-axis category they belong to.}
+ \item{column 5 (optional) - values to be used to define
+ dots sizes based on another variable.}
+}}
 
 \item{data.type}{A \code{character} to specify the type of test used to
 generate 'data'.
@@ -18,8 +27,7 @@ generate 'data'.
 A valid \code{data.table} with new column names.
 }
 \description{
-Checks the data.table provided to ggpanel.corr(), ggvolcano.corr() and
-ggvolcano.test().
+Checks the data.table provided to ggpanel.corr() and build.ggvolcano().
 }
 \author{
 Yoann Pageaud.

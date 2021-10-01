@@ -26,17 +26,17 @@ maximum cut-off on p-values
 (Default: p.cutoff = 0.01).}
 
 \item{label.cutoff}{A \code{numeric} vector of 1 or 2 values, between -1
-and 1 to be used as the minimum cut-off on
-positive and negative correlation values.
+and 1 to be used as the minimum cut-off on positive
+and negative correlation values.
 \itemize{
  \item{If 1 value is given, it will be define as the
  minimum cut-off on absolute correlation values
  (positive and negative ones).}
- \item{If 2 values are given, the smalest one will
+ \item{If 2 values are given, the smallest one will
  be used as a maximum cut-off on negative
  correlation values. the biggest one will be used as
  a minimum cut-off on positive correlation values.
- The smalest value must be comprised between -1 and
+ The smallest value must be comprised between -1 and
  0. The biggest value must be comprised between 0
  and 1.}
 }}

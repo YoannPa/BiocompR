@@ -1,8 +1,17 @@
 
-#' Checks the data.table provided to ggpanel.corr(), ggvolcano.corr() and
-#' ggvolcano.test().
+#' Checks the data.table provided to ggpanel.corr() and build.ggvolcano().
 #'
-#' @param data      A \code{data.table} which contains test result data.
+#' @param data      A \code{data.table} with 3 to 5 columns:
+#'                  \itemize{
+#'                   \item{column 1 - The labels.}
+#'                   \item{column 2 - Y-axis values.}
+#'                   \item{column 3 - P-values.}
+#'                   \item{column 4 (optional) - groups to be used to color
+#'                   points. If none provided, you can use 'y.col.sign' to color
+#'                   dots based on the Y-axis category they belong to.}
+#'                   \item{column 5 (optional) - values to be used to define
+#'                   dots sizes based on another variable.}
+#'                  }
 #' @param data.type A \code{character} to specify the type of test used to
 #'                  generate 'data'.
 #'                  (Supported: data.type = c("t.test", "corr")).
@@ -16,7 +25,8 @@ chk.dt <- function(data, data.type){
   if(is.numeric(data[[2]])){
     if(data.type == "corr"){
       if(any(data[, 2] < -1) | any(data[, 2] > 1)){
-        stop("Correlation values in column 2 must be comprised between -1 and 1.")
+        stop(
+          "Correlation values in column 2 must be comprised between -1 and 1.")
       }
     }
   } else { stop("Column 2 type must be numeric.") }
@@ -27,9 +37,9 @@ chk.dt <- function(data, data.type){
   } else { stop("Column 3 type must be numeric.") }
   #Check data.type and select appropriate colnames
   if(data.type == "corr"){
-    vec.colnames <- c("labels","corr","pval","grp","size")
+    vec.colnames <- c("labels", "corr", "pval", "grp", "size")
   } else if(data.type == "t.test"){
-    vec.colnames <- c("labels","fold","pval","grp","size")
+    vec.colnames <- c("labels", "fold", "pval", "grp", "size")
   }
   #Check ncol(data) and change column names
   if(ncol(data) < 3){ stop("Data should contain at least 3 columns.")
@@ -45,26 +55,26 @@ chk.dt <- function(data, data.type){
 }
 
 
-#' Checks the correlation cut-off value(s) given and computes the negative and
-#' positive correlation cut-offs.
+#' Checks cut-off value(s) given and computes the negative and positive
+#' cut-offs.
 #'
-#' @param cutoff A \code{numeric} vector of 1 or 2 values, between -1
-#'                          and 1 to be used as the minimum cut-off on
-#'                          positive and negative correlation values.
-#'                          \itemize{
-#'                           \item{If 1 value is given, it will be define as the
-#'                           minimum cut-off on absolute correlation values
-#'                           (positive and negative ones).}
-#'                           \item{If 2 values are given, the smalest one will
-#'                           be used as a maximum cut-off on negative
-#'                           correlation values. the biggest one will be used as
-#'                           a minimum cut-off on positive correlation values.
-#'                           The smalest value must be comprised between -1 and
-#'                           0. The biggest value must be comprised between 0
-#'                           and 1.}
-#'                          }
+#' @param cutoff    A \code{numeric} vector of 1 or 2 values, to be used as a
+#'                  cut-off on Y-axis values (Default: cutoff = 0).
+#'                  \itemize{
+#'                   \item{If 1 value is given, it will be defined as the
+#'                   minimum cut-off on absolute Y-axis values
+#'                   (positive and negative ones).}
+#'                   \item{If 2 values are given: The smallest one will be used
+#'                   as a maximum cut-off on negative Y-axis values. The biggest
+#'                   one will be used as a minimum cut-off on positive Y-axis
+#'                   values. The smallest value must be inferior or equal to 0.
+#'                   The biggest value must be superior or equal to 0.}
+#'                  }
+#' @param data.type A \code{character} to specify the type of test used to
+#'                  generate 'data'
+#'                  (Supported: data.type = c("t.test", "corr")).
 #' @return A \code{numeric} vector of length 2 containing the negative cut-off
-#'         and the positive cut-off for correlation values.
+#'         and the positive cut-off for Y-axis values.
 #' @author Yoann Pageaud.
 #' @export
 #' @keywords internal
@@ -96,23 +106,58 @@ chk.cutoff <- function(cutoff = 0, data.type){
 
 #' Checks parameters for tests functions
 #'
-#' @param param1 A \code{type} parameter description.
-#' @return A \code{type} object returned description.
+#' @param data         A \code{data.table} with 3 to 5 columns:
+#'                     \itemize{
+#'                      \item{column 1 - The labels.}
+#'                      \item{column 2 - Y-axis values.}
+#'                      \item{column 3 - P-values.}
+#'                      \item{column 4 (optional) - groups to be used to color
+#'                      points. If none provided, you can use 'y.col.sign' to
+#'                      color dots based on the Y-axis category they belong
+#'                      to.}
+#'                      \item{column 5 (optional) - values to be used to define
+#'                      dots sizes based on another variable.}
+#'                     }
+#' @param data.type    A \code{character} to specify the type of test used to
+#'                     generate 'data'
+#'                     (Supported: data.type = c("t.test", "corr")).
+#' @param label.cutoff A \code{numeric} vector of 1 or 2 values, to be used as a
+#'                     cut-off on Y-axis values (Default: label.cutoff = 0).
+#'                     \itemize{
+#'                      \item{If 1 value is given, it will be defined as the
+#'                      minimum cut-off on absolute Y-axis values
+#'                      (positive and negative ones).}
+#'                      \item{If 2 values are given: The smallest one will be
+#'                      used as a maximum cut-off on negative Y-axis values. The
+#'                      biggest one will be used as a minimum cut-off on
+#'                      positive Y-axis values. The smallest value must be
+#'                      inferior or equal to 0. The biggest value must be
+#'                      superior or equal to 0.}
+#'                     }
+#'                     Dots outside these limits will be labeled. Dots within
+#'                     the range of these limits will remain unlabeled.
+#' @return A \code{list} containing:
+#'         \itemize{
+#'          \item{The original columns names from 'data'.}
+#'          \item{The modified data.}
+#'          \item{The label cut-off positive and negative values.}
+#'         }
 #' @author Yoann Pageaud.
 #' @export
-#' @examples
-#' @references
 #' @keywords internal
 
 chk.param <- function(data, data.type, label.cutoff){
   #Get colnames
   orig.cnames <- colnames(data)
   #Convert as a data.table
-  if(!is.data.table(data)){ data <- as.data.table(data) }
+  if(!data.table::is.data.table(data)){
+    data <- data.table::as.data.table(data)
+  }
   #Check & format data.table
   data <- BiocompR::chk.dt(data = data, data.type = data.type)
   #Check label.cutoff values
-  cutoff.values <- BiocompR::chk.cutoff(cutoff = label.cutoff, data.type = data.type)
+  cutoff.values <- BiocompR::chk.cutoff(
+    cutoff = label.cutoff, data.type = data.type)
   return(list(orig.cnames, data, cutoff.values))
 }
 
@@ -135,23 +180,23 @@ chk.param <- function(data, data.type, label.cutoff){
 #' @param p.cutoff          A \code{numeric} between 0 and 1 to be used as a
 #'                          maximum cut-off on p-values
 #'                          (Default: p.cutoff = 0.01).
-#' @param label.cutoff A \code{numeric} vector of 1 or 2 values, between -1
-#'                          and 1 to be used as the minimum cut-off on
-#'                          positive and negative correlation values.
+#' @param label.cutoff      A \code{numeric} vector of 1 or 2 values, between -1
+#'                          and 1 to be used as the minimum cut-off on positive
+#'                          and negative correlation values.
 #'                          \itemize{
 #'                           \item{If 1 value is given, it will be define as the
 #'                           minimum cut-off on absolute correlation values
 #'                           (positive and negative ones).}
-#'                           \item{If 2 values are given, the smalest one will
+#'                           \item{If 2 values are given, the smallest one will
 #'                           be used as a maximum cut-off on negative
 #'                           correlation values. the biggest one will be used as
 #'                           a minimum cut-off on positive correlation values.
-#'                           The smalest value must be comprised between -1 and
+#'                           The smallest value must be comprised between -1 and
 #'                           0. The biggest value must be comprised between 0
 #'                           and 1.}
 #'                          }
-#' @param jitter.height     A \code{numeric} to specify the amount of vertical
-#'                          jitter (Default: jitter.height = 0.4).
+#' @param jitter.height A \code{numeric} to specify the amount of vertical
+#'                      jitter (Default: jitter.height = 0.4).
 #' @return A \code{gg} plot object with 4 panels:
 #'         \itemize{
 #'          \item{1 panel with significant positive correlation values.}
@@ -185,12 +230,11 @@ ggpanel.corr <- function(
 
   #Define P-value intervals
   data$P.value <- cut(
-    x = data$pval, breaks=c(min(data$pval), p.cutoff, max(data$pval)),
-    labels = c(paste0("<= ", p.cutoff,":\n[ ", formatC(x=min(data$pval),
-                                                       format="e",digits=2),
-                      ", ", p.cutoff, " ]"),
-               paste0("> ", p.cutoff, ":\n] ",p.cutoff,", ",
-                      formatC(x=max(data$pval), format="e",digits=2)," ]")),
+    x = data$pval, breaks = c(min(data$pval), p.cutoff, max(data$pval)),
+    labels = c(paste0("<= ", p.cutoff,":\n[ ", formatC(
+      x = min(data$pval), format = "e", digits = 2), ", ", p.cutoff, " ]"),
+      paste0("> ", p.cutoff, ":\n] ",p.cutoff,", ",
+             formatC(x = max(data$pval), format = "e", digits = 2), " ]")),
     include.lowest = TRUE)
   #Define correlation value intervals
   data$cor.cat <- cut(x = data$corr, breaks = c(-Inf, 0, +Inf),
@@ -198,53 +242,119 @@ ggpanel.corr <- function(
   #Remove labels out of cut-offs
   data[!(corr >= cutoff.values[2] | corr <= cutoff.values[1]), labels := ""]
   #Seed position for using geom_label_repel() with geom_jitter().
-  pos<-position_jitter(seed = 1, height = jitter.height)
+  pos <- ggplot2::position_jitter(seed = 1, height = jitter.height)
   #Plot Spearman correlation results
   if(ncol(data) == 5){
-    ggpan <- ggplot(data = data,
-                    mapping = aes(x = corr, y = P.value, label = labels))
+    ggpan <- ggplot2::ggplot(
+      data = data, mapping = ggplot2::aes(
+        x = corr, y = P.value, label = labels))
   } else if(ncol(data) == 6){
-    ggpan <- ggplot(data = data, mapping = aes(
+    ggpan <- ggplot2::ggplot(data = data, mapping = ggplot2::aes(
       x = corr, y = P.value, label = labels, color = grp))
   } else{
-    ggpan <- ggplot(data = data, mapping = aes(
+    ggpan <- ggplot2::ggplot(data = data, mapping = ggplot2::aes(
       x = corr, y = P.value, label = labels, color = grp, size = size))
   }
   ggpan <- ggpan +
-    geom_jitter(position = pos) +
-    facet_grid(P.value ~ cor.cat, scales = "free", space = "free", switch="y") +
+    ggplot2::geom_jitter(position = pos) +
+    ggplot2::facet_grid(
+      P.value ~ cor.cat, scales = "free", space = "free", switch = "y") +
     ggrepel::geom_label_repel(position = pos, size = 4) +
-    theme(axis.ticks.x = element_blank(),
-          panel.background = element_blank(),
-          panel.grid.major.x = element_line(colour = "grey"),
-          panel.border = element_rect(color = "black", fill = NA, size = 1),
-          axis.title = element_text(size = 13),
-          axis.text.x = element_text(size = 12),
-          axis.text.y = element_blank(),
-          axis.ticks.y = element_blank(),
-          plot.title = element_text(hjust = 0.5, size = 15),
-          legend.title = element_text(size = 13),
-          legend.text = element_text(size = 12),
-          strip.text = element_text(size = 12),
-          strip.background = element_rect(fill = NA, colour = 'black', size=1),
-          legend.key = element_blank()) +
-    labs(x = orig.cnames[2], color = orig.cnames[4], size = orig.cnames[5])
+    ggplot2::theme(
+      axis.ticks.x = ggplot2::element_blank(),
+      panel.background = ggplot2::element_blank(),
+      panel.grid.major.x = ggplot2::element_line(colour = "grey"),
+      panel.border = ggplot2::element_rect(
+        color = "black", fill = NA, size = 1),
+      axis.title = ggplot2::element_text(size = 13),
+      axis.text.x = ggplot2::element_text(size = 12),
+      axis.text.y = ggplot2::element_blank(),
+      axis.ticks.y = ggplot2::element_blank(),
+      plot.title = ggplot2::element_text(hjust = 0.5, size = 15),
+      legend.title = ggplot2::element_text(size = 13),
+      legend.text = ggplot2::element_text(size = 12),
+      strip.text = ggplot2::element_text(size = 12),
+      strip.background = ggplot2::element_rect(
+        fill = NA, colour = 'black', size = 1),
+      legend.key = ggplot2::element_blank()) +
+    ggplot2::labs(
+      x = orig.cnames[2], color = orig.cnames[4], size = orig.cnames[5])
   return(ggpan)
 }
 
 
 #' Core function that builds a volcano plot using ggplot2.
 #'
-#' @param param1 A \code{type} parameter description.
-#' @return A \code{type} object returned description.
+#' @param data           A \code{data.table} with 3 to 5 columns:
+#'                       \itemize{
+#'                        \item{column 1 - The labels.}
+#'                        \item{column 2 - Y-axis values.}
+#'                        \item{column 3 - P-values.}
+#'                        \item{column 4 (optional) - groups to be used to color
+#'                        points. If none provided, you can use 'y.col.sign' to
+#'                        color dots based on the Y-axis category they belong
+#'                        to.}
+#'                        \item{column 5 (optional) - values to be used to
+#'                        define dots sizes based on another variable.}
+#'                       }
+#' @param data.type      A \code{character} to specify the type of test used to
+#'                       generate 'data'
+#'                       (Supported: data.type = c("t.test", "corr")).
+#' @param label.cutoff   A \code{numeric} vector of 1 or 2 values, to be used as
+#'                       a cut-off on Y-axis values (Default: label.cutoff = 0).
+#'                       \itemize{
+#'                        \item{If 1 value is given, it will be defined as the
+#'                        minimum cut-off on absolute Y-axis values
+#'                        (positive and negative ones).}
+#'                        \item{If 2 values are given: The smallest one will be
+#'                        used as a maximum cut-off on negative Y-axis values.
+#'                        The biggest one will be used as a minimum cut-off on
+#'                        positive Y-axis values. The smallest value must be
+#'                        inferior or equal to 0. The biggest value must be
+#'                        superior or equal to 0.}
+#'                       }
+#'                       Dots outside these limits will be labeled. Dots within
+#'                       the range of these limits will remain unlabeled.
+#' @param p.cutoff       A \code{numeric} between 0 and 1 to be used as a
+#'                       maximum cut-off on p-values (Default: p.cutoff = 0.01).
+#' @param y.cutoff       A \code{numeric} vector of 1 or 2 values, to be used as
+#'                       a cut-off on Y-axis values (Default: y.cutoff = NULL).
+#'                       \itemize{
+#'                        \item{If 1 value is given, it will be defined as the
+#'                        minimum cut-off on absolute Y-axis values
+#'                        (positive and negative ones).}
+#'                        \item{If 2 values are given: The smallest one will be
+#'                        used as a maximum cut-off on negative Y-axis values.
+#'                        The biggest one will be used as a minimum cut-off on
+#'                        positive Y-axis values. The smallest value must be
+#'                        inferior or equal to 0. The biggest value must be
+#'                        superior or equal to 0.}
+#'                       }
+#'                       y.cutoff value(s) will be used to draw vertical lines
+#'                       on the volcano plot.
+#' @param title.y.cutoff A \code{character} to specify how you wish to label the
+#'                       Y-axis vertical lines on the volcano plot
+#'                       (Default: title.cutoff = "Y-Axis cutoff").
+#' @param y.col.sign     A \code{logical} to activate automatic coloring of data
+#'                       based on their correlation category. If TRUE, elements
+#'                       will be divided into 3 categories:
+#'                       \itemize{
+#'                        \item{Blue - elements below the negative 'y.cutoff'.}
+#'                        \item{Red - elements above the positive 'y.cutoff'.}
+#'                        \item{Grey - any other element not meeting the
+#'                        requirements in the first nor the second categories.}
+#'                       }
+#'                       If FALSE, dots will be colored using groups from data
+#'                       (if any provided). If no groups are passed within data,
+#'                       dots will remain black.
+#' @return A \code{gg} volcano plot of your statistical test results.
 #' @author Yoann Pageaud.
 #' @export
-#' @examples
 #' @keywords internal
 
 build.ggvolcano <- function(
-  data, data.type, label.cutoff = 0, p.cutoff = 0.01, y.cutoff = l2fc.cutoff,
-  title.y.cutoff = "Y-Axis cutoff"){
+  data, data.type, label.cutoff = 0, p.cutoff = 0.01, y.cutoff = NULL,
+  title.y.cutoff = "Y-Axis cutoff", y.col.sign = FALSE){
   #Check test parameters
   res.param <- BiocompR::chk.param(
     data = data, data.type = data.type, label.cutoff = label.cutoff)
@@ -254,31 +364,59 @@ build.ggvolcano <- function(
   #Check y.cutoff values
   y.cutoff.values <- BiocompR::chk.cutoff(
     cutoff = y.cutoff, data.type = data.type)
+  #If y.col.sign TRUE add grp color to data
+  if(y.col.sign){
+    if(data.type == "corr"){
+      groups <- c("Negatively correlated", "Insufficiently correlated",
+                  "Positively correlated")
+      data[corr <= y.cutoff.values[1], grp := groups[1]]
+      data[corr >= y.cutoff.values[2], grp := groups[3]]
+      data[corr > y.cutoff.values[1] & corr < y.cutoff.values[2],
+           grp := groups[2]]
+    } else if(data.type == "t.test"){
+      groups <- c("Negative log2(Fold change)", "Insufficient log2(Fold change)",
+                  "Positive log2(Fold change)")
+      data[fold <= y.cutoff.values[1], grp := groups[1]]
+      data[fold >= y.cutoff.values[2], grp := groups[3]]
+      data[fold > y.cutoff.values[1] & fold < y.cutoff.values[2],
+           grp := groups[2]]
+    }
+    data[, grp := as.factor(grp)]
+    data[, grp := factor(grp, levels = levels(grp)[
+      order(match(levels(grp), groups))])]
+  }
   #Create shading conditions
   data[pval > p.cutoff, "P-value" := as.factor(paste0("> ", p.cutoff))]
   data[pval <= p.cutoff, "P-value" := paste0("<= ", p.cutoff)]
   #Build scatter plot
-  ggvol <- ggplot()
+  ggvol <- ggplot2::ggplot()
   if(ncol(data) == 6){
-    ggvol <- ggvol +
-      geom_point(data = data, aes(x = data[[2]], y = -log10(pval), color = grp,
-                                  size = size, alpha = `P-value`))
+    ggvol <- ggvol + ggplot2::geom_point(
+      data = data, mapping = ggplot2::aes(
+        x = data[[2]], y = -log10(pval), color = grp, size = size,
+        alpha = `P-value`))
   } else if(ncol(data) == 5){
-    ggvol <- ggvol +
-      geom_point(data = data, aes(x = data[[2]], y = -log10(pval), color = grp,
-                                  alpha = `P-value`))
+    ggvol <- ggvol + ggplot2::geom_point(
+      data = data, mapping = ggplot2::aes(
+        x = data[[2]], y = -log10(pval), color = grp, alpha = `P-value`))
   } else {
-    ggvol <- ggvol + geom_point(
-      data = data, aes(x = data[[2]], y = -log10(pval), alpha = `P-value`))
+    ggvol <- ggvol + ggplot2::geom_point(
+      data = data, mapping = ggplot2::aes(
+        x = data[[2]], y = -log10(pval), alpha = `P-value`))
+  }
+  if(y.col.sign){
+    ggvol <- ggvol + ggplot2::scale_color_manual(
+      values = c("darkblue", "grey", "darkred"))
   }
   #Make p-value cut-off
-  ggvol <- ggvol + geom_hline(yintercept = -log10(p.cutoff), color = 'black')
+  ggvol <- ggvol + ggplot2::geom_hline(
+    yintercept = -log10(p.cutoff), color = 'black')
   #Make Y-Axis cut-off
   if(!is.null(y.cutoff)){
     #Make negative and positive cut-off
     ggvol <- ggvol +
-      geom_vline(xintercept = y.cutoff.values[1], color = 'blue') +
-      geom_vline(xintercept = y.cutoff.values[2], color = 'red')
+      ggplot2::geom_vline(xintercept = y.cutoff.values[1], color = 'blue') +
+      ggplot2::geom_vline(xintercept = y.cutoff.values[2], color = 'red')
   }
   #Create labels table
   if(data.type == "corr"){
@@ -290,167 +428,205 @@ build.ggvolcano <- function(
   } else { stop("Unsupported 'data.type'.") }
   #Create labels
   if(ncol(data) > 4){
-    ggvol <- ggvol + ggrepel::geom_label_repel(data = dt.label, mapping = aes(
-      x = dt.label[[2]], y = -log10(pval), label = labels, color = grp),
+    ggvol <- ggvol + ggrepel::geom_label_repel(
+      data = dt.label, mapping = ggplot2::aes(
+        x = dt.label[[2]], y = -log10(pval), label = labels, color = grp),
       size = 4.5)
   } else if(ncol(data) == 4){
-    ggvol <- ggvol + ggrepel::geom_label_repel(data = dt.label, mapping = aes(
-      x = dt.label[[2]], y = -log10(pval), label = labels), size = 4.5)
+    ggvol <- ggvol + ggrepel::geom_label_repel(
+      data = dt.label, mapping = ggplot2::aes(
+        x = dt.label[[2]], y = -log10(pval), label = labels), size = 4.5)
   }
   #Create P-value label
   ggvol <- ggvol + ggrepel::geom_label_repel(
-    data = data.frame(), aes(x = -Inf, y = -log10(p.cutoff), fontface = 1,
-                             label = "P-value cut-off"),
+    data = data.frame(), mapping = ggplot2::aes(
+      x = -Inf, y = -log10(p.cutoff), fontface = 1, label = "P-value cut-off"),
     color = "black", direction = "x", size = 4)
   #Create Y-axis label
   if(!is.null(y.cutoff)){
     #Make negative and positive cut-off label
     ggvol <- ggvol +
-      ggrepel::geom_label_repel(data = data.frame(), aes(
+      ggrepel::geom_label_repel(data = data.frame(), mapping = ggplot2::aes(
         x = y.cutoff.values[1], y = Inf, fontface = 1, label = title.y.cutoff),
         color = "blue", direction = "y", size = 4) +
-      ggrepel::geom_label_repel(data = data.frame(), aes(
+      ggrepel::geom_label_repel(data = data.frame(), mapping = ggplot2::aes(
         x = y.cutoff.values[2], y = Inf, fontface = 1, label = title.y.cutoff),
         color = "red", direction = "y", size = 4)
   }
   #Add default volcano theme
   ggvol <- ggvol +
-    theme(axis.ticks = element_blank(),
-          panel.background = element_blank(),
-          panel.grid.major = element_line(colour = "grey"),
-          axis.title = element_text(size = 13),
-          axis.text = element_text(size = 12),
-          plot.title = element_text(size = 15, hjust = 0.5),
-          legend.title = element_text(size = 13),
-          legend.text = element_text(size = 12),
-          legend.key = element_blank()) +
-    labs(x = orig.cnames[2], y = paste0("-log10(",orig.cnames[3],")"),
-         color = orig.cnames[4], size = orig.cnames[5])
+    ggplot2::theme(
+      axis.ticks = ggplot2::element_blank(),
+      panel.background = ggplot2::element_blank(),
+      panel.grid.major = ggplot2::element_line(colour = "grey"),
+      axis.title = ggplot2::element_text(size = 13),
+      axis.text = ggplot2::element_text(size = 12),
+      plot.title = ggplot2::element_text(size = 15, hjust = 0.5),
+      legend.title = ggplot2::element_text(size = 13),
+      legend.text = ggplot2::element_text(size = 12),
+      legend.key = ggplot2::element_blank()) +
+    ggplot2::labs(x = orig.cnames[2], y = paste0(
+      "-log10(", orig.cnames[3], ")"), color = orig.cnames[4],
+      size = orig.cnames[5])
   #Return plot removing warning about discrete variable given to alpha
-  warn.handle(pattern = "Using alpha for a discrete variable is not advised.",
-              print(ggvol))
+  BiocompR::warn.handle(
+    pattern = "Using alpha for a discrete variable is not advised.",
+    print(ggvol))
 }
 
 
 #' Plots results of correlation test between a single variable and multiple
 #' others as volcano plot.
 #'
-#' @param data              A \code{data.table} with 3 to 5 columns:
-#'                          \itemize{
-#'                           \item{column 1 - strings to be used as labels for
-#'                           individual dots.}
-#'                           \item{column 2 - correlation values.}
-#'                           \item{column 3 - correlation p-values.}
-#'                           \item{column 4 (optional) - groups to be used for
-#'                           coloring the dots.}
-#'                           \item{column 5 (optional) - values to be used to
-#'                           define dots sizes. It can be the sample size used
-#'                           for the calculation of the correlation test.}
-#'                          }
-#' @param p.cutoff          A \code{numeric} between 0 and 1 to be used as a
-#'                          maximum cut-off on p-values
-#'                          (Default: p.cutoff = 0.01).
-#' @param corr.cutoff       A \code{numeric} value between -1 and 1 to be used
-#'                          as a cut-off on correlation values.
-#'                          \itemize{
-#'                           \item{if corr.cutoff < 0: it will be a maximum
-#'                           cut-off on negative correlation values.}
-#'                           \item{if corr.cutoff > 0: it will be a minimum
-#'                           cut-off on positive correlation values.}
-#'                          }
-#'                          It is not used as an absolute cut-off on positive
-#'                          and negative correlation values as if the sign of
-#'                          the correlation value is different from the one of
-#'                          the cut-off, it might not necessary make sense apply
-#'                          the cut-off to it.
-#' @param title.corr.cutoff A \code{character} to be used as the label of the
-#'                          correlation cut-off vertical blue line
-#'                          (Default: title.corr.cutoff="Correlation cut-off").
-#' @param label.cutoff A \code{numeric} vector of 1 or 2 values, between -1
-#'                          and 1 to be used as the minimum cut-off on
-#'                          positive and negative correlation values.
-#'                          \itemize{
-#'                           \item{If 1 value is given, it will be define as the
-#'                           minimum cut-off on absolute correlation values
-#'                           (positive and negative ones).}
-#'                           \item{If 2 values are given, the smalest one will
-#'                           be used as a maximum cut-off on negative
-#'                           correlation values. The biggest one will be used as
-#'                           a minimum cut-off on positive correlation values.
-#'                           The smalest value must be comprised between -1 and
-#'                           0. The biggest value must be comprised between 0
-#'                           and 1.}
-#'                          }
-#' @return A \code{gg} volcano plot object.
+#' @param data         A \code{data.table} with 3 to 5 columns:
+#'                     \itemize{
+#'                      \item{column 1 - The labels.}
+#'                      \item{column 2 - correlation values.}
+#'                      \item{column 3 - P-values.}
+#'                      \item{column 4 (optional) - groups to be used to color
+#'                      points. If none provided, you can use 'y.col.sign' to
+#'                      color dots based on the correlation category they belong
+#'                      to.}
+#'                      \item{column 5 (optional) - values to be used to define
+#'                      dots sizes based on another variable.}
+#'                     }
+#' @param p.cutoff     A \code{numeric} between 0 and 1 to be used as a maximum
+#'                     cut-off on p-values (Default: p.cutoff = 0.01).
+#' @param corr.cutoff  A \code{numeric} vector of 1 or 2 values, comprised
+#'                     between -1 and 1, to be used as a cut-off on correlation
+#'                     values (Default: corr.cutoff = NULL).
+#'                     \itemize{
+#'                      \item{If 1 value is given, it will be defined as the
+#'                      minimum cut-off on absolute correlation values
+#'                      (positive and negative ones).}
+#'                      \item{If 2 values are given: The smallest one will be
+#'                      used as a maximum cut-off on negative correlation
+#'                      values. The biggest one will be used as a minimum
+#'                      cut-off on positive correlation values.
+#'                      The smallest value must be inferior or equal to 0. The
+#'                      biggest value must be superior or equal to 0.}
+#'                     }
+#'                     corr.cutoff value(s) will be used to draw vertical lines
+#'                     on the volcano plot.
+#' @param title.cutoff A \code{character} to specify how you wish to label the
+#'                     correlation limits on the volcano plot
+#'                     (Default: title.cutoff = "Correlation cut-off").
+#' @param label.cutoff A \code{numeric} vector of 1 or 2 values, comprised
+#'                     between -1 and 1, to be used as a cut-off on correlation
+#'                     values (Default: corr.cutoff = NULL).
+#'                     \itemize{
+#'                      \item{If 1 value is given, it will be defined as the
+#'                      minimum cut-off on absolute correlation values
+#'                      (positive and negative ones).}
+#'                      \item{If 2 values are given: The smallest one will be
+#'                      used as a maximum cut-off on negative correlation
+#'                      values. The biggest one will be used as a minimum
+#'                      cut-off on positive correlation values.
+#'                      The smallest value must be inferior or equal to 0. The
+#'                      biggest value must be superior or equal to 0.}
+#'                     }
+#'                     Dots outside these limits will be labeled. Dots within
+#'                     the range of these limits will remain unlabeled.
+#' @param y.col.sign   A \code{logical} to activate automatic coloring of data
+#'                     based on their correlation category. If TRUE, elements
+#'                     will be divided into 3 categories:
+#'                     \itemize{
+#'                      \item{Blue - elements below the negative 'corr.cutoff'.}
+#'                      \item{Red - elements above the positive 'corr.cutoff'.}
+#'                      \item{Grey - any other element not meeting the
+#'                      requirements in the first nor the second categories.}
+#'                     }
+#'                     If FALSE, dots will be colored using groups from data
+#'                     (if any provided). If no groups are passed within data,
+#'                     dots will remain black.
+#' @return A \code{gg} volcano plot of your correlation test results.
 #' @author Yoann Pageaud.
 #' @export
 
 ggvolcano.corr <- function(
   data, p.cutoff = 0.01, corr.cutoff = NULL,
-  title.corr.cutoff = "Correlation cut-off", label.cutoff = 0){
+  title.cutoff = "Correlation cut-off", label.cutoff = 0, y.col.sign = FALSE){
   #Build volcano plot for correlation data
   BiocompR::build.ggvolcano(
     data = data, data.type = "corr", label.cutoff = label.cutoff,
     p.cutoff = p.cutoff, y.cutoff = corr.cutoff,
-    title.y.cutoff = title.corr.cutoff)
+    title.y.cutoff = title.cutoff, y.col.sign = y.col.sign)
 }
 
 
-#' Plots results of statistical tests as volcano plot.
+#' Plots results of statistical tests as a volcano plot.
 #'
-#' @param data        A \code{data.table} with 3 to 5 columns:
-#'                    \itemize{
-#'                     \item{column 1 - The labels.}
-#'                     \item{column 2 - log2(fold changes) values.}
-#'                     \item{column 3 - P-values.}
-#'                     \item{
-#'                     column 4 (optional) - groups to be used to color points.
-#'                     If none provided, elements will be divided into
-#'                     3 categories:
+#' @param data         A \code{data.table} with 3 to 5 columns:
 #'                     \itemize{
-#'                      \item{Red - elements above the positive
-#'                      'l2fc.cutoff' and below 'p.cutoff'.}
-#'                      \item{Blue - elements below the negative
-#'                      'l2fc.cutoff' and below 'p.cutoff'.}
-#'                      \item{Black - any other element not meeting the
-#'                      requirements in the first nor the second category.}
-#'                     }}
-#'                    }
-#' @param p.cutoff    A \code{numeric} between 0 and 1 to be used as a maximum
-#'                    cut-off on p-values (Default: p.cutoff = 0.01).
-#' @param l2fc.cutoff A \code{numeric} to be used as a cut-off on fold changes
-#'                    (Default: l2fc.cutoff = 0).
-#' @param label       A \code{character} vector to be used to define which
-#'                    elements in the \code{data.table} column 1 should be
-#'                    labeled on the plot. (Default: label = NULL).
-#' @param group.label A \code{logical} to be used to define whether labeling is
-#'                    done on individual (Default: group.label = FALSE) or group
-#'                    level (group.label = TRUE). The parameter is only used
-#'                    when the \code{data.table} column 4 is set.
-#' @param label.cutoff A \code{numeric} vector of 1 or 2 values, to be used as
-#'                     the minimum cut-off on positive and negative correlation
-#'                     values.
+#'                      \item{column 1 - The labels.}
+#'                      \item{column 2 - log2(fold changes) values.}
+#'                      \item{column 3 - P-values.}
+#'                      \item{column 4 (optional) - groups to be used to color
+#'                      points. If none provided, you can use 'y.col.sign' to
+#'                      color dots based on the fold change category they belong
+#'                      to.}
+#'                      \item{column 5 (optional) - values to be used to define
+#'                      dots sizes based on another variable.}
+#'                     }
+#' @param p.cutoff     A \code{numeric} between 0 and 1 to be used as a maximum
+#'                     cut-off on p-values (Default: p.cutoff = 0.01).
+#' @param l2fc.cutoff  A \code{numeric} vector of 1 or 2 values, to be used as
+#'                     a cut-off on log2(fold change) values
+#'                     (Default: l2fc.cutoff = NULL).
 #'                     \itemize{
-#'                      \item{If 1 value is given, it will be define as the
-#'                      minimum cut-off on absolute correlation values (positive
-#'                      and negative ones).}
-#'                      \item{If 2 values are given, the smalest one will be
+#'                      \item{If 1 value is given, it will be defined as the
+#'                      minimum cut-off on absolute log2(fold change) values
+#'                      (positive and negative ones).}
+#'                      \item{If 2 values are given: The smallest one will be
 #'                      used as a maximum cut-off on negative log2(fold change)
 #'                      values. The biggest one will be used as a minimum
 #'                      cut-off on positive log2(fold change) values.
-#'                      The smalest value must be inferior to 0. The biggest
-#'                      value must be superior to 0.}
+#'                      The smallest value must be inferior or equal to 0. The
+#'                      biggest value must be superior or equal to 0.}
 #'                     }
-#' @return A \code{gg} volcano plot.
-#' @author Verena Bitto, Yoann Pageaud.
+#'                     l2fc.cutoff value(s) will be used to draw vertical lines
+#'                     on the volcano plot.
+#' @param title.cutoff A \code{character} to specify how you wish to label the
+#'                     log2(fold change) limits on the volcano plot
+#'                     (Default: title.cutoff = "L2FC cut-off").
+#' @param label.cutoff A \code{numeric} vector of 1 or 2 values, to be used as
+#'                     a cut-off on log2(fold change) values
+#'                     (Default: label.cutoff = 0).
+#'                     \itemize{
+#'                      \item{If 1 value is given, it will be defined as the
+#'                      minimum cut-off on absolute log2(fold change) values
+#'                      (positive and negative ones).}
+#'                      \item{If 2 values are given: The smallest one will be
+#'                      used as a maximum cut-off on negative log2(fold change)
+#'                      values. The biggest one will be used as a minimum
+#'                      cut-off on positive log2(fold change) values.
+#'                      The smallest value must be inferior or equal to 0. The
+#'                      biggest value must be superior or equal to 0.}
+#'                     }
+#'                     Dots outside these limits will be labeled. Dots within
+#'                     the range of these limits will remain unlabeled.
+#' @param y.col.sign   A \code{logical} to activate automatic coloring of data
+#'                     based on their fold change category. If TRUE, elements
+#'                     will be divided into 3 categories:
+#'                     \itemize{
+#'                      \item{Blue - elements below the negative 'l2fc.cutoff'.}
+#'                      \item{Red - elements above the positive 'l2fc.cutoff'.}
+#'                      \item{Grey - any other element not meeting the
+#'                      requirements in the first nor the second categories.}
+#'                     }
+#'                     If FALSE, dots will be colored using groups from data
+#'                     (if any provided). If no groups are passed within data,
+#'                     dots will remain black.
+#' @return A \code{gg} volcano plot of your statistical test results.
+#' @author Yoann Pageaud, Verena Bitto.
 #' @export
 
 ggvolcano.test <- function(
-  data, p.cutoff = 0.01, l2fc.cutoff = NULL, title.fc.cutoff = "L2FC cut-off",
-  label.cutoff = 0){
+  data, p.cutoff = 0.01, l2fc.cutoff = NULL, title.cutoff = "L2FC cut-off",
+  label.cutoff = 0, y.col.sign = FALSE){
   #Build volcano plot for t-test data
   BiocompR::build.ggvolcano(
     data = data, data.type = "t.test", label.cutoff = label.cutoff,
     p.cutoff = p.cutoff, y.cutoff = l2fc.cutoff,
-    title.y.cutoff = title.fc.cutoff)
+    title.y.cutoff = title.cutoff, y.col.sign = y.col.sign)
 }

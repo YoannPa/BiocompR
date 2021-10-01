@@ -9,64 +9,81 @@ ggvolcano.corr(
   data,
   p.cutoff = 0.01,
   corr.cutoff = NULL,
-  title.corr.cutoff = "Correlation cut-off",
-  label.cutoff = 0
+  title.cutoff = "Correlation cut-off",
+  label.cutoff = 0,
+  y.col.sign = FALSE
 )
 }
 \arguments{
 \item{data}{A \code{data.table} with 3 to 5 columns:
 \itemize{
- \item{column 1 - strings to be used as labels for
- individual dots.}
+ \item{column 1 - The labels.}
  \item{column 2 - correlation values.}
- \item{column 3 - correlation p-values.}
- \item{column 4 (optional) - groups to be used for
- coloring the dots.}
- \item{column 5 (optional) - values to be used to
- define dots sizes. It can be the sample size used
- for the calculation of the correlation test.}
+ \item{column 3 - P-values.}
+ \item{column 4 (optional) - groups to be used to color
+ points. If none provided, you can use 'y.col.sign' to
+ color dots based on the correlation category they belong
+ to.}
+ \item{column 5 (optional) - values to be used to define
+ dots sizes based on another variable.}
 }}
 
-\item{p.cutoff}{A \code{numeric} between 0 and 1 to be used as a
-maximum cut-off on p-values
-(Default: p.cutoff = 0.01).}
+\item{p.cutoff}{A \code{numeric} between 0 and 1 to be used as a maximum
+cut-off on p-values (Default: p.cutoff = 0.01).}
 
-\item{corr.cutoff}{A \code{numeric} value between -1 and 1 to be used
-as a cut-off on correlation values.
+\item{corr.cutoff}{A \code{numeric} vector of 1 or 2 values, comprised
+between -1 and 1, to be used as a cut-off on correlation
+values (Default: corr.cutoff = NULL).
 \itemize{
- \item{if corr.cutoff < 0: it will be a maximum
- cut-off on negative correlation values.}
- \item{if corr.cutoff > 0: it will be a minimum
- cut-off on positive correlation values.}
-}
-It is not used as an absolute cut-off on positive
-and negative correlation values as if the sign of
-the correlation value is different from the one of
-the cut-off, it might not necessary make sense apply
-the cut-off to it.}
-
-\item{title.corr.cutoff}{A \code{character} to be used as the label of the
-correlation cut-off vertical blue line
-(Default: title.corr.cutoff="Correlation cut-off").}
-
-\item{label.cutoff}{A \code{numeric} vector of 1 or 2 values, between -1
-and 1 to be used as the minimum cut-off on
-positive and negative correlation values.
-\itemize{
- \item{If 1 value is given, it will be define as the
+ \item{If 1 value is given, it will be defined as the
  minimum cut-off on absolute correlation values
  (positive and negative ones).}
- \item{If 2 values are given, the smalest one will
- be used as a maximum cut-off on negative
- correlation values. The biggest one will be used as
- a minimum cut-off on positive correlation values.
- The smalest value must be comprised between -1 and
- 0. The biggest value must be comprised between 0
- and 1.}
-}}
+ \item{If 2 values are given: The smallest one will be
+ used as a maximum cut-off on negative correlation
+ values. The biggest one will be used as a minimum
+ cut-off on positive correlation values.
+ The smallest value must be inferior or equal to 0. The
+ biggest value must be superior or equal to 0.}
+}
+corr.cutoff value(s) will be used to draw vertical lines
+on the volcano plot.}
+
+\item{title.cutoff}{A \code{character} to specify how you wish to label the
+correlation limits on the volcano plot
+(Default: title.cutoff = "Correlation cut-off").}
+
+\item{label.cutoff}{A \code{numeric} vector of 1 or 2 values, comprised
+between -1 and 1, to be used as a cut-off on correlation
+values (Default: corr.cutoff = NULL).
+\itemize{
+ \item{If 1 value is given, it will be defined as the
+ minimum cut-off on absolute correlation values
+ (positive and negative ones).}
+ \item{If 2 values are given: The smallest one will be
+ used as a maximum cut-off on negative correlation
+ values. The biggest one will be used as a minimum
+ cut-off on positive correlation values.
+ The smallest value must be inferior or equal to 0. The
+ biggest value must be superior or equal to 0.}
+}
+Dots outside these limits will be labeled. Dots within
+the range of these limits will remain unlabeled.}
+
+\item{y.col.sign}{A \code{logical} to activate automatic coloring of data
+based on their correlation category. If TRUE, elements
+will be divided into 3 categories:
+\itemize{
+ \item{Blue - elements below the negative 'corr.cutoff'.}
+ \item{Red - elements above the positive 'corr.cutoff'.}
+ \item{Grey - any other element not meeting the
+ requirements in the first nor the second categories.}
+}
+If FALSE, dots will be colored using groups from data
+(if any provided). If no groups are passed within data,
+dots will remain black.}
 }
 \value{
-A \code{gg} volcano plot object.
+A \code{gg} volcano plot of your correlation test results.
 }
 \description{
 Plots results of correlation test between a single variable and multiple

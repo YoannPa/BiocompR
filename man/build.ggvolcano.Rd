@@ -9,15 +9,83 @@ build.ggvolcano(
   data.type,
   label.cutoff = 0,
   p.cutoff = 0.01,
-  y.cutoff = l2fc.cutoff,
-  title.y.cutoff = "Y-Axis cutoff"
+  y.cutoff = NULL,
+  title.y.cutoff = "Y-Axis cutoff",
+  y.col.sign = FALSE
 )
 }
 \arguments{
-\item{param1}{A \code{type} parameter description.}
+\item{data}{A \code{data.table} with 3 to 5 columns:
+\itemize{
+ \item{column 1 - The labels.}
+ \item{column 2 - Y-axis values.}
+ \item{column 3 - P-values.}
+ \item{column 4 (optional) - groups to be used to color
+ points. If none provided, you can use 'y.col.sign' to
+ color dots based on the Y-axis category they belong
+ to.}
+ \item{column 5 (optional) - values to be used to
+ define dots sizes based on another variable.}
+}}
+
+\item{data.type}{A \code{character} to specify the type of test used to
+generate 'data'
+(Supported: data.type = c("t.test", "corr")).}
+
+\item{label.cutoff}{A \code{numeric} vector of 1 or 2 values, to be used as
+a cut-off on Y-axis values (Default: label.cutoff = 0).
+\itemize{
+ \item{If 1 value is given, it will be defined as the
+ minimum cut-off on absolute Y-axis values
+ (positive and negative ones).}
+ \item{If 2 values are given: The smallest one will be
+ used as a maximum cut-off on negative Y-axis values.
+ The biggest one will be used as a minimum cut-off on
+ positive Y-axis values. The smallest value must be
+ inferior or equal to 0. The biggest value must be
+ superior or equal to 0.}
+}
+Dots outside these limits will be labeled. Dots within
+the range of these limits will remain unlabeled.}
+
+\item{p.cutoff}{A \code{numeric} between 0 and 1 to be used as a
+maximum cut-off on p-values (Default: p.cutoff = 0.01).}
+
+\item{y.cutoff}{A \code{numeric} vector of 1 or 2 values, to be used as
+a cut-off on Y-axis values (Default: y.cutoff = NULL).
+\itemize{
+ \item{If 1 value is given, it will be defined as the
+ minimum cut-off on absolute Y-axis values
+ (positive and negative ones).}
+ \item{If 2 values are given: The smallest one will be
+ used as a maximum cut-off on negative Y-axis values.
+ The biggest one will be used as a minimum cut-off on
+ positive Y-axis values. The smallest value must be
+ inferior or equal to 0. The biggest value must be
+ superior or equal to 0.}
+}
+y.cutoff value(s) will be used to draw vertical lines
+on the volcano plot.}
+
+\item{title.y.cutoff}{A \code{character} to specify how you wish to label the
+Y-axis vertical lines on the volcano plot
+(Default: title.cutoff = "Y-Axis cutoff").}
+
+\item{y.col.sign}{A \code{logical} to activate automatic coloring of data
+based on their correlation category. If TRUE, elements
+will be divided into 3 categories:
+\itemize{
+ \item{Blue - elements below the negative 'y.cutoff'.}
+ \item{Red - elements above the positive 'y.cutoff'.}
+ \item{Grey - any other element not meeting the
+ requirements in the first nor the second categories.}
+}
+If FALSE, dots will be colored using groups from data
+(if any provided). If no groups are passed within data,
+dots will remain black.}
 }
 \value{
-A \code{type} object returned description.
+A \code{gg} volcano plot of your statistical test results.
 }
 \description{
 Core function that builds a volcano plot using ggplot2.
