@@ -106,20 +106,30 @@ fancy.hist <- function(
           seq(0, reduce.dt.facet[facet == i]$size,
               length.out = reduce.dt.facet[facet == i]$n.breaks)
         })
+        names(ls.xbreaks) <- reduce.dt.facet$facet
         ls.histdata <- lapply(X = seq_along(ls.xbreaks), FUN = function(i){
-          histdata <- parallel::mclapply(
-            X = seq(length(ls.xbreaks[[i]])-1), mc.cores = ncores,
-            FUN = function(j){
-              if(j == length(ls.xbreaks[[i]])-1){
-                #If last bin take values equal to maximum too
-                sub.chars <- uniq.x[
-                  round(ls.xbreaks[[i]][j]):round(ls.xbreaks[[i]][j+1])]
-              } else {
-                sub.chars <- uniq.x[
-                  round(ls.xbreaks[[i]][j]):round(ls.xbreaks[[i]][j+1]-1)]
-              }
-              length(x[x %in% sub.chars])
-            })
+          if(length(ls.xbreaks[[i]]) == 1){
+            sub.chars <- dt.facet[facet == names(ls.xbreaks)[i]]$uniq.x
+            histdata <- list(length(x[x %in% sub.chars]))
+          } else{
+            histdata <- parallel::mclapply(
+              X = seq(length(ls.xbreaks[[i]])-1), mc.cores = ncores,
+              FUN = function(j){
+            # histdata <- lapply(
+            #   X = seq(length(ls.xbreaks[[i]])-1),
+            #   FUN = function(j){
+                if(j == length(ls.xbreaks[[i]])-1){
+                  #If last bin take values equal to maximum too
+                  sub.chars <- dt.facet[facet == names(ls.xbreaks)[i]]$uniq.x[
+                    round(ls.xbreaks[[i]][j]):round(ls.xbreaks[[i]][j+1])]
+                } else {
+                  sub.chars <- dt.facet[facet == names(ls.xbreaks)[i]]$uniq.x[
+                    round(ls.xbreaks[[i]][j]):round(ls.xbreaks[[i]][j+1]-1)]
+                }
+                # print(sub.chars)
+                length(x[x %in% sub.chars])
+              })
+          }
           data.table::data.table(x = seq(histdata), y = unlist(histdata))
         })
         names(ls.histdata) <- reduce.dt.facet$facet
