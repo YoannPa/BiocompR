@@ -58,11 +58,13 @@
 #TODO: add option to pass hlines & vlines to the function instead of guessing it
 fancy.hist <- function(
   x, xmax = max(x, na.rm = TRUE), nbreaks = 11, ngrad = 11, round.grad = 1,
-  ncores = 1, bin.col = "#0570b0", show.annot = FALSE, facet = NULL){
+  ncores = 1, bin.col = "#0570b0", show.annot = FALSE, facet = NULL,
+  verbose = FALSE){
   #Check if is any NAs
   if(any(is.na(x))){ x <- x[!is.na(x)] } #rm NAs
   #Check x type
   if(is.numeric(x)){
+    if(verbose){ cat("Numeric vector detected.\n") }
     xbreaks <- seq(0, xmax, length.out = nbreaks) #Set breaks
     #Set graduations
     xgrads <- round(x = seq(0, xmax, length.out = ngrad), digits = round.grad)
@@ -74,6 +76,7 @@ fancy.hist <- function(
       xlabs[length(xlabs)] <- paste(xlabs[length(xlabs)], "\nor more")
     }
     #Compute quantities for each bin
+    if(verbose){ cat("Computing quantities in each bin...") }
     histdata <- parallel::mclapply(
       X = seq(length(xbreaks)-1), mc.cores = ncores, FUN = function(i){
         if(i == length(xbreaks)-1){
@@ -82,15 +85,17 @@ fancy.hist <- function(
         } else { length(x[x >= xbreaks[i] & x < xbreaks[i+1]]) }
       })
     histdata <- unlist(histdata)
-
+    if(verbose){ cat("Done.\n") }
     histbreaks <- xgrads*(length(histdata)/xmax) + 0.5 #Scale graduations
     histlim <- seq(0, xmax, length.out = ngrad)*(length(histdata)/xmax) + 0.5
     histlim <- c(histlim[1], rev(histlim)[1])
     #Create data.table
     dframe <- data.table::data.table(x = seq(histdata), y = histdata)
   } else if(is.character(x)){
+    if(verbose){ cat("Character vector detected.\n") }
     uniq.x <- unique(x)
     if(!is.null(facet)){
+      if(verbose){ cat("Faceting is On.\n") }
       if(length(uniq.x) != length(facet)){
         stop("facet must be of the same length as unique(x) to be applied.")
       } else {
@@ -107,7 +112,9 @@ fancy.hist <- function(
               length.out = reduce.dt.facet[facet == i]$n.breaks)
         })
         names(ls.xbreaks) <- reduce.dt.facet$facet
+        if(verbose){ cat("Computing quantities in each bin...\n") }
         ls.histdata <- lapply(X = seq_along(ls.xbreaks), FUN = function(i){
+          if(verbose){ cat(paste("\t", names(ls.xbreaks)[i], "\n")) }
           if(length(ls.xbreaks[[i]]) == 1){
             sub.chars <- dt.facet[facet == names(ls.xbreaks)[i]]$uniq.x
             histdata <- list(length(x[x %in% sub.chars]))
@@ -137,10 +144,12 @@ fancy.hist <- function(
         dframe[, facet := factor(
           x = facet, levels = levels(reduce.dt.facet$facet))]
         dframe[, x := .I] #Update the rank on all data
+        if(verbose){ cat("Done.\n") }
       }
     } else {
       xmax <- length(uniq.x)
       xbreaks <- seq(0, length(uniq.x), length.out = nbreaks) #Set breaks
+      if(verbose){ cat("Computing quantities in each bin...") }
       histdata <- parallel::mclapply(
         X = seq(length(xbreaks)-1), mc.cores = ncores, FUN = function(i){
           if(i == length(xbreaks)-1){
@@ -154,18 +163,21 @@ fancy.hist <- function(
       histdata <- unlist(histdata)
       #Create data.table
       dframe <- data.table::data.table(x = seq(histdata), y = histdata)
+      if(verbose){ cat("Done.\n") }
     }
   } else { stop("format not supported for 'x'.") }
 
   #Get recommended cut-off value and median
   if(show.annot){
-    cat("Compute Median and Cutoff\n")
+    if(verbose){ cat("show.annot: On. Computing median and cut-off...") }
     cutoff.val <- quantmod::findValleys(x = histdata)[1]
     cutoff.pos <- cutoff.val*(length(histdata)/xmax) + 0.5
     median.val <- stats::median(x, na.rm = TRUE)
     median.pos <- median.val*(length(histdata)/xmax) + 0.5
+    if(verbose){ cat("Done.\n") }
   }
   #Default ggplot
+  if(verbose){ cat("Creating histogram plot...") }
   gghist <- ggplot2::ggplot(data = dframe, ggplot2::aes(x = x, y = y)) +
     ggplot2::geom_bar(
       stat = "identity", width = 1, fill = bin.col, alpha = 0.7) +
@@ -231,5 +243,7 @@ fancy.hist <- function(
           vjust = 0.5, color = "#d7191c")
     }
   }
-  gghist
+  if(verbose){ cat("Done.\n") }
+  #Return histogram
+  return(gghist)
 }

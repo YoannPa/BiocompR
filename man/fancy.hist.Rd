@@ -14,7 +14,8 @@ fancy.hist(
   ncores = 1,
   bin.col = "#0570b0",
   show.annot = FALSE,
-  facet = NULL
+  facet = NULL,
+  verbose = FALSE
 )
 }
 \arguments{

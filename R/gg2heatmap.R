@@ -501,10 +501,7 @@ gg2heatmap <- function(
 
   if(verbose){ cat("Configure heatmap...") }
   #Set theme_forced_htmp
-  theme_forced_htmp <- ggplot2::theme(
-    plot.margin = ggplot2::margin(0, 0, 0, 0),
-    legend.position = "bottom",
-  )
+  theme_forced_htmp <- ggplot2::theme(legend.position = "bottom")
   #Set theme_default_htmp
   theme_default_htmp <- ggplot2::theme(
     axis.title.x = ggplot2::element_text(size = 12, color = 'black'),
@@ -520,6 +517,7 @@ gg2heatmap <- function(
     panel.grid = ggplot2::element_blank(),
     panel.background = ggplot2::element_rect(fill = "transparent"),
     plot.background = ggplot2::element_rect(fill = "transparent"),
+    plot.margin = ggplot2::margin(0, 0, 0, 0),
     legend.text = ggplot2::element_text(size = 11),
     legend.title = ggplot2::element_text(size = 12),
     legend.justification = c(0.4, 0.5),
