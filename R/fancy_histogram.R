@@ -102,7 +102,7 @@ fancy.hist <- function(
         #Make dt.facet
         dt.facet <- data.table::data.table(uniq.x = uniq.x, facet = facet)
         #Get facet sizes
-        dt.facet[, size := .N, by = "facet"]
+        dt.facet[, size := data.table::.N, by = "facet"]
         #Calculate number of breaks in each facet
         dt.facet[, n.breaks := round((size*nbreaks)/length(uniq.x))]
         reduce.dt.facet <- unique(dt.facet, by = "facet")[, -c(1), ]
@@ -122,9 +122,6 @@ fancy.hist <- function(
             histdata <- parallel::mclapply(
               X = seq(length(ls.xbreaks[[i]])-1), mc.cores = ncores,
               FUN = function(j){
-            # histdata <- lapply(
-            #   X = seq(length(ls.xbreaks[[i]])-1),
-            #   FUN = function(j){
                 if(j == length(ls.xbreaks[[i]])-1){
                   #If last bin take values equal to maximum too
                   sub.chars <- dt.facet[facet == names(ls.xbreaks)[i]]$uniq.x[
@@ -133,7 +130,6 @@ fancy.hist <- function(
                   sub.chars <- dt.facet[facet == names(ls.xbreaks)[i]]$uniq.x[
                     round(ls.xbreaks[[i]][j]):round(ls.xbreaks[[i]][j+1]-1)]
                 }
-                # print(sub.chars)
                 length(x[x %in% sub.chars])
               })
           }
@@ -143,7 +139,7 @@ fancy.hist <- function(
         dframe <- data.table::rbindlist(l = ls.histdata, idcol = "facet")
         dframe[, facet := factor(
           x = facet, levels = levels(reduce.dt.facet$facet))]
-        dframe[, x := .I] #Update the rank on all data
+        dframe[, x := data.table::.I] #Update the rank on all data
         if(verbose){ cat("Done.\n") }
       }
     } else {
@@ -181,12 +177,12 @@ fancy.hist <- function(
   gghist <- ggplot2::ggplot(data = dframe, ggplot2::aes(x = x, y = y)) +
     ggplot2::geom_bar(
       stat = "identity", width = 1, fill = bin.col, alpha = 0.7) +
-    scale_y_continuous(expand = c(0, 0)) +
-    labs(x = "Values", y = "Frequency") +
-    ggplot2::theme(plot.margin = unit(c(0.1,1,0.1,0.1),"cm"),
+    ggplot2::scale_y_continuous(expand = c(0, 0)) +
+    ggplot2::labs(x = "Values", y = "Frequency") +
+    ggplot2::theme(plot.margin = ggplot2::margin(0.1, 1, 0.1, 0.1, unit = "cm"),
                    axis.title = ggplot2::element_text(size = 13),
                    axis.text = ggplot2::element_text(size = 11),
-                   panel.background = element_rect(fill = "white"))
+                   panel.background = ggplot2::element_rect(fill = "white"))
 
   if(is.character(x)){
     #Plot for x as a character vector
@@ -197,22 +193,22 @@ fancy.hist <- function(
         ggplot2::theme(
           panel.grid.major.y = ggplot2::element_line(colour = "grey"),
           panel.grid.minor.y = ggplot2::element_line(colour = "grey"),
-          panel.grid.major.x = element_blank(),
-          panel.grid.minor.x = element_blank(),
-          axis.ticks.x = element_blank(),
-          axis.text.x = element_blank())
+          panel.grid.major.x = ggplot2::element_blank(),
+          panel.grid.minor.x = ggplot2::element_blank(),
+          axis.ticks.x = ggplot2::element_blank(),
+          axis.text.x = ggplot2::element_blank())
     } else {
       #With facet
       gghist <- gghist +
         ggplot2::scale_x_continuous(expand = c(0, 0)) +
-        facet_grid(. ~ facet, scales = "free", space = "free") +
+        ggplot2::facet_grid(. ~ facet, scales = "free", space = "free") +
         ggplot2::theme(
           panel.grid.major.y = ggplot2::element_line(colour = "grey"),
           panel.grid.minor.y = ggplot2::element_line(colour = "grey"),
-          panel.grid.major.x = element_blank(),
-          panel.grid.minor.x = element_blank(),
-          axis.ticks.x = element_blank(),
-          axis.text.x = element_blank())
+          panel.grid.major.x = ggplot2::element_blank(),
+          panel.grid.minor.x = ggplot2::element_blank(),
+          axis.ticks.x = ggplot2::element_blank(),
+          axis.text.x = ggplot2::element_blank())
     }
   } else if(is.numeric(x)){
     #Plot for x as a numeric vector
@@ -226,7 +222,8 @@ fancy.hist <- function(
   #Add annotations
   if(show.annot){
     gghist <- gghist +
-      geom_vline(xintercept = median.pos, color = "#313695", size = 0.7) +
+      ggplot2::geom_vline(
+        xintercept = median.pos, color = "#313695", size = 0.7) +
       ggrepel::geom_label_repel(data = data.frame(), ggplot2::aes(
         x = median.pos, y = Inf, fontface = 2,
         label = paste0("median = ", round(x = median.val, digits = 2))),
@@ -234,7 +231,8 @@ fancy.hist <- function(
     #If recommended cut-off inferior or equal to median, plot cut-off
     if(cutoff.val <= median.val){
       gghist <- gghist +
-        geom_vline(xintercept = cutoff.pos, color = "#d7191c", size = 0.7) +
+        ggplot2::geom_vline(
+          xintercept = cutoff.pos, color = "#d7191c", size = 0.7) +
         ggrepel::geom_label_repel(
           data = data.frame(),
           ggplot2::aes(

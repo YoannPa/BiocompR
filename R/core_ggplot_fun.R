@@ -158,7 +158,7 @@ ggdend <- function(df, orientation, reverse.x = FALSE, theme_dend = NULL) {
   }
   #Create ggplot of dendrogram
   ddplot <- ggplot2::ggplot() + ggplot2::geom_segment(
-      data = df, ggplot2::aes(x = x, y = y, xend = xend, yend = yend)) +
+    data = df, ggplot2::aes(x = x, y = y, xend = xend, yend = yend)) +
     ggplot2::expand_limits(x = c(0.5, max(df$x) + 0.5), y = 0) + theme_dend
 
   if(orientation == "top"){
@@ -381,7 +381,6 @@ get.len.legends <- function(col_table){
 #' @export
 #' @examples
 #' #Building the simplest layout with 1 legend and 2 categories
-#' library(BiocompR)
 #' build.layout(col_table = list(data.table::data.table(
 #'   'Grps' = c('cat 1', 'cat 2'), 'Cols' = c('blue', 'red'))),
 #'   height.lgds.space = 29)
@@ -799,8 +798,9 @@ raster.ggplot.to.grob <- function(gg.plot, filter = "Lanczos"){
 annotation_custom2 <- function(
   grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, data){
   ggplot2::layer(
-    data = data, stat = StatIdentity, position = PositionIdentity,
-    geom = ggplot2:::GeomCustomAnn, inherit.aes = TRUE, params = list(
+    data = data, stat = ggplot2::StatIdentity,
+    position = ggplot2::PositionIdentity, geom = ggplot2:::GeomCustomAnn,
+    inherit.aes = TRUE, params = list(
       grob = grob, xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax))
 }
 

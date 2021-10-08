@@ -48,7 +48,7 @@ bivar.plot <- function(data, violin = FALSE, cat.step = 10L, cat.max = 10L,
   #Assign values to last category if there category is above cat.max
   data[category > cat.max, category := cat.max]
   #Get Number of CpGs by categories
-  data[, cat.sizes := .N, by = "category"]
+  data[, cat.sizes := data.table::.N, by = "category"]
   #Calculate intervals
   cat.breaks <- cumsum(rep(cat.step, cat.max))
   cat.first <- ifelse(is.integer(data[, 1]), "1", "0")

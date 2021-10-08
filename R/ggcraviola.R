@@ -108,7 +108,8 @@ ggcraviola <- function(
   mean.value = TRUE, bins = FALSE, bins.quantiles = seq(0.1, 0.9, 0.1),
   bin.fun = "sd", lines.col = NA){
   #Check if data is a data.table and convert if not
-  if(!is.data.table(data)){ data <- as.data.table(data) }
+  if(!data.table::is.data.table(data)){
+    data <- data.table::as.data.table(data) }
   #Make annotation table
   unique.dt <- unique(x = data, by = 1)
   if(ncol(data) < 4){
@@ -118,7 +119,7 @@ ggcraviola <- function(
       if(!is.factor(unique.dt[[1]])){ #Convert as factor column 1
         unique.dt[, Samples := as.factor(Samples)]
       }
-      Annot.table <- data.table(
+      Annot.table <- data.table::data.table(
         unique.dt[,1], "Groups" = as.factor(c(1, 1)),
         "Conditions" = unique.dt[[1]], unique.dt[, 2])
       data <- merge(
@@ -128,17 +129,18 @@ ggcraviola <- function(
   if(nrow(unique(Annot.table, by = 3)) > 2){
     stop("More than 2 conditions inputed. Only 2 conditions tolerated.")
   }
-  if(any(Annot.table[, .N, by = "Groups"]$N > 2)){
+  if(any(Annot.table[, data.table::.N, by = "Groups"]$N > 2)){
     stop(paste(
       "At least 1 group contains data for more than 2 samples.",
       "A craviola cannot represent more than 2 distributions per group."))
   }
   #Check if all conditional variables are factors
-  if(!all(Annot.table[, lapply(X = .SD, FUN = is.factor)] == TRUE)){
+  if(!all(Annot.table[, lapply(X = data.table::.SD, FUN = is.factor)] == TRUE)){
     #Convert annotations and data conditional variable into factors
-    Annot.table <- Annot.table[, lapply(X = .SD, FUN = as.factor)]
+    Annot.table <- Annot.table[, lapply(X = data.table::.SD, FUN = as.factor)]
     cols <- colnames(data)[1:3]
-    data[, (cols) := lapply(X = .SD, FUN = as.factor), .SDcols = cols]
+    data[, (cols) := lapply(
+      X = data.table::.SD, FUN = as.factor), .SDcols = cols]
   }
   original.var.col <- levels(Annot.table[[3]])
   if(length(levels(Annot.table[[3]])) > 2) {
@@ -170,17 +172,12 @@ ggcraviola <- function(
       x.pos <- x.pos + (as.integer(Annot.table[
         Annot.table[[1]] == names(list_vect.val1)[i], 2])-1)
     }
-    # data.frame(Var.col = Annot.table[Annot.table[[1]] ==
-    #                                    names(list_vect.val1)[i], 3],
-    #            x=x.pos, min = qiles[1], low=qiles[2], mid=qiles[3],
-    #            top=qiles[4], max = qiles[5], mean = means,
-    #            pos.crav = round(x.pos))
-    data.table(Annot.table[Annot.table[[1]] == names(list_vect.val1)[i], 3],
-               x = x.pos, min = qiles[1], low = qiles[2], mid = qiles[3],
-               top = qiles[4], max = qiles[5], mean = means,
-               pos.crav = round(x.pos))
+    data.table::data.table(
+      Annot.table[Annot.table[[1]] == names(list_vect.val1)[i], 3], x = x.pos,
+      min = qiles[1], low = qiles[2], mid = qiles[3], top = qiles[4],
+      max = qiles[5], mean = means, pos.crav = round(x.pos))
   })
-  box.dframe <- rbindlist(list.bp.stat)
+  box.dframe <- data.table::rbindlist(list.bp.stat)
   # box.dframe<-do.call(rbind, list.bp.stat)
 
   #Create Craviola plot
@@ -188,18 +185,6 @@ ggcraviola <- function(
   list_dens.df <- lapply(list_dens.res, function(i){
     data.frame(y.pos = i$x, dens.curv = i$y*craviola.width)
   })
-  # list_oriented_dens <- lapply(seq_along(list_dens.df), function(i){
-  #   if(Annot.table[Annot.table[[1]] == names(list_dens.df)[i], 3] == 1){
-  #     list_dens.df[[i]]$dens.curv <<- list_dens.df[[i]]$dens.curv * -1
-  #     list_dens.df[[i]]
-  #   } else { list_dens.df[[i]] }
-  #   if(Annot.table[Annot.table[[1]] == names(list_dens.df)[i], 2] != 1){
-  #     list_dens.df[[i]]$dens.curv <<- list_dens.df[[i]]$dens.curv +
-  #       (as.integer(Annot.table[Annot.table[[1]] ==
-  #                                 names(list_dens.df)[i], 2]) - 1)
-  #     list_dens.df[[i]]
-  #   } else { list_dens.df[[i]] }
-  # })
   list_oriented_dens <- lapply(names(list_dens.df), function(i){
     if(as.integer(Annot.table[Annot.table[[1]] == i, 3]) == 1){
       list_dens.df[[i]]$dens.curv <<- list_dens.df[[i]]$dens.curv * -1
@@ -284,45 +269,45 @@ ggcraviola <- function(
   dframe <- do.call(rbind, list.dframes)
 
   #Plot
-  craviola.plot <- ggplot() +
-    scale_x_continuous(breaks = as.integer(levels(dframe$Var.grp))-1,
-                       labels = levels(data[[2]])) +
-    xlab(colnames(Annot.table)[2]) + ylab(colnames(data)[4]) +
-    labs(fill = colnames(Annot.table)[3], color = "Extrema",
-         alpha = colnames(data)[5]) +
-    guides(fill = guide_legend(order = 1)) +
-    scale_fill_manual(values = c("blue", "red"), labels = original.var.col)
+  craviola.plot <- ggplot2::ggplot() +
+    ggplot2::scale_x_continuous(breaks = as.integer(levels(dframe$Var.grp))-1,
+                                labels = levels(data[[2]])) +
+    ggplot2::xlab(colnames(Annot.table)[2]) + ggplot2::ylab(colnames(data)[4]) +
+    ggplot2::labs(fill = colnames(Annot.table)[3], color = "Extrema",
+                  alpha = colnames(data)[5]) +
+    ggplot2::guides(fill = ggplot2::guide_legend(order = 1)) +
+    ggplot2::scale_fill_manual(
+      values = c("blue", "red"), labels = original.var.col)
 
   #Plot Options
   if(bins){ #bins TRUE
     craviola.plot <- craviola.plot +
-      geom_polygon(data = dframe, mapping = aes(
+      ggplot2::geom_polygon(data = dframe, mapping = ggplot2::aes(
         dens.curv, y.pos, fill = Var.col, group = interaction(Var1,bin),
         alpha = bin.av.val2), colour = lines.col) +
-      guides(alpha = guide_legend(order = 2)) +
-      scale_alpha_continuous(limits = c(floor(min(vec_av.val2)),
-                                        ceiling(max(vec_av.val2))),
-                             breaks = round(seq(floor(min(vec_av.val2)),
-                                                ceiling(max(vec_av.val2)),
-                                                length.out = 5)))
+      ggplot2::guides(alpha = ggplot2::guide_legend(order = 2)) +
+      ggplot2::scale_alpha_continuous(
+        limits = c(floor(min(vec_av.val2)), ceiling(max(vec_av.val2))),
+        breaks = round(seq(floor(min(vec_av.val2)), ceiling(max(vec_av.val2)),
+                           length.out = 5)))
   } else { #bins FALSE
     craviola.plot <- craviola.plot +
-      geom_polygon(data = dframe,
-                   mapping = aes(dens.curv, y.pos,fill = Var.col,
-                                 group = interaction(Var.col, Var1)),
-                   colour = lines.col)
+      ggplot2::geom_polygon(
+        data = dframe, mapping = ggplot2::aes(
+          dens.curv, y.pos,fill = Var.col, group = interaction(Var.col, Var1)),
+        colour = lines.col)
   }
   if(boxplots){ #boxplots TRUE
     craviola.plot <- craviola.plot +
-      geom_boxplot(data = box.dframe,
-                   mapping = aes(x = x, ymin = low, lower = low, middle = mid,
-                                 upper = top, ymax = top, group = x),
-                   stat = "identity")
+      ggplot2::geom_boxplot(
+        data = box.dframe, mapping = ggplot2::aes(
+          x = x, ymin = low, lower = low, middle = mid, upper = top, ymax = top,
+          group = x), stat = "identity")
   }
   if(mean.value){ #mean.value TRUE
     craviola.plot <- craviola.plot +
-      geom_point(data = box.dframe, mapping = aes(x = x, y = mean), size = 2,
-                 color = "red")
+      ggplot2::geom_point(data = box.dframe, mapping = ggplot2::aes(
+        x = x, y = mean), size = 2, color = "red")
   }
   craviola.plot
 }

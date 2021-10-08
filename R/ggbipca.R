@@ -168,7 +168,8 @@ ggbipca <- function(
       max(abs(dt.scaled.pc[["PCx"]]))/max(abs(loadings.data[["PCx"]])),
       max(abs(dt.scaled.pc[["PCy"]]))/max(abs(loadings.data[["PCy"]])))
     loadings.data[, 2:3 := lapply(
-      X = .SD, FUN = function(i){ i * scaler * 0.8 }), .SDcols = c(2, 3)]
+      X = data.table::.SD,
+      FUN = function(i){ i * scaler * 0.8 }), .SDcols = c(2, 3)]
 
     if(!is.null(top.load.by.quad)){
       #Compute loadings length
@@ -180,7 +181,7 @@ ggbipca <- function(
       loadings.data[PCx < 0 & PCy >= 0, quadrant := "top-left"]
       #Keep top N longest arrows by quadrant
       loadings.data <- loadings.data[order(quadrant, -load.sqrd.length)]
-      loadings.data <- loadings.data[, head(.SD, top.load.by.quad),
+      loadings.data <- loadings.data[, head(data.table::.SD, top.load.by.quad),
                                      by = quadrant]
     }
     #Subset the loadings displayed if some cut-off
@@ -205,58 +206,60 @@ ggbipca <- function(
   }
   #Make PCA ggplot
   biplt <- ggplot2::ggplot() +
-    ggplot2::theme(axis.ticks = element_blank(),
-                   panel.background = element_blank(),
-                   panel.grid = element_line(colour = "grey"),
-                   axis.title = element_text(size = 13),
-                   axis.text = element_text(size = 12),
-                   legend.title = element_text(size = 13),
-                   legend.text = element_text(size = 12),
-                   legend.key = element_blank())
+    ggplot2::theme(axis.ticks = ggplot2::element_blank(),
+                   panel.background = ggplot2::element_blank(),
+                   panel.grid = ggplot2::element_line(colour = "grey"),
+                   axis.title = ggplot2::element_text(size = 13),
+                   axis.text = ggplot2::element_text(size = 12),
+                   legend.title = ggplot2::element_text(size = 13),
+                   legend.text = ggplot2::element_text(size = 12),
+                   legend.key = ggplot2::element_blank())
   if(!is.null(color.data) & is.null(shape.data)){
     biplt <- biplt +
       #Draw sample distribution
-      geom_point(data = dt.scaled.pc, mapping = aes(
+      ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
         x = PCx, y = PCy, color = color.data), size = point.size) +
-      labs(x = lab.PC[1], y = lab.PC[2], color = color.data)
+      ggplot2::labs(x = lab.PC[1], y = lab.PC[2], color = color.data)
   } else if(!is.null(color.data) & !is.null(shape.data)){
     if(color.data != shape.data){
       biplt <- biplt +
         #Draw sample distribution
-        geom_point(data = dt.scaled.pc, mapping = aes(
+        ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
           x = PCx, y = PCy, color = color.data, shape = shape.data),
           size = point.size) +
-        labs(
+        ggplot2::labs(
           x = lab.PC[1], y = lab.PC[2], shape = shape.data, color = color.data)
     } else {
       biplt <- biplt +
         #Draw sample distribution
-        geom_point(data = dt.scaled.pc, mapping = aes(
+        ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
           x = PCx, y = PCy, color = color.data, shape = color.data),
           size = point.size) +
-        labs(
+        ggplot2::labs(
           x = lab.PC[1], y = lab.PC[2], shape = color.data, color = color.data)
     }
   } else if(is.null(color.data) & is.null(shape.data)){
     biplt <- biplt +
-      geom_point(data = dt.scaled.pc, mapping = aes(x = PCx, y = PCy),
-                 color = "black", size = point.size) +
-      labs(x = lab.PC[1], y = lab.PC[2])
+      ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
+        x = PCx, y = PCy), color = "black", size = point.size) +
+      ggplot2::labs(x = lab.PC[1], y = lab.PC[2])
   } else if(is.null(color.data) & !is.null(shape.data)){
     biplt <- biplt +
-      geom_point(data = dt.scaled.pc, mapping = aes(
+      ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
         x = PCx, y = PCy, shape = shape.data),
         color = "black", size = point.size) +
-      labs(x = lab.PC[1], y = lab.PC[2], shape = shape.data)
+      ggplot2::labs(x = lab.PC[1], y = lab.PC[2], shape = shape.data)
   }
   #Draw loadings
   if(loadings){
-    biplt <- biplt + geom_segment(
-      data = loadings.data, mapping = aes(x = 0, y = 0, xend = PCx, yend = PCy),
+    biplt <- biplt + ggplot2::geom_segment(
+      data = loadings.data, mapping = ggplot2::aes(
+        x = 0, y = 0, xend = PCx, yend = PCy),
       arrow = grid::arrow(length = grid::unit(8, "points")),
       colour = loadings.col) +
       ggrepel::geom_label_repel(
-        data = loadings.data, mapping = aes(x = PCx, y = PCy, label = labels),
+        data = loadings.data, mapping = ggplot2::aes(
+          x = PCx, y = PCy, label = labels),
         size = 3)
   }
   #Return PCA biplot
@@ -373,8 +376,6 @@ cross.biplot <- function(
   #Scale PCA data
   dt.scaled.pc <- data.table::as.data.table(t(t(prcomp.res$x[, PC])/lam))
   dt.scaled.pc <- cbind(dt.scaled.pc, dt.annot)
-  # setnames(x = dt.scaled.pc, old = PC[1], new = "PCx")
-  # setnames(x = dt.scaled.pc, old = PC[2], new = "PCy")
   #Calculate the percentage of variability explained by the principal component
   ve <- prcomp.res$sdev^2/sum(prcomp.res$sdev^2)
   lab.PC <- paste0(PC, " (", round(ve[PCs] * 100, 2), "%)")
@@ -394,18 +395,12 @@ cross.biplot <- function(
         data.table::as.data.table(prcomp.res$rotation))[, c("labels", PC),
                                                         with = FALSE]
     }
-    # setnames(x = loadings.data, old = PC[1], new = "PCx")
-    # setnames(x = loadings.data, old = PC[2], new = "PCy")
-
     #Define scale for plot data and loadings based on selected PCs
     scaler <- min(unlist(lapply(X = PC, FUN = function(p){
       max(abs(dt.scaled.pc[[p]]))/max(abs(loadings.data[[p]]))
     })))
-    # scaler <- min(
-    #   max(abs(dt.scaled.pc[["PCx"]]))/max(abs(loadings.data[["PCx"]])),
-    #   max(abs(dt.scaled.pc[["PCy"]]))/max(abs(loadings.data[["PCy"]])))
     loadings.data[, c(PC) := lapply(
-      X = .SD, FUN = function(i){ i * scaler * 0.8 }), .SDcols = PC]
+      X = data.table::.SD, FUN = function(i){ i * scaler * 0.8 }), .SDcols = PC]
     #Recreate loadings.data
     ls.dt.loadings <- lapply(X = seq(nrow(comb.pcs)), FUN = function(i){
       pc.select <- unlist(c("labels", comb.pcs[i]))
@@ -419,10 +414,10 @@ cross.biplot <- function(
     loadings.data <- loadings.data[, .(labels, name.X, PCx, name.Y, PCy)]
     loadings.data[, c("name.X", "name.Y") := .(
       as.factor(name.X), as.factor(name.Y))]
-    setattr(loadings.data$name.X, "levels",
-            lab.PC[order(match(PC, levels(loadings.data$name.X)))]$lab.PC)
-    setattr(loadings.data$name.Y, "levels",
-            lab.PC[order(match(PC, levels(loadings.data$name.Y)))]$lab.PC)
+    data.table::setattr(loadings.data$name.X, "levels", lab.PC[
+      order(match(PC, levels(loadings.data$name.X)))]$lab.PC)
+    data.table::setattr(loadings.data$name.Y, "levels", lab.PC[
+      order(match(PC, levels(loadings.data$name.Y)))]$lab.PC)
     if(!is.null(top.load.by.quad)){
       #Compute loadings length
       loadings.data[, load.sqrd.length := PCx^2 + PCy^2]
@@ -432,9 +427,9 @@ cross.biplot <- function(
       loadings.data[PCx < 0 & PCy < 0, quadrant := "bottom-left"]
       loadings.data[PCx < 0 & PCy >= 0, quadrant := "top-left"]
       #Keep top N longest arrows by quadrant and by PC combinations
-      loadings.data <- loadings.data[order(quadrant, -load.sqrd.length), .SD,
-                                     by = .(name.X, name.Y)]
-      loadings.data <- loadings.data[, head(.SD, top.load.by.quad),
+      loadings.data <- loadings.data[order(quadrant, -load.sqrd.length),
+                                     data.table::.SD, by = .(name.X, name.Y)]
+      loadings.data <- loadings.data[, head(data.table::.SD, top.load.by.quad),
                                      by = .(name.X, name.Y, quadrant)]
     }
   }
@@ -451,66 +446,70 @@ cross.biplot <- function(
   dt.scaled.pc <- dt.scaled.pc[, ..cols, ]
   dt.scaled.pc[, c("name.X", "name.Y") := .(
     as.factor(name.X), as.factor(name.Y))]
-  setattr(dt.scaled.pc$name.X, "levels",
-          lab.PC[order(match(PC, levels(dt.scaled.pc$name.X)))]$lab.PC)
-  setattr(dt.scaled.pc$name.Y, "levels",
-          lab.PC[order(match(PC, levels(dt.scaled.pc$name.Y)))]$lab.PC)
+  data.table::setattr(dt.scaled.pc$name.X, "levels", lab.PC[
+    order(match(PC, levels(dt.scaled.pc$name.X)))]$lab.PC)
+  data.table::setattr(dt.scaled.pc$name.Y, "levels", lab.PC[
+    order(match(PC, levels(dt.scaled.pc$name.Y)))]$lab.PC)
 
   #Make PCA ggplot
   biplt <- ggplot2::ggplot() +  ggplot2::theme(
-    panel.background = element_blank(),
-    panel.grid = element_line(colour = "grey"),
-    panel.spacing = unit(0, "lines"),
-    panel.border = element_rect(color = "black", fill = NA, size = 0.5),
-    axis.title = element_blank(), axis.text = element_text(size = 12),
-    axis.text.x = element_text(angle = -45, hjust = 0, vjust = 0.5),
-    strip.text = element_text(size = 13), strip.background = element_rect(
+    panel.background = ggplot2::element_blank(),
+    panel.grid = ggplot2::element_line(colour = "grey"),
+    panel.spacing = ggplot2::unit(0, "lines"),
+    panel.border = ggplot2::element_rect(
+      color = "black", fill = NA, size = 0.5),
+    axis.title = ggplot2::element_blank(),
+    axis.text = ggplot2::element_text(size = 12),
+    axis.text.x = ggplot2::element_text(angle = -45, hjust = 0, vjust = 0.5),
+    strip.text = ggplot2::element_text(size = 13),
+    strip.background = ggplot2::element_rect(
       fill = "white", color = "black", size = 0.5),
-    legend.title = element_text(size = 13),
-    legend.text = element_text(size = 12), legend.key = element_blank()) +
-    facet_grid(name.Y ~ name.X, scales = "free", space = "fixed")
+    legend.title = ggplot2::element_text(size = 13),
+    legend.text = ggplot2::element_text(
+      size = 12), legend.key = ggplot2::element_blank()) +
+    ggplot2::facet_grid(name.Y ~ name.X, scales = "free", space = "fixed")
   if(!is.null(color.data) & is.null(shape.data)){
     biplt <- biplt +
       #Draw sample distribution
-      geom_point(data = dt.scaled.pc, mapping = aes(
+      ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
         x = PCx, y = PCy, color = color.data), size = point.size) +
-      labs(color = color.data)
+      ggplot2::labs(color = color.data)
   } else if(!is.null(color.data) & !is.null(shape.data)){
     if(color.data != shape.data){
       biplt <- biplt +
         #Draw sample distribution
-        geom_point(data = dt.scaled.pc, mapping = aes(
+        ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
           x = PCx, y = PCy, color = color.data, shape = shape.data),
           size = point.size) +
-        labs(shape = shape.data, color = color.data)
+        ggplot2::labs(shape = shape.data, color = color.data)
     } else {
       biplt <- biplt +
         #Draw sample distribution
-        geom_point(data = dt.scaled.pc, mapping = aes(
+        ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
           x = PCx, y = PCy, color = color.data, shape = color.data),
           size = point.size) +
-        labs(shape = color.data, color = color.data)
+        ggplot2::labs(shape = color.data, color = color.data)
     }
   } else if(is.null(color.data) & is.null(shape.data)){
     biplt <- biplt +
-      geom_point(data = dt.scaled.pc, mapping = aes(x = PCx, y = PCy),
-                 color = "black", size = point.size)
+      ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
+        x = PCx, y = PCy), color = "black", size = point.size)
   } else if(is.null(color.data) & !is.null(shape.data)){
     biplt <- biplt +
-      geom_point(data = dt.scaled.pc, mapping = aes(
+      ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
         x = PCx, y = PCy, shape = shape.data),
         color = "black", size = point.size) +
-      labs(shape = shape.data)
+      ggplot2::labs(shape = shape.data)
   }
   #Draw loadings
   if(loadings){
-    biplt <- biplt + geom_segment(
-      data = loadings.data, mapping = aes(x = 0, y = 0, xend = PCx, yend = PCy),
-      arrow = grid::arrow(length = grid::unit(8, "points")),
-      colour = loadings.col) +
+    biplt <- biplt + ggplot2::geom_segment(
+      data = loadings.data, mapping = ggplot2::aes(
+        x = 0, y = 0, xend = PCx, yend = PCy), arrow = grid::arrow(
+          length = grid::unit(8, "points")), colour = loadings.col) +
       ggrepel::geom_label_repel(
-        data = loadings.data, mapping = aes(x = PCx, y = PCy, label = labels),
-        size = 3)
+        data = loadings.data, mapping = ggplot2::aes(
+          x = PCx, y = PCy, label = labels), size = 3)
   }
   #Return PCA biplot
   return(biplt)

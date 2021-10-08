@@ -28,7 +28,6 @@ Builds legends layout.
 }
 \examples{
 #Building the simplest layout with 1 legend and 2 categories
-library(BiocompR)
 build.layout(col_table = list(data.table::data.table(
   'Grps' = c('cat 1', 'cat 2'), 'Cols' = c('blue', 'red'))),
   height.lgds.space = 29)

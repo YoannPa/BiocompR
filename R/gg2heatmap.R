@@ -259,14 +259,14 @@ gg2heatmap <- function(
   #Check m is a matrix
   if(is.matrix(m)){ m.type <- "matrix" } else { if(is.data.frame(m)){
     #Check if data.table, if not convert into data.table
-    if(!is.data.table(m)){ m <- as.data.table(m) }
+    if(!data.table::is.data.table(m)){ m <- data.table::as.data.table(m) }
     #Get number columns of data.frame
     n.col <- ncol(m)
     #Cast matrix from molten data.frame
     colnames(m)[1:3] <- c("rows", "cols", "values")
     m <- data.table::dcast(data = m, formula = ... ~ cols, value.var = "values")
     #Add index
-    m[, I := .I]
+    m[, I := data.table::.I]
     #Store additional columns of splitting
     dt.cat <- m[, c(seq(1, n.col-2), ncol(m)), with = FALSE]
     dt.cat[, I := as.factor(I)]
@@ -419,7 +419,7 @@ gg2heatmap <- function(
         theme_dend_top <- theme_dend_top + ggplot2::theme(
           plot.margin = theme_heatmap$plot.margin)
       }
-    }
+  }
   }
   #Compute rows distances & create rows dendrogram
   if(method.rows != 'none'){
@@ -507,7 +507,8 @@ gg2heatmap <- function(
       melted_mat <- melted_mat[, c("rn", "variable", "value", split.by.rows),
                                with = FALSE]
       #Rename splitting categorical column
-      setnames(x = melted_mat, old = split.by.rows, new = "split.by.rows")
+      data.table::setnames(
+        x = melted_mat, old = split.by.rows, new = "split.by.rows")
     }
   }
   if(!is.null(facet)){

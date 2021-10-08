@@ -51,12 +51,12 @@ sunset <- function(
   tab.data <- tabulate(pos.cov + 1L, N + 1L)
 
   #Compute size of bins
-  dt.data <- data.table(
+  dt.data <- data.table::data.table(
     "sample.amount" = c(0, seq(N)), "data.covered" = tab.data,
     "sample.string" = paste0(
       c("NONE", seq(N)), " (", round((tab.data/sum(tab.data))*100), "%", ")"))
   #Add index to dt.data
-  dt.data[, index := .I]
+  dt.data[, index := data.table::.I]
 
   #Reverse option
   if(reverse){
@@ -90,7 +90,7 @@ sunset <- function(
     dt.data[nrow(dt.data), white.line.hide := TRUE]
   }
   #Keep white line of level before the one having a white line
-  invisible(lapply(X = dt.data[, .I], FUN = function(i){
+  invisible(lapply(X = dt.data[, data.table::.I], FUN = function(i){
     if(!all(is.na(dt.data[i+1,]))){
       if((dt.data[i+1, ]$hiden == FALSE |
           dt.data[i+1, ]$right.y.hiden == FALSE) &
@@ -100,19 +100,19 @@ sunset <- function(
     }
   }))
   #Get positions of strings that will not be displayed
-  pos_str <- data.table(dt.data[hiden == TRUE & right.y.hiden == TRUE]$index)
+  pos_str <- data.table::data.table(
+    dt.data[hiden == TRUE & right.y.hiden == TRUE]$index)
   # pos_str <- data.table(dt.data[hiden == TRUE & right.y.hiden == TRUE,
   #                               which = TRUE])
 
   #Get groups of following samples
   smpl_intervals <- do.call(
     rbind, by(pos_str, cumsum(c(0, diff(pos_str$V1) != 1)), function(g){
-      data.table(start = min(g$V1), end = max(g$V1),
-                 width = diff(range(g$V1)) + 1)}))
+      data.table::data.table(start = min(g$V1), end = max(g$V1),
+                             width = diff(range(g$V1)) + 1)}))
   #Get groups average label.pos cumulative diff_bins
   if(nrow(smpl_intervals) != 0){
-    invisible(lapply(smpl_intervals[, .I], function(i){
-      # dt_grp <- dt.data[c(smpl_intervals[i, ]$start:smpl_intervals[i, ]$end), ]
+    invisible(lapply(smpl_intervals[, data.table::.I], function(i){
       dt_grp <- dt.data[index >= smpl_intervals[i, ]$start &
                           index <= smpl_intervals[i, ]$end]
       data_cov_grp <- sum(dt_grp$data.covered)
@@ -138,7 +138,7 @@ sunset <- function(
         if(per_grp < display.num.smpl){ right.y.hiden_grp <- TRUE
         } else { right.y.hiden_grp <- FALSE }
       }
-      new.dt <- data.table(
+      new.dt <- data.table::data.table(
         "sample.amount" = amnt_grp, "data.covered" = data_cov_grp,
         "sample.string" = str_grp, "index" = tail(dt_grp$index, n = 1),
         "label.pos" = pos_lab_grp, "diff.bins" = per_grp,
@@ -155,54 +155,57 @@ sunset <- function(
     }))
   }
   #"Sunset" Plot of the Amount of CpGs Covered by Number of Samples
-  sun.plt <- ggplot() + theme_gray() +
-    theme(legend.title.align = 0.5,
-          legend.text = element_text(size = 12),
-          legend.position = lgd.pos) +
-    geom_bar(data = dt.data,
-             mapping = aes(x = 0, y = data.covered, fill = sample.amount),
-             stat = "identity") +
-    geom_text(data = dt.data[hiden == FALSE], mapping = aes(
+  sun.plt <- ggplot2::ggplot() + ggplot2::theme_gray() +
+    ggplot2::theme(legend.title.align = 0.5,
+                   legend.text = ggplot2::element_text(size = 12),
+                   legend.position = lgd.pos) +
+    ggplot2::geom_bar(
+      data = dt.data, mapping = ggplot2::aes(
+        x = 0, y = data.covered, fill = sample.amount), stat = "identity") +
+    ggplot2::geom_text(data = dt.data[hiden == FALSE], mapping = ggplot2::aes(
       x = 0, y = label.pos, label = sample.string), vjust = 0.35, hjust = 0.5,
       color = "white", size = 5) +
-    scale_fill_gradient2(low = col.pal[1], mid = col.pal[2], high = col.pal[3],
-                         midpoint = round(N/2)) +
-    scale_y_continuous(
+    ggplot2::scale_fill_gradient2(low = col.pal[1], mid = col.pal[2],
+                                  high = col.pal[3], midpoint = round(N/2)) +
+    ggplot2::scale_y_continuous(
       expand = c(0, 0),
       breaks = seq(0, N.rows, length.out = n.grad),
       labels = function(x) format(x, digits = 2, scientific = TRUE),
-      sec.axis = sec_axis(
+      sec.axis = ggplot2::sec_axis(
         trans = ~.,
         breaks = dt.data[right.y.hiden == FALSE]$right.y.label.pos,
         labels = dt.data[right.y.hiden == FALSE]$sample.string)) +
-    scale_x_continuous(expand = c(0, 0)) +
-    geom_hline(data = dt.data[white.line.hide == FALSE],
-               mapping = aes(yintercept = cumulated), color = "white")
+    ggplot2::scale_x_continuous(expand = c(0, 0)) +
+    ggplot2::geom_hline(
+      data = dt.data[white.line.hide == FALSE], mapping = ggplot2::aes(
+        yintercept = cumulated), color = "white")
   if(horizontal) {
     sun.plt <- sun.plt +
       # Sunset <- Sunset +
-      ggtitle(title) +
-      theme(plot.title = element_text(title, size = 15, hjust = 0.5),
-            axis.title = element_blank(),
-            axis.ticks.y = element_blank(),
-            axis.text.y = element_blank(),
-            axis.text.x = element_text(size = 12, face = "bold"),
-            legend.title = element_text(size = 14, vjust = 0.8),
-            plot.margin = margin(0, 0, 0, 20)) +
-      labs(fill = "Number of Samples") +
-      coord_flip()
+      ggplot2::ggtitle(title) +
+      ggplot2::theme(
+        plot.title = ggplot2::element_text(title, size = 15, hjust = 0.5),
+        axis.title = ggplot2::element_blank(),
+        axis.ticks.y = ggplot2::element_blank(),
+        axis.text.y = ggplot2::element_blank(),
+        axis.text.x = ggplot2::element_text(size = 12, face = "bold"),
+        legend.title = ggplot2::element_text(size = 14, vjust = 0.8),
+        plot.margin = ggplot2::margin(0, 0, 0, 20)) +
+      ggplot2::labs(fill = "Number of Samples") +
+      ggplot2::coord_flip()
   } else {
     sun.plt <- sun.plt +
       # Sunset <- Sunset +
-      theme(axis.title.x = element_blank(),
-            axis.text.x = element_blank(),
-            axis.ticks.x = element_blank(),
-            axis.text.y = element_text(size = 12, face = "bold"),
-            axis.title = element_text(size = 15),
-            legend.title = element_text(size = 14, vjust = 1),
-            legend.title.align = 0) +
-      ylab(title) +
-      labs(fill = "Number\nof samples")
+      ggplot2::theme(
+        axis.title.x = ggplot2::element_blank(),
+        axis.text.x = ggplot2::element_blank(),
+        axis.ticks.x = ggplot2::element_blank(),
+        axis.text.y = ggplot2::element_text(size = 12, face = "bold"),
+        axis.title = ggplot2::element_text(size = 15),
+        legend.title = ggplot2::element_text(size = 14, vjust = 1),
+        legend.title.align = 0) +
+      ggplot2::ylab(title) +
+      ggplot2::labs(fill = "Number\nof samples")
   }
   sun.plt
 }

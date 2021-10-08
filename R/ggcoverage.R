@@ -94,7 +94,8 @@ ggcoverage <- function(
   data, round.unit = 2, rev.stack = FALSE, invert.percent = FALSE,
   horizontal = FALSE, log.scaled = FALSE, decreasing.order = FALSE){
   #Check if data is a data.table and convert if not
-  if(!is.data.table(data)){ data <- as.data.table(data) }
+  if(!data.table::is.data.table(data)){
+    data <- data.table::as.data.table(data) }
   colnames(data)[1:3] <- c("IDs", "Total", "Subset")
   #Replace NAs by zeros
   data[is.na(Total), c("Total", "Subset") := 0]
@@ -117,12 +118,12 @@ ggcoverage <- function(
         log10(Total), log10(Remaining))]
       data[, logSubset := .(logTotal-logRemaining)]
     }
-    data <- melt(data, id.vars = c(
+    data <- data.table::melt(data, id.vars = c(
       "IDs", "Total", "Subset", "logTotal", "Remaining", "percents"),
       measure.vars = c("logSubset", "logRemaining"))
   } else {
-    data <- melt(data, id.vars = c("IDs", "Total", "percents"),
-                 measure.vars = c("Subset", "Remaining"))
+    data <- data.table::melt(data, id.vars = c("IDs", "Total", "percents"),
+                             measure.vars = c("Subset", "Remaining"))
   }
   if(!rev.stack){ #Change order for value before cumsum
     data <- data[order(variable, decreasing = TRUE)]
@@ -160,17 +161,21 @@ ggcoverage <- function(
   data[variable == "Subset", percents := " "]
   if(log.scaled){ data[, "Total" := logTotal] }
   #Barplot
-  ggcov <- ggplot(data = data, aes(x = IDs, y = value, fill = variable)) +
-    geom_bar(stat = "identity") +
-    geom_text(aes(y = label_ypos, label = value.char), vjust = 0.5,
-              color = "white", size = 4, fontface = "bold")
+  ggcov <- ggplot2::ggplot(data = data, mapping = ggplot2::aes(
+    x = IDs, y = value, fill = variable)) +
+    ggplot2::geom_bar(stat = "identity") +
+    ggplot2::geom_text(mapping = ggplot2::aes(
+      y = label_ypos, label = value.char), vjust = 0.5, color = "white",
+      size = 4, fontface = "bold")
   if (horizontal) {
     ggcov <- ggcov +
-      geom_text(aes(y = Total, label = percents), hjust = -0.1) +
-      coord_flip()
+      ggplot2::geom_text(mapping = ggplot2::aes(
+        y = Total, label = percents), hjust = -0.1) +
+      ggplot2::coord_flip()
   } else {
     ggcov <- ggcov +
-      geom_text(aes(y = Total, label = percents), vjust = -1, hjust = 0.5)
+      ggplot2::geom_text(mapping = ggplot2::aes(y = Total, label = percents),
+                         vjust = -1, hjust = 0.5)
   }
   return(ggcov)
 }
