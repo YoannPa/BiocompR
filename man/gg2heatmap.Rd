@@ -12,6 +12,8 @@ gg2heatmap(
   top.rows = NULL,
   dendrograms = TRUE,
   dend.size = 1,
+  theme_dend_top = NULL,
+  theme_dend_left = NULL,
   imputation.grps = NULL,
   ncores = 1,
   plot.labs = NULL,
@@ -125,6 +127,18 @@ dendrograms size (Default: dend.size = 1).
        numeric will apply to the dendrogram built on
        columns.}
 }}
+
+\item{theme_dend_top}{A ggplot2 \code{theme} to specify any theme parameter
+you wish to custom the top dendrogram
+(Default: theme_dend = NULL). For more information
+about how to define a theme, see
+\link[ggplot2]{theme}.}
+
+\item{theme_dend_left}{A ggplot2 \code{theme} to specify any theme parameter
+you wish to custom the left dendrogram
+(Default: theme_dend = NULL). For more information
+about how to define a theme, see
+\link[ggplot2]{theme}.}
 
 \item{imputation.grps}{A \code{character} vector defining groups to which
 columns of the matrix belong. These groups are use to

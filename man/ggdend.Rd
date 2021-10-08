@@ -4,7 +4,7 @@
 \alias{ggdend}
 \title{Creates a dendogram in ggplot2.}
 \usage{
-ggdend(df, orientation, reverse.x = FALSE)
+ggdend(df, orientation, reverse.x = FALSE, theme_dend = NULL)
 }
 \arguments{
 \item{df}{A \code{data.frame} containing variables and values to be
@@ -18,6 +18,11 @@ reversed (reverse.x = TRUE like in a correlation plot), or
 kept unchanged (reverse.x = TRUE like in a heatmap), for a
 dendrogram to be displayed on the left of a plot
 (Default: reverse.x = FALSE).}
+
+\item{theme_dend}{A ggplot2 \code{theme} to specify any theme parameter you
+wish to custom the dendrogram
+(Default: theme_dend = NULL). For more information about
+how to define a theme, see \link[ggplot2]{theme}.}
 }
 \value{
 A \code{gg} plot of the dendrogram.

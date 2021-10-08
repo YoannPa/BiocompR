@@ -76,6 +76,16 @@
 #'                               numeric will apply to the dendrogram built on
 #'                               columns.}
 #'                        }
+#' @param theme_dend_top  A ggplot2 \code{theme} to specify any theme parameter
+#'                        you wish to custom the top dendrogram
+#'                        (Default: theme_dend = NULL). For more information
+#'                        about how to define a theme, see
+#'                        \link[ggplot2]{theme}.
+#' @param theme_dend_left A ggplot2 \code{theme} to specify any theme parameter
+#'                        you wish to custom the left dendrogram
+#'                        (Default: theme_dend = NULL). For more information
+#'                        about how to define a theme, see
+#'                        \link[ggplot2]{theme}.
 #' @param imputation.grps A \code{character} vector defining groups to which
 #'                        columns of the matrix belong. These groups are use to
 #'                        make group-wise imputation of missing values between
@@ -232,10 +242,10 @@
 # title and keys labels for each legend.
 gg2heatmap <- function(
   m, na.handle = 'remove', dist.method = 'manhattan', rank.fun = NULL,
-  top.rows = NULL, dendrograms = TRUE, dend.size = 1, imputation.grps = NULL,
-  ncores = 1, plot.labs = NULL, row.type = 'rows', facet = NULL,
-  split.by.rows = NULL, border.col = NA, border.size = 0.1, cell.size = 1,
-  raster = NULL, theme_heatmap = NULL,
+  top.rows = NULL, dendrograms = TRUE, dend.size = 1, theme_dend_top = NULL,
+  theme_dend_left = NULL, imputation.grps = NULL, ncores = 1, plot.labs = NULL,
+  row.type = 'rows', facet = NULL, split.by.rows = NULL, border.col = NA,
+  border.size = 0.1, cell.size = 1, raster = NULL, theme_heatmap = NULL,
   guide_custom_bar = ggplot2::guide_colorbar(
     title = "Values", barwidth = 15, ticks.linewidth = 1, title.vjust = 0.86),
   scale_fill_grad = ggplot2::scale_fill_gradientn(
@@ -402,6 +412,15 @@ gg2heatmap <- function(
       stop("Cannot compute distances on rows. All rows are missing values.")
     }
   }
+  #Set theme_dend_top plot.margin based on them_heatmap plot.margin
+  if(!is.null(theme_heatmap)){ if(!is.null(theme_heatmap$plot.margin)){
+    if(is.null(theme_dend_top)){ theme_dend_top <- ggplot2::theme(
+      plot.margin = theme_heatmap$plot.margin) } else {
+        theme_dend_top <- theme_dend_top + ggplot2::theme(
+          plot.margin = theme_heatmap$plot.margin)
+      }
+    }
+  }
   #Compute rows distances & create rows dendrogram
   if(method.rows != 'none'){
     row_dist <- tryCatch(
@@ -422,7 +441,7 @@ gg2heatmap <- function(
       #Get dendrogram segments and order matrix rows
       ddgr_seg_row <- BiocompR::ggdend(
         df = ggdendro::dendro_data(rowclust)$segments, orientation = "left",
-        reverse.x = TRUE)
+        reverse.x = TRUE, theme_dend = theme_dend_left)
     }
   } else if(dd.rows & method.rows == 'none'){
     stop(paste(
@@ -440,7 +459,8 @@ gg2heatmap <- function(
       ddgr_dat <- ggdendro::dendro_data(ddgr)
       #Get dendrogram segments and order matrix columns
       ddgr_seg_col <- BiocompR::ggdend(
-        df = ddgr_dat$segments, orientation = "top")
+        df = ddgr_dat$segments, orientation = "top",
+        theme_dend = theme_dend_top)
     }
   } else if(dd.cols & method.cols == 'none'){
     stop("Cannot plot dendrogram on columns with method.cols = 'none'.")

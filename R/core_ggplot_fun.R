@@ -129,31 +129,66 @@ get.lgd <- function(gg2.obj){
 #'                    kept unchanged (reverse.x = TRUE like in a heatmap), for a
 #'                    dendrogram to be displayed on the left of a plot
 #'                    (Default: reverse.x = FALSE).
+#' @param theme_dend  A ggplot2 \code{theme} to specify any theme parameter you
+#'                    wish to custom the dendrogram
+#'                    (Default: theme_dend = NULL). For more information about
+#'                    how to define a theme, see \link[ggplot2]{theme}.
 #' @return A \code{gg} plot of the dendrogram.
 #' @author Yoann Pageaud.
 #' @export
 
-ggdend <- function(df, orientation, reverse.x = FALSE) {
-  ddplot <- ggplot2::ggplot() +
-    ggplot2::geom_segment(
+ggdend <- function(df, orientation, reverse.x = FALSE, theme_dend = NULL) {
+  #Set default dendrogram theme
+  theme_default_dend <- ggplot2::theme(
+    panel.background = ggplot2::element_rect(fill = "transparent"),
+    plot.background = ggplot2::element_rect(fill = "transparent"))
+  #Set forced dendrogram theme
+  theme_forced_dend <- ggplot2::theme(
+    axis.title = ggplot2::element_blank(),
+    axis.text = ggplot2::element_blank(),
+    axis.ticks = ggplot2::element_blank(),
+    panel.grid = ggplot2::element_blank(),
+    axis.ticks.length = ggplot2::unit(0, "pt"))
+
+  #Update theme_dend
+  if(is.null(theme_dend)){
+    theme_dend <- theme_default_dend + theme_forced_dend
+  } else {
+    theme_dend <- theme_default_dend + theme_dend + theme_forced_dend
+  }
+  #Create ggplot of dendrogram
+  ddplot <- ggplot2::ggplot() + ggplot2::geom_segment(
       data = df, ggplot2::aes(x = x, y = y, xend = xend, yend = yend)) +
-    ggplot2::theme(
-      axis.title = ggplot2::element_blank(),
-      axis.text = ggplot2::element_blank(),
-      axis.ticks = ggplot2::element_blank(),
-      panel.grid = ggplot2::element_blank(),
-      panel.background = ggplot2::element_rect(fill = "transparent"),
-      plot.background = ggplot2::element_rect(fill = "transparent"),
-      axis.ticks.length = ggplot2::unit(0, "pt")) +
-    ggplot2::expand_limits(x = c(0.5, max(df$x) + 0.5), y = 0)
+    ggplot2::expand_limits(x = c(0.5, max(df$x) + 0.5), y = 0) + theme_dend
+
   if(orientation == "top"){
+    if(is.null(theme_dend$plot.margin)){
+      dend_margin <- ggplot2::margin(0.1, 0, 0, 0, unit = "cm")
+    } else {
+      if(as.numeric(theme_dend$plot.margin[1]) != 0.1){
+        dend_margin <- ggplot2::margin(
+          0.1, as.numeric(theme_dend$plot.margin[2]),
+          as.numeric(theme_dend$plot.margin[3]),
+          as.numeric(theme_dend$plot.margin[4]), unit = "cm")
+      } else { dend_margin <- theme_dend$plot.margin }
+    }
     ddplot <- ddplot +
       ggplot2::scale_x_continuous(expand = c(0, 0)) +
-      ggplot2::theme(plot.margin = ggplot2::unit(c(0.1, 0, 0, 0), "cm")) +
+      ggplot2::theme(plot.margin = dend_margin) +
       ggplot2::scale_y_continuous(expand = c(0, 0))
   } else if(orientation == "left"){
+    if(is.null(theme_dend$plot.margin)){
+      dend_margin <- ggplot2::margin(0, 0, 0, 0.1, unit = "cm")
+    } else {
+      if(as.numeric(theme_dend$plot.margin[4]) != 0.1){
+        dend_margin <- ggplot2::margin(
+          as.numeric(theme_dend$plot.margin[1]),
+          as.numeric(theme_dend$plot.margin[2]),
+          as.numeric(theme_dend$plot.margin[3]), 0.1, unit = "cm")
+      } else { dend_margin <- theme_dend$plot.margin }
+    }
     ddplot <- ddplot +
-      ggplot2::theme(plot.margin = ggplot2::unit(c(0, 0, 0, 0.1), "cm")) +
+      ggplot2::theme(plot.margin = dend_margin) +
       ggplot2::scale_y_reverse(expand = c(0, 0)) +
       ggplot2::coord_flip()
     if(reverse.x){
