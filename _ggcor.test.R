@@ -25,8 +25,13 @@ dt.test <- data.table(
   "gene group" = rep(c("A", "B", "C", "D"), times = c(6, 6, 6, 8)),
   "ontology weight" = sample.int(n = 26))
 
+dt.test[, FC := 2^logFC]
+nologdt <- dt.test[, c("gene", "FC", "P-value", "gene group", "ontology weight"), ]
+
 # basic
-ggvolcano.test(data = dt.test[,c(1:3)], p.cutoff = 0.00001, l2fc.cutoff = 1.5,
-               label.cutoff = 2, y.col.sign = TRUE)
+ggvolcano.test(data = nologdt, p.cutoff = 0.00001, l2fc.cutoff = 1.5,
+               label.cutoff = 2, y.col.sign = TRUE, l2.transform = TRUE)
 # log.transform
-# condition on data distribution
+
+
+

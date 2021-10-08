@@ -617,13 +617,20 @@ ggvolcano.corr <- function(
 #'                     If FALSE, dots will be colored using groups from data
 #'                     (if any provided). If no groups are passed within data,
 #'                     dots will remain black.
+#' @param l2.transform A \code{logical} to specify whether the data in the
+#'                     second column should be log2 transformed
+#'                     (l2.transform = TRUE) or if the log2 transformation has
+#'                     already been applied and no further transformation is
+#'                     needed (Default: l2.transform = TRUE).
 #' @return A \code{gg} volcano plot of your statistical test results.
 #' @author Yoann Pageaud, Verena Bitto.
 #' @export
 
 ggvolcano.test <- function(
   data, p.cutoff = 0.01, l2fc.cutoff = NULL, title.cutoff = "L2FC cut-off",
-  label.cutoff = 0, y.col.sign = FALSE){
+  label.cutoff = 0, y.col.sign = FALSE, l2.transform = FALSE){
+  #Apply log2 transformation if needed
+  if(l2.transform){ data[, (2) := log2(x = data[[2]])] }
   #Build volcano plot for t-test data
   BiocompR::build.ggvolcano(
     data = data, data.type = "t.test", label.cutoff = label.cutoff,
