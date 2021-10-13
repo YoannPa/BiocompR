@@ -230,16 +230,17 @@
 #' @return A \code{grob} list containing the final plot, and also each grob
 #'         generated separately.
 #' @author Yoann Pageaud.
+#' @importFrom data.table `:=`
 #' @export
 #' @examples
 #' #Create the basic gg2heatmap
 #' mat <- as.matrix(t(scale(mtcars)))
 #' gg2heatmap(m = mat)
-
-#TODO: Rewrite the assembling of plots using egg package functions and handling
-# all unsolved remaining cases.
+#TODO: Add option to hide subtitle information
 #TODO: Fix the issue with annotation legends overlapping by checking length of
 # title and keys labels for each legend.
+#TODO: Rewrite the assembling of plots using egg package functions and handling
+# all unsolved remaining cases.
 gg2heatmap <- function(
   m, na.handle = 'remove', dist.method = 'manhattan', rank.fun = NULL,
   top.rows = NULL, dendrograms = TRUE, dend.size = 1, theme_dend_top = NULL,

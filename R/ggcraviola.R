@@ -54,6 +54,8 @@
 #'                       (Default: lines.col = NA).
 #' @return A \code{gg} craviola plot.
 #' @author Yoann Pageaud.
+#' @importFrom data.table `:=`
+#' @export
 #' @examples
 #' #Using a 'minimal' data.frame:
 #' df.minimal = data.frame(
@@ -100,7 +102,6 @@
 #' scale_y_continuous(expand = c(0, 0)) + #Expand fully plot panel on Y-axis
 #' scale_fill_manual(labels = c("Control", "Case"), # Rename conditions
 #'                   values = c("dodgerblue", "darkorange")) # Change colors
-#' @export
 
 #TODO: Add ncores option to speed-up ggcraviola using multiple cores
 ggcraviola <- function(

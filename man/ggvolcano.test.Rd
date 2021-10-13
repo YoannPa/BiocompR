@@ -10,8 +10,9 @@ ggvolcano.test(
   l2fc.cutoff = NULL,
   title.cutoff = "L2FC cut-off",
   label.cutoff = 0,
-  y.col.sign = FALSE,
-  l2.transform = FALSE
+  x.col.sign = FALSE,
+  l2.transform = FALSE,
+  force.label = NULL
 )
 }
 \arguments{
@@ -21,7 +22,7 @@ ggvolcano.test(
  \item{column 2 - log2(fold changes) values.}
  \item{column 3 - P-values.}
  \item{column 4 (optional) - groups to be used to color
- points. If none provided, you can use 'y.col.sign' to
+ points. If none provided, you can use 'x.col.sign' to
  color dots based on the fold change category they belong
  to.}
  \item{column 5 (optional) - values to be used to define
@@ -69,7 +70,7 @@ a cut-off on log2(fold change) values
 Dots outside these limits will be labeled. Dots within
 the range of these limits will remain unlabeled.}
 
-\item{y.col.sign}{A \code{logical} to activate automatic coloring of data
+\item{x.col.sign}{A \code{logical} to activate automatic coloring of data
 based on their fold change category. If TRUE, elements
 will be divided into 3 categories:
 \itemize{
@@ -87,6 +88,12 @@ second column should be log2 transformed
 (l2.transform = TRUE) or if the log2 transformation has
 already been applied and no further transformation is
 needed (Default: l2.transform = TRUE).}
+
+\item{force.label}{A \code{character} vector matching elements in the
+first column of 'data' that you wish to label,
+independently from their actual significance
+(Default: force.label = NULL). force.label overrides
+other labeling parameters.}
 }
 \value{
 A \code{gg} volcano plot of your statistical test results.

@@ -41,6 +41,7 @@
 #'                           plot.
 #' @return A \code{gg} plot of a PCA biplot.
 #' @author Yoann Pageaud.
+#' @importFrom data.table `:=`
 #' @export
 #' @examples
 #' #Draw the simplest biplot of PC1 and PC2:
@@ -295,6 +296,7 @@ ggbipca <- function(
 #' @return A \code{gg} plot displaying all combinations of biplots for the
 #'         selected PCs.
 #' @author Yoann Pageaud.
+#' @importFrom data.table `:=`
 #' @export
 #' @examples
 #' #Draw the simplest cross-biplot:

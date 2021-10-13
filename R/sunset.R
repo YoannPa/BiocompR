@@ -32,6 +32,7 @@
 #'
 #' @return A \code{gg} sunset plot.
 #' @author Yoann Pageaud.
+#' @importFrom data.table `:=`
 #' @export
 
 sunset <- function(

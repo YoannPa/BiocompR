@@ -7,8 +7,8 @@
 #'                   \item{column 2 - Y-axis values.}
 #'                   \item{column 3 - P-values.}
 #'                   \item{column 4 (optional) - groups to be used to color
-#'                   points. If none provided, you can use 'y.col.sign' to color
-#'                   dots based on the Y-axis category they belong to.}
+#'                   points. If none provided, you can use 'x.col.sign' to color
+#'                   dots based on the X-axis category they belong to.}
 #'                   \item{column 5 (optional) - values to be used to define
 #'                   dots sizes based on another variable.}
 #'                  }
@@ -40,6 +40,8 @@ chk.dt <- function(data, data.type){
     vec.colnames <- c("labels", "corr", "pval", "grp", "size")
   } else if(data.type == "t.test"){
     vec.colnames <- c("labels", "fold", "pval", "grp", "size")
+  } else if(data.type == "free"){
+    vec.colnames <- c("labels", "xval", "pval", "grp", "size")
   }
   #Check ncol(data) and change column names
   if(ncol(data) < 3){ stop("Data should contain at least 3 columns.")
@@ -96,7 +98,7 @@ chk.cutoff <- function(cutoff = 0, data.type){
     if(!(0 <= pos.cutoff & pos.cutoff <= 1)){
       stop("max(cutoff) must be comprised between 0 and 1.")
     }
-  } else if(data.type == "t.test"){
+  } else if(data.type %in% c("t.test", "free")){
     if(!(neg.cutoff <= 0)){ stop("min(cutoff) must be inferior to 0.") }
     if(!(pos.cutoff >= 0)){ stop("max(cutoff) must be superior to 0.") }
   }
@@ -112,8 +114,8 @@ chk.cutoff <- function(cutoff = 0, data.type){
 #'                      \item{column 2 - Y-axis values.}
 #'                      \item{column 3 - P-values.}
 #'                      \item{column 4 (optional) - groups to be used to color
-#'                      points. If none provided, you can use 'y.col.sign' to
-#'                      color dots based on the Y-axis category they belong
+#'                      points. If none provided, you can use 'x.col.sign' to
+#'                      color dots based on the X-axis category they belong
 #'                      to.}
 #'                      \item{column 5 (optional) - values to be used to define
 #'                      dots sizes based on another variable.}
@@ -206,6 +208,7 @@ chk.param <- function(data, data.type, label.cutoff){
 #'         }
 #'         Each panel displays results as jittered scatter plots.
 #' @author Yoann Pageaud.
+#' @importFrom data.table `:=`
 #' @export
 
 ggpanel.corr <- function(
@@ -288,11 +291,11 @@ ggpanel.corr <- function(
 #' @param data           A \code{data.table} with 3 to 5 columns:
 #'                       \itemize{
 #'                        \item{column 1 - The labels.}
-#'                        \item{column 2 - Y-axis values.}
+#'                        \item{column 2 - X-axis values.}
 #'                        \item{column 3 - P-values.}
 #'                        \item{column 4 (optional) - groups to be used to color
-#'                        points. If none provided, you can use 'y.col.sign' to
-#'                        color dots based on the Y-axis category they belong
+#'                        points. If none provided, you can use 'x.col.sign' to
+#'                        color dots based on the X-axis category they belong
 #'                        to.}
 #'                        \item{column 5 (optional) - values to be used to
 #'                        define dots sizes based on another variable.}
@@ -317,8 +320,8 @@ ggpanel.corr <- function(
 #'                       the range of these limits will remain unlabeled.
 #' @param p.cutoff       A \code{numeric} between 0 and 1 to be used as a
 #'                       maximum cut-off on p-values (Default: p.cutoff = 0.01).
-#' @param y.cutoff       A \code{numeric} vector of 1 or 2 values, to be used as
-#'                       a cut-off on Y-axis values (Default: y.cutoff = NULL).
+#' @param x.cutoff       A \code{numeric} vector of 1 or 2 values, to be used as
+#'                       a cut-off on Y-axis values (Default: x.cutoff = NULL).
 #'                       \itemize{
 #'                        \item{If 1 value is given, it will be defined as the
 #'                        minimum cut-off on absolute Y-axis values
@@ -330,81 +333,96 @@ ggpanel.corr <- function(
 #'                        inferior or equal to 0. The biggest value must be
 #'                        superior or equal to 0.}
 #'                       }
-#'                       y.cutoff value(s) will be used to draw vertical lines
+#'                       x.cutoff value(s) will be used to draw vertical lines
 #'                       on the volcano plot.
-#' @param title.y.cutoff A \code{character} to specify how you wish to label the
+#' @param title.x.cutoff A \code{character} to specify how you wish to label the
 #'                       Y-axis vertical lines on the volcano plot
-#'                       (Default: title.cutoff = "Y-Axis cutoff").
-#' @param y.col.sign     A \code{logical} to activate automatic coloring of data
+#'                       (Default: title.cutoff = "X-Axis cutoff").
+#' @param x.col.sign     A \code{logical} to activate automatic coloring of data
 #'                       based on their correlation category. If TRUE, elements
 #'                       will be divided into 3 categories:
 #'                       \itemize{
-#'                        \item{Blue - elements below the negative 'y.cutoff'.}
-#'                        \item{Red - elements above the positive 'y.cutoff'.}
+#'                        \item{Blue - elements below the negative 'x.cutoff'.}
+#'                        \item{Red - elements above the positive 'x.cutoff'.}
 #'                        \item{Grey - any other element not meeting the
 #'                        requirements in the first nor the second categories.}
 #'                       }
 #'                       If FALSE, dots will be colored using groups from data
 #'                       (if any provided). If no groups are passed within data,
 #'                       dots will remain black.
+#' @param force.label    A \code{character} vector matching elements in the
+#'                       first column of 'data' that you wish to label,
+#'                       independently from their actual significance
+#'                       (Default: force.label = NULL). force.label overrides
+#'                       other labeling parameters.
 #' @return A \code{gg} volcano plot of your statistical test results.
 #' @author Yoann Pageaud.
 #' @export
+#' @importFrom data.table `:=`
 #' @keywords internal
 
 build.ggvolcano <- function(
-  data, data.type, label.cutoff = 0, p.cutoff = 0.01, y.cutoff = NULL,
-  title.y.cutoff = "Y-Axis cutoff", y.col.sign = FALSE){
+  data, data.type, label.cutoff = 0, p.cutoff = 0.01, x.cutoff = NULL,
+  title.x.cutoff = "X-Axis cutoff", x.col.sign = FALSE, force.label = NULL){
+  #Make a copy of the data.table to work on
+  dt.data <- as.data.table(data)
   #Check test parameters
   res.param <- BiocompR::chk.param(
-    data = data, data.type = data.type, label.cutoff = label.cutoff)
+    data = dt.data, data.type = data.type, label.cutoff = label.cutoff)
   orig.cnames <- res.param[[1]]
-  data <- res.param[[2]]
+  dt.data <- res.param[[2]]
   cutoff.values <- res.param[[3]]
-  #Check y.cutoff values
-  y.cutoff.values <- BiocompR::chk.cutoff(
-    cutoff = y.cutoff, data.type = data.type)
-  #If y.col.sign TRUE add grp color to data
-  if(y.col.sign){
+  #Check x.cutoff values
+  x.cutoff.values <- BiocompR::chk.cutoff(
+    cutoff = x.cutoff, data.type = data.type)
+  #If x.col.sign TRUE add grp color to data
+  if(x.col.sign){
     if(data.type == "corr"){
       groups <- c("Negatively correlated", "Insufficiently correlated",
                   "Positively correlated")
-      data[corr <= y.cutoff.values[1], grp := groups[1]]
-      data[corr >= y.cutoff.values[2], grp := groups[3]]
-      data[corr > y.cutoff.values[1] & corr < y.cutoff.values[2],
+      dt.data[corr <= x.cutoff.values[1], grp := groups[1]]
+      dt.data[corr >= x.cutoff.values[2], grp := groups[3]]
+      dt.data[corr > x.cutoff.values[1] & corr < x.cutoff.values[2],
            grp := groups[2]]
     } else if(data.type == "t.test"){
       groups <- c("Negative log2(Fold change)", "Insufficient log2(Fold change)",
                   "Positive log2(Fold change)")
-      data[fold <= y.cutoff.values[1], grp := groups[1]]
-      data[fold >= y.cutoff.values[2], grp := groups[3]]
-      data[fold > y.cutoff.values[1] & fold < y.cutoff.values[2],
+      dt.data[fold <= x.cutoff.values[1], grp := groups[1]]
+      dt.data[fold >= x.cutoff.values[2], grp := groups[3]]
+      dt.data[fold > x.cutoff.values[1] & fold < x.cutoff.values[2],
+           grp := groups[2]]
+    } else if(data.type == "free"){
+      groups <- c("Negatively associated", "Insufficiently associated",
+                  "Positively associated")
+      dt.data[xval <= x.cutoff.values[1], grp := groups[1]]
+      dt.data[xval >= x.cutoff.values[2], grp := groups[3]]
+      dt.data[xval > x.cutoff.values[1] & xval < x.cutoff.values[2],
            grp := groups[2]]
     }
-    data[, grp := as.factor(grp)]
-    data[, grp := factor(grp, levels = levels(grp)[
+    dt.data[, grp := as.factor(grp)]
+    dt.data[, grp := factor(grp, levels = levels(grp)[
       order(match(levels(grp), groups))])]
   }
   #Create shading conditions
-  data[pval > p.cutoff, "P-value" := as.factor(paste0("> ", p.cutoff))]
-  data[pval <= p.cutoff, "P-value" := paste0("<= ", p.cutoff)]
+  dt.data[pval > p.cutoff, "P-value" := as.factor(paste0("> ", p.cutoff))]
+  dt.data[pval <= p.cutoff, "P-value" := paste0("<= ", p.cutoff)]
   #Build scatter plot
   ggvol <- ggplot2::ggplot()
-  if(ncol(data) == 6){
+  if(ncol(dt.data) == 6){
     ggvol <- ggvol + ggplot2::geom_point(
-      data = data, mapping = ggplot2::aes(
-        x = data[[2]], y = -log10(pval), color = grp, size = size,
+      data = dt.data, mapping = ggplot2::aes(
+        x = dt.data[[2]], y = -log10(pval), color = grp, size = size,
         alpha = `P-value`))
-  } else if(ncol(data) == 5){
+  } else if(ncol(dt.data) == 5){
     ggvol <- ggvol + ggplot2::geom_point(
-      data = data, mapping = ggplot2::aes(
-        x = data[[2]], y = -log10(pval), color = grp, alpha = `P-value`))
+      data = dt.data, mapping = ggplot2::aes(
+        x = dt.data[[2]], y = -log10(pval), color = grp, alpha = `P-value`))
   } else {
     ggvol <- ggvol + ggplot2::geom_point(
-      data = data, mapping = ggplot2::aes(
-        x = data[[2]], y = -log10(pval), alpha = `P-value`))
+      data = dt.data, mapping = ggplot2::aes(
+        x = dt.data[[2]], y = -log10(pval), alpha = `P-value`))
   }
-  if(y.col.sign){
+  if(x.col.sign){
     ggvol <- ggvol + ggplot2::scale_color_manual(
       values = c("darkblue", "grey", "darkred"))
   }
@@ -412,27 +430,43 @@ build.ggvolcano <- function(
   ggvol <- ggvol + ggplot2::geom_hline(
     yintercept = -log10(p.cutoff), color = 'black')
   #Make Y-Axis cut-off
-  if(!is.null(y.cutoff)){
+  if(!is.null(x.cutoff)){
     #Make negative and positive cut-off
     ggvol <- ggvol +
-      ggplot2::geom_vline(xintercept = y.cutoff.values[1], color = 'blue') +
-      ggplot2::geom_vline(xintercept = y.cutoff.values[2], color = 'red')
+      ggplot2::geom_vline(xintercept = x.cutoff.values[1], color = 'darkblue') +
+      ggplot2::geom_vline(xintercept = x.cutoff.values[2], color = 'darkred')
   }
   #Create labels table
-  if(data.type == "corr"){
-    dt.label <- data[(corr >= cutoff.values[2] | corr <= cutoff.values[1]) &
-                       pval <= p.cutoff]
-  } else if(data.type == "t.test"){
-    dt.label <- data[(fold >= cutoff.values[2] | fold <= cutoff.values[1]) &
-                       pval <= p.cutoff]
-  } else { stop("Unsupported 'data.type'.") }
+  if(is.null(force.label)){
+    if(data.type == "corr"){
+      dt.label <- dt.data[(corr >= cutoff.values[2] | corr <= cutoff.values[1]) &
+                         pval <= p.cutoff]
+    } else if(data.type == "t.test"){
+      dt.label <- dt.data[(fold >= cutoff.values[2] | fold <= cutoff.values[1]) &
+                         pval <= p.cutoff]
+    } else if(data.type == "free"){
+      dt.label <- dt.data[(xval >= cutoff.values[2] | xval <= cutoff.values[1]) &
+                         pval <= p.cutoff]
+    } else { stop("Unsupported 'data.type'.") }
+  } else {
+    #Keep only some labels of interest
+    if(all(force.label %in% dt.data[["labels"]])){
+      #Override label display to force labeling of specific data
+      dt.label <- dt.data[labels %in% force.label]
+    } else {
+      warning(
+        "Some labels specified in 'force.label' are not part of the dataset.")
+      force.label <- force.label[force.label %in% dt.data[["labels"]]]
+      dt.label <- dt.data[labels %in% force.label]
+    }
+  }
   #Create labels
-  if(ncol(data) > 4){
+  if(ncol(dt.data) > 4){
     ggvol <- ggvol + ggrepel::geom_label_repel(
       data = dt.label, mapping = ggplot2::aes(
         x = dt.label[[2]], y = -log10(pval), label = labels, color = grp),
       size = 4.5)
-  } else if(ncol(data) == 4){
+  } else if(ncol(dt.data) == 4){
     ggvol <- ggvol + ggrepel::geom_label_repel(
       data = dt.label, mapping = ggplot2::aes(
         x = dt.label[[2]], y = -log10(pval), label = labels), size = 4.5)
@@ -443,15 +477,15 @@ build.ggvolcano <- function(
       x = -Inf, y = -log10(p.cutoff), fontface = 1, label = "P-value cut-off"),
     color = "black", direction = "x", size = 4)
   #Create Y-axis label
-  if(!is.null(y.cutoff)){
+  if(!is.null(x.cutoff)){
     #Make negative and positive cut-off label
     ggvol <- ggvol +
       ggrepel::geom_label_repel(data = data.frame(), mapping = ggplot2::aes(
-        x = y.cutoff.values[1], y = Inf, fontface = 1, label = title.y.cutoff),
-        color = "blue", direction = "y", size = 4) +
+        x = x.cutoff.values[1], y = Inf, fontface = 1, label = title.x.cutoff),
+        color = "darkblue", direction = "y", size = 4) +
       ggrepel::geom_label_repel(data = data.frame(), mapping = ggplot2::aes(
-        x = y.cutoff.values[2], y = Inf, fontface = 1, label = title.y.cutoff),
-        color = "red", direction = "y", size = 4)
+        x = x.cutoff.values[2], y = Inf, fontface = 1, label = title.x.cutoff),
+        color = "darkred", direction = "y", size = 4)
   }
   #Add default volcano theme
   ggvol <- ggvol +
@@ -484,7 +518,7 @@ build.ggvolcano <- function(
 #'                      \item{column 2 - correlation values.}
 #'                      \item{column 3 - P-values.}
 #'                      \item{column 4 (optional) - groups to be used to color
-#'                      points. If none provided, you can use 'y.col.sign' to
+#'                      points. If none provided, you can use 'x.col.sign' to
 #'                      color dots based on the correlation category they belong
 #'                      to.}
 #'                      \item{column 5 (optional) - values to be used to define
@@ -527,7 +561,7 @@ build.ggvolcano <- function(
 #'                     }
 #'                     Dots outside these limits will be labeled. Dots within
 #'                     the range of these limits will remain unlabeled.
-#' @param y.col.sign   A \code{logical} to activate automatic coloring of data
+#' @param x.col.sign   A \code{logical} to activate automatic coloring of data
 #'                     based on their correlation category. If TRUE, elements
 #'                     will be divided into 3 categories:
 #'                     \itemize{
@@ -539,18 +573,24 @@ build.ggvolcano <- function(
 #'                     If FALSE, dots will be colored using groups from data
 #'                     (if any provided). If no groups are passed within data,
 #'                     dots will remain black.
+#' @param force.label  A \code{character} vector matching elements in the
+#'                     first column of 'data' that you wish to label,
+#'                     independently from their actual significance
+#'                     (Default: force.label = NULL). force.label overrides
+#'                     other labeling parameters.
 #' @return A \code{gg} volcano plot of your correlation test results.
 #' @author Yoann Pageaud.
 #' @export
 
 ggvolcano.corr <- function(
   data, p.cutoff = 0.01, corr.cutoff = NULL,
-  title.cutoff = "Correlation cut-off", label.cutoff = 0, y.col.sign = FALSE){
+  title.cutoff = "Correlation cut-off", label.cutoff = 0, x.col.sign = FALSE,
+  force.label = NULL){
   #Build volcano plot for correlation data
   BiocompR::build.ggvolcano(
     data = data, data.type = "corr", label.cutoff = label.cutoff,
-    p.cutoff = p.cutoff, y.cutoff = corr.cutoff,
-    title.y.cutoff = title.cutoff, y.col.sign = y.col.sign)
+    p.cutoff = p.cutoff, x.cutoff = corr.cutoff, title.x.cutoff = title.cutoff,
+    x.col.sign = x.col.sign, force.label = force.label)
 }
 
 
@@ -562,7 +602,7 @@ ggvolcano.corr <- function(
 #'                      \item{column 2 - log2(fold changes) values.}
 #'                      \item{column 3 - P-values.}
 #'                      \item{column 4 (optional) - groups to be used to color
-#'                      points. If none provided, you can use 'y.col.sign' to
+#'                      points. If none provided, you can use 'x.col.sign' to
 #'                      color dots based on the fold change category they belong
 #'                      to.}
 #'                      \item{column 5 (optional) - values to be used to define
@@ -605,7 +645,7 @@ ggvolcano.corr <- function(
 #'                     }
 #'                     Dots outside these limits will be labeled. Dots within
 #'                     the range of these limits will remain unlabeled.
-#' @param y.col.sign   A \code{logical} to activate automatic coloring of data
+#' @param x.col.sign   A \code{logical} to activate automatic coloring of data
 #'                     based on their fold change category. If TRUE, elements
 #'                     will be divided into 3 categories:
 #'                     \itemize{
@@ -622,18 +662,108 @@ ggvolcano.corr <- function(
 #'                     (l2.transform = TRUE) or if the log2 transformation has
 #'                     already been applied and no further transformation is
 #'                     needed (Default: l2.transform = TRUE).
+#' @param force.label  A \code{character} vector matching elements in the
+#'                     first column of 'data' that you wish to label,
+#'                     independently from their actual significance
+#'                     (Default: force.label = NULL). force.label overrides
+#'                     other labeling parameters.
 #' @return A \code{gg} volcano plot of your statistical test results.
 #' @author Yoann Pageaud, Verena Bitto.
+#' @importFrom data.table `:=`
 #' @export
 
 ggvolcano.test <- function(
   data, p.cutoff = 0.01, l2fc.cutoff = NULL, title.cutoff = "L2FC cut-off",
-  label.cutoff = 0, y.col.sign = FALSE, l2.transform = FALSE){
+  label.cutoff = 0, x.col.sign = FALSE, l2.transform = FALSE,
+  force.label = NULL){
   #Apply log2 transformation if needed
   if(l2.transform){ data[, (2) := log2(x = data[[2]])] }
   #Build volcano plot for t-test data
   BiocompR::build.ggvolcano(
     data = data, data.type = "t.test", label.cutoff = label.cutoff,
-    p.cutoff = p.cutoff, y.cutoff = l2fc.cutoff,
-    title.y.cutoff = title.cutoff, y.col.sign = y.col.sign)
+    p.cutoff = p.cutoff, x.cutoff = l2fc.cutoff, title.x.cutoff = title.cutoff,
+    x.col.sign = x.col.sign, force.label = force.label)
+}
+
+
+#' Plots any king of results with P-values that can be displayed as a volcano
+#' plot.
+#'
+#' @param data           A \code{data.table} with 3 to 5 columns:
+#'                       \itemize{
+#'                        \item{column 1 - The labels.}
+#'                        \item{column 2 - X-axis values.}
+#'                        \item{column 3 - P-values.}
+#'                        \item{column 4 (optional) - groups to be used to color
+#'                        points. If none provided, you can use 'x.col.sign' to
+#'                        color dots based on the Y-axis category they belong
+#'                        to.}
+#'                        \item{column 5 (optional) - values to be used to
+#'                        define dots sizes based on another variable.}
+#'                       }
+#' @param label.cutoff   A \code{numeric} vector of 1 or 2 values, to be used as
+#'                       a cut-off on Y-axis values (Default: label.cutoff = 0).
+#'                       \itemize{
+#'                        \item{If 1 value is given, it will be defined as the
+#'                        minimum cut-off on absolute Y-axis values
+#'                        (positive and negative ones).}
+#'                        \item{If 2 values are given: The smallest one will be
+#'                        used as a maximum cut-off on negative Y-axis values.
+#'                        The biggest one will be used as a minimum cut-off on
+#'                        positive Y-axis values. The smallest value must be
+#'                        inferior or equal to 0. The biggest value must be
+#'                        superior or equal to 0.}
+#'                       }
+#'                       Dots outside these limits will be labeled. Dots within
+#'                       the range of these limits will remain unlabeled.
+#' @param p.cutoff       A \code{numeric} between 0 and 1 to be used as a
+#'                       maximum cut-off on p-values (Default: p.cutoff = 0.01).
+#' @param x.cutoff       A \code{numeric} vector of 1 or 2 values, to be used as
+#'                       a cut-off on Y-axis values (Default: x.cutoff = NULL).
+#'                       \itemize{
+#'                        \item{If 1 value is given, it will be defined as the
+#'                        minimum cut-off on absolute Y-axis values
+#'                        (positive and negative ones).}
+#'                        \item{If 2 values are given: The smallest one will be
+#'                        used as a maximum cut-off on negative Y-axis values.
+#'                        The biggest one will be used as a minimum cut-off on
+#'                        positive Y-axis values. The smallest value must be
+#'                        inferior or equal to 0. The biggest value must be
+#'                        superior or equal to 0.}
+#'                       }
+#'                       x.cutoff value(s) will be used to draw vertical lines
+#'                       on the volcano plot.
+#' @param title.x.cutoff A \code{character} to specify how you wish to label the
+#'                       Y-axis vertical lines on the volcano plot
+#'                       (Default: title.cutoff = "X-Axis cutoff").
+#' @param x.col.sign     A \code{logical} to activate automatic coloring of data
+#'                       based on their correlation category. If TRUE, elements
+#'                       will be divided into 3 categories:
+#'                       \itemize{
+#'                        \item{Blue - elements below the negative 'x.cutoff'.}
+#'                        \item{Red - elements above the positive 'x.cutoff'.}
+#'                        \item{Grey - any other element not meeting the
+#'                        requirements in the first nor the second categories.}
+#'                       }
+#'                       If FALSE, dots will be colored using groups from data
+#'                       (if any provided). If no groups are passed within data,
+#'                       dots will remain black.
+#' @param force.label    A \code{character} vector matching elements in the
+#'                       first column of 'data' that you wish to label,
+#'                       independently from their actual significance
+#'                       (Default: force.label = NULL). force.label overrides
+#'                       other labeling parameters.
+#' @return A \code{gg} volcano plot of your results.
+#' @author Yoann Pageaud.
+#' @importFrom data.table `:=`
+#' @export
+
+ggvolcano.free <- function(
+  data, label.cutoff = 0, p.cutoff = 0.01, x.cutoff = NULL,
+  title.x.cutoff = "X-Axis cutoff", x.col.sign = FALSE, force.label = NULL){
+  #Build volcano plot for free data
+  BiocompR::build.ggvolcano(
+    data = data, data.type = "free", label.cutoff = label.cutoff,
+    p.cutoff = p.cutoff, x.cutoff = x.cutoff, title.x.cutoff = title.x.cutoff,
+    x.col.sign = x.col.sign, force.label = force.label)
 }

@@ -31,7 +31,13 @@ nologdt <- dt.test[, c("gene", "FC", "P-value", "gene group", "ontology weight")
 # basic
 ggvolcano.test(data = nologdt, p.cutoff = 0.00001, l2fc.cutoff = 1.5,
                label.cutoff = 2, y.col.sign = TRUE, l2.transform = TRUE)
-# log.transform
+
+# Manually tell which point should be labeled with force.label.
+ggvolcano.test(data = dt.test, p.cutoff = 0.00001, l2fc.cutoff = 1.5,
+               label.cutoff = 2, x.col.sign = FALSE, l2.transform = FALSE)
+# Create a function that supports Free Y-axis values
+ggvolcano.free(data = dt.test, label.cutoff = 1, p.cutoff = 0.00001,
+               x.cutoff = 1, title.x.cutoff = "Delta methylation cut-off", x.col.sign = FALSE)
 
 
 

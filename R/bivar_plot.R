@@ -32,6 +32,7 @@
 #'                 use a dark color (Default: fill = "deepskyblue3").
 #' @return A \code{gg} plot object displaying boxplots and/or violin plots.
 #' @author Yoann Pageaud, Yassen Assenov.
+#' @importFrom data.table `:=`
 #' @export
 
 bivar.plot <- function(data, violin = FALSE, cat.step = 10L, cat.max = 10L,

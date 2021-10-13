@@ -31,6 +31,8 @@
 #'                         order can be inverted with: decreasing.order = TRUE.
 #' @return A \code{gg} stacked barplot with annotations.
 #' @author Yoann Pageaud.
+#' @importFrom data.table `:=`
+#' @export
 #' @examples
 #' # Basic use of ggcoverage()
 #' df <- data.frame(
@@ -88,7 +90,6 @@
 #'   scale_fill_manual(labels = c("Remaining", "Subset"), # Rename conditions
 #'                     values = c("#D6604D", "#4393C3")) + # Change colors
 #'   facet_grid(df$col4 ~ ., scales = "free", space = "free_y") # Add grouping
-#' @export
 
 ggcoverage <- function(
   data, round.unit = 2, rev.stack = FALSE, invert.percent = FALSE,

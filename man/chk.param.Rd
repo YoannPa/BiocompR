@@ -13,8 +13,8 @@ chk.param(data, data.type, label.cutoff)
  \item{column 2 - Y-axis values.}
  \item{column 3 - P-values.}
  \item{column 4 (optional) - groups to be used to color
- points. If none provided, you can use 'y.col.sign' to
- color dots based on the Y-axis category they belong
+ points. If none provided, you can use 'x.col.sign' to
+ color dots based on the X-axis category they belong
  to.}
  \item{column 5 (optional) - values to be used to define
  dots sizes based on another variable.}

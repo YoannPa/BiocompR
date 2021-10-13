@@ -441,6 +441,7 @@ build.layout <- function(col_table, height.lgds.space){
 #'                  used to display a legend (Default: lgd.ncol = 1).
 #' @return A \code{gg} object of the basic sidebar (a 'geom_tile()').
 #' @author Yoann Pageaud.
+#' @importFrom data.table `:=`
 #' @export
 
 basic.sidebar <- function(
@@ -459,7 +460,7 @@ basic.sidebar <- function(
   if(!is.null(facet)){
     #Add faceting
     dt.facet <- data[.id == facet]
-    dt.facet[, facet.annot := Groups]
+    dt.facet[, `:=`(facet.annot, Groups)]
     data <- merge(x = data, y = dt.facet[, c("Samples", "facet.annot"), ],
                   by = "Samples", all.x = TRUE)
     #Plot annotation bar with facet

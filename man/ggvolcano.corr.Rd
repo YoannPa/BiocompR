@@ -11,7 +11,8 @@ ggvolcano.corr(
   corr.cutoff = NULL,
   title.cutoff = "Correlation cut-off",
   label.cutoff = 0,
-  y.col.sign = FALSE
+  x.col.sign = FALSE,
+  force.label = NULL
 )
 }
 \arguments{
@@ -21,7 +22,7 @@ ggvolcano.corr(
  \item{column 2 - correlation values.}
  \item{column 3 - P-values.}
  \item{column 4 (optional) - groups to be used to color
- points. If none provided, you can use 'y.col.sign' to
+ points. If none provided, you can use 'x.col.sign' to
  color dots based on the correlation category they belong
  to.}
  \item{column 5 (optional) - values to be used to define
@@ -69,7 +70,7 @@ values (Default: corr.cutoff = NULL).
 Dots outside these limits will be labeled. Dots within
 the range of these limits will remain unlabeled.}
 
-\item{y.col.sign}{A \code{logical} to activate automatic coloring of data
+\item{x.col.sign}{A \code{logical} to activate automatic coloring of data
 based on their correlation category. If TRUE, elements
 will be divided into 3 categories:
 \itemize{
@@ -81,6 +82,12 @@ will be divided into 3 categories:
 If FALSE, dots will be colored using groups from data
 (if any provided). If no groups are passed within data,
 dots will remain black.}
+
+\item{force.label}{A \code{character} vector matching elements in the
+first column of 'data' that you wish to label,
+independently from their actual significance
+(Default: force.label = NULL). force.label overrides
+other labeling parameters.}
 }
 \value{
 A \code{gg} volcano plot of your correlation test results.

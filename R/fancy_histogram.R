@@ -29,6 +29,8 @@
 #'                   works if x is a character vector).
 #' @return A \code{gg} plot of an histogram.
 #' @author Yoann Pageaud.
+#' @importFrom data.table `:=`
+#' @export
 #' @examples
 #' # Basic use of fancy.hist()
 #' fancy.hist(x = rnorm(100, 5, 1))
@@ -51,7 +53,6 @@
 #'  x = rnorm(100, 5, 1), xmax = 7, ngrad = 8, nbreaks = 8, bin.col = "orange",
 #'  show.annot = TRUE) +
 #' labs(x = "Distribution of the values", y = "Number of values in each bin")
-#' @export
 
 #TODO: Add facet option for x as a numeric vector
 #TODO: Adapt show.annot to the faceting and when X is a character.
