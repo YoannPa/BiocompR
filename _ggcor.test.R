@@ -37,7 +37,12 @@ ggvolcano.test(data = dt.test, p.cutoff = 0.00001, l2fc.cutoff = 1.5,
                label.cutoff = 2, x.col.sign = FALSE, l2.transform = FALSE)
 # Create a function that supports Free Y-axis values
 ggvolcano.free(data = dt.test, label.cutoff = 1, p.cutoff = 0.00001,
-               x.cutoff = 1, title.x.cutoff = "Delta methylation cut-off", x.col.sign = FALSE)
+               x.cutoff = 1, title.x.cutoff = "Delta methylation cut-off",
+               x.col.sign = FALSE, force.label = c(
+                 "Sox2", "DDIT4", "CA9", "ANKRD37", "NDRG1", "ANGPTL4", "ENO2",
+                 "EGLN3", "INSIG2", "MYCBP", "BNIP3", "RPA2", "HK2", "MPRS17",
+                 "KDM3A", "ADM", "MKi67", "RFC4", "BRCA1", "PCNA", "PDK1",
+                 "KCTD11", "CDKN3", "ATR", "BNIP3L", "P4HA1"))
 
 
 

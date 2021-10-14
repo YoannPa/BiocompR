@@ -465,11 +465,12 @@ build.ggvolcano <- function(
     ggvol <- ggvol + ggrepel::geom_label_repel(
       data = dt.label, mapping = ggplot2::aes(
         x = dt.label[[2]], y = -log10(pval), label = labels, color = grp),
-      size = 4.5)
+      size = 4.5, max.overlaps = Inf)
   } else if(ncol(dt.data) == 4){
     ggvol <- ggvol + ggrepel::geom_label_repel(
       data = dt.label, mapping = ggplot2::aes(
-        x = dt.label[[2]], y = -log10(pval), label = labels), size = 4.5)
+        x = dt.label[[2]], y = -log10(pval), label = labels),
+      size = 4.5, max.overlaps = Inf)
   }
   #Create P-value label
   ggvol <- ggvol + ggrepel::geom_label_repel(
