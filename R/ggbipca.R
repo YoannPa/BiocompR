@@ -182,8 +182,8 @@ ggbipca <- function(
       loadings.data[PCx < 0 & PCy >= 0, quadrant := "top-left"]
       #Keep top N longest arrows by quadrant
       loadings.data <- loadings.data[order(quadrant, -load.sqrd.length)]
-      loadings.data <- loadings.data[, head(data.table::.SD, top.load.by.quad),
-                                     by = quadrant]
+      loadings.data <- loadings.data[, utils::head(
+        data.table::.SD, top.load.by.quad), by = quadrant]
     }
     #Subset the loadings displayed if some cut-off
     if(!is.null(load.above.x) | !is.null(load.below.x)){
@@ -342,11 +342,24 @@ ggbipca <- function(
 #'              loadings.col = "purple", top.load.by.quad = 1) +
 #'   scale_color_manual(values = c("green", "red", "orange")) +
 #'   scale_shape_manual(values = c(83, 8, 25))
+
 cross.biplot <- function(
   #TODO: Merge parts of the code that are in common between the 2 functions
   prcomp.res, data, PCs = c(1:3), scale = 1, point.size = 1, color.data = NULL,
   shape.data = NULL, loadings = FALSE, loadings.col = "red",
   top.load.by.quad = NULL){
+  #Fix BiocCheck() complaining about these objects initialization
+  Var1 <- NULL
+  Var2 <- NULL
+  ..pc.select <- NULL
+  . <- NULL
+  name.X <- NULL
+  PCx <- NULL
+  name.Y <- NULL
+  PCy <- NULL
+  load.sqrd.length <- NULL
+  quadrant <- NULL
+  cross.biplot (..cols)
   #Duplicate data.table
   dt.annot <- data.table::as.data.table(as.data.frame(data))
   #Rename annotation column used for points colors and shapes
@@ -431,8 +444,8 @@ cross.biplot <- function(
       #Keep top N longest arrows by quadrant and by PC combinations
       loadings.data <- loadings.data[order(quadrant, -load.sqrd.length),
                                      data.table::.SD, by = .(name.X, name.Y)]
-      loadings.data <- loadings.data[, head(data.table::.SD, top.load.by.quad),
-                                     by = .(name.X, name.Y, quadrant)]
+      loadings.data <- loadings.data[, utils::head(
+        data.table::.SD, top.load.by.quad), by = .(name.X, name.Y, quadrant)]
     }
   }
   #Recreate dt.scaled.pc

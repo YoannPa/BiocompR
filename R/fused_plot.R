@@ -623,7 +623,7 @@ fused.view <- function(
 #' @export
 
 #TODO: Add parameter documentation for annot.text.
-fused.plot<-function(
+fused.plot <- function(
   data, ncores, upper.comp, upper.value, lower.comp, lower.value,
   na.rm = 'pairwise', order.method, order.select, hclust.method = 'complete',
   p.adjust, annot.grps = list("Groups" = seq(ncol(data))),
@@ -659,6 +659,8 @@ fused.plot<-function(
   lgd.frame.col = "grey", lgd.frame.linewidth = 1.5,
   lgd.frame.linewidth1 = NULL, lgd.frame.linewidth2 = NULL,
   raster = TRUE, raster1 = NULL, raster2 = NULL, add.ggplot.arg = NULL){
+  #Fix BiocCheck() complaining about these objects initialization
+  statistic <- NULL
   #Data format
   if(!(is.matrix(data))){if(is.data.frame(data)){data<-as.matrix(data)
   } else { stop("data is neither a matrix or a dataframe.") } }

@@ -236,9 +236,8 @@
 #' #Create the basic gg2heatmap
 #' mat <- as.matrix(t(scale(mtcars)))
 #' gg2heatmap(m = mat)
+
 #TODO: Add option to hide subtitle information
-#TODO: Fix the issue with annotation legends overlapping by checking length of
-# title and keys labels for each legend.
 #TODO: Rewrite the assembling of plots using egg package functions and handling
 # all unsolved remaining cases.
 gg2heatmap <- function(
@@ -256,7 +255,13 @@ gg2heatmap <- function(
   theme_annot = NULL, show.annot = TRUE, lgd.merge = FALSE,
   theme_legend = NULL, lgd.space.width = 1,
   lgd.space.height = 26, y.axis.right = FALSE, draw = TRUE, verbose = FALSE){
-
+  #Fix BiocCheck() complaining about these objects initialization
+  rows <- NULL
+  value <- NULL
+  variable <- NULL
+  Cols <- NULL
+  facet.annot <- NULL
+  rn <- NULL
   #Check m is a matrix
   if(is.matrix(m)){ m.type <- "matrix" } else { if(is.data.frame(m)){
     #Check if data.table, if not convert into data.table
@@ -387,7 +392,8 @@ gg2heatmap <- function(
   if(verbose){ cat("Ranking data by rows...") }
   if(!is.null(rank.fun)){
     #TODO: improve this part to support more function with eval() & parse()
-    m <- m[order(apply(m, 1, sd, na.rm = T), decreasing = TRUE), , drop = FALSE]
+    m <- m[order(apply(m, 1, stats::sd, na.rm = T), decreasing = TRUE), ,
+           drop = FALSE]
   }
   if(verbose){ cat("Done.\n") }
 

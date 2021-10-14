@@ -61,6 +61,10 @@ fancy.hist <- function(
   x, xmax = max(x, na.rm = TRUE), nbreaks = 11, ngrad = 11, round.grad = 1,
   ncores = 1, bin.col = "#0570b0", show.annot = FALSE, facet = NULL,
   verbose = FALSE){
+  #Fix BiocCheck() complaining about these objects initialization
+  size <- NULL
+  n.breaks <- NULL
+  y <- NULL
   #Check if is any NAs
   if(any(is.na(x))){ x <- x[!is.na(x)] } #rm NAs
   #Check x type

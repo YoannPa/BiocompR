@@ -247,11 +247,16 @@ ggdend <- function(df, orientation, reverse.x = FALSE, theme_dend = NULL) {
 #' @export
 #' @keywords internal
 
-basic.ggplot.tri<-function(melt.tri, grid.col, grid.thickness, lgd.title,
-                           lgd.text, lgd.pal, min_tri, max_tri, lgd.breaks,
-                           lgd.round, lgd.ticks, lgd.nbin, lgd.height,lgd.width,
-                           rasteri, lgd.ticks.linewidth, lgd.frame.col,
-                           lgd.frame.linewidth, diag.col, set.lgd.title){
+basic.ggplot.tri <- function(
+  melt.tri, grid.col, grid.thickness, lgd.title, lgd.text, lgd.pal, min_tri,
+  max_tri, lgd.breaks, lgd.round, lgd.ticks, lgd.nbin, lgd.height, lgd.width,
+  rasteri, lgd.ticks.linewidth, lgd.frame.col, lgd.frame.linewidth, diag.col,
+  set.lgd.title){
+  #Fix BiocCheck() complaining about these objects initialization
+  Var1 <- NULL
+  Var2 <- NULL
+  value <- NULL
+  #Create the triangle plot
   ggplot2::ggplot() +
     ggplot2::geom_tile(
       data = melt.tri, ggplot2::aes(x = Var1, y = Var2, fill = value),
@@ -446,6 +451,12 @@ build.layout <- function(col_table, height.lgds.space){
 
 basic.sidebar <- function(
   data, palette, annot.sep = 0, annot.cut = 0, lgd.ncol = 1, facet = NULL){
+  #Fix BiocCheck() complaining about these objects initialization
+  .id <- NULL
+  facet.annot <- NULL
+  Groups <- NULL
+  Samples <- NULL
+  #Create a basic sidebar plot
   basic <- ggplot2::ggplot() +
     ggplot2::theme(
       legend.justification = c(1, 1),

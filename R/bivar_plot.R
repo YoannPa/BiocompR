@@ -37,6 +37,13 @@
 
 bivar.plot <- function(data, violin = FALSE, cat.step = 10L, cat.max = 10L,
                        fill = "deepskyblue3"){
+  #Fix BiocCheck() complaining about these objects initialization
+  category <- NULL
+  . <- NULL
+  Var2 <- NULL
+  cat.sizes <- NULL
+  Var1 <- NULL
+  V1 <- NULL
   #Convert into a data.table
   if(!data.table::is.data.table(data)){
     data <- data.table::as.data.table(data)

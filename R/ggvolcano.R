@@ -213,17 +213,6 @@ chk.param <- function(data, data.type, label.cutoff){
 
 ggpanel.corr <- function(
   data, p.cutoff = 0.01, label.cutoff = 0, jitter.height = 0.4){
-
-  # #Get colnames
-  # orig.cnames <- colnames(data)
-  # #Convert as a data.table
-  # if(!is.data.table(data)){ data<-as.data.table(data) }
-  # #Check & format data.table
-  # data <- chk.dt(data = data, data.type = "corr")
-  # #Check label.cutoff values
-  # cutoff.values <- chk.cutoff(
-  #   label.cutoff = label.cutoff, data.type = "corr")
-
   #Check test parameters
   res.param <- BiocompR::chk.param(
     data = data, data.type = "corr", label.cutoff = label.cutoff)
@@ -364,8 +353,16 @@ ggpanel.corr <- function(
 build.ggvolcano <- function(
   data, data.type, label.cutoff = 0, p.cutoff = 0.01, x.cutoff = NULL,
   title.x.cutoff = "X-Axis cutoff", x.col.sign = FALSE, force.label = NULL){
+  #Fix BiocCheck() complaining about these objects initialization
+  corr <- NULL
+  grp <- NULL
+  fold <- NULL
+  xval <- NULL
+  pval <- NULL
+  size <- NULL
+  `P-value` <- NULL
   #Make a copy of the data.table to work on
-  dt.data <- as.data.table(data)
+  dt.data <- data.table::as.data.table(data)
   #Check test parameters
   res.param <- BiocompR::chk.param(
     data = dt.data, data.type = data.type, label.cutoff = label.cutoff)
