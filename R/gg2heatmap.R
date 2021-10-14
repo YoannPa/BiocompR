@@ -623,7 +623,7 @@ gg2heatmap <- function(
 
   if(show.annot){
     if(verbose){ cat("Configure annotations...") }
-    #Reoder groups and convert as factors
+    #Reorder groups and convert as factors
     annot.grps <- lapply(X = annot.grps, FUN = function(i){
       factor(x = i, levels = unique(i))})
     #If the distance method used on columns is not "none" reorder columns
