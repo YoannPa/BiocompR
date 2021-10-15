@@ -9,12 +9,12 @@
 #' load.palettes()
 
 load.palettes <- function(){
-  pal_sunset <<- c("red", "gold", "blue4")
-  pal_westworld <<- c("sienna1", "lightgoldenrod", "skyblue3")
-  pal_startrek <<- c("red", "goldenrod1", "dodgerblue")
-  pal_margesimpson <<- c("lightgreen", "gold", "dodgerblue2")
-  pal_eighties <<- c("darkviolet", "deeppink", "blue4")
-  pal_insta <<- c("deeppink", "red", "goldenrod1")
+  base::`<<-` ("pal_sunset", c("red", "gold", "blue4"))
+  base::`<<-` ("pal_westworld", c("sienna1", "lightgoldenrod", "skyblue3"))
+  base::`<<-` ("pal_startrek", c("red", "goldenrod1", "dodgerblue"))
+  base::`<<-` ("pal_margesimpson", c("lightgreen", "gold", "dodgerblue2"))
+  base::`<<-` ("pal_eighties", c("darkviolet", "deeppink", "blue4"))
+  base::`<<-` ("pal_insta", c("deeppink", "red", "goldenrod1"))
 }
 
 #' Checks matching between annotation groups and annotation palettes.
@@ -137,7 +137,12 @@ get.lgd <- function(gg2.obj){
 #' @author Yoann Pageaud.
 #' @export
 
-ggdend <- function(df, orientation, reverse.x = FALSE, theme_dend = NULL) {
+ggdend <- function(df, orientation, reverse.x = FALSE, theme_dend = NULL){
+  #Fix BiocCheck() complaining about these objects initialization
+  x <- NULL
+  y <- NULL
+  xend <- NULL
+  yend <- NULL
   #Set default dendrogram theme
   theme_default_dend <- ggplot2::theme(
     panel.background = ggplot2::element_rect(fill = "transparent"),
@@ -562,6 +567,10 @@ plot.col.sidebar <- function(
     axis.text.x = ggplot2::element_text(size = 12),
     axis.text.y = ggplot2::element_text(size = 12)),
   set.x.title, set.y.title, dendro.pos, facet = NULL){
+  #Fix BiocCheck() complaining about these objects initialization
+  Grps <- NULL
+  Cols <- NULL
+  .id <- NULL
   #Create list of groups in their original order
   origin.grps <- lapply(X = annot.grps, FUN = function(i){
     if(is.factor(i)){ levels(i) } else { levels(as.factor(i)) }

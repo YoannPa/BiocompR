@@ -10,7 +10,9 @@
 #' @export
 #' @keywords internal
 
-ls.quantile <- function(ls, qtiles){ lapply(ls, quantile, qtiles) }
+ls.quantile <- function(ls, qtiles){
+  lapply(X = ls, FUN = stats::quantile, qtiles)
+}
 
 #' Bins density object following specific percentiles.
 #'

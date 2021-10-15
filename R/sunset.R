@@ -40,6 +40,20 @@ sunset <- function(
   col.pal = c("red","gold","blue4"), horizontal = FALSE, reverse = FALSE,
   n.grad = 15, display.cutoff = 0.03, display.num.smpl = 0.01,
   lgd.pos = "bottom"){
+  #Fix BiocCheck() complaining about these objects initialization
+  index <- NULL
+  . <- NULL
+  sample.amount <- NULL
+  data.covered <- NULL
+  sample.string <- NULL
+  hiden <- NULL
+  right.y.data.covered <- NULL
+  right.y.hiden <- NULL
+  right.y.diff.bins <- NULL
+  diff.bins <- NULL
+  white.line.hide <- NULL
+  label.pos <- NULL
+  cumulated <- NULL
 
   if(!is.matrix(mat)){ stop("'mat' must be a matrix.") }
   #Calculate number values not being NAs for each row in the matrix
@@ -87,7 +101,7 @@ sunset <- function(
   dt.data[is.na(right.y.hiden), right.y.hiden := FALSE]
   dt.data[is.na(white.line.hide), white.line.hide := FALSE]
   #Hide last white line if one
-  if(tail(dt.data$white.line.hide, n = 1) == FALSE){
+  if(utils::tail(dt.data$white.line.hide, n = 1) == FALSE){
     dt.data[nrow(dt.data), white.line.hide := TRUE]
   }
   #Keep white line of level before the one having a white line
@@ -103,9 +117,6 @@ sunset <- function(
   #Get positions of strings that will not be displayed
   pos_str <- data.table::data.table(
     dt.data[hiden == TRUE & right.y.hiden == TRUE]$index)
-  # pos_str <- data.table(dt.data[hiden == TRUE & right.y.hiden == TRUE,
-  #                               which = TRUE])
-
   #Get groups of following samples
   smpl_intervals <- do.call(
     rbind, by(pos_str, cumsum(c(0, diff(pos_str$V1) != 1)), function(g){
@@ -123,12 +134,12 @@ sunset <- function(
         dt_grp[index == smpl_intervals[i, ]$end]$sample.amount, " (",
         round(per_grp*100), "%)")
       if(dt_grp[1, ]$index == 1){
-        pos_lab_grp <- tail(dt_grp, n = 1)$cumulated/2
-        amnt_grp <- tail(dt_grp$sample.amount, n = 1)
+        pos_lab_grp <- utils::tail(dt_grp, n = 1)$cumulated/2
+        amnt_grp <- utils::tail(dt_grp$sample.amount, n = 1)
       } else {
         pos_lab_grp <- (dt.data[dt_grp[1, ]$index - 1,]$cumulated +
-                          tail(dt_grp, n = 1)$cumulated)/2
-        amnt_grp <- tail(dt_grp$sample.amount, n = 1) - head(
+                          utils::tail(dt_grp, n = 1)$cumulated)/2
+        amnt_grp <- utils::tail(dt_grp$sample.amount, n = 1) - utils::head(
           dt_grp$sample.amount, n = 1) + 1
       }
       if(data_cov_grp > display.cutoff * N.rows){
@@ -141,9 +152,9 @@ sunset <- function(
       }
       new.dt <- data.table::data.table(
         "sample.amount" = amnt_grp, "data.covered" = data_cov_grp,
-        "sample.string" = str_grp, "index" = tail(dt_grp$index, n = 1),
+        "sample.string" = str_grp, "index" = utils::tail(dt_grp$index, n = 1),
         "label.pos" = pos_lab_grp, "diff.bins" = per_grp,
-        "cumulated" = tail(dt_grp$cumulated, n = 1),
+        "cumulated" = utils::tail(dt_grp$cumulated, n = 1),
         "right.y.data.covered" = data_cov_grp,
         "right.y.sample.string" = str_grp, "right.y.label.pos" = pos_lab_grp,
         "right.y.diff.bins" = per_grp, "hiden" = hiden_grp,
@@ -182,7 +193,6 @@ sunset <- function(
         yintercept = cumulated), color = "white")
   if(horizontal) {
     sun.plt <- sun.plt +
-      # Sunset <- Sunset +
       ggplot2::ggtitle(title) +
       ggplot2::theme(
         plot.title = ggplot2::element_text(title, size = 15, hjust = 0.5),
@@ -196,7 +206,6 @@ sunset <- function(
       ggplot2::coord_flip()
   } else {
     sun.plt <- sun.plt +
-      # Sunset <- Sunset +
       ggplot2::theme(
         axis.title.x = ggplot2::element_blank(),
         axis.text.x = ggplot2::element_blank(),

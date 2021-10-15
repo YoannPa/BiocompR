@@ -104,10 +104,23 @@
 #'                   values = c("dodgerblue", "darkorange")) # Change colors
 
 #TODO: Add ncores option to speed-up ggcraviola using multiple cores
+#TODO: Check if the Sample column is really necessary
 ggcraviola <- function(
   data, craviola.width = 1, boxplots = TRUE, boxplot.width = 0.04,
   mean.value = TRUE, bins = FALSE, bins.quantiles = seq(0.1, 0.9, 0.1),
   bin.fun = "sd", lines.col = NA){
+  #Fix BiocCheck() complaining about these objects initialization
+  Samples <- NULL
+  dens.curv <- NULL
+  y.pos <- NULL
+  Var.col <- NULL
+  Var1 <- NULL
+  bin <- NULL
+  bin.av.val2 <- NULL
+  x <- NULL
+  low <- NULL
+  mid <- NULL
+  top <- NULL
   #Check if data is a data.table and convert if not
   if(!data.table::is.data.table(data)){
     data <- data.table::as.data.table(data) }
@@ -164,7 +177,7 @@ ggcraviola <- function(
   list_vect.val1 <- lapply(X = list_val1, FUN = unlist, use.names = FALSE)
   #Create stats plots
   list.bp.stat <- lapply(seq_along(list_vect.val1), function(i){
-    qiles <- quantile(list_vect.val1[[i]])
+    qiles <- stats::quantile(list_vect.val1[[i]])
     means <- mean(list_vect.val1[[i]])
     if(Annot.table[Annot.table[[1]] == names(list_vect.val1)[i], 3] == 1){
       x.pos <- -boxplot.width
@@ -174,17 +187,17 @@ ggcraviola <- function(
         Annot.table[[1]] == names(list_vect.val1)[i], 2])-1)
     }
     data.table::data.table(
-      Annot.table[Annot.table[[1]] == names(list_vect.val1)[i], 3], x = x.pos,
-      min = qiles[1], low = qiles[2], mid = qiles[3], top = qiles[4],
-      max = qiles[5], mean = means, pos.crav = round(x.pos))
+      Annot.table[Annot.table[[1]] == names(list_vect.val1)[i], 3], "x" = x.pos,
+      "min" = qiles[1], "low" = qiles[2], "mid" = qiles[3], "top" = qiles[4],
+      "max" = qiles[5], "mean" = means, "pos.crav" = round(x.pos))
   })
   box.dframe <- data.table::rbindlist(list.bp.stat)
   # box.dframe<-do.call(rbind, list.bp.stat)
 
   #Create Craviola plot
-  list_dens.res <- lapply(list_vect.val1, density)
-  list_dens.df <- lapply(list_dens.res, function(i){
-    data.frame(y.pos = i$x, dens.curv = i$y*craviola.width)
+  list_dens.res <- lapply(X = list_vect.val1, FUN = stats::density)
+  list_dens.df <- lapply(X = list_dens.res, FUN = function(i){
+    data.frame("y.pos" = i$x, "dens.curv" = i$y*craviola.width)
   })
   list_oriented_dens <- lapply(names(list_dens.df), function(i){
     if(as.integer(Annot.table[Annot.table[[1]] == i, 3]) == 1){
@@ -232,18 +245,18 @@ ggcraviola <- function(
         list.quant.lim[[i]] <<- c(list.quant.lim[[i]], max(list_vect.val1[[i]]))
       }
       smpl.data[["bin.groups"]] <- findInterval(
-        smpl.data[[4]], list.quant.lim[[i]], all.inside = T)-1
+        smpl.data[[4]], list.quant.lim[[i]], all.inside = TRUE)-1
       if(bin.fun == "mean"){
         unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
-          mean(smpl.data[smpl.data$bin.groups == j][[5]], na.rm = T)
+          mean(smpl.data[smpl.data$bin.groups == j][[5]], na.rm = TRUE)
         }))
       } else if(bin.fun == "sd"){
-        unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
-          sd(smpl.data[smpl.data$bin.groups == j][[5]], na.rm = T)
+        unlist(lapply(X = sort(unique(smpl.data$bin.groups)), FUN = function(j){
+          stats::sd(smpl.data[smpl.data$bin.groups == j][[5]], na.rm = TRUE)
         }))
       } else if(bin.fun == "mad"){
         unlist(lapply(sort(unique(smpl.data$bin.groups)), function(j){
-          mad(smpl.data[smpl.data$bin.groups == j][[5]], na.rm = T)
+          stats::mad(smpl.data[smpl.data$bin.groups == j][[5]], na.rm = TRUE)
         }))
       } else {
         stop("Unsupported function. Supported functions: bin.fun = c('mean','sd' and 'mad').")
@@ -284,7 +297,7 @@ ggcraviola <- function(
   if(bins){ #bins TRUE
     craviola.plot <- craviola.plot +
       ggplot2::geom_polygon(data = dframe, mapping = ggplot2::aes(
-        dens.curv, y.pos, fill = Var.col, group = interaction(Var1,bin),
+        dens.curv, y.pos, fill = Var.col, group = interaction(Var1, bin),
         alpha = bin.av.val2), colour = lines.col) +
       ggplot2::guides(alpha = ggplot2::guide_legend(order = 2)) +
       ggplot2::scale_alpha_continuous(
@@ -295,7 +308,7 @@ ggcraviola <- function(
     craviola.plot <- craviola.plot +
       ggplot2::geom_polygon(
         data = dframe, mapping = ggplot2::aes(
-          dens.curv, y.pos,fill = Var.col, group = interaction(Var.col, Var1)),
+          dens.curv, y.pos, fill = Var.col, group = interaction(Var.col, Var1)),
         colour = lines.col)
   }
   if(boxplots){ #boxplots TRUE

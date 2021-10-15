@@ -140,7 +140,7 @@ manage.na <- function(
       if(method == "remove"){ #Remove all rows containing any NA
         data_rname <- rownames(data)[
           apply(X = data, MARGIN = 1, FUN = anyNA) == FALSE]
-        data <- data[complete.cases(data), ]
+        data <- data[stats::complete.cases(data), ]
         if(is.vector(data)){
           data <- matrix(
             data, nrow = 1, dimnames = list(data_rname, names(data)))

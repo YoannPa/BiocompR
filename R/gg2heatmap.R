@@ -262,6 +262,7 @@ gg2heatmap <- function(
   Cols <- NULL
   facet.annot <- NULL
   rn <- NULL
+  raster.grob <- NULL
   #Check m is a matrix
   if(is.matrix(m)){ m.type <- "matrix" } else { if(is.data.frame(m)){
     #Check if data.table, if not convert into data.table

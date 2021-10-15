@@ -213,6 +213,11 @@ chk.param <- function(data, data.type, label.cutoff){
 
 ggpanel.corr <- function(
   data, p.cutoff = 0.01, label.cutoff = 0, jitter.height = 0.4){
+  #Fix BiocCheck() complaining about these objects initialization
+  corr <- NULL
+  P.value <- NULL
+  grp <- NULL
+  size <- NULL
   #Check test parameters
   res.param <- BiocompR::chk.param(
     data = data, data.type = "corr", label.cutoff = label.cutoff)

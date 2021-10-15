@@ -113,7 +113,9 @@ ggbipca <- function(
   color.data = NULL, shape.data = NULL, loadings = FALSE, loadings.col = "red",
   top.load.by.quad = NULL, load.above.x = NULL, load.above.y = NULL,
   load.below.x = NULL, load.below.y = NULL){
-
+  #Fix BiocCheck() complaining about these objects initialization
+  load.sqrd.length <- NULL
+  quadrant <- NULL
   #Duplicate data.table
   dt.annot <- data.table::as.data.table(as.data.frame(data))
   #Make PC names vector
@@ -359,7 +361,7 @@ cross.biplot <- function(
   PCy <- NULL
   load.sqrd.length <- NULL
   quadrant <- NULL
-  cross.biplot (..cols)
+  ..cols <- NULL
   #Duplicate data.table
   dt.annot <- data.table::as.data.table(as.data.frame(data))
   #Rename annotation column used for points colors and shapes

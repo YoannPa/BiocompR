@@ -94,6 +94,21 @@
 ggcoverage <- function(
   data, round.unit = 2, rev.stack = FALSE, invert.percent = FALSE,
   horizontal = FALSE, log.scaled = FALSE, decreasing.order = FALSE){
+  #Fix BiocCheck() complaining about these objects initialization
+  Total <- NULL
+  Subset <- NULL
+  Remaining <- NULL
+  . <- NULL
+  percents <- NULL
+  logRemaining <- NULL
+  logTotal <- NULL
+  logSubset <- NULL
+  variable <- NULL
+  label_ypos <- NULL
+  value <- NULL
+  IDs <- NULL
+  value.char <- NULL
+  filter.val <- NULL
   #Check if data is a data.table and convert if not
   if(!data.table::is.data.table(data)){
     data <- data.table::as.data.table(data) }
