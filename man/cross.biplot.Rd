@@ -7,7 +7,7 @@
 cross.biplot(
   prcomp.res,
   data,
-  PCs = c(1:3),
+  PCs = c(1, 2, 3),
   scale = 1,
   point.size = 1,
   color.data = NULL,

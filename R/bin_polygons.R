@@ -67,13 +67,15 @@ bin.polygons <- function(list_oriented_dens, list.quant.lim, Annot.table){
     })
   })
   #Split density dataframes by position+1
-  split.positions <- lapply(seq_along(quant.pos),function(i){
-    unlist(lapply(seq_along(quant.pos[[i]]),
-                  function(j){quant.pos[[i]][j]+1-j}))
+  split.positions <- lapply(X = seq_along(quant.pos), FUN = function(i){
+    unlist(lapply(X = seq_along(quant.pos[[i]]),
+                  FUN = function(j){ quant.pos[[i]][j] + 1 - j }))
   })
-  splitted.dens.df <- lapply(seq_along(list_oriented_dens), function(i){
-    split(list_oriented_dens[[i]],
-          findInterval(1:nrow(list_oriented_dens[[i]]), split.positions[[i]]))
+  splitted.dens.df <- lapply(
+    X = seq_along(list_oriented_dens), FUN = function(i){
+      split(list_oriented_dens[[i]],
+            findInterval(x = seq(nrow(list_oriented_dens[[i]])),
+                         vec = split.positions[[i]]))
   })
   #Define bin numbers and Map them to each list of dataframes
   splitted.dens.df <- lapply(seq_along(splitted.dens.df), function(i){

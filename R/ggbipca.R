@@ -347,8 +347,8 @@ ggbipca <- function(
 
 cross.biplot <- function(
   #TODO: Merge parts of the code that are in common between the 2 functions
-  prcomp.res, data, PCs = c(1:3), scale = 1, point.size = 1, color.data = NULL,
-  shape.data = NULL, loadings = FALSE, loadings.col = "red",
+  prcomp.res, data, PCs = c(1, 2, 3), scale = 1, point.size = 1,
+  color.data = NULL, shape.data = NULL, loadings = FALSE, loadings.col = "red",
   top.load.by.quad = NULL){
   #Fix BiocCheck() complaining about these objects initialization
   Var1 <- NULL

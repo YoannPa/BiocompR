@@ -45,11 +45,11 @@ chk.dt <- function(data, data.type){
   }
   #Check ncol(data) and change column names
   if(ncol(data) < 3){ stop("Data should contain at least 3 columns.")
-  } else if(ncol(data) == 3){ colnames(data) <- vec.colnames[1:3]
-  } else if(ncol(data) == 4){ colnames(data) <- vec.colnames[1:4]
+  } else if(ncol(data) == 3){ colnames(data) <- vec.colnames[seq(3)]
+  } else if(ncol(data) == 4){ colnames(data) <- vec.colnames[seq(4)]
   } else if(ncol(data) == 5){
     if(!is.numeric(data[[5]])){ stop("Column 5 type must be numeric.") }
-    colnames(data) <- vec.colnames[1:5]
+    colnames(data) <- vec.colnames[seq(5)]
   } else if (ncol(data) > 5){
     stop("Too many columns. ncol(data) must be <= 5.")
   }
@@ -689,7 +689,7 @@ ggvolcano.test <- function(
 }
 
 
-#' Plots any king of results with P-values that can be displayed as a volcano
+#' Plots any kind of results with P-values that can be displayed as a volcano
 #' plot.
 #'
 #' @param data           A \code{data.table} with 3 to 5 columns:

@@ -116,14 +116,14 @@ EVA <- function(data, use = "pairwise", method = "pearson", adjust = "none",
                "the variance. Please set a lower var.min."))
   }
   #Get eigenvectors
-  eigvects <- as.data.frame(eigen(M)$vectors[, c(1:true.eigvals)])
+  eigvects <- as.data.frame(eigen(M)$vectors[, seq(true.eigvals)])
   dframe <- as.data.frame(
     cbind(eigvects, "Groups" = as.factor(groups), "Labels" = colnames(data)))
   #Create all possible combinations
   combs <- expand.grid(seq(true.eigvals), seq(true.eigvals))
   #Remove duplicate and order
   combs <- combs[combs$Var1 != combs$Var2, ]
-  combs <- combs[order(combs[,1]), ]
+  combs <- combs[order(combs[, 1]), ]
   my_cols <- colnames(dframe)[!colnames(dframe) %in% c("Groups", "Labels")]
   #Generate all Eigenvector Plots
   list_EVplots <- lapply(my_cols, function(col1){

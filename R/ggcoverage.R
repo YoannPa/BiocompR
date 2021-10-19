@@ -112,7 +112,7 @@ ggcoverage <- function(
   #Check if data is a data.table and convert if not
   if(!data.table::is.data.table(data)){
     data <- data.table::as.data.table(data) }
-  colnames(data)[1:3] <- c("IDs", "Total", "Subset")
+  colnames(data)[seq(3)] <- c("IDs", "Total", "Subset")
   #Replace NAs by zeros
   data[is.na(Total), c("Total", "Subset") := 0]
   data[is.na(Subset), Subset := 0]

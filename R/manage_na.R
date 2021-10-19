@@ -41,7 +41,7 @@ row.impute.na <- function(
         #Combine imputation by group with vertical imputation on column
         impute.vals <- unlist(
           lapply(X = names(sub.data[is.na(sub.data)]), FUN = function(i){
-            lead.val <- rev(data[which(miss.mat[1:(r - 1), i]), i])[1]
+            lead.val <- rev(data[which(miss.mat[seq(r - 1), i]), i])[1]
             lag.val <- data[r + which(miss.mat[(r + 1):nr, i]), i][1]
             if(length(lead.val) == 0){
               impute.val <- eval(parse(text = paste0(
@@ -168,7 +168,7 @@ manage.na <- function(
           grp.imp <- row.impute.na(
             data = data, miss.mat = miss.mat, grp_tbl = grp_tbl, nr = nr, r = r,
             impute.fun = impute.fun, vinterpolate = vinterpolate)
-          data[r, names(grp.imp)] <<- grp.imp
+          base::`<<-` (data[r, names(grp.imp)], grp.imp)
           cat(paste0(round((r/max(rows.to.impute))*100, 3), "%\n"))
         }))
         rm(miss.mat)

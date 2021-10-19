@@ -139,7 +139,7 @@ ggcraviola <- function(
       data <- merge(
         x = Annot.table[, -4], y = data, by = "Samples", all.y = TRUE)
     } else{ stop("Missing columns in the data provided.") }
-  } else { Annot.table <- unique.dt[, 1:3] }
+  } else { Annot.table <- unique.dt[, seq(3), with = FALSE] }
   if(nrow(unique(Annot.table, by = 3)) > 2){
     stop("More than 2 conditions inputed. Only 2 conditions tolerated.")
   }
@@ -152,7 +152,7 @@ ggcraviola <- function(
   if(!all(Annot.table[, lapply(X = data.table::.SD, FUN = is.factor)] == TRUE)){
     #Convert annotations and data conditional variable into factors
     Annot.table <- Annot.table[, lapply(X = data.table::.SD, FUN = as.factor)]
-    cols <- colnames(data)[1:3]
+    cols <- colnames(data)[seq(3)]
     data[, (cols) := lapply(
       X = data.table::.SD, FUN = as.factor), .SDcols = cols]
   }
@@ -168,9 +168,9 @@ ggcraviola <- function(
   }
   amount.grp <- length(unique(Annot.table[[2]]))
   if(amount.grp > 1){
-    invisible(lapply(seq_along(unique(Annot.table[[2]])), function(i){
-      levels(Annot.table[[2]])[i] <<- i
-    }))
+    data.table::setattr(
+      x = Annot.table[[2]], name = "levels", value = as.character(
+        seq_along(levels(Annot.table[[2]]))))
   }
   mylist_data <- split(x = data, f = data[[1]])
   list_val1 <- lapply(X = mylist_data, FUN = subset, select = 4)
@@ -192,8 +192,6 @@ ggcraviola <- function(
       "max" = qiles[5], "mean" = means, "pos.crav" = round(x.pos))
   })
   box.dframe <- data.table::rbindlist(list.bp.stat)
-  # box.dframe<-do.call(rbind, list.bp.stat)
-
   #Create Craviola plot
   list_dens.res <- lapply(X = list_vect.val1, FUN = stats::density)
   list_dens.df <- lapply(X = list_dens.res, FUN = function(i){
@@ -201,12 +199,13 @@ ggcraviola <- function(
   })
   list_oriented_dens <- lapply(names(list_dens.df), function(i){
     if(as.integer(Annot.table[Annot.table[[1]] == i, 3]) == 1){
-      list_dens.df[[i]]$dens.curv <<- list_dens.df[[i]]$dens.curv * -1
+      base::`<<-` (
+        list_dens.df[[i]]$dens.curv, list_dens.df[[i]]$dens.curv * -1)
       list_dens.df[[i]]
     } else { list_dens.df[[i]] }
     if(as.integer(Annot.table[Annot.table[[1]] == i, 2]) > 1){
-      list_dens.df[[i]]$dens.curv <<- list_dens.df[[i]]$dens.curv +
-        as.integer(Annot.table[Annot.table[[1]] == i, 2]) - 1
+      base::`<<-` (list_dens.df[[i]]$dens.curv, list_dens.df[[i]]$dens.curv +
+                     as.integer(Annot.table[Annot.table[[1]] == i, 2]) - 1)
       list_dens.df[[i]]
     } else { list_dens.df[[i]] }
   })
@@ -233,16 +232,18 @@ ggcraviola <- function(
                              Annot.table = Annot.table)
     names(list.dfs) <- names(list.quant.lim)
     #Calculate average value on 3rd variable for each bin
-    list.fun.val2 <- lapply(seq_along(list.quant.lim), function(i){
+    list.fun.val2 <- lapply(X = seq_along(list.quant.lim), FUN = function(i){
       smpl.data <- data[data[[1]] == names(list.quant.lim)[i], ]
       # Check if external quantiles are min and max
       if(min(list_vect.val1[[i]]) != list.quant.lim[[i]][1]){
         # Add minimum value at the beginning of the vector
-        list.quant.lim[[i]] <<- c(min(list_vect.val1[[i]]), list.quant.lim[[i]])
+        base::`<<-` (
+          list.quant.lim[[i]], c(min(list_vect.val1[[i]]), list.quant.lim[[i]]))
       }
       if(max(list_vect.val1[[i]]) != rev(list.quant.lim[[i]])[1]){
         # Add maximum value at the end of the vector
-        list.quant.lim[[i]] <<- c(list.quant.lim[[i]], max(list_vect.val1[[i]]))
+        base::`<<-` (
+          list.quant.lim[[i]], c(list.quant.lim[[i]], max(list_vect.val1[[i]])))
       }
       smpl.data[["bin.groups"]] <- findInterval(
         smpl.data[[4]], list.quant.lim[[i]], all.inside = TRUE)-1

@@ -423,9 +423,9 @@ build.layout <- function(col_table, height.lgds.space){
       #Rbind legend matrix with NA matrix
       col_mat <- rbind(col_mat, NAmat)
       #Empty vectors from the legend previously used
-      lgd_sizes <<- lgd_sizes[-lgd_position]
-      legend_ids <<- legend_ids[-lgd_position]
-      ncol.by.lgd <<- ncol.by.lgd[-lgd_position]
+      base::`<<-` (lgd_sizes, lgd_sizes[-lgd_position])
+      base::`<<-` (legend_ids, legend_ids[-lgd_position])
+      base::`<<-` (ncol.by.lgd, ncol.by.lgd[-lgd_position])
       #Return column matrix
       col_mat
     }

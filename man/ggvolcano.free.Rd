@@ -2,7 +2,7 @@
 % Please edit documentation in R/ggvolcano.R
 \name{ggvolcano.free}
 \alias{ggvolcano.free}
-\title{Plots any king of results with P-values that can be displayed as a volcano
+\title{Plots any kind of results with P-values that can be displayed as a volcano
 plot.}
 \usage{
 ggvolcano.free(
@@ -91,7 +91,7 @@ other labeling parameters.}
 A \code{gg} volcano plot of your results.
 }
 \description{
-Plots any king of results with P-values that can be displayed as a volcano
+Plots any kind of results with P-values that can be displayed as a volcano
 plot.
 }
 \author{

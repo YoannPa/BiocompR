@@ -270,7 +270,7 @@ gg2heatmap <- function(
     #Get number columns of data.frame
     n.col <- ncol(m)
     #Cast matrix from molten data.frame
-    colnames(m)[1:3] <- c("rows", "cols", "values")
+    colnames(m)[seq(3)] <- c("rows", "cols", "values")
     m <- data.table::dcast(data = m, formula = ... ~ cols, value.var = "values")
     #Add index
     m[, I := data.table::.I]
@@ -393,7 +393,7 @@ gg2heatmap <- function(
   if(verbose){ cat("Ranking data by rows...") }
   if(!is.null(rank.fun)){
     #TODO: improve this part to support more function with eval() & parse()
-    m <- m[order(apply(m, 1, stats::sd, na.rm = T), decreasing = TRUE), ,
+    m <- m[order(apply(m, 1, stats::sd, na.rm = TRUE), decreasing = TRUE), ,
            drop = FALSE]
   }
   if(verbose){ cat("Done.\n") }
