@@ -9,12 +9,12 @@
 #' load.palettes()
 
 load.palettes <- function(){
-  base::`<<-` ("pal_sunset", c("red", "gold", "blue4"))
-  base::`<<-` ("pal_westworld", c("sienna1", "lightgoldenrod", "skyblue3"))
-  base::`<<-` ("pal_startrek", c("red", "goldenrod1", "dodgerblue"))
-  base::`<<-` ("pal_margesimpson", c("lightgreen", "gold", "dodgerblue2"))
-  base::`<<-` ("pal_eighties", c("darkviolet", "deeppink", "blue4"))
-  base::`<<-` ("pal_insta", c("deeppink", "red", "goldenrod1"))
+    base::`<<-` ("pal_sunset", c("red", "gold", "blue4"))
+    base::`<<-` ("pal_westworld", c("sienna1", "lightgoldenrod", "skyblue3"))
+    base::`<<-` ("pal_startrek", c("red", "goldenrod1", "dodgerblue"))
+    base::`<<-` ("pal_margesimpson", c("lightgreen", "gold", "dodgerblue2"))
+    base::`<<-` ("pal_eighties", c("darkviolet", "deeppink", "blue4"))
+    base::`<<-` ("pal_insta", c("deeppink", "red", "goldenrod1"))
 }
 
 #' Checks matching between annotation groups and annotation palettes.
@@ -37,55 +37,63 @@ load.palettes <- function(){
 #' @keywords internal
 
 check.annotations <- function(data, annot.grps, annot.pal, verbose = FALSE){
-  #Groups checking
-  if(is.list(annot.grps)){
-    if(any(unlist(lapply(annot.grps, length))!= ncol(data))){
-      stop("samples are not all assigned to a group.")
-    } else{
-      if(verbose){
-        #Print groups values
-        invisible(lapply(seq_along(annot.grps), function(i){
-          cat(paste0(names(annot.grps)[i],": ", paste(unique(annot.grps[[i]]),
-                                                      collapse = ", "), ".\n"))
-        }))
-      }
-    }
-  } else {
-    stop(paste("'annot.grps' must be a named list.",
-               "e.g. annot.grps = list('annotation_name' = annotation_vector)",
-               sep = "\n"))
-  }
-  #Color checking
-  if(is.list(annot.pal)){
-    if(length(annot.grps) == length(annot.pal)){
-      invisible(lapply(seq_along(annot.pal), function(i){
-        if(length(annot.pal[[i]])!=length(levels(as.factor(annot.grps[[i]])))){
-          stop(paste0("The length of annotation '",names(annot.grps)[i],
-                      "' levels do not match the length of the corresponding ",
-                      "palette."))
+    #Groups checking
+    if(is.list(annot.grps)){
+        if(any(unlist(lapply(annot.grps, length))!= ncol(data))){
+            stop("samples are not all assigned to a group.")
+        } else{ if(verbose){
+            #Print groups values
+            invisible(lapply(seq_along(annot.grps), function(i){ cat(paste0(
+                names(annot.grps)[i],": ", paste(
+                    unique(annot.grps[[i]]), collapse = ", "), ".\n"))
+            }))
         }
-      }))
+        }
     } else {
-      stop("The number of palettes does not match the number of annotations provided.")
+        stop(paste(
+            "'annot.grps' must be a named list. e.g. annot.grps =",
+            "list('annotation_name' = annotation_vector)", sep = "\n"))
     }
-  } else if(!is.list(annot.pal)){ #if a single palette is provided
-    invisible(lapply(seq_along(annot.grps), function(i){
-      if(length(annot.pal) == 0){ stop("'annot.pal' is empty.") }
-      if(length(levels(as.factor(annot.grps[[i]]))) != length(annot.pal)){
-        if(isTRUE(all.equal(target = annot.pal,
-                            current = grDevices::rainbow(n = ncol(data))))){
-          stop(paste("A specific palette must be defined in 'annot.pal' to",
-                     "match the annotation provided."))
+    #Color checking
+    if(is.list(annot.pal)){
+        if(length(annot.grps) == length(annot.pal)){
+            invisible(lapply(seq_along(annot.pal), function(i){
+                if(length(annot.pal[[i]]) != length(levels(as.factor(
+                    annot.grps[[i]])))){
+                    stop(paste0(
+                        "The length of annotation '", names(annot.grps)[i],
+                        "' levels do not match the length of the ",
+                        "corresponding palette."))
+                }
+            }))
         } else {
-          stop(paste0("The length of annotation '",names(annot.grps)[i],
-                      "' levels do not match the length of the corresponding ",
-                      "palette."))
+            stop(paste(
+                "The number of palettes does not match the number of",
+                "annotations provided."))
         }
-      }
-    }))
-  } else { #If not a list or a vector
-    stop("Unknown type for 'annot.pal'. 'annot.pal' should be either a list or a vector.")
-  }
+    } else if(!is.list(annot.pal)){ #if a single palette is provided
+        invisible(lapply(seq_along(annot.grps), function(i){
+            if(length(annot.pal) == 0){ stop("'annot.pal' is empty.") }
+            if(length(levels(as.factor(annot.grps[[i]]))) != length(annot.pal)){
+                if(isTRUE(all.equal(
+                    target = annot.pal, current = grDevices::rainbow(
+                        n = ncol(data))))){
+                    stop(paste(
+                        "A specific palette must be defined in",
+                        "'annot.pal' to match the annotation provided."))
+                } else {
+                    stop(paste0(
+                        "The length of annotation '",names(annot.grps)[i],
+                        "' levels do not match the length of the ",
+                        "corresponding palette."))
+                }
+            }
+        }))
+    } else { #If not a list or a vector
+        stop(paste(
+            "Unknown type for 'annot.pal'. 'annot.pal' should be either",
+            "a list or a vector."))
+    }
 }
 
 #' Checks if a list's attributes has for class 'element_blank'.
@@ -97,8 +105,8 @@ check.annotations <- function(data, annot.grps, annot.pal, verbose = FALSE){
 #' @keywords internal
 
 is.elt_blank <- function(arg){
-  bool<-attributes(arg)$class[1] == "element_blank"
-  return(bool)
+    bool<-attributes(arg)$class[1] == "element_blank"
+    return(bool)
 }
 
 #' Extracts legend from a ggplot2 object.
@@ -111,11 +119,11 @@ is.elt_blank <- function(arg){
 #' @references \href{https://github.com/tidyverse/ggplot2/wiki/Share-a-legend-between-two-ggplot2-graphs}{Share a legend between two ggplot2 graphs - Mara Averick}
 
 get.lgd <- function(gg2.obj){
-  tmp <- ggplot2::ggplot_gtable(ggplot2::ggplot_build(gg2.obj))
-  leg <- which(vapply(X = tmp$grobs, FUN = function(x) x$name,
-                      FUN.VALUE = character(length = 1)) == "guide-box")
-  legend <- tmp$grobs[[leg]]
-  return(legend)
+    tmp <- ggplot2::ggplot_gtable(ggplot2::ggplot_build(gg2.obj))
+    leg <- which(vapply(X = tmp$grobs, FUN = function(x) x$name,
+                        FUN.VALUE = character(length = 1)) == "guide-box")
+    legend <- tmp$grobs[[leg]]
+    return(legend)
 }
 
 #' Creates a dendogram in ggplot2.
@@ -138,69 +146,70 @@ get.lgd <- function(gg2.obj){
 #' @export
 
 ggdend <- function(df, orientation, reverse.x = FALSE, theme_dend = NULL){
-  #Fix BiocCheck() complaining about these objects initialization
-  x <- NULL
-  y <- NULL
-  xend <- NULL
-  yend <- NULL
-  #Set default dendrogram theme
-  theme_default_dend <- ggplot2::theme(
-    panel.background = ggplot2::element_rect(fill = "transparent"),
-    plot.background = ggplot2::element_rect(fill = "transparent"))
-  #Set forced dendrogram theme
-  theme_forced_dend <- ggplot2::theme(
-    axis.title = ggplot2::element_blank(),
-    axis.text = ggplot2::element_blank(),
-    axis.ticks = ggplot2::element_blank(),
-    panel.grid = ggplot2::element_blank(),
-    axis.ticks.length = ggplot2::unit(0, "pt"))
+    #Fix BiocCheck() complaining about these objects initialization
+    x <- NULL
+    y <- NULL
+    xend <- NULL
+    yend <- NULL
+    #Set default dendrogram theme
+    theme_default_dend <- ggplot2::theme(
+        panel.background = ggplot2::element_rect(fill = "transparent"),
+        plot.background = ggplot2::element_rect(fill = "transparent"))
+    #Set forced dendrogram theme
+    theme_forced_dend <- ggplot2::theme(
+        axis.title = ggplot2::element_blank(),
+        axis.text = ggplot2::element_blank(),
+        axis.ticks = ggplot2::element_blank(),
+        panel.grid = ggplot2::element_blank(),
+        axis.ticks.length = ggplot2::unit(0, "pt"))
 
-  #Update theme_dend
-  if(is.null(theme_dend)){
-    theme_dend <- theme_default_dend + theme_forced_dend
-  } else {
-    theme_dend <- theme_default_dend + theme_dend + theme_forced_dend
-  }
-  #Create ggplot of dendrogram
-  ddplot <- ggplot2::ggplot() + ggplot2::geom_segment(
-    data = df, ggplot2::aes(x = x, y = y, xend = xend, yend = yend)) +
-    ggplot2::expand_limits(x = c(0.5, max(df$x) + 0.5), y = 0) + theme_dend
+    #Update theme_dend
+    if(is.null(theme_dend)){
+        theme_dend <- theme_default_dend + theme_forced_dend
+    } else {
+        theme_dend <- theme_default_dend + theme_dend + theme_forced_dend
+    }
+    #Create ggplot of dendrogram
+    ddplot <- ggplot2::ggplot() + ggplot2::geom_segment(
+        data = df, ggplot2::aes(x = x, y = y, xend = xend, yend = yend)) +
+        ggplot2::expand_limits(x = c(0.5, max(df$x) + 0.5), y = 0) + theme_dend
 
-  if(orientation == "top"){
-    if(is.null(theme_dend$plot.margin)){
-      dend_margin <- ggplot2::margin(0.1, 0, 0, 0, unit = "cm")
-    } else {
-      if(as.numeric(theme_dend$plot.margin[1]) != 0.1){
-        dend_margin <- ggplot2::margin(
-          0.1, as.numeric(theme_dend$plot.margin[2]),
-          as.numeric(theme_dend$plot.margin[3]),
-          as.numeric(theme_dend$plot.margin[4]), unit = "cm")
-      } else { dend_margin <- theme_dend$plot.margin }
-    }
-    ddplot <- ddplot +
-      ggplot2::scale_x_continuous(expand = c(0, 0)) +
-      ggplot2::theme(plot.margin = dend_margin) +
-      ggplot2::scale_y_continuous(expand = c(0, 0))
-  } else if(orientation == "left"){
-    if(is.null(theme_dend$plot.margin)){
-      dend_margin <- ggplot2::margin(0, 0, 0, 0.1, unit = "cm")
-    } else {
-      if(as.numeric(theme_dend$plot.margin[4]) != 0.1){
-        dend_margin <- ggplot2::margin(
-          as.numeric(theme_dend$plot.margin[1]),
-          as.numeric(theme_dend$plot.margin[2]),
-          as.numeric(theme_dend$plot.margin[3]), 0.1, unit = "cm")
-      } else { dend_margin <- theme_dend$plot.margin }
-    }
-    ddplot <- ddplot +
-      ggplot2::theme(plot.margin = dend_margin) +
-      ggplot2::scale_y_reverse(expand = c(0, 0)) +
-      ggplot2::coord_flip()
-    if(reverse.x){
-      ddplot <- ddplot + ggplot2::scale_x_reverse(expand = c(0, 0))
-    } else { ddplot <- ddplot + ggplot2::scale_x_continuous(expand = c(0, 0)) }
-  } else { stop("dendrogram's orientation value not supported by ggdend().") }
-  return(ddplot)
+    if(orientation == "top"){
+        if(is.null(theme_dend$plot.margin)){
+            dend_margin <- ggplot2::margin(0.1, 0, 0, 0, unit = "cm")
+        } else {
+            if(as.numeric(theme_dend$plot.margin[1]) != 0.1){
+                dend_margin <- ggplot2::margin(
+                    0.1, as.numeric(theme_dend$plot.margin[2]),
+                    as.numeric(theme_dend$plot.margin[3]),
+                    as.numeric(theme_dend$plot.margin[4]), unit = "cm")
+            } else { dend_margin <- theme_dend$plot.margin }
+        }
+        ddplot <- ddplot +
+            ggplot2::scale_x_continuous(expand = c(0, 0)) +
+            ggplot2::theme(plot.margin = dend_margin) +
+            ggplot2::scale_y_continuous(expand = c(0, 0))
+    } else if(orientation == "left"){
+        if(is.null(theme_dend$plot.margin)){
+            dend_margin <- ggplot2::margin(0, 0, 0, 0.1, unit = "cm")
+        } else {
+            if(as.numeric(theme_dend$plot.margin[4]) != 0.1){
+                dend_margin <- ggplot2::margin(
+                    as.numeric(theme_dend$plot.margin[1]),
+                    as.numeric(theme_dend$plot.margin[2]),
+                    as.numeric(theme_dend$plot.margin[3]), 0.1, unit = "cm")
+            } else { dend_margin <- theme_dend$plot.margin }
+        }
+        ddplot <- ddplot +
+            ggplot2::theme(plot.margin = dend_margin) +
+            ggplot2::scale_y_reverse(expand = c(0, 0)) +
+            ggplot2::coord_flip()
+        if(reverse.x){
+            ddplot <- ddplot + ggplot2::scale_x_reverse(expand = c(0, 0))
+        } else {
+            ddplot <- ddplot + ggplot2::scale_x_continuous(expand = c(0, 0)) }
+    } else { stop("dendrogram's orientation value not supported by ggdend().") }
+    return(ddplot)
 }
 
 
@@ -253,36 +262,40 @@ ggdend <- function(df, orientation, reverse.x = FALSE, theme_dend = NULL){
 #' @keywords internal
 
 basic.ggplot.tri <- function(
-  melt.tri, grid.col, grid.thickness, lgd.title, lgd.text, lgd.pal, min_tri,
-  max_tri, lgd.breaks, lgd.round, lgd.ticks, lgd.nbin, lgd.height, lgd.width,
-  rasteri, lgd.ticks.linewidth, lgd.frame.col, lgd.frame.linewidth, diag.col,
-  set.lgd.title){
-  #Fix BiocCheck() complaining about these objects initialization
-  Var1 <- NULL
-  Var2 <- NULL
-  value <- NULL
-  #Create the triangle plot
-  ggplot2::ggplot() +
-    ggplot2::geom_tile(
-      data = melt.tri, ggplot2::aes(x = Var1, y = Var2, fill = value),
-      color = grid.col, size=grid.thickness) +
-    ggplot2::theme(
-      legend.title = lgd.title, legend.text = lgd.text,
-      legend.justification = c(1, 0), plot.margin = ggplot2::margin(0, 0, 0, 0),
-      panel.grid = ggplot2::element_blank(),
-      panel.background = ggplot2::element_rect(fill = "transparent"),
-      plot.background = ggplot2::element_rect(fill = "transparent")) +
-    ggplot2::scale_x_discrete(position = "top",expand = c(0, 0)) +
-    ggplot2::scale_y_discrete(expand = c(0, 0)) +
-    ggplot2::scale_fill_gradientn(
-      colours = lgd.pal, breaks = seq(min_tri, max_tri,length.out = lgd.breaks),
-      labels = round(seq(min_tri, max_tri, length.out = lgd.breaks), lgd.round),
-      guide = ggplot2::guide_colourbar(
-        ticks = lgd.ticks, nbin = lgd.nbin, barheight = lgd.height,
-        label = TRUE, barwidth = lgd.width, raster = rasteri,
-        ticks.linewidth = lgd.ticks.linewidth, frame.colour = lgd.frame.col,
-        frame.linewidth = lgd.frame.linewidth), na.value = diag.col,
-      limits = c(min_tri, max_tri), name = set.lgd.title)
+    melt.tri, grid.col, grid.thickness, lgd.title, lgd.text, lgd.pal, min_tri,
+    max_tri, lgd.breaks, lgd.round, lgd.ticks, lgd.nbin, lgd.height, lgd.width,
+    rasteri, lgd.ticks.linewidth, lgd.frame.col, lgd.frame.linewidth, diag.col,
+    set.lgd.title){
+    #Fix BiocCheck() complaining about these objects initialization
+    Var1 <- NULL
+    Var2 <- NULL
+    value <- NULL
+    #Create the triangle plot
+    ggplot2::ggplot() +
+        ggplot2::geom_tile(
+            data = melt.tri, ggplot2::aes(x = Var1, y = Var2, fill = value),
+            color = grid.col, size=grid.thickness) +
+        ggplot2::theme(
+            legend.title = lgd.title, legend.text = lgd.text,
+            legend.justification = c(1, 0),
+            plot.margin = ggplot2::margin(0, 0, 0, 0),
+            panel.grid = ggplot2::element_blank(),
+            panel.background = ggplot2::element_rect(fill = "transparent"),
+            plot.background = ggplot2::element_rect(fill = "transparent")) +
+        ggplot2::scale_x_discrete(position = "top",expand = c(0, 0)) +
+        ggplot2::scale_y_discrete(expand = c(0, 0)) +
+        ggplot2::scale_fill_gradientn(
+            colours = lgd.pal,
+            breaks = seq(min_tri, max_tri,length.out = lgd.breaks),
+            labels = round(
+                seq(min_tri, max_tri, length.out = lgd.breaks), lgd.round),
+            guide = ggplot2::guide_colourbar(
+                ticks = lgd.ticks, nbin = lgd.nbin, barheight = lgd.height,
+                label = TRUE, barwidth = lgd.width, raster = rasteri,
+                ticks.linewidth = lgd.ticks.linewidth,
+                frame.colour = lgd.frame.col,
+                frame.linewidth = lgd.frame.linewidth), na.value = diag.col,
+            limits = c(min_tri, max_tri), name = set.lgd.title)
 }
 
 
@@ -302,24 +315,28 @@ basic.ggplot.tri <- function(
 #' @keywords internal
 
 map.cat2pal <- function(origin.grps, groups, annot.pal){
-  if(length(groups) == length(annot.pal)){ #if annotations match palettes
-    #Map groups to palettes
-    ls.dt.grp.pal <- Map(data.table::data.table, "Grps" = origin.grps,
-                         "Cols" = annot.pal, stringsAsFactors = FALSE)
-    col_table <- lapply(seq_along(groups), function(i){
-      if(length(groups[[i]]) == length(annot.pal[[i]])){
-        #if number of groups match number of colors
-        ls.dt.grp.pal[[i]][match(groups[[i]], ls.dt.grp.pal[[i]]$Grps), ]
-      } else {
-        stop(paste0(
-          "The length of annotation '", names(groups)[i],
-          "' levels does not match the length of the corresponding palette."))
-      }
-    })
-  } else {
-    stop("The number of annotations does not match the number of palettes provided.")
-  }
-  return(col_table)
+    if(length(groups) == length(annot.pal)){ #if annotations match palettes
+        #Map groups to palettes
+        ls.dt.grp.pal <- Map(
+            data.table::data.table, "Grps" = origin.grps, "Cols" = annot.pal,
+            stringsAsFactors = FALSE)
+        col_table <- lapply(seq_along(groups), function(i){
+            if(length(groups[[i]]) == length(annot.pal[[i]])){
+                #if number of groups match number of colors
+                ls.dt.grp.pal[[i]][
+                    match(groups[[i]], ls.dt.grp.pal[[i]]$Grps), ]
+            } else {
+                stop(paste0(
+                    "The length of annotation '", names(groups)[i],
+                    "' levels does not match the length of the corresponding ",
+                    "palette."))
+            }
+        })
+    } else {
+        stop(paste("The number of annotations does not match the number of",
+                   "palettes provided."))
+    }
+    return(col_table)
 }
 
 
@@ -336,24 +353,24 @@ map.cat2pal <- function(origin.grps, groups, annot.pal){
 #' @keywords internal
 
 build.col_table <- function(annot.grps, annot.pal){
-  #Create list of groups in their original order
-  origin.grps <- lapply(X = annot.grps, FUN = function(i){
-    if(is.factor(i)){ levels(i) } else { levels(as.factor(i)) }
-  })
-  #Update levels following the new order of the annotation
-  groups <- lapply(X = lapply(X = annot.grps, FUN = function(i){
-    factor(x = i, levels =  unique(i))}), FUN = levels)
-  #Create list of color tables
-  if(is.list(annot.pal)){
-    #Map categories to palettes
-    col_table <- BiocompR::map.cat2pal(origin.grps, groups, annot.pal)
-  } else if(!is.list(annot.pal)){
-    col_table <- lapply(X = origin.grps, FUN = function(grp){
-      data.table::data.table(
-        "Grps" = grp, "Cols" = annot.pal, stringsAsFactors = FALSE)
+    #Create list of groups in their original order
+    origin.grps <- lapply(X = annot.grps, FUN = function(i){
+        if(is.factor(i)){ levels(i) } else { levels(as.factor(i)) }
     })
-  }
-  return(col_table)
+    #Update levels following the new order of the annotation
+    groups <- lapply(X = lapply(X = annot.grps, FUN = function(i){
+        factor(x = i, levels =  unique(i))}), FUN = levels)
+    #Create list of color tables
+    if(is.list(annot.pal)){
+        #Map categories to palettes
+        col_table <- BiocompR::map.cat2pal(origin.grps, groups, annot.pal)
+    } else if(!is.list(annot.pal)){
+        col_table <- lapply(X = origin.grps, FUN = function(grp){
+            data.table::data.table(
+                "Grps" = grp, "Cols" = annot.pal, stringsAsFactors = FALSE)
+        })
+    }
+    return(col_table)
 }
 
 
@@ -367,9 +384,9 @@ build.col_table <- function(annot.grps, annot.pal){
 #' @keywords internal
 
 get.len.legends <- function(col_table){
-  lgd_sizes <- unlist(lapply(X = col_table, FUN = nrow))
-  lgd_sizes <- lgd_sizes + 1
-  return(lgd_sizes)
+    lgd_sizes <- unlist(lapply(X = col_table, FUN = nrow))
+    lgd_sizes <- lgd_sizes + 1
+    return(lgd_sizes)
 }
 
 
@@ -399,41 +416,41 @@ get.len.legends <- function(col_table){
 #' # generating a new column if there is not enough space.
 
 build.layout <- function(col_table, height.lgds.space){
-  # Calculate legends length
-  lgd_sizes <- BiocompR::get.len.legends(col_table = col_table)
-  #Compute the number of columns necessary for display of large legends
-  ncol.by.lgd <- ceiling(lgd_sizes/height.lgds.space)
-  # Calculate spatial disposition of legends based on their size and the number
-  # of columns they occupy to create layout matrix by column
-  legend_ids <- seq(length(col_table))
-  columns <- lapply(X = seq(length(col_table)), FUN = function(i){
-    if(i %in% legend_ids){
-      lgd_position <- which(cumsum(lgd_sizes) <= height.lgds.space)
-      if(length(lgd_position) == 0){
-        lgd_position <- which(
-          ceiling(cumsum(lgd_sizes)/ncol.by.lgd[1]) <= height.lgds.space)
-      }
-      col_lgd <- legend_ids[lgd_position]
-      col_mat <- rep(x = rep(x = col_lgd, times = ceiling(
-        lgd_sizes[lgd_position]/ncol.by.lgd[1])), times = ncol.by.lgd[1])
-      col_mat <- matrix(data = col_mat, ncol = ncol.by.lgd[1])
-      #Make NA matrix to complete missing space
-      NAmat <- matrix(
-        nrow = height.lgds.space - nrow(col_mat), ncol = ncol.by.lgd[1])
-      #Rbind legend matrix with NA matrix
-      col_mat <- rbind(col_mat, NAmat)
-      #Empty vectors from the legend previously used
-      base::`<<-` (lgd_sizes, lgd_sizes[-lgd_position])
-      base::`<<-` (legend_ids, legend_ids[-lgd_position])
-      base::`<<-` (ncol.by.lgd, ncol.by.lgd[-lgd_position])
-      #Return column matrix
-      col_mat
-    }
-  })
-  #Cbind all columns
-  mlayout <- do.call(cbind, columns)
-  #Return legends layout
-  return(mlayout)
+    # Calculate legends length
+    lgd_sizes <- BiocompR::get.len.legends(col_table = col_table)
+    #Compute the number of columns necessary for display of large legends
+    ncol.by.lgd <- ceiling(lgd_sizes/height.lgds.space)
+    # Calculate spatial disposition of legends based on their size and the
+    # number of columns they occupy to create layout matrix by column
+    legend_ids <- seq(length(col_table))
+    columns <- lapply(X = seq(length(col_table)), FUN = function(i){
+        if(i %in% legend_ids){
+            lgd_position <- which(cumsum(lgd_sizes) <= height.lgds.space)
+            if(length(lgd_position) == 0){
+                lgd_position <- which(ceiling(cumsum(
+                    lgd_sizes)/ncol.by.lgd[1]) <= height.lgds.space)
+            }
+            col_lgd <- legend_ids[lgd_position]
+            col_mat <- rep(x = rep(x = col_lgd, times = ceiling(lgd_sizes[
+                lgd_position]/ncol.by.lgd[1])), times = ncol.by.lgd[1])
+            col_mat <- matrix(data = col_mat, ncol = ncol.by.lgd[1])
+            #Make NA matrix to complete missing space
+            NAmat <- matrix(
+                nrow = height.lgds.space - nrow(col_mat), ncol = ncol.by.lgd[1])
+            #Rbind legend matrix with NA matrix
+            col_mat <- rbind(col_mat, NAmat)
+            #Empty vectors from the legend previously used
+            base::`<<-` (lgd_sizes, lgd_sizes[-lgd_position])
+            base::`<<-` (legend_ids, legend_ids[-lgd_position])
+            base::`<<-` (ncol.by.lgd, ncol.by.lgd[-lgd_position])
+            #Return column matrix
+            col_mat
+        }
+    })
+    #Cbind all columns
+    mlayout <- do.call(cbind, columns)
+    #Return legends layout
+    return(mlayout)
 }
 
 
@@ -455,44 +472,47 @@ build.layout <- function(col_table, height.lgds.space){
 #' @export
 
 basic.sidebar <- function(
-  data, palette, annot.sep = 0, annot.cut = 0, lgd.ncol = 1, facet = NULL){
-  #Fix BiocCheck() complaining about these objects initialization
-  .id <- NULL
-  facet.annot <- NULL
-  Groups <- NULL
-  Samples <- NULL
-  #Create a basic sidebar plot
-  basic <- ggplot2::ggplot() +
-    ggplot2::theme(
-      legend.justification = c(1, 1),
-      legend.spacing.y = ggplot2::unit(0.05, 'cm'),
-      legend.margin = ggplot2::margin(0, 0.8, 0, 0, unit = "cm"),
-      legend.box.margin = ggplot2::margin(3, 0, 0, 0, unit = "cm"),
-      axis.text = ggplot2::element_text(size = 12),
-      panel.grid = ggplot2::element_blank(),
-      plot.margin = ggplot2::margin(0, 0, 0, 0)) +
-    ggplot2::scale_fill_manual(values = as.character(palette)) +
-    ggplot2::guides(fill = ggplot2::guide_legend(ncol = lgd.ncol, byrow = TRUE))
-  if(!is.null(facet)){
-    #Add faceting
-    dt.facet <- data[.id == facet]
-    dt.facet[, `:=`(facet.annot, Groups)]
-    data <- merge(x = data, y = dt.facet[, c("Samples", "facet.annot"), ],
-                  by = "Samples", all.x = TRUE)
-    #Plot annotation bar with facet
-    basic <- basic + ggplot2::geom_tile(data = data, mapping = ggplot2::aes(
-      x = Samples, y = .id, fill = Groups, height = 1 - annot.sep,
-      width = 1 - annot.cut)) +
-      ggplot2::facet_grid(. ~ facet.annot, scales = "free", space = "free") +
-      ggplot2::theme(
-        panel.spacing = ggplot2::unit(0, "lines"),
-        strip.background = ggplot2::element_rect(color = "black", size = 0.5))
-  } else {
-    basic <- basic + ggplot2::geom_tile(data = data, mapping = ggplot2::aes(
-      x = Samples, y = .id, fill = Groups, height = 1 - annot.sep,
-      width = 1 - annot.cut))
-  }
-  return(basic)
+    data, palette, annot.sep = 0, annot.cut = 0, lgd.ncol = 1, facet = NULL){
+    #Fix BiocCheck() complaining about these objects initialization
+    .id <- NULL
+    facet.annot <- NULL
+    Groups <- NULL
+    Samples <- NULL
+    #Create a basic sidebar plot
+    basic <- ggplot2::ggplot() +
+        ggplot2::theme(
+            legend.justification = c(1, 1),
+            legend.spacing.y = ggplot2::unit(0.05, 'cm'),
+            legend.margin = ggplot2::margin(0, 0.8, 0, 0, unit = "cm"),
+            legend.box.margin = ggplot2::margin(3, 0, 0, 0, unit = "cm"),
+            axis.text = ggplot2::element_text(size = 12),
+            panel.grid = ggplot2::element_blank(),
+            plot.margin = ggplot2::margin(0, 0, 0, 0)) +
+        ggplot2::scale_fill_manual(values = as.character(palette)) +
+        ggplot2::guides(fill = ggplot2::guide_legend(
+            ncol = lgd.ncol, byrow = TRUE))
+    if(!is.null(facet)){
+        #Add faceting
+        dt.facet <- data[.id == facet]
+        dt.facet[, `:=`(facet.annot, Groups)]
+        data <- merge(x = data, y = dt.facet[, c("Samples", "facet.annot"), ],
+                      by = "Samples", all.x = TRUE)
+        #Plot annotation bar with facet
+        basic <- basic + ggplot2::geom_tile(data = data, mapping = ggplot2::aes(
+            x = Samples, y = .id, fill = Groups, height = 1 - annot.sep,
+            width = 1 - annot.cut)) +
+            ggplot2::facet_grid(
+                . ~ facet.annot, scales = "free", space = "free") +
+            ggplot2::theme(
+                panel.spacing = ggplot2::unit(0, "lines"),
+                strip.background = ggplot2::element_rect(
+                    color = "black", size = 0.5))
+    } else {
+        basic <- basic + ggplot2::geom_tile(data = data, mapping = ggplot2::aes(
+            x = Samples, y = .id, fill = Groups, height = 1 - annot.sep,
+            width = 1 - annot.cut))
+    }
+    return(basic)
 }
 
 
@@ -558,156 +578,162 @@ basic.sidebar <- function(
 #' @export
 
 plot.col.sidebar <- function(
-  sample.names, annot.grps, annot.pal, annot.pos = "top", annot.sep = 0,
-  annot.cut = 0, merge.lgd = FALSE, right = FALSE, lgd.name = "Legends",
-  lgd.ncol = 1, theme_legend = ggplot2::theme(
-    legend.title = ggplot2::element_blank(),
-    legend.text = ggplot2::element_blank()),
-  theme_annot = ggplot2::theme(
-    axis.text.x = ggplot2::element_text(size = 12),
-    axis.text.y = ggplot2::element_text(size = 12)),
-  set.x.title, set.y.title, dendro.pos, facet = NULL){
-  #Fix BiocCheck() complaining about these objects initialization
-  Grps <- NULL
-  Cols <- NULL
-  .id <- NULL
-  #Create list of groups in their original order
-  origin.grps <- lapply(X = annot.grps, FUN = function(i){
-    if(is.factor(i)){ levels(i) } else { levels(as.factor(i)) }
-  })
-  #Update levels following the new order of the annotation
-  groups <- lapply(X = lapply(X = annot.grps, FUN = function(i){
-    factor(x = i, levels =  unique(i))}), FUN = levels)
-  #Create list of color tables
-  if(is.list(annot.pal)) { #If a list of palettes is provided
-    #Map categories to palettes
-    col_table <- BiocompR::map.cat2pal(origin.grps, groups, annot.pal)
-  } else if(!is.list(annot.pal)){ #if a single palette is provided
-    #Map groups to the same palette
-    ls.df.grp.pal <- lapply(X = origin.grps, FUN = function(grp){
-      data.frame("Grps" = grp, "Cols" = annot.pal, stringsAsFactors = FALSE)
+    sample.names, annot.grps, annot.pal, annot.pos = "top", annot.sep = 0,
+    annot.cut = 0, merge.lgd = FALSE, right = FALSE, lgd.name = "Legends",
+    lgd.ncol = 1, theme_legend = ggplot2::theme(
+        legend.title = ggplot2::element_blank(),
+        legend.text = ggplot2::element_blank()),
+    theme_annot = ggplot2::theme(
+        axis.text.x = ggplot2::element_text(size = 12),
+        axis.text.y = ggplot2::element_text(size = 12)),
+    set.x.title, set.y.title, dendro.pos, facet = NULL){
+    #Fix BiocCheck() complaining about these objects initialization
+    Grps <- NULL
+    Cols <- NULL
+    .id <- NULL
+    #Create list of groups in their original order
+    origin.grps <- lapply(X = annot.grps, FUN = function(i){
+        if(is.factor(i)){ levels(i) } else { levels(as.factor(i)) }
     })
-    col_table <- lapply(seq_along(groups), function(i){
-      if(length(groups[[i]]) == length(annot.pal)){ #if groups match colors
-        ls.df.grp.pal[[i]][match(groups[[i]], ls.df.grp.pal[[i]]$Grps), ]
-        # data.frame("Grps" = groups[[i]], "Cols" = annot.pal)
-      } else {
-        stop(paste0("The length of annotation '", names(groups)[i],
-                    "' levels do not match the length of the corresponding ",
-                    "palette."))}
-    })
-  } else { #If not a list or a vector
-    stop("Unknown type for 'annot.pal'. 'annot.pal' should be either a list or a vector.")
-  }
-  #Create list of annotation data.frames
-  dframe.annot <- lapply(annot.grps, function(i){
-    data.frame("Samples" = sample.names, "Groups" = i)
-  })
-  #Order samples following the correlation order provided and categories by
-  # alphabetical order
-  dframe.annot <- lapply(dframe.annot, function(i){
-    i[["Samples"]] <- factor(i[["Samples"]], levels = i[["Samples"]])
-    i[["Groups"]] <- factor(i[["Groups"]], levels = unique(i[["Groups"]]))
-    i
-  })
-  #Rbind all annotations
-  dframe.annot <- data.table::rbindlist(dframe.annot, idcol = TRUE)
-  #Convert .id as factors
-  dframe.annot$.id <- factor(
-    x = dframe.annot$.id, levels = unique(dframe.annot$.id))
-  if(annot.pos == "top"){ #Change order of levels
-    dframe.annot$.id <- factor(
-      x = dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
-  }
-  #Check color tables
-  col_table <- lapply(X = col_table, FUN = function(tbl){
-    if(any(duplicated(tbl$Cols))){ #Check palette consistency
-      stop("1 color in a palette has been associated to more than 1 group.")
-    }
-    if(any(duplicated(tbl$Grps))){ #Check annotation consistency
-      warning("Duplicated group name provided. Removing duplicated...")
-      tbl <- tbl[!duplicated(Grps)]
-    } else { tbl }
-  })
-  col_table <- data.table::rbindlist(col_table, idcol = TRUE)
-  if(!is.list(annot.pal)){
-    if(any(duplicated(col_table$Cols))){ #Check palette consistency
-      col_table <- col_table[!duplicated(x = Cols)]
-    }
-  }
-  #Plot color sidebars
-  col_sidebar <- BiocompR::basic.sidebar(
-    data = dframe.annot, palette = col_table$Cols, annot.sep = annot.sep,
-    annot.cut = annot.cut, facet = facet, lgd.ncol = lgd.ncol[1])
-  #Add legend theme parameters if some
-  col_sidebar <- col_sidebar + theme_legend
-  #Modify base plot following its position
-  if(annot.pos == "top"){
-    theme_annot <- theme_annot + ggplot2::theme(
-      axis.text.x.top = theme_annot$axis.text.x,
-      axis.text.x = ggplot2::element_blank())
-    col_sidebar <- col_sidebar + theme_annot +
-      ggplot2::scale_x_discrete(expand = c(0, 0), position = "top") +
-      ggplot2::xlab(set.x.title)
-    if(right){
-      col_sidebar <- col_sidebar +
-        ggplot2::scale_y_discrete(position = 'right', expand = c(0, 0))
-    } else {
-      col_sidebar <- col_sidebar + ggplot2::scale_y_discrete(expand = c(0, 0))
-    }
-    if(dendro.pos != "top"){
-      theme_annot <- theme_annot +
-        ggplot2::theme(axis.title.y = ggplot2::element_blank())
-      col_sidebar <- col_sidebar + theme_annot
-    } else {
-      theme_annot <- theme_annot +
-        ggplot2::theme(axis.title = ggplot2::element_blank())
-      col_sidebar <- col_sidebar + theme_annot
-    }
-  } else if(annot.pos == "left"){
-    theme_annot <- theme_annot + ggplot2::theme(
-      axis.text.x.top = theme_annot$axis.text.x,
-      axis.text.x = ggplot2::element_blank())
-    col_sidebar <- col_sidebar + ggplot2::coord_flip() + theme_annot +
-      ggplot2::scale_x_discrete(expand = c(0, 0)) +
-      ggplot2::scale_y_discrete(expand = c(0, 0), position = "right") +
-      ggplot2::xlab(set.y.title)
-    if(dendro.pos != "left"){
-      col_sidebar <- col_sidebar + theme_annot +
-        ggplot2::theme(axis.title.x = ggplot2::element_blank())
-    } else {
-      col_sidebar <- col_sidebar + theme_annot +
-        ggplot2::theme(axis.title = ggplot2::element_blank())
-    }
-  }
-  if(merge.lgd){ # Do not split legends
-    sidebar.lgd <- list(
-      BiocompR::get.lgd(col_sidebar + ggplot2::labs(fill = lgd.name)))
-  } else { # Split legends and return a list of legends
-    if(annot.pos == "top"){
-      dframe.annot$.id <- factor(
-        dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
-    }
-    #Generate separate legends if more than 1 palette available or if only 1
-    # annotation is used
-    if((is.list(annot.pal) & length(annot.pal) > 1) |
-       length(levels(dframe.annot$.id)) == 1){
-      #Get all legends separately
-      sidebar.lgd <- lapply(
-        X = seq_along(levels(dframe.annot$.id)), FUN = function(i){
-          BiocompR::get.lgd(
-            BiocompR::basic.sidebar(
-              data = dframe.annot[.id == levels(dframe.annot$.id)[i]],
-              palette = col_table[.id == i]$Cols, lgd.ncol = lgd.ncol[i]) +
-              theme_legend + ggplot2::labs(fill = levels(dframe.annot$.id)[i]))
+    #Update levels following the new order of the annotation
+    groups <- lapply(X = lapply(X = annot.grps, FUN = function(i){
+        factor(x = i, levels =  unique(i))}), FUN = levels)
+    #Create list of color tables
+    if(is.list(annot.pal)) { #If a list of palettes is provided
+        #Map categories to palettes
+        col_table <- BiocompR::map.cat2pal(origin.grps, groups, annot.pal)
+    } else if(!is.list(annot.pal)){ #if a single palette is provided
+        #Map groups to the same palette
+        ls.df.grp.pal <- lapply(X = origin.grps, FUN = function(grp){
+            data.frame(
+                "Grps" = grp, "Cols" = annot.pal, stringsAsFactors = FALSE)
         })
-    } else {
-      stop("Cannot generate separated legends if only one annotation palette is given.")
+        col_table <- lapply(seq_along(groups), function(i){
+            if(length(groups[[i]]) == length(annot.pal)){
+                #If groups match colors
+                ls.df.grp.pal[[i]][
+                    match(groups[[i]], ls.df.grp.pal[[i]]$Grps), ]
+            } else {
+                stop(paste0("The length of annotation '", names(groups)[i],
+                            "' levels do not match the length of the ",
+                            "corresponding palette."))}
+        })
+    } else { #If not a list or a vector
+        stop(paste("Unknown type for 'annot.pal'. 'annot.pal' should be either",
+                   "a list or a vector."))
     }
-  }
-  return(list("sidebar" = col_sidebar +
-                ggplot2::theme(legend.position = "none"),
-              "legends" = sidebar.lgd))
+    #Create list of annotation data.frames
+    dframe.annot <- lapply(annot.grps, function(i){
+        data.frame("Samples" = sample.names, "Groups" = i)
+    })
+    #Order samples following the correlation order provided and categories by
+    # alphabetical order
+    dframe.annot <- lapply(dframe.annot, function(i){
+        i[["Samples"]] <- factor(i[["Samples"]], levels = i[["Samples"]])
+        i[["Groups"]] <- factor(i[["Groups"]], levels = unique(i[["Groups"]]))
+        i
+    })
+    #Rbind all annotations
+    dframe.annot <- data.table::rbindlist(dframe.annot, idcol = TRUE)
+    #Convert .id as factors
+    dframe.annot$.id <- factor(
+        x = dframe.annot$.id, levels = unique(dframe.annot$.id))
+    if(annot.pos == "top"){ #Change order of levels
+        dframe.annot$.id <- factor(
+            x = dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
+    }
+    #Check color tables
+    col_table <- lapply(X = col_table, FUN = function(tbl){
+        if(any(duplicated(tbl$Cols))){ #Check palette consistency
+            stop("1 color in a palette has been associated to more than 1",
+                 "group.")
+        }
+        if(any(duplicated(tbl$Grps))){ #Check annotation consistency
+            warning("Duplicated group name provided. Removing duplicated...")
+            tbl <- tbl[!duplicated(Grps)]
+        } else { tbl }
+    })
+    col_table <- data.table::rbindlist(col_table, idcol = TRUE)
+    if(!is.list(annot.pal)){
+        if(any(duplicated(col_table$Cols))){ #Check palette consistency
+            col_table <- col_table[!duplicated(x = Cols)]
+        }
+    }
+    #Plot color sidebars
+    col_sidebar <- BiocompR::basic.sidebar(
+        data = dframe.annot, palette = col_table$Cols, annot.sep = annot.sep,
+        annot.cut = annot.cut, facet = facet, lgd.ncol = lgd.ncol[1])
+    #Add legend theme parameters if some
+    col_sidebar <- col_sidebar + theme_legend
+    #Modify base plot following its position
+    if(annot.pos == "top"){
+        theme_annot <- theme_annot + ggplot2::theme(
+            axis.text.x.top = theme_annot$axis.text.x,
+            axis.text.x = ggplot2::element_blank())
+        col_sidebar <- col_sidebar + theme_annot +
+            ggplot2::scale_x_discrete(expand = c(0, 0), position = "top") +
+            ggplot2::xlab(set.x.title)
+        if(right){
+            col_sidebar <- col_sidebar +
+                ggplot2::scale_y_discrete(position = 'right', expand = c(0, 0))
+        } else {
+            col_sidebar <- col_sidebar +
+                ggplot2::scale_y_discrete(expand = c(0, 0))
+        }
+        if(dendro.pos != "top"){
+            theme_annot <- theme_annot +
+                ggplot2::theme(axis.title.y = ggplot2::element_blank())
+            col_sidebar <- col_sidebar + theme_annot
+        } else {
+            theme_annot <- theme_annot +
+                ggplot2::theme(axis.title = ggplot2::element_blank())
+            col_sidebar <- col_sidebar + theme_annot
+        }
+    } else if(annot.pos == "left"){
+        theme_annot <- theme_annot + ggplot2::theme(
+            axis.text.x.top = theme_annot$axis.text.x,
+            axis.text.x = ggplot2::element_blank())
+        col_sidebar <- col_sidebar + ggplot2::coord_flip() + theme_annot +
+            ggplot2::scale_x_discrete(expand = c(0, 0)) +
+            ggplot2::scale_y_discrete(expand = c(0, 0), position = "right") +
+            ggplot2::xlab(set.y.title)
+        if(dendro.pos != "left"){
+            col_sidebar <- col_sidebar + theme_annot +
+                ggplot2::theme(axis.title.x = ggplot2::element_blank())
+        } else {
+            col_sidebar <- col_sidebar + theme_annot +
+                ggplot2::theme(axis.title = ggplot2::element_blank())
+        }
+    }
+    if(merge.lgd){ # Do not split legends
+        sidebar.lgd <- list(
+            BiocompR::get.lgd(col_sidebar + ggplot2::labs(fill = lgd.name)))
+    } else { # Split legends and return a list of legends
+        if(annot.pos == "top"){
+            dframe.annot$.id <- factor(
+                dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
+        }
+        #Generate separate legends if more than 1 palette available or if only 1
+        # annotation is used
+        if((is.list(annot.pal) & length(annot.pal) > 1) |
+           length(levels(dframe.annot$.id)) == 1){
+            #Get all legends separately
+            sidebar.lgd <- lapply(
+                X = seq_along(levels(dframe.annot$.id)), FUN = function(i){
+                    BiocompR::get.lgd(BiocompR::basic.sidebar(
+                        data = dframe.annot[.id == levels(dframe.annot$.id)[i]],
+                        palette = col_table[.id == i]$Cols,
+                        lgd.ncol = lgd.ncol[i]) + theme_legend + ggplot2::labs(
+                            fill = levels(dframe.annot$.id)[i]))
+                })
+        } else {
+            stop(paste("Cannot generate separated legends if only one",
+                       "annotation palette is given."))
+        }
+    }
+    return(list("sidebar" = col_sidebar +
+                    ggplot2::theme(legend.position = "none"),
+                "legends" = sidebar.lgd))
 }
 
 
@@ -727,23 +753,23 @@ plot.col.sidebar <- function(
 #' @references \href{https://github.com/tidyverse/ggplot2/wiki/Align-two-plots-on-a-page}{Align two plots on a page - Mara Averick}
 
 resize.grobs <- function(ls.grobs, dimensions, start.unit, end.unit){
-  #Get dimension units from the list of grobs to redimension
-  ls.dim <- lapply(X = ls.grobs, FUN = function(i){
-    if(length(i[[dimensions]]) < end.unit){
-      i[[dimensions]][start.unit:length(i[[dimensions]])]
-    } else { i[[dimensions]][start.unit:end.unit] }
-  })
-  #Calculate maximum of all unit objects including the main grob.
-  max.dim <- eval(parse(
-    text = paste("grid::unit.pmax(",paste(paste(
-      rep("ls.dim[[",length(ls.dim)), seq(length(ls.dim)),"]]", sep = ""),
-      collapse = ", "), ")", sep = "")))
-  #Apply changes to grobs dimensions
-  ls.grobs <- lapply(X = ls.grobs, FUN = function(i){
-    i[[dimensions]][start.unit:end.unit] <- as.list(max.dim)
-    i
-  })
-  return(ls.grobs)
+    #Get dimension units from the list of grobs to redimension
+    ls.dim <- lapply(X = ls.grobs, FUN = function(i){
+        if(length(i[[dimensions]]) < end.unit){
+            i[[dimensions]][start.unit:length(i[[dimensions]])]
+        } else { i[[dimensions]][start.unit:end.unit] }
+    })
+    #Calculate maximum of all unit objects including the main grob.
+    max.dim <- eval(parse(
+        text = paste("grid::unit.pmax(",paste(paste(
+            rep("ls.dim[[",length(ls.dim)), seq(length(ls.dim)),"]]", sep = ""),
+            collapse = ", "), ")", sep = "")))
+    #Apply changes to grobs dimensions
+    ls.grobs <- lapply(X = ls.grobs, FUN = function(i){
+        i[[dimensions]][start.unit:end.unit] <- as.list(max.dim)
+        i
+    })
+    return(ls.grobs)
 }
 
 
@@ -761,16 +787,16 @@ resize.grobs <- function(ls.grobs, dimensions, start.unit, end.unit){
 #' @export
 
 resize.grob.oneway <- function(grob1, grob2, dimensions, positions){
-  #Get dimension units from the list of grobs to redimension
-  if(max(positions) > length(grob2[[dimensions]]) | min(positions) < 1){
-    stop("positions out of range in grob2.")
-  }
-  if(max(positions) > length(grob1[[dimensions]])){
-    warning("some positions out of range in grob1 ignored.")
-    positions <- positions[positions <= length(grob1[[dimensions]])]
-  }
-  grob1[[dimensions]][positions] <- grob2[[dimensions]][positions]
-  return(grob1)
+    #Get dimension units from the list of grobs to redimension
+    if(max(positions) > length(grob2[[dimensions]]) | min(positions) < 1){
+        stop("positions out of range in grob2.")
+    }
+    if(max(positions) > length(grob1[[dimensions]])){
+        warning("some positions out of range in grob1 ignored.")
+        positions <- positions[positions <= length(grob1[[dimensions]])]
+    }
+    grob1[[dimensions]][positions] <- grob2[[dimensions]][positions]
+    return(grob1)
 }
 
 
@@ -787,18 +813,18 @@ resize.grob.oneway <- function(grob1, grob2, dimensions, positions){
 #' @export
 
 raster.ggplot.to.grob <- function(gg.plot, filter = "Lanczos"){
-  #Catch heatmap in magick::image_graph()
-  fig <- magick::image_graph(width = 2160, height = 2160, res = 96)
-  print(gg.plot)
-  grDevices::dev.off()
-  rastered <- magick::image_resize(
-    image = fig, geometry = "1080x1080", filter = filter)
-  #Create raster grob
-  raster.grob <- grid::rasterGrob(
-    rastered, width = grid::unit(1, "npc"), height = grid::unit(1, "npc"),
-    interpolate = TRUE)
-  #Return grob annotation
-  return(raster.grob)
+    #Catch heatmap in magick::image_graph()
+    fig <- magick::image_graph(width = 2160, height = 2160, res = 96)
+    print(gg.plot)
+    grDevices::dev.off()
+    rastered <- magick::image_resize(
+        image = fig, geometry = "1080x1080", filter = filter)
+    #Create raster grob
+    raster.grob <- grid::rasterGrob(
+        rastered, width = grid::unit(1, "npc"), height = grid::unit(1, "npc"),
+        interpolate = TRUE)
+    #Return grob annotation
+    return(raster.grob)
 }
 
 
@@ -817,12 +843,12 @@ raster.ggplot.to.grob <- function(gg.plot, filter = "Lanczos"){
 #' @keywords internal
 
 annotation_custom2 <- function(
-  grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, data){
-  ggplot2::layer(
-    data = data, stat = ggplot2::StatIdentity,
-    position = ggplot2::PositionIdentity, geom = ggplot2:::GeomCustomAnn,
-    inherit.aes = TRUE, params = list(
-      grob = grob, xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax))
+    grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, data){
+    ggplot2::layer(
+        data = data, stat = ggplot2::StatIdentity,
+        position = ggplot2::PositionIdentity, geom = ggplot2::GeomCustomAnn,
+        inherit.aes = TRUE, params = list(
+            grob = grob, xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax))
 }
 
 
@@ -842,32 +868,33 @@ annotation_custom2 <- function(
 #' @keywords internal
 
 update_guide_colorbar <- function(
-  old_guide = ggplot2::guide_colorbar(), new_guide, forced_param = NULL){
-  new_guide <- lapply(X = names(old_guide), function(i){
-    #If any difference for the parameter between previous guide and new guide
-    if(isTRUE(all.equal(target = new_guide[[i]], current = old_guide[[i]]))){
-      if(!is.null(forced_param)){
-        if(i %in% names(forced_param)){
-          #If different, but also in forced param, keep forced value
-          forced_param[[i]]
+    old_guide = ggplot2::guide_colorbar(), new_guide, forced_param = NULL){
+    new_guide <- lapply(X = names(old_guide), function(i){
+        #If any difference for the parameter between previous and new guides
+        if(isTRUE(all.equal(
+            target = new_guide[[i]], current = old_guide[[i]]))){
+            if(!is.null(forced_param)){
+                if(i %in% names(forced_param)){
+                    #If different, but also in forced param, keep forced value
+                    forced_param[[i]]
+                } else {
+                    #if different, but not in forced param, update value
+                    old_guide[[i]]
+                }
+            } else { old_guide[[i]] } #No difference: Keep the reference value
         } else {
-          #if different, but not in forced param, update value
-          old_guide[[i]]
+            if(!is.null(forced_param)){
+                if(i %in% names(forced_param)){
+                    #If different, but also in forced param, keep forced value
+                    forced_param[[i]]
+                } else {
+                    #if different, but not in forced param, update value
+                    new_guide[[i]]
+                }
+            } else { new_guide[[i]] }
         }
-      } else { old_guide[[i]] } #No difference: Keep the reference value
-    } else {
-      if(!is.null(forced_param)){
-        if(i %in% names(forced_param)){
-          #If different, but also in forced param, keep forced value
-          forced_param[[i]]
-        } else {
-          #if different, but not in forced param, update value
-          new_guide[[i]]
-        }
-      } else { new_guide[[i]] }
-    }
-  })
-  names(new_guide) <- names(ggplot2::guide_colorbar())
-  class(new_guide) <- c("guide", "colorbar")
-  return(new_guide)
+    })
+    names(new_guide) <- names(ggplot2::guide_colorbar())
+    class(new_guide) <- c("guide", "colorbar")
+    return(new_guide)
 }

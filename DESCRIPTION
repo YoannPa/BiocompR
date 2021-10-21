@@ -1,6 +1,6 @@
 Package: BiocompR
 Title: BiocompR - Advanced visualizations for data comparison
-Version: 0.0.154
+Version: 0.0.155
 Authors@R: 
     person(given = "Yoann",
            family = "Pageaud",
@@ -13,16 +13,12 @@ Description: BiocompR is a R package built upon ggplot2, and using data.table.
              new kind of plots, provides a toolbox of functions to work with
              ggplot2 and grid objects, and ultimately, allows users to customize
              plots produced into publication ready figures.
-License: GPL-3.0
+License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 Depends:
     data.table,
     ggplot2
-biocViews:
-    Software,
-    Infrastructure,
-    DataRepresentation
 Imports:
     corrplot,
     egg,
@@ -41,3 +37,4 @@ Suggests:
     rmarkdown,
     magick
 VignetteBuilder: knitr
+biocViews: Software, Infrastructure, DataRepresentation

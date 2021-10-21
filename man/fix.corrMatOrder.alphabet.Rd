@@ -2,7 +2,8 @@
 % Please edit documentation in R/fused_plot.R
 \name{fix.corrMatOrder.alphabet}
 \alias{fix.corrMatOrder.alphabet}
-\title{Fixes a bug related to corrMatOrder when order parameter is set to 'alphabet'.}
+\title{Fixes a bug related to corrMatOrder when order parameter is set to
+'alphabet'.}
 \usage{
 fix.corrMatOrder.alphabet(cor.order, str)
 }
@@ -15,7 +16,8 @@ fix.corrMatOrder.alphabet(cor.order, str)
 A \code{type} object returned description.
 }
 \description{
-Fixes a bug related to corrMatOrder when order parameter is set to 'alphabet'.
+Fixes a bug related to corrMatOrder when order parameter is set to
+'alphabet'.
 }
 \author{
 Yoann Pageaud.
