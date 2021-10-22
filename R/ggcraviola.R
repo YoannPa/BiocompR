@@ -54,7 +54,7 @@
 #'                       (Default: lines.col = NA).
 #' @return A \code{gg} craviola plot.
 #' @author Yoann Pageaud.
-#' @importFrom data.table `:=`
+#' @importFrom data.table `:=` `.SD`
 #' @export
 #' @examples
 #' #Using a 'minimal' data.frame:
@@ -149,12 +149,12 @@ ggcraviola <- function(
       "A craviola cannot represent more than 2 distributions per group."))
   }
   #Check if all conditional variables are factors
-  if(!all(Annot.table[, lapply(X = data.table::.SD, FUN = is.factor)] == TRUE)){
+  if(!all(Annot.table[, lapply(X = .SD, FUN = is.factor)] == TRUE)){
     #Convert annotations and data conditional variable into factors
-    Annot.table <- Annot.table[, lapply(X = data.table::.SD, FUN = as.factor)]
+    Annot.table <- Annot.table[, lapply(X = .SD, FUN = as.factor)]
     cols <- colnames(data)[seq(3)]
     data[, (cols) := lapply(
-      X = data.table::.SD, FUN = as.factor), .SDcols = cols]
+      X = .SD, FUN = as.factor), .SDcols = cols]
   }
   original.var.col <- levels(Annot.table[[3]])
   if(length(levels(Annot.table[[3]])) > 2) {

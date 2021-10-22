@@ -41,7 +41,7 @@
 #'                           plot.
 #' @return A \code{gg} plot of a PCA biplot.
 #' @author Yoann Pageaud.
-#' @importFrom data.table `:=`
+#' @importFrom data.table `:=` `.SD`
 #' @export
 #' @examples
 #' #Draw the simplest biplot of PC1 and PC2:
@@ -171,8 +171,7 @@ ggbipca <- function(
       max(abs(dt.scaled.pc[["PCx"]]))/max(abs(loadings.data[["PCx"]])),
       max(abs(dt.scaled.pc[["PCy"]]))/max(abs(loadings.data[["PCy"]])))
     loadings.data[, 2:3 := lapply(
-      X = data.table::.SD,
-      FUN = function(i){ i * scaler * 0.8 }), .SDcols = c(2, 3)]
+        X = .SD, FUN = function(i){ i * scaler * 0.8 }), .SDcols = c(2, 3)]
 
     if(!is.null(top.load.by.quad)){
       #Compute loadings length
@@ -185,7 +184,7 @@ ggbipca <- function(
       #Keep top N longest arrows by quadrant
       loadings.data <- loadings.data[order(quadrant, -load.sqrd.length)]
       loadings.data <- loadings.data[, utils::head(
-        data.table::.SD, top.load.by.quad), by = quadrant]
+        .SD, top.load.by.quad), by = quadrant]
     }
     #Subset the loadings displayed if some cut-off
     if(!is.null(load.above.x) | !is.null(load.below.x)){
@@ -298,7 +297,7 @@ ggbipca <- function(
 #' @return A \code{gg} plot displaying all combinations of biplots for the
 #'         selected PCs.
 #' @author Yoann Pageaud.
-#' @importFrom data.table `:=`
+#' @importFrom data.table `:=` `.SD`
 #' @export
 #' @examples
 #' #Draw the simplest cross-biplot:
@@ -417,7 +416,7 @@ cross.biplot <- function(
       max(abs(dt.scaled.pc[[p]]))/max(abs(loadings.data[[p]]))
     })))
     loadings.data[, c(PC) := lapply(
-      X = data.table::.SD, FUN = function(i){ i * scaler * 0.8 }), .SDcols = PC]
+      X = .SD, FUN = function(i){ i * scaler * 0.8 }), .SDcols = PC]
     #Recreate loadings.data
     ls.dt.loadings <- lapply(X = seq(nrow(comb.pcs)), FUN = function(i){
       pc.select <- unlist(c("labels", comb.pcs[i]))
@@ -444,10 +443,10 @@ cross.biplot <- function(
       loadings.data[PCx < 0 & PCy < 0, quadrant := "bottom-left"]
       loadings.data[PCx < 0 & PCy >= 0, quadrant := "top-left"]
       #Keep top N longest arrows by quadrant and by PC combinations
-      loadings.data <- loadings.data[order(quadrant, -load.sqrd.length),
-                                     data.table::.SD, by = .(name.X, name.Y)]
+      loadings.data <- loadings.data[order(
+        quadrant, -load.sqrd.length), .SD, by = .(name.X, name.Y)]
       loadings.data <- loadings.data[, utils::head(
-        data.table::.SD, top.load.by.quad), by = .(name.X, name.Y, quadrant)]
+        .SD, top.load.by.quad), by = .(name.X, name.Y, quadrant)]
     }
   }
   #Recreate dt.scaled.pc

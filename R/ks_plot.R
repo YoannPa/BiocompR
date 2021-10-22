@@ -10,8 +10,8 @@
 
 #TODO Write help
 #TODO Test function
-ks.plot<-function(
-  data, ncores=1, order.select, order.method, axis.text.y, axis.text.x,
+ks.plot <- function(
+  data, ncores = 1, order.select, order.method, axis.text.y, axis.text.x,
   annot.grps, annot.pal, annot.size, lgd.title, lgd.breaks1, lgd.breaks2,
   lgd.nbin1, lgd.nbin2, lgd.pal1, lgd.pal2){
   #Run KS test

@@ -333,8 +333,9 @@ map.cat2pal <- function(origin.grps, groups, annot.pal){
             }
         })
     } else {
-        stop(paste("The number of annotations does not match the number of",
-                   "palettes provided."))
+        stop(paste(
+            "The number of annotations does not match the number of",
+            "palettes provided."))
     }
     return(col_table)
 }
@@ -495,8 +496,9 @@ basic.sidebar <- function(
         #Add faceting
         dt.facet <- data[.id == facet]
         dt.facet[, `:=`(facet.annot, Groups)]
-        data <- merge(x = data, y = dt.facet[, c("Samples", "facet.annot"), ],
-                      by = "Samples", all.x = TRUE)
+        data <- merge(
+            x = data, y = dt.facet[, c("Samples", "facet.annot"), ],
+            by = "Samples", all.x = TRUE)
         #Plot annotation bar with facet
         basic <- basic + ggplot2::geom_tile(data = data, mapping = ggplot2::aes(
             x = Samples, y = .id, fill = Groups, height = 1 - annot.sep,
@@ -619,8 +621,9 @@ plot.col.sidebar <- function(
                             "corresponding palette."))}
         })
     } else { #If not a list or a vector
-        stop(paste("Unknown type for 'annot.pal'. 'annot.pal' should be either",
-                   "a list or a vector."))
+        stop(paste(
+            "Unknown type for 'annot.pal'. 'annot.pal' should be either",
+            "a list or a vector."))
     }
     #Create list of annotation data.frames
     dframe.annot <- lapply(annot.grps, function(i){
@@ -645,8 +648,9 @@ plot.col.sidebar <- function(
     #Check color tables
     col_table <- lapply(X = col_table, FUN = function(tbl){
         if(any(duplicated(tbl$Cols))){ #Check palette consistency
-            stop("1 color in a palette has been associated to more than 1",
-                 "group.")
+            stop(paste(
+                "1 color in a palette has been associated to more than 1",
+                "group."))
         }
         if(any(duplicated(tbl$Grps))){ #Check annotation consistency
             warning("Duplicated group name provided. Removing duplicated...")
@@ -715,8 +719,8 @@ plot.col.sidebar <- function(
         }
         #Generate separate legends if more than 1 palette available or if only 1
         # annotation is used
-        if((is.list(annot.pal) & length(annot.pal) > 1) |
-           length(levels(dframe.annot$.id)) == 1){
+        if((is.list(annot.pal) & length(annot.pal) > 1) | length(
+            levels(dframe.annot$.id)) == 1){
             #Get all legends separately
             sidebar.lgd <- lapply(
                 X = seq_along(levels(dframe.annot$.id)), FUN = function(i){
@@ -727,8 +731,9 @@ plot.col.sidebar <- function(
                             fill = levels(dframe.annot$.id)[i]))
                 })
         } else {
-            stop(paste("Cannot generate separated legends if only one",
-                       "annotation palette is given."))
+            stop(paste(
+                "Cannot generate separated legends if only one",
+                "annotation palette is given."))
         }
     }
     return(list("sidebar" = col_sidebar +

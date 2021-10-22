@@ -230,7 +230,7 @@
 #' @return A \code{grob} list containing the final plot, and also each grob
 #'         generated separately.
 #' @author Yoann Pageaud.
-#' @importFrom data.table `:=`
+#' @importFrom data.table `:=` `.I`
 #' @export
 #' @examples
 #' #Create the basic gg2heatmap
@@ -275,7 +275,7 @@ gg2heatmap <- function(
         m <- data.table::dcast(
             data = m, formula = ... ~ cols, value.var = "values")
         #Add index
-        m[, I := data.table::.I]
+        m[, I := .I]
         #Store additional columns of splitting
         dt.cat <- m[, c(seq(1, n.col-2), ncol(m)), with = FALSE]
         dt.cat[, I := as.factor(I)]

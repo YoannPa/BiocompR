@@ -29,7 +29,7 @@
 #'                   works if x is a character vector).
 #' @return A \code{gg} plot of an histogram.
 #' @author Yoann Pageaud.
-#' @importFrom data.table `:=`
+#' @importFrom data.table `:=` `.I`
 #' @export
 #' @examples
 #' # Basic use of fancy.hist()
@@ -160,7 +160,7 @@ fancy.hist <- function(
                     l = ls.histdata, idcol = "facet")
                 dframe[, facet := factor(
                     x = facet, levels = levels(reduce.dt.facet$facet))]
-                dframe[, x := data.table::.I] #Update the rank on all data
+                dframe[, x := .I] #Update the rank on all data
                 if(verbose){ cat("Done.\n") }
             }
         } else {

@@ -1,3 +1,3 @@
-CHANGES IN VERSION 0.0.155
+CHANGES IN VERSION 0.0.156
 -------------------------
-    o Cleaning before submission to Bioconductor
+    o Fixed error related to data.table

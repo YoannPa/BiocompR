@@ -32,7 +32,7 @@
 #'
 #' @return A \code{gg} sunset plot.
 #' @author Yoann Pageaud.
-#' @importFrom data.table `:=`
+#' @importFrom data.table `:=` `.I`
 #' @export
 
 sunset <- function(
@@ -71,7 +71,7 @@ sunset <- function(
     "sample.string" = paste0(
       c("NONE", seq(N)), " (", round((tab.data/sum(tab.data))*100), "%", ")"))
   #Add index to dt.data
-  dt.data[, index := data.table::.I]
+  dt.data[, index := .I]
 
   #Reverse option
   if(reverse){
@@ -105,7 +105,7 @@ sunset <- function(
     dt.data[nrow(dt.data), white.line.hide := TRUE]
   }
   #Keep white line of level before the one having a white line
-  invisible(lapply(X = dt.data[, data.table::.I], FUN = function(i){
+  invisible(lapply(X = dt.data[, .I], FUN = function(i){
     if(!all(is.na(dt.data[i+1,]))){
       if((dt.data[i+1, ]$hiden == FALSE |
           dt.data[i+1, ]$right.y.hiden == FALSE) &
@@ -124,7 +124,7 @@ sunset <- function(
                              width = diff(range(g$V1)) + 1)}))
   #Get groups average label.pos cumulative diff_bins
   if(nrow(smpl_intervals) != 0){
-    invisible(lapply(smpl_intervals[, data.table::.I], function(i){
+    invisible(lapply(smpl_intervals[, .I], function(i){
       dt_grp <- dt.data[index >= smpl_intervals[i, ]$start &
                           index <= smpl_intervals[i, ]$end]
       data_cov_grp <- sum(dt_grp$data.covered)
