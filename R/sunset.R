@@ -37,7 +37,7 @@
 
 sunset <- function(
   mat, title = "Number of rows without missing data",
-  col.pal = c("red","gold","blue4"), horizontal = FALSE, reverse = FALSE,
+  col.pal = c("red", "gold", "blue4"), horizontal = FALSE, reverse = FALSE,
   n.grad = 15, display.cutoff = 0.03, display.num.smpl = 0.01,
   lgd.pos = "bottom"){
   #Fix BiocCheck() complaining about these objects initialization
