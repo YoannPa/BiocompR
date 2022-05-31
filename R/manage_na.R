@@ -1,19 +1,31 @@
 
 #' Imputes missing data in a matrix row.
 #'
-#' @param data     A \code{matrix}.
-#' @param miss.mat A logical \code{matrix} where cells are TRUE when there is a
-#'                 numeric value in data, or FALSE when there are NAs in data.
-#' @param grp_tbl  A \code{dataframe} with 2 columns:
-#'                 \itemize{
-#'                  \item{samples - which contains all column names from data.}
-#'                  \item{groups - which contains the groups to which each
-#'                  column belong to.}
-#'                 }
-#' @param nr       An \code{integer} specifying the total number of rows in the
-#'                 matrix data.
-#' @param r        An \code{integer} specifying the position of the row of
-#'                 interest for imputation in the matrix data.
+#' @param data         A \code{matrix}.
+#' @param miss.mat     A logical \code{matrix} where cells are TRUE when there
+#'                     is a numeric value in data, or FALSE when there are NAs
+#'                     in data. miss.mat is only used when vinterpolate is TRUE
+#'                     (Default: miss.mat = NULL).
+#' @param grp_tbl      A \code{dataframe} with 2 columns:
+#'                     \itemize{
+#'                      \item{samples - which contains all column names from
+#'                      data.}
+#'                      \item{groups - which contains the groups to which each
+#'                      column belong to.}
+#'                     }
+#' @param nr           An \code{integer} specifying the total number of rows in
+#'                     the matrix data.
+#' @param r            An \code{integer} specifying the position of the row of
+#'                     interest for imputation in the matrix data.
+#' @param impute.fun   A \code{character} specifying the function to be used for
+#'                     imputation (Default: impute.fun = "median").
+#' @param vinterpolate A \code{logical} specifying whether vertical
+#'                     interpolation should be applied on missing values, based
+#'                     on previous and next available values in a column
+#'                     (vinterpolate = TRUE) or not
+#'                     (Default: vinterpolate = FALSE). It is combined with the
+#'                     function use for imputation by group. vinterpolate is not
+#'                     use if method is not set to 'impute'.
 #' @return A \code{numeric} vector containing the imputed values of the row for
 #'         each groups of columns.
 #' @author Yoann Pageaud.
@@ -21,7 +33,7 @@
 #' @keywords internal
 
 row.impute.na <- function(
-  data, miss.mat, grp_tbl, nr, r, impute.fun, vinterpolate){
+  data, miss.mat = NULL, grp_tbl, nr, r, impute.fun, vinterpolate){
   #Get groups to impute data in
   sample_grps <- unique(grp_tbl[grp_tbl$samples %in% names(data[r,][
     is.na(data[r,])]), ]$groups)
@@ -113,23 +125,23 @@ row.impute.na <- function(
 #'                     (Default: ncores = 1).
 #' @return A \code{matrix}.
 #' @author Yoann Pageaud.
+#' @export
 #' @examples
 #' # Creating a data.frame of 4 columns with 50 values in each:
 #' df <- data.frame("col1" = rnorm(n = 50, mean = 25, sd = 4),
 #'                  "col2" = rnorm(n = 50, mean = 25, sd = 4),
 #'                  "col3" = rnorm(n = 50, mean = 25, sd = 4),
 #'                  "col4" = rnorm(n = 50, mean = 25, sd = 4))
-#' # col1 and col4 are missing data
+#' # col1 and col4 contain missing data
 #' df$col1[1:10] <- NA
 #' df$col4[40:50] <- NA
 #' # Create 2 groups: grp1 & grp2.
 #' # col1 and col2 are in grp1, col3 and col4 are in grp2.
 #' grps <- c("grp1","grp1","grp2","grp2")
 #' # Remove all rows containing at least 1 missing value
-#' manage.na(data = test, method = "remove", groups = grps)
+#' manage.na(data = df, method = "remove", groups = grps)
 #' # Impute by group the missing data (and remove rows missing all values)
-#' manage.na(data = test, method = "impute", groups = grps)
-#' @export
+#' manage.na(data = df, method = "impute", groups = grps)
 
 manage.na <- function(
   data, method = "remove", groups, impute.fun = "median", vinterpolate = FALSE,
@@ -165,13 +177,19 @@ manage.na <- function(
         grp_tbl <- data.frame(samples = colnames(data), groups = groups)
         #TODO: Make parallel apply when it will be possible.
         invisible(lapply(X = rows.to.impute, FUN = function(r){
-          grp.imp <- row.impute.na(
-            data = data, miss.mat = miss.mat, grp_tbl = grp_tbl, nr = nr, r = r,
-            impute.fun = impute.fun, vinterpolate = vinterpolate)
+          if(vinterpolate){
+            grp.imp <- row.impute.na(
+              data = data, miss.mat = miss.mat, grp_tbl = grp_tbl, nr = nr, r = r,
+              impute.fun = impute.fun, vinterpolate = vinterpolate)
+          } else {
+            grp.imp <- row.impute.na(
+              data = data, grp_tbl = grp_tbl, nr = nr, r = r,
+              impute.fun = impute.fun, vinterpolate = vinterpolate)
+          }
           base::`<<-` (data[r, names(grp.imp)], grp.imp)
           cat(paste0(round((r/max(rows.to.impute))*100, 3), "%\n"))
         }))
-        rm(miss.mat)
+        if(vinterpolate){ rm(miss.mat) }
       }
     }
   }

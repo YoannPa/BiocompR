@@ -34,9 +34,6 @@ A \code{type} object returned description.
 Computes pairwise Kolmogorov-Smirnov tests on a matrix and display results in
 a fused plot
 }
-\references{
-
-}
 \author{
 Yoann Pageaud.
 }

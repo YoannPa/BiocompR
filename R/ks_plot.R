@@ -6,7 +6,6 @@
 #' @return A \code{type} object returned description.
 #' @author Yoann Pageaud.
 #' @export
-#' @references
 
 #TODO Write help
 #TODO Test function

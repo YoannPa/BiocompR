@@ -71,16 +71,16 @@ df <- data.frame("col1" = rnorm(n = 50, mean = 25, sd = 4),
                  "col2" = rnorm(n = 50, mean = 25, sd = 4),
                  "col3" = rnorm(n = 50, mean = 25, sd = 4),
                  "col4" = rnorm(n = 50, mean = 25, sd = 4))
-# col1 and col4 are missing data
+# col1 and col4 contain missing data
 df$col1[1:10] <- NA
 df$col4[40:50] <- NA
 # Create 2 groups: grp1 & grp2.
 # col1 and col2 are in grp1, col3 and col4 are in grp2.
 grps <- c("grp1","grp1","grp2","grp2")
 # Remove all rows containing at least 1 missing value
-manage.na(data = test, method = "remove", groups = grps)
+manage.na(data = df, method = "remove", groups = grps)
 # Impute by group the missing data (and remove rows missing all values)
-manage.na(data = test, method = "impute", groups = grps)
+manage.na(data = df, method = "impute", groups = grps)
 }
 \author{
 Yoann Pageaud.

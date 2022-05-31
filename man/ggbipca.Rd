@@ -12,6 +12,7 @@ ggbipca(
   scale = 1,
   point.size = 1,
   color.data = NULL,
+  fill.data = NULL,
   shape.data = NULL,
   loadings = FALSE,
   loadings.col = "red",
@@ -42,6 +43,13 @@ values to display on Y-axis.}
 
 \item{color.data}{A \code{character} specifying the column name in
 'data' to be used to map colors to points.}
+
+\item{fill.data}{A \code{character} specifying the column name in
+'data' to be used to map filling colors to points
+(Important: this parameter will only work if
+associated with 'shape.data', and only if input
+values provided to scale_shape_manual() are
+comprised between 21 and 25).}
 
 \item{shape.data}{A \code{character} specifying the column name in
 'data' to be used to map shapes to points.}
@@ -83,8 +91,9 @@ A \code{gg} plot of a PCA biplot.
 Computes and draws a custom PCA biplot.
 }
 \examples{
-#Draw the simplest biplot of PC1 and PC2:
+#Get PCA results
 pca.res <- prcomp(iris[,-5])
+#Draw the simplest biplot of PC1 and PC2:
 ggbipca(prcomp.res = pca.res, data = iris)
 #Draw a biplot of PC2 and PC3:
 ggbipca(prcomp.res = pca.res, data = iris, PCx = 2, PCy = 3)
@@ -108,6 +117,23 @@ ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
         color.data = "Species", shape.data = "Species") +
   scale_color_manual(values = c("green", "red", "orange")) +
   scale_shape_manual(values = c(83, 8, 25))
+#Map custom filling colors:
+ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
+        fill.data = "Species", shape.data = "Species") +
+  scale_fill_manual(values = c("green", "royalblue", "orange")) +
+  scale_shape_manual(values = c(21, 22, 23)) # Needs values between 21 and 25
+#Enable custom filling colors and fix point shapes:
+ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
+        fill.data = "Species", shape.data = "Species") +
+  scale_fill_manual(values = c("green", "royalblue", "orange")) +
+  scale_shape_manual(values = rep(21, 3)) # Maps shape 21 to 3 categories
+#Map filling colors, outline colors, and point shapes all together:
+ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
+        fill.data = "Species", shape.data = "Species",
+        color.data = "Species") +
+  scale_fill_manual(values = c("green", "royalblue", "orange")) +
+  scale_color_manual(values = c("black", "red", "blue")) +
+  scale_shape_manual(values = c(21, 22, 23)) # Needs values between 21 and 25
 #Show loadings:
 ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
         color.data = "Species", shape.data = "Species", loadings = TRUE) +

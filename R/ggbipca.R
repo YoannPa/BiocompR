@@ -1,4 +1,215 @@
 
+#' Change colnames in annotation data.table to color, fill, or shape data.
+#'
+#' @param data       A \code{data.table} containing annotations matching data in
+#'                   'prcomp.res'.
+#' @param color.data A \code{character} specifying the column name in 'data' to
+#'                   be used to map colors to points.
+#' @param fill.data  A \code{character} specifying the column name in 'data' to
+#'                   be used to map filling colors to points (Important: this
+#'                   parameter will only work if associated with 'shape.data',
+#'                   and only if input values provided to scale_shape_manual()
+#'                   are comprised between 21 and 25).
+#' @param shape.data A \code{character} specifying the column name in 'data' to
+#'                   be used to map shapes to points.
+#' @return A \code{data.table} with all annotations, and the colnames necessary
+#'         for color, fill, or shape, changed.
+#' @author Yoann Pageaud.
+#' @export
+#' @keywords internal
+
+rename_dt_col <- function(data, color.data, fill.data, shape.data){
+  #Duplicate data.table
+  dt.annot <- data.table::as.data.table(as.data.frame(data))
+  #Check if any of color.data, fill.data or shape.data colnames is a unique
+  # match
+  if(is.null(color.data)){ varval <- NA } else {varval <- color.data}
+  if(is.null(fill.data)){ varval <- c(varval, NA)
+  } else {varval <- c(varval, fill.data)}
+  if(is.null(shape.data)){ varval <- c(varval, NA)
+  } else {varval <- c(varval, shape.data)}
+  dt.varia <- data.table::data.table(
+    varnames = c("color.data", "fill.data", "shape.data"), varval)
+  if(any(table(dt.varia$varval) < 2)){
+    #Get variables that should be set as new colnames
+    vars.to.set <- dt.varia[varval %in% names(table(dt.varia$varval)[
+      table(dt.varia$varval) == 1])]$varnames
+    print(vars.to.set)
+    #Set new colnames
+    lapply(X = vars.to.set, FUN = function(v){
+      if(v == "color.data"){
+        if(color.data %in% colnames(dt.annot)){
+          data.table::setnames(
+            x = dt.annot, old = color.data, new = "color.data")
+          if(is.null(levels(dt.annot$color.data))){
+            dt.annot[, color.data := as.factor(color.data)]
+          }
+        } else { stop(
+          "'color.data' does not match any column name in 'data'.") }
+      } else if(v == "fill.data"){
+        if(fill.data %in% colnames(dt.annot)){
+          data.table::setnames(
+            x = dt.annot, old = fill.data, new = "fill.data")
+          if(is.null(levels(dt.annot$fill.data))){
+            dt.annot[, fill.data := as.factor(fill.data)]
+          }
+        } else { stop(
+          "'fill.data' does not match any column name in 'data'.") }
+      } else if(v == "shape.data"){
+        if(shape.data %in% colnames(dt.annot)){
+          data.table::setnames(
+            x = dt.annot, old = shape.data, new = "shape.data")
+          if(is.null(levels(dt.annot$shape.data))){
+            dt.annot[, shape.data := as.factor(shape.data)]
+          }
+        } else { stop(
+          "'fill.data' does not match any column name in 'data'.") }
+      }
+    })
+  }
+  #Set priorities over variables when there is no unique colname match for
+  # each: color > fill > shape
+  if(any(table(dt.varia$varval) >= 2)){
+    vars.to.set <- dt.varia[varval %in% names(table(dt.varia$varval)[
+      table(dt.varia$varval) >= 2])]$varnames
+    if(isTRUE(all.equal(
+      target = c("color.data", "shape.data"), current = vars.to.set))){
+      if(color.data %in% colnames(dt.annot)){
+        data.table::setnames(
+          x = dt.annot, old = color.data, new = "color.data")
+        if(is.null(levels(dt.annot$color.data))){
+          dt.annot[, color.data := as.factor(color.data)]
+        }
+      } else {
+        stop("'color.data' does not match any column name in 'data'.") }
+    } else if(isTRUE(all.equal(
+      target = c("color.data", "fill.data"), current = vars.to.set))){
+      if(color.data %in% colnames(dt.annot)){
+        data.table::setnames(
+          x = dt.annot, old = color.data, new = "color.data")
+        if(is.null(levels(dt.annot$color.data))){
+          dt.annot[, color.data := as.factor(color.data)]
+        }
+      } else {
+        stop("'color.data' does not match any column name in 'data'.") }
+    } else if(isTRUE(all.equal(
+      target = c("fill.data", "shape.data"), current = vars.to.set))){
+      if(fill.data %in% colnames(dt.annot)){
+        data.table::setnames(
+          x = dt.annot, old = fill.data, new = "fill.data")
+        if(is.null(levels(dt.annot$fill.data))){
+          dt.annot[, fill.data := as.factor(fill.data)]
+        }
+      } else {
+        stop("'fill.data' does not match any column name in 'data'.") }
+    } else if(isTRUE(all.equal(
+      target = c("color.data", "fill.data", "shape.data"),
+      current = vars.to.set))){
+      if(color.data %in% colnames(dt.annot)){
+        data.table::setnames(
+          x = dt.annot, old = color.data, new = "color.data")
+        if(is.null(levels(dt.annot$color.data))){
+          dt.annot[, color.data := as.factor(color.data)]
+        }
+      } else {
+        stop("'color.data' does not match any column name in 'data'.") }
+    } else { stop("Unsupported parameters combination.") }
+  }
+  return(dt.annot)
+  # #Rename annotation column used for points colors and shapes
+  # if(!is.null(color.data)){
+  #   if(color.data %in% colnames(dt.annot)){
+  #     data.table::setnames(x = dt.annot, old = color.data, new = "color.data")
+  #     if(is.null(levels(dt.annot$color.data))){
+  #       dt.annot[, color.data := as.factor(color.data)]
+  #     }
+  #   } else { stop("'color.data' does not match any column name in 'data'.") }
+  # }
+  # if(!is.null(shape.data)){
+  #   if(shape.data != color.data){
+  #     if(shape.data %in% colnames(dt.annot)){
+  #       data.table::setnames(x = dt.annot, old = shape.data, new = "shape.data")
+  #       if(is.null(levels(dt.annot$shape.data))){
+  #         dt.annot[, shape.data := as.factor(shape.data)]
+  #       }
+  #     } else { stop("'shape.data' does not match any column name in 'data'.") }
+  #   }
+  # }
+}
+
+#' Collects and computes needed metrics for PCA biplot.
+#'
+#' @param prcomp.res A PCA result of classes \code{prcomp} or
+#'                   \code{irlba_prcomp} resulting from stats::prcomp() or
+#'                   irlba::prcomp_irlba().
+#' @param dt.annot   A \code{data.table} containing annotations matching data in
+#'                   'prcomp.res'.
+#' @param PCs        An \code{integer} vector matching principal components to
+#'                   be used to generate the PCA biplot.
+#' @param scale      A \code{double} scaling parameter, disabled by 0.
+#' @return A \code{list} containing PC IDs, scaled values of the PCA, and PCs
+#'         labels to be displayed on the margins of each axis.
+#' @author Yoann Pageaud.
+#' @export
+#' @keywords internal
+
+prepare_pca_data <- function(prcomp.res, dt.annot, PCs, scale){
+  #Make PC names vector
+  PC <- paste0("PC", PCs)
+  #Get sdev from selected PCs
+  lam <- prcomp.res$sdev[PCs]
+  #Create scaling factor
+  lam <- lam * sqrt(nrow(prcomp.res$x))
+  lam <- lam^scale
+  #Scale PCA data
+  dt.scaled.pc <- data.table::as.data.table(t(t(prcomp.res$x[, PC])/lam))
+  dt.scaled.pc <- cbind(dt.scaled.pc, dt.annot)
+  #Calculate the percentage of variability explained by the principal component
+  ve <- prcomp.res$sdev^2/sum(prcomp.res$sdev^2)
+  lab.PC <- paste0(PC, " (", round(ve[PCs] * 100, 2), "%)")
+
+  ls.res <- list("PC" = PC, "scaled_PC" = dt.scaled.pc, "labels" = lab.PC)
+  return(ls.res)
+}
+
+#' ggplot2 theme for PCA biplot functions.
+#'
+#' @return A \code{ggplot2} object themed for biplot functions.
+#' @author Yoann Pageaud.
+#' @export
+#' @keywords internal
+
+theme_biplot <- function(){
+  ggplot2::ggplot() +  ggplot2::theme(
+    panel.background = ggplot2::element_blank(),
+    panel.grid = ggplot2::element_line(colour = "grey"),
+    axis.text = ggplot2::element_text(size = 12),
+    legend.title = ggplot2::element_text(size = 13),
+    legend.text = ggplot2::element_text(size = 12),
+    legend.key = ggplot2::element_blank())
+}
+
+#' Draws loadings from a PCA.
+#'
+#' @param loadings.data A \code{data.table} containing data necessary to plot
+#'                      loadings.
+#' @param loadings.col  A \code{character} specifying a color to be used for
+#'                      loadings.
+#' @return A \code{ggplot2} plot of PCA loadings.
+#' @author Yoann Pageaud.
+#' @export
+#' @keywords internal
+
+ggloadings <- function(ggbiplot, loadings.data, loadings.col){
+  ggbiplot + ggplot2::geom_segment(
+    data = loadings.data, mapping = ggplot2::aes(
+      x = 0, y = 0, xend = PCx, yend = PCy), arrow = grid::arrow(
+        length = grid::unit(8, "points")), colour = loadings.col) +
+    ggrepel::geom_label_repel(
+      data = loadings.data, mapping = ggplot2::aes(
+        x = PCx, y = PCy, label = labels), size = 3)
+}
+
 #' Computes and draws a custom PCA biplot.
 #'
 #' @param prcomp.res         A PCA result of classes \code{prcomp} or
@@ -14,6 +225,12 @@
 #' @param point.size         A \code{double} specifying the size of points.
 #' @param color.data         A \code{character} specifying the column name in
 #'                           'data' to be used to map colors to points.
+#' @param fill.data          A \code{character} specifying the column name in
+#'                           'data' to be used to map filling colors to points
+#'                           (Important: this parameter will only work if
+#'                           associated with 'shape.data', and only if input
+#'                           values provided to scale_shape_manual() are
+#'                           comprised between 21 and 25).
 #' @param shape.data         A \code{character} specifying the column name in
 #'                           'data' to be used to map shapes to points.
 #' @param loadings           A \code{logical} specifying whether the loadings
@@ -44,8 +261,9 @@
 #' @importFrom data.table `:=` `.SD`
 #' @export
 #' @examples
-#' #Draw the simplest biplot of PC1 and PC2:
+#' #Get PCA results
 #' pca.res <- prcomp(iris[,-5])
+#' #Draw the simplest biplot of PC1 and PC2:
 #' ggbipca(prcomp.res = pca.res, data = iris)
 #' #Draw a biplot of PC2 and PC3:
 #' ggbipca(prcomp.res = pca.res, data = iris, PCx = 2, PCy = 3)
@@ -69,6 +287,23 @@
 #'         color.data = "Species", shape.data = "Species") +
 #'   scale_color_manual(values = c("green", "red", "orange")) +
 #'   scale_shape_manual(values = c(83, 8, 25))
+#' #Map custom filling colors:
+#' ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
+#'         fill.data = "Species", shape.data = "Species") +
+#'   scale_fill_manual(values = c("green", "royalblue", "orange")) +
+#'   scale_shape_manual(values = c(21, 22, 23)) # Needs values between 21 and 25
+#' #Enable custom filling colors and fix point shapes:
+#' ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
+#'         fill.data = "Species", shape.data = "Species") +
+#'   scale_fill_manual(values = c("green", "royalblue", "orange")) +
+#'   scale_shape_manual(values = rep(21, 3)) # Maps shape 21 to 3 categories
+#' #Map filling colors, outline colors, and point shapes all together:
+#' ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
+#'         fill.data = "Species", shape.data = "Species",
+#'         color.data = "Species") +
+#'   scale_fill_manual(values = c("green", "royalblue", "orange")) +
+#'   scale_color_manual(values = c("black", "red", "blue")) +
+#'   scale_shape_manual(values = c(21, 22, 23)) # Needs values between 21 and 25
 #' #Show loadings:
 #' ggbipca(prcomp.res = pca.res, data = iris, point.size = 2,
 #'         color.data = "Species", shape.data = "Species", loadings = TRUE) +
@@ -110,59 +345,146 @@
 
 ggbipca <- function(
   prcomp.res, data, PCx = 1, PCy = 2, scale = 1, point.size = 1,
-  color.data = NULL, shape.data = NULL, loadings = FALSE, loadings.col = "red",
-  top.load.by.quad = NULL, load.above.x = NULL, load.above.y = NULL,
-  load.below.x = NULL, load.below.y = NULL){
+  color.data = NULL, fill.data = NULL, shape.data = NULL, loadings = FALSE,
+  loadings.col = "red", top.load.by.quad = NULL, load.above.x = NULL,
+  load.above.y = NULL, load.below.x = NULL, load.below.y = NULL){
   #Fix BiocCheck() complaining about these objects initialization
   load.sqrd.length <- NULL
   quadrant <- NULL
-  #Duplicate data.table
-  dt.annot <- data.table::as.data.table(as.data.frame(data))
-  #Make PC names vector
-  PC <- paste0("PC", c(PCx, PCy))
-  #Rename annotation column used for points colors and shapes
-  if(!is.null(color.data)){
-    if(color.data %in% colnames(dt.annot)){
-      data.table::setnames(x = dt.annot, old = color.data, new = "color.data")
-      if(is.null(levels(dt.annot$color.data))){
-        dt.annot[, color.data := as.factor(color.data)]
-      }
-    } else { stop("'color.data' does not match any column name in 'data'.") }
-  }
-  if(!is.null(shape.data)){
-    if(shape.data != color.data){
-      if(shape.data %in% colnames(dt.annot)){
-        data.table::setnames(x = dt.annot, old = shape.data, new = "shape.data")
-        if(is.null(levels(dt.annot$shape.data))){
-          dt.annot[, shape.data := as.factor(shape.data)]
-        }
-      } else { stop("'shape.data' does not match any column name in 'data'.") }
-    }
-  }
-  #Get sdev from selected PCs
-  lam <- prcomp.res$sdev[c(PCx, PCy)]
-  #Create scaling factor
-  lam <- lam * sqrt(nrow(prcomp.res$x))
-  lam <- lam^scale
-  #Scale PCA data
-  dt.scaled.pc <- data.table::as.data.table(t(t(prcomp.res$x[, PC])/lam))
-  dt.scaled.pc <- cbind(dt.scaled.pc, dt.annot)
+
+  dt.annot <- rename_dt_col(
+    data = data, color.data = color.data, fill.data = fill.data,
+    shape.data = shape.data)
+  # #Duplicate data.table
+  # dt.annot <- data.table::as.data.table(as.data.frame(data))
+  # #Check if any of color.data, fill.data or shape.data colnames is a unique
+  # # match
+  # if(is.null(color.data)){ varval <- NA } else {varval <- color.data}
+  # if(is.null(fill.data)){ varval <- c(varval, NA)
+  # } else {varval <- c(varval, fill.data)}
+  # if(is.null(shape.data)){ varval <- c(varval, NA)
+  # } else {varval <- c(varval, shape.data)}
+  # dt.varia <- data.table::data.table(
+  #   varnames = c("color.data", "fill.data", "shape.data"), varval)
+  # if(any(table(dt.varia$varval) < 2)){
+  #   #Get variables that should be set as new colnames
+  #   vars.to.set <- dt.varia[varval %in% names(table(dt.varia$varval)[
+  #     table(dt.varia$varval) == 1])]$varnames
+  #   print(vars.to.set)
+  #   #Set new colnames
+  #   lapply(X = vars.to.set, FUN = function(v){
+  #     if(v == "color.data"){
+  #       if(color.data %in% colnames(dt.annot)){
+  #         data.table::setnames(
+  #           x = dt.annot, old = color.data, new = "color.data")
+  #         if(is.null(levels(dt.annot$color.data))){
+  #           dt.annot[, color.data := as.factor(color.data)]
+  #         }
+  #       } else { stop(
+  #         "'color.data' does not match any column name in 'data'.") }
+  #     } else if(v == "fill.data"){
+  #       if(fill.data %in% colnames(dt.annot)){
+  #         data.table::setnames(
+  #           x = dt.annot, old = fill.data, new = "fill.data")
+  #         if(is.null(levels(dt.annot$fill.data))){
+  #           dt.annot[, fill.data := as.factor(fill.data)]
+  #         }
+  #       } else { stop(
+  #         "'fill.data' does not match any column name in 'data'.") }
+  #     } else if(v == "shape.data"){
+  #       if(shape.data %in% colnames(dt.annot)){
+  #         data.table::setnames(
+  #           x = dt.annot, old = shape.data, new = "shape.data")
+  #         if(is.null(levels(dt.annot$shape.data))){
+  #           dt.annot[, shape.data := as.factor(shape.data)]
+  #         }
+  #       } else { stop(
+  #         "'fill.data' does not match any column name in 'data'.") }
+  #     }
+  #   })
+  # }
+  # #Set priorities over variables when there is no unique colname match for
+  # # each: color > fill > shape
+  # if(any(table(dt.varia$varval) >= 2)){
+  #   vars.to.set <- dt.varia[varval %in% names(table(dt.varia$varval)[
+  #     table(dt.varia$varval) >= 2])]$varnames
+  #   if(isTRUE(all.equal(
+  #     target = c("color.data", "shape.data"), current = vars.to.set))){
+  #     if(color.data %in% colnames(dt.annot)){
+  #       data.table::setnames(
+  #         x = dt.annot, old = color.data, new = "color.data")
+  #       if(is.null(levels(dt.annot$color.data))){
+  #         dt.annot[, color.data := as.factor(color.data)]
+  #       }
+  #     } else {
+  #       stop("'color.data' does not match any column name in 'data'.") }
+  #   } else if(isTRUE(all.equal(
+  #     target = c("color.data", "fill.data"), current = vars.to.set))){
+  #     if(color.data %in% colnames(dt.annot)){
+  #       data.table::setnames(
+  #         x = dt.annot, old = color.data, new = "color.data")
+  #       if(is.null(levels(dt.annot$color.data))){
+  #         dt.annot[, color.data := as.factor(color.data)]
+  #       }
+  #     } else {
+  #       stop("'color.data' does not match any column name in 'data'.") }
+  #   } else if(isTRUE(all.equal(
+  #     target = c("fill.data", "shape.data"), current = vars.to.set))){
+  #     if(fill.data %in% colnames(dt.annot)){
+  #       data.table::setnames(
+  #         x = dt.annot, old = fill.data, new = "fill.data")
+  #       if(is.null(levels(dt.annot$fill.data))){
+  #         dt.annot[, fill.data := as.factor(fill.data)]
+  #       }
+  #     } else {
+  #       stop("'fill.data' does not match any column name in 'data'.") }
+  #   } else if(isTRUE(all.equal(
+  #     target = c("color.data", "fill.data", "shape.data"),
+  #     current = vars.to.set))){
+  #     if(color.data %in% colnames(dt.annot)){
+  #       data.table::setnames(
+  #         x = dt.annot, old = color.data, new = "color.data")
+  #       if(is.null(levels(dt.annot$color.data))){
+  #         dt.annot[, color.data := as.factor(color.data)]
+  #       }
+  #     } else {
+  #       stop("'color.data' does not match any column name in 'data'.") }
+  #   } else { stop("Unsupported parameters combination.") }
+  # }
+
+  prepare.res <- prepare_pca_data(
+    prcomp.res = prcomp.res, dt.annot = dt.annot, PCs = c(PCx, PCy),
+    scale = scale)
+  PC <- prepare.res$PC
+  dt.scaled.pc <- prepare.res$scaled_PC
+  lab.PC <- prepare.res$labels
+  # #Make PC names vector
+  # PC <- paste0("PC", c(PCx, PCy))
+  # #Get sdev from selected PCs
+  # lam <- prcomp.res$sdev[c(PCx, PCy)]
+  # #Create scaling factor
+  # lam <- lam * sqrt(nrow(prcomp.res$x))
+  # lam <- lam^scale
+  # #Scale PCA data
+  # dt.scaled.pc <- data.table::as.data.table(t(t(prcomp.res$x[, PC])/lam))
+  # dt.scaled.pc <- cbind(dt.scaled.pc, dt.annot)
+  # #Calculate the percentage of variability explained by the principal component
+  # ve <- prcomp.res$sdev^2/sum(prcomp.res$sdev^2)
+  # lab.PC <- paste0(PC, " (", round(ve[c(PCx, PCy)] * 100, 2), "%)")
+
   data.table::setnames(x = dt.scaled.pc, old = PC[1], new = "PCx")
   data.table::setnames(x = dt.scaled.pc, old = PC[2], new = "PCy")
-  #Calculate the percentage of variability explained by the principal component
-  ve <- prcomp.res$sdev^2/sum(prcomp.res$sdev^2)
-  lab.PC <- paste0(PC, " (", round(ve[c(PCx, PCy)] * 100, 2), "%)")
   #Get loadings data for PCx & PCy
   if(loadings){
     if(class(prcomp.res)[1] == "prcomp"){
       loadings.data <- data.table::as.data.table(
-        prcomp.res$rotation, keep.rownames = "labels")[, c("labels", PC),
-                                                       with = FALSE]
+        prcomp.res$rotation, keep.rownames = "labels")[
+          , c("labels", PC), with = FALSE]
     } else if(class(prcomp.res)[1] == "irlba_prcomp"){
       loadings.data <- cbind(
         "labels" = names(prcomp.res$center),
-        data.table::as.data.table(prcomp.res$rotation))[, c("labels", PC),
-                                                        with = FALSE]
+        data.table::as.data.table(prcomp.res$rotation))[
+          , c("labels", PC), with = FALSE]
     }
     data.table::setnames(x = loadings.data, old = PC[1], new = "PCx")
     data.table::setnames(x = loadings.data, old = PC[2], new = "PCy")
@@ -171,7 +493,7 @@ ggbipca <- function(
       max(abs(dt.scaled.pc[["PCx"]]))/max(abs(loadings.data[["PCx"]])),
       max(abs(dt.scaled.pc[["PCy"]]))/max(abs(loadings.data[["PCy"]])))
     loadings.data[, 2:3 := lapply(
-        X = .SD, FUN = function(i){ i * scaler * 0.8 }), .SDcols = c(2, 3)]
+      X = .SD, FUN = function(i){ i * scaler * 0.8 }), .SDcols = c(2, 3)]
 
     if(!is.null(top.load.by.quad)){
       #Compute loadings length
@@ -207,22 +529,25 @@ ggbipca <- function(
     }
   }
   #Make PCA ggplot
-  biplt <- ggplot2::ggplot() +
-    ggplot2::theme(axis.ticks = ggplot2::element_blank(),
-                   panel.background = ggplot2::element_blank(),
-                   panel.grid = ggplot2::element_line(colour = "grey"),
-                   axis.title = ggplot2::element_text(size = 13),
-                   axis.text = ggplot2::element_text(size = 12),
-                   legend.title = ggplot2::element_text(size = 13),
-                   legend.text = ggplot2::element_text(size = 12),
-                   legend.key = ggplot2::element_blank())
-  if(!is.null(color.data) & is.null(shape.data)){
+  biplt <- theme_biplot() + ggplot2::theme(
+    axis.ticks = ggplot2::element_blank(),
+    axis.title = ggplot2::element_text(size = 13))
+  # biplt <- ggplot2::ggplot() +
+  #   ggplot2::theme(axis.ticks = ggplot2::element_blank(),
+  #                  panel.background = ggplot2::element_blank(),
+  #                  panel.grid = ggplot2::element_line(colour = "grey"),
+  #                  axis.title = ggplot2::element_text(size = 13),
+  #                  axis.text = ggplot2::element_text(size = 12),
+  #                  legend.title = ggplot2::element_text(size = 13),
+  #                  legend.text = ggplot2::element_text(size = 12),
+  #                  legend.key = ggplot2::element_blank())
+  if(!is.null(color.data) & is.null(shape.data) & is.null(fill.data)){
     biplt <- biplt +
       #Draw sample distribution
       ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
         x = PCx, y = PCy, color = color.data), size = point.size) +
       ggplot2::labs(x = lab.PC[1], y = lab.PC[2], color = color.data)
-  } else if(!is.null(color.data) & !is.null(shape.data)){
+  } else if(!is.null(color.data) & !is.null(shape.data) & is.null(fill.data)){
     if(color.data != shape.data){
       biplt <- biplt +
         #Draw sample distribution
@@ -230,7 +555,8 @@ ggbipca <- function(
           x = PCx, y = PCy, color = color.data, shape = shape.data),
           size = point.size) +
         ggplot2::labs(
-          x = lab.PC[1], y = lab.PC[2], shape = shape.data, color = color.data)
+          x = lab.PC[1], y = lab.PC[2], shape = shape.data,
+          color = color.data)
     } else {
       biplt <- biplt +
         #Draw sample distribution
@@ -238,31 +564,110 @@ ggbipca <- function(
           x = PCx, y = PCy, color = color.data, shape = color.data),
           size = point.size) +
         ggplot2::labs(
-          x = lab.PC[1], y = lab.PC[2], shape = color.data, color = color.data)
+          x = lab.PC[1], y = lab.PC[2], shape = color.data,
+          color = color.data)
     }
-  } else if(is.null(color.data) & is.null(shape.data)){
+  } else if(is.null(color.data) & is.null(shape.data) & is.null(fill.data)){
     biplt <- biplt +
       ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
         x = PCx, y = PCy), color = "black", size = point.size) +
       ggplot2::labs(x = lab.PC[1], y = lab.PC[2])
-  } else if(is.null(color.data) & !is.null(shape.data)){
+  } else if(is.null(color.data) & !is.null(shape.data) & is.null(fill.data)){
     biplt <- biplt +
       ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
         x = PCx, y = PCy, shape = shape.data),
         color = "black", size = point.size) +
       ggplot2::labs(x = lab.PC[1], y = lab.PC[2], shape = shape.data)
+  } else if(!is.null(color.data) & is.null(shape.data) & !is.null(fill.data)){
+    biplt <- biplt +
+      #Draw sample distribution
+      ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
+        x = PCx, y = PCy, color = color.data), size = point.size) +
+      ggplot2::labs(x = lab.PC[1], y = lab.PC[2], color = color.data)
+  } else if(
+    !is.null(color.data) & !is.null(shape.data) & !is.null(fill.data)){
+    if(color.data != shape.data){
+      if(color.data != fill.data){
+        biplt <- biplt +
+          #Draw sample distribution
+          ggplot2::geom_point(
+            data = dt.scaled.pc, mapping = ggplot2::aes(
+              x = PCx, y = PCy, color = color.data,
+              shape = shape.data, fill = fill.data),
+            size = point.size) +
+          ggplot2::labs(
+            x = lab.PC[1], y = lab.PC[2], shape = shape.data,
+            color = color.data, fill = fill.data)
+      } else {
+        biplt <- biplt +
+          #Draw sample distribution
+          ggplot2::geom_point(
+            data = dt.scaled.pc, mapping = ggplot2::aes(
+              x = PCx, y = PCy, color = color.data,
+              shape = shape.data, fill = color.data),
+            size = point.size) +
+          ggplot2::labs(
+            x = lab.PC[1], y = lab.PC[2], shape = shape.data,
+            color = color.data, fill = color.data)
+      }
+    } else {
+      if(color.data != fill.data){
+        biplt <- biplt +
+          #Draw sample distribution
+          ggplot2::geom_point(
+            data = dt.scaled.pc, mapping = ggplot2::aes(
+              x = PCx, y = PCy, color = color.data,
+              shape = color.data, fill = fill.data),
+            size = point.size) +
+          ggplot2::labs(
+            x = lab.PC[1], y = lab.PC[2], shape = color.data,
+            color = color.data, fill = fill.data)
+      } else {
+        biplt <- biplt +
+          #Draw sample distribution
+          ggplot2::geom_point(
+            data = dt.scaled.pc, mapping = ggplot2::aes(
+              x = PCx, y = PCy, color = color.data,
+              shape = color.data, fill = color.data),
+            size = point.size) +
+          ggplot2::labs(
+            x = lab.PC[1], y = lab.PC[2], shape = color.data,
+            color = color.data, fill = color.data)
+      }
+    }
+  } else if(is.null(color.data) & is.null(shape.data) & !is.null(fill.data)){
+    stop("Cannot set filling color if point shapes are not set to values between 21 to 25.")
+  } else if(is.null(color.data) & !is.null(shape.data) & !is.null(fill.data)){
+    if(shape.data != fill.data){
+      biplt <- biplt +
+        ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
+          x = PCx, y = PCy, shape = shape.data, fill = fill.data),
+          color = "black", size = point.size) +
+        ggplot2::labs(
+          x = lab.PC[1], y = lab.PC[2], shape = shape.data,
+          fill = fill.data)
+    } else {
+      biplt <- biplt +
+        ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
+          x = PCx, y = PCy, shape = fill.data, fill = fill.data),
+          color = "black", size = point.size) +
+        ggplot2::labs(
+          x = lab.PC[1], y = lab.PC[2], shape = fill.data,
+          fill = fill.data)
+    }
   }
   #Draw loadings
   if(loadings){
-    biplt <- biplt + ggplot2::geom_segment(
-      data = loadings.data, mapping = ggplot2::aes(
-        x = 0, y = 0, xend = PCx, yend = PCy),
-      arrow = grid::arrow(length = grid::unit(8, "points")),
-      colour = loadings.col) +
-      ggrepel::geom_label_repel(
-        data = loadings.data, mapping = ggplot2::aes(
-          x = PCx, y = PCy, label = labels),
-        size = 3)
+    biplt <- ggloadings(
+      ggbiplot = biplt, loadings.data = loadings.data,
+      loadings.col = loadings.col)
+    # biplt <- biplt + ggplot2::geom_segment(
+    #   data = loadings.data, mapping = ggplot2::aes(
+    #     x = 0, y = 0, xend = PCx, yend = PCy), arrow = grid::arrow(
+    #       length = grid::unit(8, "points")), colour = loadings.col) +
+    #   ggrepel::geom_label_repel(
+    #     data = loadings.data, mapping = ggplot2::aes(
+    #       x = PCx, y = PCy, label = labels), size = 3)
   }
   #Return PCA biplot
   return(biplt)
@@ -300,8 +705,9 @@ ggbipca <- function(
 #' @importFrom data.table `:=` `.SD`
 #' @export
 #' @examples
-#' #Draw the simplest cross-biplot:
+#' #Get PCA results
 #' pca.res <- prcomp(iris[,-5])
+#' #Draw the simplest cross-biplot:
 #' cross.biplot(prcomp.res = pca.res, data = iris)
 #' #Draw a biplot of PC1 to PC4:
 #' cross.biplot(prcomp.res = pca.res, data = iris, PCs = c(1:4))
@@ -325,6 +731,23 @@ ggbipca <- function(
 #'              color.data = "Species", shape.data = "Species") +
 #'   scale_color_manual(values = c("green", "red", "orange")) +
 #'   scale_shape_manual(values = c(83, 8, 25))
+#' #Map custom filling colors:
+#' cross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
+#'              fill.data = "Species", shape.data = "Species") +
+#'   scale_fill_manual(values = c("green", "royalblue", "orange")) +
+#'   scale_shape_manual(values = c(21, 22, 23)) # Needs values between 21 and 25
+#' #Enable custom filling colors and fix point shapes:
+#' cross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
+#'              fill.data = "Species", shape.data = "Species") +
+#'   scale_fill_manual(values = c("green", "royalblue", "orange")) +
+#'   scale_shape_manual(values = rep(21, 3)) # Maps shape N°21 to 3 categories
+#' #Map filling colors, outline colors, and point shapes all together:
+#' cross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
+#'              fill.data = "Species", shape.data = "Species",
+#'              color.data = "Species") +
+#'   scale_fill_manual(values = c("green", "royalblue", "orange")) +
+#'   scale_color_manual(values = c("black", "red", "blue")) +
+#'   scale_shape_manual(values = c(21, 22, 23)) # Needs values between 21 and 25
 #' #Show loadings:
 #' cross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
 #'              color.data = "Species", shape.data = "Species",
@@ -345,14 +768,13 @@ ggbipca <- function(
 #'   scale_shape_manual(values = c(83, 8, 25))
 
 cross.biplot <- function(
-  #TODO: Merge parts of the code that are in common between the 2 functions
   prcomp.res, data, PCs = c(1, 2, 3), scale = 1, point.size = 1,
-  color.data = NULL, shape.data = NULL, loadings = FALSE, loadings.col = "red",
-  top.load.by.quad = NULL){
+  color.data = NULL, fill.data = NULL, shape.data = NULL, loadings = FALSE,
+  loadings.col = "red", top.load.by.quad = NULL){
   #Fix BiocCheck() complaining about these objects initialization
   Var1 <- NULL
   Var2 <- NULL
-  ..pc.select <- NULL
+  # ..pc.select <- NULL
   . <- NULL
   name.X <- NULL
   PCx <- NULL
@@ -360,41 +782,52 @@ cross.biplot <- function(
   PCy <- NULL
   load.sqrd.length <- NULL
   quadrant <- NULL
-  ..cols <- NULL
-  #Duplicate data.table
-  dt.annot <- data.table::as.data.table(as.data.frame(data))
-  #Rename annotation column used for points colors and shapes
-  if(!is.null(color.data)){
-    if(color.data %in% colnames(dt.annot)){
-      data.table::setnames(x = dt.annot, old = color.data, new = "color.data")
-      if(is.null(levels(dt.annot$color.data))){
-        dt.annot[, color.data := as.factor(color.data)]
-      }
-    } else { stop("'color.data' does not match any column name in 'data'.") }
-  }
-  if(!is.null(shape.data)){
-    if(shape.data != color.data){
-      if(shape.data %in% colnames(dt.annot)){
-        data.table::setnames(x = dt.annot, old = shape.data, new = "shape.data")
-        if(is.null(levels(dt.annot$shape.data))){
-          dt.annot[, shape.data := as.factor(shape.data)]
-        }
-      } else { stop("'shape.data' does not match any column name in 'data'.") }
-    }
-  }
-  #Make PC names vector
-  PC <- paste0("PC", PCs)
-  #Get sdev from selected PCs
-  lam <- prcomp.res$sdev[PCs]
-  #Create scaling factor
-  lam <- lam * sqrt(nrow(prcomp.res$x))
-  lam <- lam^scale
-  #Scale PCA data
-  dt.scaled.pc <- data.table::as.data.table(t(t(prcomp.res$x[, PC])/lam))
-  dt.scaled.pc <- cbind(dt.scaled.pc, dt.annot)
-  #Calculate the percentage of variability explained by the principal component
-  ve <- prcomp.res$sdev^2/sum(prcomp.res$sdev^2)
-  lab.PC <- paste0(PC, " (", round(ve[PCs] * 100, 2), "%)")
+  # ..cols <- NULL
+
+  dt.annot <- rename_dt_col(
+    data = data, color.data = color.data, fill.data = fill.data,
+    shape.data = shape.data)
+  # #Duplicate data.table
+  # dt.annot <- data.table::as.data.table(as.data.frame(data))
+  # #Rename annotation column used for points colors and shapes
+  # if(!is.null(color.data)){
+  #   if(color.data %in% colnames(dt.annot)){
+  #     data.table::setnames(x = dt.annot, old = color.data, new = "color.data")
+  #     if(is.null(levels(dt.annot$color.data))){
+  #       dt.annot[, color.data := as.factor(color.data)]
+  #     }
+  #   } else { stop("'color.data' does not match any column name in 'data'.") }
+  # }
+  # if(!is.null(shape.data)){
+  #   if(shape.data != color.data){
+  #     if(shape.data %in% colnames(dt.annot)){
+  #       data.table::setnames(x = dt.annot, old = shape.data, new = "shape.data")
+  #       if(is.null(levels(dt.annot$shape.data))){
+  #         dt.annot[, shape.data := as.factor(shape.data)]
+  #       }
+  #     } else { stop("'shape.data' does not match any column name in 'data'.") }
+  #   }
+  # }
+
+  prepare.res <- prepare_pca_data(
+    prcomp.res = prcomp.res, dt.annot = dt.annot, PCs = PCs, scale = scale)
+  PC <- prepare.res$PC
+  dt.scaled.pc <- prepare.res$scaled_PC
+  lab.PC <- prepare.res$labels
+  # #Make PC names vector
+  # PC <- paste0("PC", PCs)
+  # #Get sdev from selected PCs
+  # lam <- prcomp.res$sdev[PCs]
+  # #Create scaling factor
+  # lam <- lam * sqrt(nrow(prcomp.res$x))
+  # lam <- lam^scale
+  # #Scale PCA data
+  # dt.scaled.pc <- data.table::as.data.table(t(t(prcomp.res$x[, PC])/lam))
+  # dt.scaled.pc <- cbind(dt.scaled.pc, dt.annot)
+  # #Calculate the percentage of variability explained by the principal component
+  # ve <- prcomp.res$sdev^2/sum(prcomp.res$sdev^2)
+  # lab.PC <- paste0(PC, " (", round(ve[PCs] * 100, 2), "%)")
+
   lab.PC <- data.table::data.table(PC, lab.PC)
   #Create possible PCs combinations
   comb.pcs <- data.table::as.data.table(
@@ -468,29 +901,40 @@ cross.biplot <- function(
     order(match(PC, levels(dt.scaled.pc$name.Y)))]$lab.PC)
 
   #Make PCA ggplot
-  biplt <- ggplot2::ggplot() +  ggplot2::theme(
-    panel.background = ggplot2::element_blank(),
-    panel.grid = ggplot2::element_line(colour = "grey"),
+  biplt <- theme_biplot() + ggplot2::theme(
     panel.spacing = ggplot2::unit(0, "lines"),
     panel.border = ggplot2::element_rect(
       color = "black", fill = NA, size = 0.5),
     axis.title = ggplot2::element_blank(),
-    axis.text = ggplot2::element_text(size = 12),
     axis.text.x = ggplot2::element_text(angle = -45, hjust = 0, vjust = 0.5),
     strip.text = ggplot2::element_text(size = 13),
     strip.background = ggplot2::element_rect(
-      fill = "white", color = "black", size = 0.5),
-    legend.title = ggplot2::element_text(size = 13),
-    legend.text = ggplot2::element_text(
-      size = 12), legend.key = ggplot2::element_blank()) +
+      fill = "white", color = "black", size = 0.5)) +
     ggplot2::facet_grid(name.Y ~ name.X, scales = "free", space = "fixed")
-  if(!is.null(color.data) & is.null(shape.data)){
+  # biplt <- ggplot2::ggplot() +  ggplot2::theme(
+  #   panel.background = ggplot2::element_blank(),
+  #   panel.grid = ggplot2::element_line(colour = "grey"),
+  #   panel.spacing = ggplot2::unit(0, "lines"),
+  #   panel.border = ggplot2::element_rect(
+  #     color = "black", fill = NA, size = 0.5),
+  #   axis.title = ggplot2::element_blank(),
+  #   axis.text = ggplot2::element_text(size = 12),
+  #   axis.text.x = ggplot2::element_text(angle = -45, hjust = 0, vjust = 0.5),
+  #   strip.text = ggplot2::element_text(size = 13),
+  #   strip.background = ggplot2::element_rect(
+  #     fill = "white", color = "black", size = 0.5),
+  #   legend.title = ggplot2::element_text(size = 13),
+  #   legend.text = ggplot2::element_text(size = 12),
+  #   legend.key = ggplot2::element_blank()) +
+  #   ggplot2::facet_grid(name.Y ~ name.X, scales = "free", space = "fixed")
+
+  if(!is.null(color.data) & is.null(shape.data) & is.null(fill.data)){
     biplt <- biplt +
       #Draw sample distribution
       ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
         x = PCx, y = PCy, color = color.data), size = point.size) +
       ggplot2::labs(color = color.data)
-  } else if(!is.null(color.data) & !is.null(shape.data)){
+  } else if(!is.null(color.data) & !is.null(shape.data) & is.null(fill.data)){
     if(color.data != shape.data){
       biplt <- biplt +
         #Draw sample distribution
@@ -506,26 +950,132 @@ cross.biplot <- function(
           size = point.size) +
         ggplot2::labs(shape = color.data, color = color.data)
     }
-  } else if(is.null(color.data) & is.null(shape.data)){
+  } else if(is.null(color.data) & is.null(shape.data) & is.null(fill.data)){
     biplt <- biplt +
       ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
         x = PCx, y = PCy), color = "black", size = point.size)
-  } else if(is.null(color.data) & !is.null(shape.data)){
+  } else if(is.null(color.data) & !is.null(shape.data) & is.null(fill.data)){
     biplt <- biplt +
       ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
         x = PCx, y = PCy, shape = shape.data),
         color = "black", size = point.size) +
       ggplot2::labs(shape = shape.data)
+  } else if(!is.null(color.data) & is.null(shape.data) & !is.null(fill.data)){
+    biplt <- biplt +
+      #Draw sample distribution
+      ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
+        x = PCx, y = PCy, color = color.data), size = point.size) +
+      ggplot2::labs(color = color.data)
+  } else if(
+    !is.null(color.data) & !is.null(shape.data) & !is.null(fill.data)){
+    if(color.data != shape.data){
+      if(color.data != fill.data){
+        biplt <- biplt +
+          #Draw sample distribution
+          ggplot2::geom_point(
+            data = dt.scaled.pc, mapping = ggplot2::aes(
+              x = PCx, y = PCy, color = color.data,
+              shape = shape.data, fill = fill.data),
+            size = point.size) +
+          ggplot2::labs(
+            shape = shape.data, color = color.data, fill = fill.data)
+      } else {
+        biplt <- biplt +
+          #Draw sample distribution
+          ggplot2::geom_point(
+            data = dt.scaled.pc, mapping = ggplot2::aes(
+              x = PCx, y = PCy, color = color.data,
+              shape = shape.data, fill = color.data),
+            size = point.size) +
+          ggplot2::labs(
+            shape = shape.data, color = color.data, fill = color.data)
+      }
+    } else {
+      if(color.data != fill.data){
+        biplt <- biplt +
+          #Draw sample distribution
+          ggplot2::geom_point(
+            data = dt.scaled.pc, mapping = ggplot2::aes(
+              x = PCx, y = PCy, color = color.data,
+              shape = color.data, fill = fill.data),
+            size = point.size) +
+          ggplot2::labs(
+            shape = color.data, color = color.data, fill = fill.data)
+      } else {
+        biplt <- biplt +
+          #Draw sample distribution
+          ggplot2::geom_point(
+            data = dt.scaled.pc, mapping = ggplot2::aes(
+              x = PCx, y = PCy, color = color.data,
+              shape = color.data, fill = color.data),
+            size = point.size) +
+          ggplot2::labs(
+            shape = color.data, color = color.data, fill = color.data)
+      }
+    }
+  } else if(is.null(color.data) & is.null(shape.data) & !is.null(fill.data)){
+    stop("Cannot set filling color if point shapes are not set to values between 21 to 25.")
+  } else if(is.null(color.data) & !is.null(shape.data) & !is.null(fill.data)){
+    if(shape.data != fill.data){
+      biplt <- biplt +
+        ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
+          x = PCx, y = PCy, shape = shape.data, fill = fill.data),
+          color = "black", size = point.size) +
+        ggplot2::labs(shape = shape.data, fill = fill.data)
+    } else {
+      biplt <- biplt +
+        ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
+          x = PCx, y = PCy, shape = fill.data, fill = fill.data),
+          color = "black", size = point.size) +
+        ggplot2::labs(shape = fill.data, fill = fill.data)
+    }
   }
+  # if(!is.null(color.data) & is.null(shape.data)){
+  #   biplt <- biplt +
+  #     #Draw sample distribution
+  #     ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
+  #       x = PCx, y = PCy, color = color.data), size = point.size) +
+  #     ggplot2::labs(color = color.data)
+  # } else if(!is.null(color.data) & !is.null(shape.data)){
+  #   if(color.data != shape.data){
+  #     biplt <- biplt +
+  #       #Draw sample distribution
+  #       ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
+  #         x = PCx, y = PCy, color = color.data, shape = shape.data),
+  #         size = point.size) +
+  #       ggplot2::labs(shape = shape.data, color = color.data)
+  #   } else {
+  #     biplt <- biplt +
+  #       #Draw sample distribution
+  #       ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
+  #         x = PCx, y = PCy, color = color.data, shape = color.data),
+  #         size = point.size) +
+  #       ggplot2::labs(shape = color.data, color = color.data)
+  #   }
+  # } else if(is.null(color.data) & is.null(shape.data)){
+  #   biplt <- biplt +
+  #     ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
+  #       x = PCx, y = PCy), color = "black", size = point.size)
+  # } else if(is.null(color.data) & !is.null(shape.data)){
+  #   biplt <- biplt +
+  #     ggplot2::geom_point(data = dt.scaled.pc, mapping = ggplot2::aes(
+  #       x = PCx, y = PCy, shape = shape.data),
+  #       color = "black", size = point.size) +
+  #     ggplot2::labs(shape = shape.data)
+  # }
+
   #Draw loadings
   if(loadings){
-    biplt <- biplt + ggplot2::geom_segment(
-      data = loadings.data, mapping = ggplot2::aes(
-        x = 0, y = 0, xend = PCx, yend = PCy), arrow = grid::arrow(
-          length = grid::unit(8, "points")), colour = loadings.col) +
-      ggrepel::geom_label_repel(
-        data = loadings.data, mapping = ggplot2::aes(
-          x = PCx, y = PCy, label = labels), size = 3)
+    biplt <- ggloadings(
+      ggbiplot = biplt, loadings.data = loadings.data,
+      loadings.col = loadings.col)
+    # biplt <- biplt + ggplot2::geom_segment(
+    #   data = loadings.data, mapping = ggplot2::aes(
+    #     x = 0, y = 0, xend = PCx, yend = PCy), arrow = grid::arrow(
+    #       length = grid::unit(8, "points")), colour = loadings.col) +
+    #   ggrepel::geom_label_repel(
+    #     data = loadings.data, mapping = ggplot2::aes(
+    #       x = PCx, y = PCy, label = labels), size = 3)
   }
   #Return PCA biplot
   return(biplt)
