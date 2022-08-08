@@ -69,7 +69,8 @@ sunset <- function(
     dt.data <- data.table::data.table(
         "sample.amount" = c(0, seq(N)), "data.covered" = tab.data,
         "sample.string" = paste0(
-            c("NONE", seq(N)), " (", round((tab.data/sum(tab.data))*100), "%", ")"))
+            c("NONE", seq(N)), " (", round((tab.data/sum(tab.data))*100), "%",
+            ")"))
     #Add index to dt.data
     dt.data[, index := .I]
 
@@ -86,13 +87,16 @@ sunset <- function(
     dt.data[, c(
         "label.pos", "diff.bins", "cumulated", "right.y.data.covered",
         "right.y.sample.string", "right.y.label.pos","right.y.diff.bins") := .(
-            cumsum(data.covered)-0.5*data.covered, data.covered/sum(data.covered),
+            cumsum(data.covered)-0.5*data.covered,
+            data.covered/sum(data.covered),
             cumsum(data.covered), data.covered, sample.string,
-            cumsum(data.covered)-0.5*data.covered, data.covered/sum(data.covered))]
+            cumsum(data.covered)-0.5*data.covered,
+            data.covered/sum(data.covered))]
     #Apply display cut-off on main labels
     dt.data[data.covered < display.cutoff * N.rows, hiden := TRUE]
     #Apply display cut-off on right y labels
-    dt.data[right.y.data.covered > display.cutoff * N.rows, right.y.hiden := TRUE]
+    dt.data[
+        right.y.data.covered > display.cutoff * N.rows, right.y.hiden := TRUE]
     dt.data[right.y.diff.bins < display.num.smpl, right.y.hiden := TRUE]
     #Set white lines display
     dt.data[diff.bins < display.num.smpl, white.line.hide := TRUE]
@@ -139,8 +143,9 @@ sunset <- function(
             } else {
                 pos_lab_grp <- (dt.data[dt_grp[1, ]$index - 1,]$cumulated +
                                     utils::tail(dt_grp, n = 1)$cumulated)/2
-                amnt_grp <- utils::tail(dt_grp$sample.amount, n = 1) - utils::head(
-                    dt_grp$sample.amount, n = 1) + 1
+                amnt_grp <- utils::tail(
+                    dt_grp$sample.amount, n = 1) - utils::head(
+                        dt_grp$sample.amount, n = 1) + 1
             }
             if(data_cov_grp > display.cutoff * N.rows){
                 hiden_grp <- FALSE
@@ -152,18 +157,21 @@ sunset <- function(
             }
             new.dt <- data.table::data.table(
                 "sample.amount" = amnt_grp, "data.covered" = data_cov_grp,
-                "sample.string" = str_grp, "index" = utils::tail(dt_grp$index, n = 1),
+                "sample.string" = str_grp,
+                "index" = utils::tail(dt_grp$index, n = 1),
                 "label.pos" = pos_lab_grp, "diff.bins" = per_grp,
                 "cumulated" = utils::tail(dt_grp$cumulated, n = 1),
                 "right.y.data.covered" = data_cov_grp,
-                "right.y.sample.string" = str_grp, "right.y.label.pos" = pos_lab_grp,
+                "right.y.sample.string" = str_grp,
+                "right.y.label.pos" = pos_lab_grp,
                 "right.y.diff.bins" = per_grp, "hiden" = hiden_grp,
                 "right.y.hiden" = right.y.hiden_grp)
             dt.data[index == new.dt$index, c(
                 "sample.string", "label.pos", "right.y.sample.string",
                 "right.y.label.pos", "hiden", "right.y.hiden") := .(
-                    new.dt$sample.string, new.dt$label.pos, new.dt$sample.string,
-                    new.dt$label.pos, new.dt$hiden, new.dt$right.y.hiden)]
+                    new.dt$sample.string, new.dt$label.pos,
+                    new.dt$sample.string, new.dt$label.pos, new.dt$hiden,
+                    new.dt$right.y.hiden)]
         }))
     }
     #"Sunset" Plot of the Amount of CpGs Covered by Number of Samples
@@ -173,10 +181,12 @@ sunset <- function(
                        legend.position = lgd.pos) +
         ggplot2::geom_bar(
             data = dt.data, mapping = ggplot2::aes(
-                x = 0, y = data.covered, fill = sample.amount), stat = "identity") +
-        ggplot2::geom_text(data = dt.data[hiden == FALSE], mapping = ggplot2::aes(
-            x = 0, y = label.pos, label = sample.string), vjust = 0.35, hjust = 0.5,
-            color = "white", size = 5) +
+                x = 0, y = data.covered, fill = sample.amount),
+            stat = "identity") +
+        ggplot2::geom_text(
+            data = dt.data[hiden == FALSE], mapping = ggplot2::aes(
+                x = 0, y = label.pos, label = sample.string), vjust = 0.35,
+            hjust = 0.5, color = "white", size = 5) +
         ggplot2::scale_fill_gradient2(
             low = col.pal[1], mid = col.pal[2], high = col.pal[3],
             midpoint = round(N/2), breaks = round(seq(
@@ -194,12 +204,14 @@ sunset <- function(
         ggplot2::geom_hline(
             data = dt.data[white.line.hide == FALSE], mapping = ggplot2::aes(
                 yintercept = cumulated), color = "white") +
-        ggplot2::guides(fill = guide_colorbar(ticks.linewidth = 2, ticks.colour = "black"))
+        ggplot2::guides(
+            fill = guide_colorbar(ticks.linewidth = 2, ticks.colour = "black"))
     if(horizontal) {
         sun.plt <- sun.plt +
             ggplot2::ggtitle(title) +
             ggplot2::theme(
-                plot.title = ggplot2::element_text(title, size = 15, hjust = 0.5),
+                plot.title = ggplot2::element_text(
+                    title, size = 15, hjust = 0.5),
                 axis.title = ggplot2::element_blank(),
                 axis.ticks.y = ggplot2::element_blank(),
                 axis.text.y = ggplot2::element_blank(),
