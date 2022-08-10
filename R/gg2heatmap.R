@@ -827,7 +827,7 @@ gg2heatmap <- function(
                             gg.plot = sub.htmp, filter = raster)
                         rm(sub.htmp)
                         #Make grob annotation
-                        raster.annot <- BiocompR::annotation_custom2(
+                        raster.annot <- BiocompR:::annotation_custom2(
                             grob = raster.grob, xmin = -Inf, xmax = Inf,
                             ymin = -Inf, ymax = Inf,
                             data = melted_mat[facet.annot == i])

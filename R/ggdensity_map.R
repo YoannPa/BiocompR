@@ -23,8 +23,9 @@ colDensity <- function(
     ls.density <- parallel::mclapply(
         X = seq(ncol(x)), mc.cores = ncores, FUN = function(i){
             dens.res <- density(x = x[, i], from = from, to = to, na.rm = na.rm)
-            dt.dens <- data.table(variable = colnames(x)[i], value = dens.res$x,
-                                  density = dens.res$y)
+            dt.dens <- data.table::data.table(
+                variable = colnames(x)[i], value = dens.res$x,
+                density = dens.res$y)
             dt.dens
         })
     return(ls.density)
@@ -210,29 +211,32 @@ ggdensity_map <- function(
     rm(m)
     #Plot density map
     if(verbose){cat("Plotting density color map...")}
-    ggdensmap <- ggplot() +
-        geom_tile(data = dt.density, mapping = aes(
+    ggdensmap <- ggplot2::ggplot() +
+        ggplot2::geom_tile(data = dt.density, mapping = ggplot2::aes(
             x = variable, y = value, fill = density)) +
-        scale_fill_viridis_c(option = col.map) +
-        scale_y_continuous(expand = c(0, 0)) +
-        scale_x_discrete(expand = c(0, 0)) +
-        theme(
-            axis.text.x = element_blank(),
-            axis.ticks.x = element_blank(),
-            axis.text.y = element_text(size = 11),
-            axis.title = element_text(size = 12),
+        ggplot2::scale_fill_viridis_c(option = col.map) +
+        ggplot2::scale_y_continuous(expand = c(0, 0)) +
+        ggplot2::scale_x_discrete(expand = c(0, 0)) +
+        ggplot2::theme(
+            axis.text.x = ggplot2::element_blank(),
+            axis.ticks.x = ggplot2::element_blank(),
+            axis.text.y = ggplot2::element_text(size = 11),
+            axis.title = ggplot2::element_text(size = 12),
             legend.position = "none",
-            strip.text = element_text(size = 12),
-            strip.background = element_rect(fill = "white", color = "black"),
-            panel.spacing = unit(1, "lines"),
-            panel.border = element_rect(fill = NA, color = "black"),
-            plot.margin = margin(0.3,0.1,0.1,0.1, unit = "cm")) +
-        labs(x = var.col, y = val.col)
+            strip.text = ggplot2::element_text(size = 12),
+            strip.background = ggplot2::element_rect(
+                fill = "white", color = "black"),
+            panel.spacing = ggplot2::unit(1, "lines"),
+            panel.border = ggplot2::element_rect(fill = NA, color = "black"),
+            plot.margin = ggplot2::margin(0.3, 0.1, 0.1, 0.1, unit = "cm")) +
+        ggplot2::labs(x = var.col, y = val.col)
     if(data.type == "molten"){
         if(facet.by == "rows"){
-            ggdensmap <- ggdensmap + facet_grid(rows = vars(group))
+            ggdensmap <- ggdensmap +
+                ggplot2::facet_grid(rows = ggplot2::vars(group))
         } else if(facet.by == "cols"){
-            ggdensmap <- ggdensmap + facet_grid(cols = vars(group))
+            ggdensmap <- ggdensmap +
+                ggplot2::facet_grid(cols = ggplot2::vars(group))
         }
     }
     if(verbose){ cat("Done.\n") }

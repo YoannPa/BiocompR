@@ -205,7 +205,8 @@ sunset <- function(
             data = dt.data[white.line.hide == FALSE], mapping = ggplot2::aes(
                 yintercept = cumulated), color = "white") +
         ggplot2::guides(
-            fill = guide_colorbar(ticks.linewidth = 2, ticks.colour = "black"))
+            fill = ggplot2::guide_colorbar(
+                ticks.linewidth = 2, ticks.colour = "black"))
     if(horizontal) {
         sun.plt <- sun.plt +
             ggplot2::ggtitle(title) +

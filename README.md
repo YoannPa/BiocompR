@@ -8,9 +8,9 @@ _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots 
 **3-** [**DKFZ - Computational Cancer Epigenomics, Germany.**](https://www.dkfz.de/en/CanEpi/CompEpigen/index.html)  
 **4-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
-**Version: 0.0.160 (Beta)**  
+**Version: 0.0.161 (Beta)**  
 **R Compatibility: Version 4.2.0**  
-**Last Update: 08/08/2022**  
+**Last Update: 10/08/2022**  
 **How to cite:** _Pageaud Y. et al., BiocompR - Advanced visualizations for data comparison._
 
 ## Content
@@ -29,6 +29,7 @@ Currently the package BiocompR contains **25 functions**:
 * `ggcoverage()` - Plots an annotated barplot.  
 * `ggcraviola()` - Draws a craviola plot (half-splitted and percentile-binned violin plot).  
 * `ggdend()` - Creates a dendogram in ggplot2.  
+* `ggdensity_map` - Plots a density color map from a matrix or a molten data.frame.  
 * `ggeigenvector()` - Creates an eigenvector plot using ggplot2.  
 * `ggpanel.corr()` - Plots results of correlation test between a single variable and multiple others as jittered scatter plot divided into 4 different panels.  
 * `ggvolcano.corr()` - Plots results of correlation test between a single variable and multiple others as volcano plot.  

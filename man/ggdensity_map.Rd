@@ -100,6 +100,10 @@ ggdensity_map(m = molten.iris, grp.col = "Species") +
 # Plot densities on a specific range of values:
 ggdensity_map(m = molten.iris, grp.col = "Species", from = 2, to = 5) +
   theme(axis.text.x = element_text(size = 12))
+# Change the color map:
+ggdensity_map(
+  m = molten.iris, grp.col = "Species", col.map = "D", from = 2, to = 5) +
+  theme(axis.text.x = element_text(size = 12))
 # Facetting the density heatmap by columns:
 ggdensity_map(m = molten.iris, grp.col = "Species", facet.by = "cols") +
   theme(axis.text.x = element_text(size = 12, angle = -90))

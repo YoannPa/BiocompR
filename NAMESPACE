@@ -3,7 +3,6 @@
 S3method(min,max.update)
 S3method(plot,col.sidebar)
 export(EVA)
-export(annotation_custom2)
 export(basic.ggplot.tri)
 export(basic.sidebar)
 export(bin.polygons)
