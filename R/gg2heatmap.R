@@ -40,9 +40,11 @@
 #'                        'manhattan', 'canberra', 'binary', 'minkowski',
 #'                        'none')).
 #' @param rank.fun        A \code{character} to specify a function to apply on
-#'                        matrix rows to order them on the final heatmap. If
-#'                        rank.fun = NULL the order of rows in the matrix will
-#'                        be kept (Default: rank.fun = NULL;
+#'                        matrix rows to order them on the final heatmap.
+#'                        Functions should be specified using the syntax
+#'                        'package::function'. If rank.fun = NULL the order of
+#'                        rows in the matrix will be kept
+#'                        (Default: rank.fun = NULL;
 #'                        Supported: rank.fun = 'sd').
 #' @param top.rows        An \code{integer} to specify the number of top rows
 #'                        you want to display on the heatmap
@@ -233,9 +235,24 @@
 #' @importFrom data.table `:=` `.I`
 #' @export
 #' @examples
-#' #Create the basic gg2heatmap
+#' # Create the basic gg2heatmap
 #' mat <- as.matrix(t(scale(mtcars)))
 #' gg2heatmap(m = mat)
+#' # Apply Euclidean distance on rows, and Manhattan distance on columns
+#' gg2heatmap(m = mat, dist.method = c("euclidean", "manhattan"))
+#' # Rank heatmap rows following their standard deviation
+#' gg2heatmap(m = mat, dist.method = c("none", "manhattan"),
+#'   rank.fun = "stats::sd", dendrograms = c(FALSE, TRUE))
+#' # Keep top 5 rows with highest standard variation
+#' gg2heatmap(m = mat, dist.method = c("none", "manhattan"),
+#'   rank.fun = "stats::sd", dendrograms = c(FALSE, TRUE), top.rows = 5)
+#' # Order rows and columns respectively by euclidean and manhattan distance,
+#' # and hide both dendrograms
+#' gg2heatmap(m = mat, dist.method = c("euclidean", "manhattan"),
+#'   dendrograms = FALSE)
+#' # Change both dendrograms size
+#' gg2heatmap(m = mat, dist.method = c("euclidean", "manhattan"),
+#'   dend.size = c(2, 5))
 
 #TODO: Add option to hide subtitle information
 #TODO: Rewrite the assembling of plots using egg package functions and handling
@@ -309,12 +326,12 @@ gg2heatmap <- function(
         stop(paste("Cannot compute distances on rows if heatmap is also",
                    "splitted on rows."))
     }
-    #Check if rank.fun is a supported function
-    rank.method <- c("sd")
-    if(!is.null(rank.fun)){
-        if(!rank.fun %in% rank.method){
-            stop("ranking function not supported.")}
-    }
+    # #Check if rank.fun is a supported function
+    # rank.method <- c("sd")
+    # if(!is.null(rank.fun)){
+    #     if(!rank.fun %in% rank.method){
+    #         stop("ranking function not supported.")}
+    # }
     #Check if top.rows is an integer
     if(!is.null(top.rows)){
         if(is.numeric(top.rows)){
@@ -394,12 +411,15 @@ gg2heatmap <- function(
     m <- BiocompR::manage.na(
         data = m, method = na.handle, groups = imputation.grps, ncores = ncores)
     if(verbose){ cat("Done.\n") }
+
     #Apply ranking function if any function defined
     if(verbose){ cat("Ranking data by rows...") }
     if(!is.null(rank.fun)){
-        #TODO: improve this part to support more function with eval() & parse()
-        m <- m[order(apply(m, 1, stats::sd, na.rm = TRUE), decreasing = TRUE), ,
-               drop = FALSE]
+        # Check the structure of the rank.fun string
+        rank.fun <- check_fun(fun = rank.fun, param.name = "rank.fun")
+        m <- eval(parse(text = paste0(
+            "m[order(apply(m, 1, ", rank.fun,
+            ", na.rm = TRUE), decreasing = TRUE), , drop = FALSE]")))
     }
     if(verbose){ cat("Done.\n") }
 

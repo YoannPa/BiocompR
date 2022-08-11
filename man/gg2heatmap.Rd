@@ -88,9 +88,11 @@ Supported: dist.method = c('euclidean', 'maximum',
 'none')).}
 
 \item{rank.fun}{A \code{character} to specify a function to apply on
-matrix rows to order them on the final heatmap. If
-rank.fun = NULL the order of rows in the matrix will
-be kept (Default: rank.fun = NULL;
+matrix rows to order them on the final heatmap.
+Functions should be specified using the syntax
+'package::function'. If rank.fun = NULL the order of
+rows in the matrix will be kept
+(Default: rank.fun = NULL;
 Supported: rank.fun = 'sd').}
 
 \item{top.rows}{An \code{integer} to specify the number of top rows
@@ -315,9 +317,24 @@ A \code{grob} list containing the final plot, and also each grob
 Creates a custom heatmap with dendrograms and annotations.
 }
 \examples{
-#Create the basic gg2heatmap
+# Create the basic gg2heatmap
 mat <- as.matrix(t(scale(mtcars)))
 gg2heatmap(m = mat)
+# Apply Euclidean distance on rows, and Manhattan distance on columns
+gg2heatmap(m = mat, dist.method = c("euclidean", "manhattan"))
+# Rank heatmap rows following their standard deviation
+gg2heatmap(m = mat, dist.method = c("none", "manhattan"),
+  rank.fun = "stats::sd", dendrograms = c(FALSE, TRUE))
+# Keep top 5 rows with highest standard variation
+gg2heatmap(m = mat, dist.method = c("none", "manhattan"),
+  rank.fun = "stats::sd", dendrograms = c(FALSE, TRUE), top.rows = 5)
+# Order rows and columns respectively by euclidean and manhattan distance,
+# and hide both dendrograms
+gg2heatmap(m = mat, dist.method = c("euclidean", "manhattan"),
+  dendrograms = FALSE)
+# Change both dendrograms size
+gg2heatmap(m = mat, dist.method = c("euclidean", "manhattan"),
+  dend.size = c(2, 5))
 }
 \author{
 Yoann Pageaud.

@@ -1,6 +1,6 @@
 Package: BiocompR
 Title: BiocompR - Advanced visualizations for data comparison
-Version: 0.0.161
+Version: 0.0.162
 Authors@R: 
     person(given = "Yoann",
            family = "Pageaud",
