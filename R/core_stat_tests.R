@@ -87,7 +87,7 @@ ls.psych.as.dt <- function(psych.list){
     return(dt)
 }
 
-#' Checks if a function exists.
+#' Checks if a function exists and package of origin.
 #'
 #' @param fun        A \code{character} string matching a function you are
 #'                   looking for. The syntax must either be 'function' or
@@ -110,8 +110,8 @@ check_fun <- function(fun, param.name = "fun", ncores = 1){
         # Look first through functions of loaded packages
         ls.packfun <- parallel::mclapply(
             X = search(), mc.cores = ncores, FUN = function(p){
-                ls.fun <- as.character(lsf.str(p))
-                if(any(as.character(lsf.str(p)) == fun.str)){
+                ls.fun <- as.character(utils::lsf.str(p))
+                if(any(ls.fun == fun.str)){
                     paste(unlist(strsplit(x = p, split = ":"))[2], fun.str,
                           sep = "::")
                 } else { NULL }

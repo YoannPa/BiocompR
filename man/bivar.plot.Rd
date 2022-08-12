@@ -2,8 +2,7 @@
 % Please edit documentation in R/bivar_plot.R
 \name{bivar.plot}
 \alias{bivar.plot}
-\title{Computes boxplots or violins from 1 variable values against ranges of a 2nd
-one.}
+\title{Draws boxplots or violins from a variable values against ranges of a 2nd one.}
 \usage{
 bivar.plot(
   data,
@@ -49,8 +48,20 @@ use a dark color (Default: fill = "deepskyblue3").}
 A \code{gg} plot object displaying boxplots and/or violin plots.
 }
 \description{
-Computes boxplots or violins from 1 variable values against ranges of a 2nd
-one.
+Draws boxplots or violins from a variable values against ranges of a 2nd one.
+}
+\examples{
+# Draw a bivar boxplot with a step of 1
+bivar.plot(data = iris[, c(1,3)], cat.step = 1)
+# Draw a bivar violin plot with a step of 1
+bivar.plot(data = iris[, c(1,3)], cat.step = 1, violin = TRUE)
+# Change the filling color of the bivar plot
+bivar.plot(data = iris[, c(1,3)], cat.step = 1, fill = "red")
+# Aggregate values above 5
+bivar.plot(data = iris[, c(1,3)], cat.step = 1, fill = "red", cat.max = 5)
+# Example of customization of axis titles using ggplot2 syntax
+bivar.plot(data = iris[, c(1,3)], cat.step = 1, fill = "red", cat.max = 5) +
+  labs(x = "Petal length", y = "Sepal length")
 }
 \author{
 Yoann Pageaud, Yassen Assenov.

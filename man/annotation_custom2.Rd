@@ -26,6 +26,9 @@ of raster.}
 \item{data}{A subset of a \code{data.table} matching the panel where the
 grob annotation should be displayed.}
 }
+\value{
+A ggplot2 \code{LayerInstance} object.
+}
 \description{
 This is a special geom intended for use as static annotations derived from
 ggplot2::annotation_custom() matching a specific panel on a faceted ggplot.

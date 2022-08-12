@@ -22,10 +22,11 @@ colDensity <- function(
     ncores = 1){
     ls.density <- parallel::mclapply(
         X = seq(ncol(x)), mc.cores = ncores, FUN = function(i){
-            dens.res <- density(x = x[, i], from = from, to = to, na.rm = na.rm)
+            dens.res <- stats::density(
+                x = x[, i], from = from, to = to, na.rm = na.rm)
             dt.dens <- data.table::data.table(
                 variable = colnames(x)[i], value = dens.res$x,
-                density = dens.res$y)
+                dens = dens.res$y)
             dt.dens
         })
     return(ls.density)
@@ -66,9 +67,9 @@ colDensity <- function(
 #'                 kernel estimation ends (Default: to = max(m, na.rm = TRUE)).
 #' @param sort.fun A \code{character} matching a function to apply to the matrix
 #'                 or the molten dataframe, to sort columns of the density
-#'                 heatmap based on the values calculated (Supported:
-#'                 "base::mean", "base::median", "base::sd", "stats::IQR",
-#'                 ... and many more).
+#'                 heatmap based on the values calculated
+#'                 (Default: sort.fun = NULL ; Supported: "base::mean",
+#'                 "base::median", "base::sd", "stats::IQR", ...and more).
 #' @param facet.by A \code{character} specifying whether the density map on a
 #'                 molten data.frame should be faceted on rows
 #'                 (Default: facet.by = "rows") or on columns
@@ -110,6 +111,19 @@ ggdensity_map <- function(
     m, rn.col = "rn", var.col = "variable", val.col = "value",
     grp.col = "group", col.map = "plasma", from = NULL, to = NULL,
     sort.fun = NULL, facet.by = "rows", ncores = 1, verbose = FALSE){
+    #Fix BiocCheck() complaining about these objects initialization
+    variable <- NULL
+    group <- NULL
+    sorting <- NULL
+    value <- NULL
+    dens <- NULL
+
+    #Check sort.fun
+    if(!is.null(sort.fun)){
+        sort.fun <- check_fun(
+            fun = sort.fun, param.name = "sort.fun", ncores = ncores)
+    }
+    #Compute density on matrix or molten dataframe
     if(is.matrix(m)){
         if(verbose){cat("Matrix detected\n")}
         data.type <- "matrix"
@@ -213,7 +227,7 @@ ggdensity_map <- function(
     if(verbose){cat("Plotting density color map...")}
     ggdensmap <- ggplot2::ggplot() +
         ggplot2::geom_tile(data = dt.density, mapping = ggplot2::aes(
-            x = variable, y = value, fill = density)) +
+            x = variable, y = value, fill = dens)) +
         ggplot2::scale_fill_viridis_c(option = col.map) +
         ggplot2::scale_y_continuous(expand = c(0, 0)) +
         ggplot2::scale_x_discrete(expand = c(0, 0)) +

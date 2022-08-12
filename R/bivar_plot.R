@@ -1,10 +1,9 @@
 
 ##FUNCTIONS
 
-#' Computes boxplots or violins from 1 variable values against ranges of a 2nd
-#' one.
+#' Draws boxplots or violins from a variable values against ranges of a 2nd one.
 #'
-#' @param data   A two-columns \code{data.frame}:
+#' @param data     A two-columns \code{data.frame}:
 #'                 \itemize{
 #'                  \item{column 1 contains values of the 1st variable. These
 #'                  values will be used for computing boxplots.}
@@ -32,8 +31,20 @@
 #'                 use a dark color (Default: fill = "deepskyblue3").
 #' @return A \code{gg} plot object displaying boxplots and/or violin plots.
 #' @author Yoann Pageaud, Yassen Assenov.
-#' @importFrom data.table `:=`
+#' @importFrom data.table `:=` `.N`
 #' @export
+#' @examples
+#' # Draw a bivar boxplot with a step of 1
+#' bivar.plot(data = iris[, c(1,3)], cat.step = 1)
+#' # Draw a bivar violin plot with a step of 1
+#' bivar.plot(data = iris[, c(1,3)], cat.step = 1, violin = TRUE)
+#' # Change the filling color of the bivar plot
+#' bivar.plot(data = iris[, c(1,3)], cat.step = 1, fill = "red")
+#' # Aggregate values above 5
+#' bivar.plot(data = iris[, c(1,3)], cat.step = 1, fill = "red", cat.max = 5)
+#' # Example of customization of axis titles using ggplot2 syntax
+#' bivar.plot(data = iris[, c(1,3)], cat.step = 1, fill = "red", cat.max = 5) +
+#'   labs(x = "Petal length", y = "Sepal length")
 
 bivar.plot <- function(
     data, violin = FALSE, cat.step = 10L, cat.max = 10L, fill = "deepskyblue3"){
@@ -49,14 +60,15 @@ bivar.plot <- function(
         data <- data.table::as.data.table(data)
     }
     #Create colnames
-    oldcolnames<-colnames(data)
-    colnames(data)<-c("Var1","Var2")
+    oldcolnames <- colnames(data)
+    colnames(data) <- c("Var1", "Var2")
     #Create Categories from Var2
     data[, category :=.(as.integer(floor(Var2 / cat.step)))]
     #Assign values to last category if there category is above cat.max
     data[category > cat.max, category := cat.max]
     #Get Number of CpGs by categories
-    data[, cat.sizes := data.table::.N, by = "category"]
+    # data[, cat.sizes := data.table::.N, by = "category"]
+    data[, cat.sizes := .N, by = "category"]
     #Calculate intervals
     cat.breaks <- cumsum(rep(cat.step, cat.max))
     cat.first <- ifelse(is.integer(data[, 1]), "1", "0")
@@ -76,13 +88,24 @@ bivar.plot <- function(
     #Get boxplot statistics
     dfr <- data[, stats::quantile(x = Var1), by = c("category", "cat.sizes")]
     #Categories as Levels
-    levels(dfr$category) <- dfr[
-        match(x = levels(category), table = category)][, category := .(paste0(
-            category, "\n", formatC(x = cat.sizes, format = "e", digits = 2)))
-            ]$category
+    matched_cat <- stats::na.omit(
+        dfr[match(x = levels(category), table = category)])
+    new_lvls <- matched_cat[, category := .(paste0(
+        category, "\n", formatC(x = cat.sizes, format = "e", digits = 2)))
+        ]$category
+    if(length(levels(dfr$category)) == length(new_lvls)){
+        levels(dfr$category) <- new_lvls
+    } else {
+        dfr[, category := droplevels(category)]
+        levels(dfr$category) <- new_lvls
+    }
     #Change category also in data
-    levels(data$category)<-levels(dfr$category)
-
+    if(length(levels(data$category)) == length(levels(dfr$category))){
+        levels(data$category) <- levels(dfr$category)
+    } else {
+        data[, category := droplevels(category)]
+        levels(data$category) <- levels(dfr$category)
+    }
     #Plot categories boxplot
     bivar<-ggplot2::ggplot()
     if(violin){

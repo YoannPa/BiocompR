@@ -843,6 +843,7 @@ raster.ggplot.to.grob <- function(gg.plot, filter = "Lanczos"){
 #'                  of raster.
 #' @param data      A subset of a \code{data.table} matching the panel where the
 #'                  grob annotation should be displayed.
+#' @return A ggplot2 \code{LayerInstance} object.
 #' @keywords internal
 
 annotation_custom2 <- function(

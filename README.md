@@ -8,17 +8,18 @@ _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots 
 **3-** [**DKFZ - Computational Cancer Epigenomics, Germany.**](https://www.dkfz.de/en/CanEpi/CompEpigen/index.html)  
 **4-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
-**Version: 0.0.162 (Beta)**  
+**Version: 0.0.163 (Beta)**  
 **R Compatibility: Version 4.2.0**  
-**Last Update: 11/08/2022**  
+**Last Update: 12/08/2022**  
 **How to cite:** _Pageaud Y. et al., BiocompR - Advanced visualizations for data comparison._
 
 ## Content
-Currently the package BiocompR contains **25 functions**:
+Currently the package BiocompR contains **29 functions**:
 
 * `basic.sidebar()` - Draws a ggplot2 of a basic sidebar.  
 * `bivar.plot()` - Computes boxplots or violins from 1 variable values against ranges of a 2nd one.  
-* `build.layout()` - Builds legends layout.  
+* `build.layout()` - Builds legends layout.
+* `check_fun()` - Checks if a function exists and package of origin.  
 * `cross.biplot()` - Computes and draws biplots for multiple principal components at once.  
 * `EVA()` - Computes eigenvectors, principal component scores and correlations from a correlation test.  
 * `fancy.hist()` - Computes in parallel and plot an histogram using ggplot2 from a given vector of values.  
@@ -46,7 +47,7 @@ Currently the package BiocompR contains **25 functions**:
 * `warn.handle()` - Filters unrelevant warnings matching a regular expression.  
 
 ## Prerequisites
-### Install Linux dependencies
+### Under Linux: install the following dependencies
 In the terminal do:  
 ```bash
 sudo apt-get install libcurl4-openssl-dev libxml2-dev libmagick++-dev

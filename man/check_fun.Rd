@@ -2,7 +2,7 @@
 % Please edit documentation in R/core_stat_tests.R
 \name{check_fun}
 \alias{check_fun}
-\title{Checks if a function exists.}
+\title{Checks if a function exists and package of origin.}
 \usage{
 check_fun(fun, param.name = "fun", ncores = 1)
 }
@@ -22,7 +22,7 @@ be used to parallel-compute distances for dendrograms.}
 A \code{type} object returned description.
 }
 \description{
-Checks if a function exists.
+Checks if a function exists and package of origin.
 }
 \examples{
 # Looking for the function "abbreviate"

@@ -7,7 +7,6 @@
 #' @return A \code{list} of vectors containing percentiles values, one vector by
 #' distribution.
 #' @author Yoann Pageaud.
-#' @export
 #' @keywords internal
 
 ls.quantile <- function(ls, qtiles){
@@ -25,7 +24,6 @@ ls.quantile <- function(ls, qtiles){
 #' @return A \code{list} of modified data.frames of the density distributions
 #' containing breaks to be used for delimitating bins.
 #' @author Yoann Pageaud.
-#' @export
 #' @keywords internal
 
 bin.polygons <- function(list_oriented_dens, list.quant.lim, Annot.table){
@@ -89,7 +87,10 @@ bin.polygons <- function(list_oriented_dens, list.quant.lim, Annot.table){
         Map(cbind, bin = bin.names, lim.vect[[i]])
     })
     #Map rbind() the list of daframes and the list of position dataframes
-    suppressWarnings(list.mix.df <- Map(rbind, splitted.dens.df, lim.vect))
+    # suppressWarnings(list.mix.df <- Map(rbind, splitted.dens.df, lim.vect))
+    warn.handle(
+        pattern = "number of columns of result is not a multiple of vector length \\(arg 2\\)",
+        list.mix.df <- Map(rbind, splitted.dens.df, lim.vect))
     list.dfs <- lapply(list.mix.df, function(i){
         mrg_df <- do.call(rbind, i)
         mrg_df[!duplicated(mrg_df), ] # remove appended rogue dataframe

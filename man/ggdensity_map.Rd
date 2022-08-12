@@ -61,9 +61,9 @@ kernel estimation ends (Default: to = max(m, na.rm = TRUE)).}
 
 \item{sort.fun}{A \code{character} matching a function to apply to the matrix
 or the molten dataframe, to sort columns of the density
-heatmap based on the values calculated (Supported:
-"base::mean", "base::median", "base::sd", "stats::IQR",
-... and many more).}
+heatmap based on the values calculated
+(Default: sort.fun = NULL ; Supported: "base::mean",
+"base::median", "base::sd", "stats::IQR", ...and more).}
 
 \item{facet.by}{A \code{character} specifying whether the density map on a
 molten data.frame should be faceted on rows

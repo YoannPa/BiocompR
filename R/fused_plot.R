@@ -26,8 +26,8 @@ min.max.update <- function(lgd.limits = NULL, melt.tri, tri.type){
         }
     } else {
         if(length(lgd.limits) != 2){
-            if(tri.type == "upper"){ lgd.name = "lgd.limits1" }
-            else if(tri.type == "lower"){ lgd.name = "lgd.limits2" }
+            if(tri.type == "upper"){ lgd.name <- "lgd.limits1" }
+            else if(tri.type == "lower"){ lgd.name <- "lgd.limits2" }
             stop(paste(lgd.name, "should be a vector of length 2, containing",
                        "the upper limit and the lower limit."))
         } else {

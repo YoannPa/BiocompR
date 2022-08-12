@@ -210,8 +210,8 @@ ggcraviola <- function(
     } else { list_dens.df[[i]] }
   })
   #Remove density values outside the extrema
-  xtrems <- ls.quantile(ls = list_vect.val1, qtiles = c(0, 1))
-  bined.xtrm.dens <- bin.polygons(
+  xtrems <- BiocompR:::ls.quantile(ls = list_vect.val1, qtiles = c(0, 1))
+  bined.xtrm.dens <- BiocompR:::bin.polygons(
     list_oriented_dens = list_oriented_dens, list.quant.lim = xtrems,
     Annot.table = Annot.table)
   #Keep only bin 1 for each sample
@@ -226,10 +226,11 @@ ggcraviola <- function(
   #Create Bins based on a third variable
   if(bins){ #Create bin polygons
     #Bin polygons
-    list.quant.lim <- ls.quantile(ls = list_vect.val1, qtiles = bins.quantiles)
-    list.dfs <- bin.polygons(list_oriented_dens = list_oriented_dens,
-                             list.quant.lim = list.quant.lim,
-                             Annot.table = Annot.table)
+    list.quant.lim <- BiocompR:::ls.quantile(
+      ls = list_vect.val1, qtiles = bins.quantiles)
+    list.dfs <- BiocompR:::bin.polygons(
+      list_oriented_dens = list_oriented_dens, list.quant.lim = list.quant.lim,
+      Annot.table = Annot.table)
     names(list.dfs) <- names(list.quant.lim)
     #Calculate average value on 3rd variable for each bin
     list.fun.val2 <- lapply(X = seq_along(list.quant.lim), FUN = function(i){
