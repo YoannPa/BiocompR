@@ -335,6 +335,74 @@ gg2heatmap(m = mat, dist.method = c("euclidean", "manhattan"),
 # Change both dendrograms size
 gg2heatmap(m = mat, dist.method = c("euclidean", "manhattan"),
   dend.size = c(2, 5))
+# Custom themes of top and left dendrograms
+gg2heatmap(
+  m = mat, theme_dend_top = theme(
+    panel.background = element_rect(
+      color = "red", size = 1, fill = "lightblue")),
+  theme_dend_left = theme(panel.background = element_rect(fill = "gold")))
+# Set heatmap title, and X and Y axis titles
+gg2heatmap(m = mat, plot.labs = labs(
+  title = "mtcars example heatmap", x = "Cars", y = "Cars caracteristics"),
+  y.axis.right = TRUE, # To enable the display of Y-axis on the right
+  theme_heatmap = theme(
+    axis.title.y.right = element_text(size = 14, vjust = -10)))
+# Specify what rows correspond in the subtitle.
+gg2heatmap(m = mat, row.type = "caracteristics")
+# Add 1 annotation for the top color bar
+gg2heatmap(
+  m = mat,
+  annot.grps = list("Carb" = mtcars$carb), annot.pal = rainbow(n = 6))
+# Add more annotations, adjust colorbar width, and legends positions
+gg2heatmap(
+  m = mat,
+  annot.grps = list( #Separate annotations must all have different values
+    "Carb" = paste(mtcars$carb, "Carb"),
+    "Gear" = paste(mtcars$gear, "Gear"),
+    "Am" = paste(mtcars$am, "Am")),
+  annot.pal = list( #Palettes order must matches annotations order
+    rainbow(n = 6), c("pink", "red", "darkred"), c("blue", "grey")),
+  annot.size = 3, # Increases top colorbar width
+  theme_legend = theme(
+    legend.justification = c(0, 0.8)), # Justifies all legends on the left
+    lgd.space.height = 22) # Sets vertical space to avoid legends overlaps
+# Facetting on 1 of the annotations
+gg2heatmap(
+  m = mat,
+  annot.grps = list(
+    "Carb" = paste(mtcars$carb, "Carb"),
+    "Gear" = paste(mtcars$gear, "Gear"),
+    "Am" = paste(mtcars$am, "Am")),
+  annot.pal = list(
+    rainbow(n = 6), c("pink", "red", "darkred"), c("blue", "grey")),
+  annot.size = 4, # Increases top colorbar width for facets strips
+  theme_legend = theme(
+    legend.justification = c(0, 0.8)), # Justifies all legends on the left
+    lgd.space.height = 22,
+  facet = "Carb", # Facetting heatmap using annotation 'Carb'
+  dendrograms = FALSE, # Hide dendrogram since the facetting is On.
+  dist.method = "none") # Disable clustering to let facetting work.
+# Splitting on rows following a group annotation
+molten.cars <- melt.data.table(
+  data = as.data.table(mat, keep.rownames = TRUE), id.vars = "rn",
+  variable.name = "cars")
+molten.cars[
+  rn \%in\% c('mpg', 'disp', 'hp', 'drat', 'qsec'), groups := "kinetic"]
+molten.cars[
+  rn \%in\% c('cyl', 'wt', 'vs', 'am', 'gear', 'carb'), groups := "mecanic"]
+gg2heatmap(
+  m = molten.cars, split.by.rows = "groups", # Splitting on rows by 'groups'
+  dist.method = c('none', 'euclidean'), # Disable clustering on rows
+  dendrograms = c(FALSE, TRUE), # Disable dendrogram display on rows
+  lgd.space.width = 5, # Increase legend space
+  theme_heatmap = theme(
+    axis.text.y.left = element_text(size = 12), # Show Y labels on the left
+    axis.ticks.y.left = element_line(size = 0.5)), # Show Y ticks on the left
+  theme_legend = theme(legend.justification = c(0.5, 0.5))) # Center legend
+# Change heatmap cells borders color and width
+gg2heatmap(m = mat, border.col = "black", border.size = 0.5)
+# Change heatmap cells height and width
+gg2heatmap(m = mat, cell.size = c(0.9, 0.5))
 }
 \author{
 Yoann Pageaud.

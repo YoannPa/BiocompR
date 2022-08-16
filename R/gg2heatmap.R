@@ -253,6 +253,74 @@
 #' # Change both dendrograms size
 #' gg2heatmap(m = mat, dist.method = c("euclidean", "manhattan"),
 #'   dend.size = c(2, 5))
+#' # Custom themes of top and left dendrograms
+#' gg2heatmap(
+#'   m = mat, theme_dend_top = theme(
+#'     panel.background = element_rect(
+#'       color = "red", size = 1, fill = "lightblue")),
+#'   theme_dend_left = theme(panel.background = element_rect(fill = "gold")))
+#' # Set heatmap title, and X and Y axis titles
+#' gg2heatmap(m = mat, plot.labs = labs(
+#'   title = "mtcars example heatmap", x = "Cars", y = "Cars caracteristics"),
+#'   y.axis.right = TRUE, # To enable the display of Y-axis on the right
+#'   theme_heatmap = theme(
+#'     axis.title.y.right = element_text(size = 14, vjust = -10)))
+#' # Specify what rows correspond in the subtitle.
+#' gg2heatmap(m = mat, row.type = "caracteristics")
+#' # Add 1 annotation for the top color bar
+#' gg2heatmap(
+#'   m = mat,
+#'   annot.grps = list("Carb" = mtcars$carb), annot.pal = rainbow(n = 6))
+#' # Add more annotations, adjust colorbar width, and legends positions
+#' gg2heatmap(
+#'   m = mat,
+#'   annot.grps = list( #Separate annotations must all have different values
+#'     "Carb" = paste(mtcars$carb, "Carb"),
+#'     "Gear" = paste(mtcars$gear, "Gear"),
+#'     "Am" = paste(mtcars$am, "Am")),
+#'   annot.pal = list( #Palettes order must matches annotations order
+#'     rainbow(n = 6), c("pink", "red", "darkred"), c("blue", "grey")),
+#'   annot.size = 3, # Increases top colorbar width
+#'   theme_legend = theme(
+#'     legend.justification = c(0, 0.8)), # Justifies all legends on the left
+#'     lgd.space.height = 22) # Sets vertical space to avoid legends overlaps
+#' # Facetting on 1 of the annotations
+#' gg2heatmap(
+#'   m = mat,
+#'   annot.grps = list(
+#'     "Carb" = paste(mtcars$carb, "Carb"),
+#'     "Gear" = paste(mtcars$gear, "Gear"),
+#'     "Am" = paste(mtcars$am, "Am")),
+#'   annot.pal = list(
+#'     rainbow(n = 6), c("pink", "red", "darkred"), c("blue", "grey")),
+#'   annot.size = 4, # Increases top colorbar width for facets strips
+#'   theme_legend = theme(
+#'     legend.justification = c(0, 0.8)), # Justifies all legends on the left
+#'     lgd.space.height = 22,
+#'   facet = "Carb", # Facetting heatmap using annotation 'Carb'
+#'   dendrograms = FALSE, # Hide dendrogram since the facetting is On.
+#'   dist.method = "none") # Disable clustering to let facetting work.
+#' # Splitting on rows following a group annotation
+#' molten.cars <- melt.data.table(
+#'   data = as.data.table(mat, keep.rownames = TRUE), id.vars = "rn",
+#'   variable.name = "cars")
+#' molten.cars[
+#'   rn %in% c('mpg', 'disp', 'hp', 'drat', 'qsec'), groups := "kinetic"]
+#' molten.cars[
+#'   rn %in% c('cyl', 'wt', 'vs', 'am', 'gear', 'carb'), groups := "mecanic"]
+#' gg2heatmap(
+#'   m = molten.cars, split.by.rows = "groups", # Splitting on rows by 'groups'
+#'   dist.method = c('none', 'euclidean'), # Disable clustering on rows
+#'   dendrograms = c(FALSE, TRUE), # Disable dendrogram display on rows
+#'   lgd.space.width = 5, # Increase legend space
+#'   theme_heatmap = theme(
+#'     axis.text.y.left = element_text(size = 12), # Show Y labels on the left
+#'     axis.ticks.y.left = element_line(size = 0.5)), # Show Y ticks on the left
+#'   theme_legend = theme(legend.justification = c(0.5, 0.5))) # Center legend
+#' # Change heatmap cells borders color and width
+#' gg2heatmap(m = mat, border.col = "black", border.size = 0.5)
+#' # Change heatmap cells height and width
+#' gg2heatmap(m = mat, cell.size = c(0.9, 0.5))
 
 #TODO: Add option to hide subtitle information
 #TODO: Rewrite the assembling of plots using egg package functions and handling
@@ -551,11 +619,25 @@ gg2heatmap <- function(
         }
     }
     if(!is.null(facet)){
-        dt.facet <- data.table::data.table(
-            "variable" = colnames(dt.frame)[-c(1)],
-            "facet.annot" = annot.grps[[facet]])
-        melted_mat <- merge(x = melted_mat, y = dt.facet, by = "variable",
-                            all.x = TRUE, sort = FALSE)
+        if(method.cols == "none"){
+            dt.facet <- data.table::data.table(
+                "variable" = colnames(dt.frame)[-c(1)],
+                "facet.annot" = annot.grps[[facet]])
+            melted_mat <- merge(x = melted_mat, y = dt.facet, by = "variable",
+                                all.x = TRUE, sort = FALSE)
+            melted_mat[, facet.annot := as.factor(facet.annot)]
+            melted_mat[, facet.annot := factor(
+                x = facet.annot, levels = sort(levels(facet.annot)))]
+            melted_mat[, variable := as.factor(variable)]
+            melted_mat[, variable := factor(x = variable, levels = unique(
+                melted_mat, by = "variable")[order(facet.annot)]$variable)]
+            #Get new column order based on the facetting
+            column.order <- match(
+                levels(melted_mat$variable), colnames(dt.frame)[-c(1)])
+        } else {
+            stop(paste("Cannot facet the heatmap if clustering method is",
+                       "already applied on columns."))
+        }
     }
     rm(dt.frame)
     if(verbose){ cat("Done.\n") }
@@ -671,7 +753,7 @@ gg2heatmap <- function(
         annot.grps <- lapply(X = annot.grps, FUN = function(i){
             factor(x = i, levels = unique(i))})
         #If the distance method used on columns is not "none" reorder columns
-        if(method.cols != "none"){
+        if(method.cols != "none" | !is.null(facet)){
             annot.grps <- lapply(
                 X = annot.grps, FUN = function(i){ i[column.order] })
         }
@@ -702,7 +784,7 @@ gg2heatmap <- function(
                 theme_forced_annot
         }
 
-        #Set number of columns to display annotations legends
+        #Set number of columns to display annotations facet.annotlegends
         if(lgd.merge){
             # Build color tables for legends.
             col_table <- BiocompR::build.col_table(
@@ -735,7 +817,6 @@ gg2heatmap <- function(
         #Update theme_legend
         if(is.null(theme_legend)){ theme_legend <- theme_default_legend } else{
             theme_legend <- theme_default_legend + theme_legend }
-
         #Create Color Sidebar
         col_sidebar <- BiocompR::plot.col.sidebar(
             sample.names = sample.names, annot.grps = annot.grps,
@@ -781,15 +862,23 @@ gg2heatmap <- function(
             rm(col_sidebar)
         }
     } else { # Use the egg package
-        if(!dd.rows & dd.cols & show.annot){
+        if(!dd.rows & !dd.cols & show.annot){
             facet_size <- 0
             #Create main grob
             main_grob <- egg::ggarrange(
-                ddgr_seg_col, col_sidebar$sidebar, htmp, ncol = 1, nrow = 3,
-                heights = c(dend.col.size + 2, annot.size + facet_size, 30),
+                col_sidebar$sidebar, htmp, ncol = 1, nrow = 2,
+                heights = c(annot.size + facet_size, 30),
                 draw = FALSE)
             #Get sidebar legends
             sidebar_legend <- col_sidebar$legends
+        } else {
+            if(dd.cols){
+                stop("Cannot facet and apply clustering on the data.")
+            } else if(dd.rows){
+                #TODO: Handle this case!
+                stop(paste("Cannot plot heatmap with row dendrogram and",
+                           "annotation yet. Please contact the developper."))
+            }
         }
         if(show.annot){ rm(col_sidebar) }
     }
@@ -897,9 +986,11 @@ gg2heatmap <- function(
     if(verbose){ cat("Redimensioning grobs...") }
     if(dd.cols & dd.rows){
         if(show.annot){
-            ls.w.grobs <- list(
-                'dd_col' = ddgr_seg_col, 'sidebar' = col_sidebar_grob,
-                'htmp' = htmp)
+            if(is.null(facet)){
+                ls.w.grobs <- list(
+                    'dd_col' = ddgr_seg_col, 'sidebar' = col_sidebar_grob,
+                    'htmp' = htmp)
+            }
         } else { ls.w.grobs <- list('dd_col' = ddgr_seg_col, 'htmp' = htmp) }
         upd.grob_w <- BiocompR::resize.grobs(
             ls.grobs = ls.w.grobs, dimensions = "widths", start.unit = 4,
@@ -914,38 +1005,40 @@ gg2heatmap <- function(
             }
         } else { ls.w.grobs <- list('dd_col' = ddgr_seg_col, 'htmp' = htmp) }
         rm(ddgr_seg_col)
+
         if(is.null(facet)){
             upd.grob_w <- BiocompR::resize.grobs(
                 ls.grobs = ls.w.grobs, dimensions = "widths", start.unit = 3,
                 end.unit = 7)
-        } else {
-            #TODO: Handle this case!
-            stop(paste("Cannot plot heatmap with column dendrogram with facet",
-                       "and without annotation yet. Please contact the",
-                       "developper."))
         }
+        # } else {
+        #     #TODO: Handle this case!
+        #     stop(paste("Cannot plot heatmap with column dendrogram with facet",
+        #                "and without annotation yet. Please contact the",
+        #                "developper."))
+        # }
     } else {
         if(show.annot){
-            ls.w.grobs <- list('sidebar' = col_sidebar_grob, 'htmp' = htmp)
+            if(is.null(facet)){
+                ls.w.grobs <- list('sidebar' = col_sidebar_grob, 'htmp' = htmp)
+            }
         } else { ls.w.grobs <- list('htmp' = htmp) }
+
         if(is.null(facet)){
             upd.grob_w <- BiocompR::resize.grobs(
                 ls.grobs = ls.w.grobs, dimensions = "widths", start.unit = 3,
                 end.unit = 7)
-        } else {
-            upd.grob_w <- BiocompR::resize.grobs(
-                ls.grobs = ls.w.grobs, dimensions = "widths", start.unit = 1,
-                end.unit = max(unlist(lapply(X = ls.w.grobs, FUN = function(i){
-                    length(i[["widths"]]) }))))
         }
+        # } else {
+        #     upd.grob_w <- BiocompR::resize.grobs(
+        #         ls.grobs = ls.w.grobs, dimensions = "widths", start.unit = 1,
+        #         end.unit = max(unlist(lapply(X = ls.w.grobs, FUN = function(i){
+        #             length(i[["widths"]]) }))))
+        # }
     }
 
     rm(htmp)
-    if(show.annot){
-        if(!(!dd.rows & dd.cols & show.annot)){
-            rm(col_sidebar_grob)
-        }
-    }
+    if(show.annot){ if(!(!dd.rows & show.annot)){ rm(col_sidebar_grob) } }
     #Resize grobs heights
     if(dd.rows){
         if(is.null(facet)){
@@ -961,7 +1054,7 @@ gg2heatmap <- function(
                        "annotation yet. Please contact the developper."))
         }
     } else {
-        if(!(!is.null(facet) & !dd.rows & dd.cols & show.annot)){
+        if(!(!is.null(facet) & !dd.rows & show.annot)){
             upd.grob_h <- list("htmp" = upd.grob_w$htmp)
         }
     }
@@ -1008,10 +1101,16 @@ gg2heatmap <- function(
     } else if(!dd.rows & !dd.cols){
         if(show.annot){
             #Create main grob
-            if(is.null(facet)){ facet_size <- 0 } else { facet_size <- 1 }
-            main_grob <- gridExtra::arrangeGrob(grobs = list(
-                upd.grob_w$sidebar, upd.grob_h$htmp), ncol = 1, nrow = 2,
-                heights = c(annot.size + facet_size, 30), widths = 10)
+            if(is.null(facet)){
+                facet_size <- 0
+                main_grob <- gridExtra::arrangeGrob(grobs = list(
+                    upd.grob_w$sidebar, upd.grob_h$htmp), ncol = 1, nrow = 2,
+                    heights = c(annot.size + facet_size, 30), widths = 10)
+            }
+            # if(is.null(facet)){ facet_size <- 0 } else { facet_size <- 1 }
+            # main_grob <- gridExtra::arrangeGrob(grobs = list(
+            #     upd.grob_w$sidebar, upd.grob_h$htmp), ncol = 1, nrow = 2,
+            #     heights = c(annot.size + facet_size, 30), widths = 10)
             #Set default legend width space
             def.lgd.width <- 1
         } else {
@@ -1079,7 +1178,7 @@ gg2heatmap <- function(
     }}
     #Prepare results
     if(show.annot){
-        if(!dd.rows & dd.cols & !is.null(facet)){
+        if(!dd.rows & !is.null(facet)){
             ls.res <- list(
                 "result.grob" = final.plot, "heatmap.lgd.grob" = htmp_legend,
                 "sidebar.lgds.grob" = right.legends)
@@ -1097,7 +1196,7 @@ gg2heatmap <- function(
             "heatmap.lgd.grob" = htmp_legend)
     }
     rm(final.plot, htmp_legend)
-    if(!(!dd.rows & dd.cols & !is.null(facet))){
+    if(!(!dd.rows & !is.null(facet))){
         if(dd.cols){ ls.res[["cols.dendrogram.grob"]] <- upd.grob_w$dd_col }
         if(dd.rows){ ls.res[["rows.dendrogram.grob"]] <- upd.grob_h$dd_row }
         rm(upd.grob_w, upd.grob_h)
