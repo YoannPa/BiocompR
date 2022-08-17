@@ -265,7 +265,7 @@
 #'   y.axis.right = TRUE, # To enable the display of Y-axis on the right
 #'   theme_heatmap = theme(
 #'     axis.title.y.right = element_text(size = 14, vjust = -10)))
-#' # Specify what rows correspond in the subtitle.
+#' # Specify what 'rows' correspond to in the subtitle.
 #' gg2heatmap(m = mat, row.type = "caracteristics")
 #' # Add 1 annotation for the top color bar
 #' gg2heatmap(
@@ -317,12 +317,107 @@
 #'     axis.text.y.left = element_text(size = 12), # Show Y labels on the left
 #'     axis.ticks.y.left = element_line(size = 0.5)), # Show Y ticks on the left
 #'   theme_legend = theme(legend.justification = c(0.5, 0.5))) # Center legend
-#' # Change heatmap cells borders color and width
+#' # Custom heatmap cells borders color and width
 #' gg2heatmap(m = mat, border.col = "black", border.size = 0.5)
-#' # Change heatmap cells height and width
+#' # Custom heatmap cells height and width
 #' gg2heatmap(m = mat, cell.size = c(0.9, 0.5))
+#' # Plot a rastered heatmap using the Lanczos filter
+#' gg2heatmap(m = mat, raster = "Lanczos")
+#' # Plot a rastered faceted heatmap using the Lanczos filter
+#' gg2heatmap(
+#'   m = mat,
+#'   annot.grps = list(
+#'     "Carb" = paste(mtcars$carb, "Carb"),
+#'     "Gear" = paste(mtcars$gear, "Gear"),
+#'     "Am" = paste(mtcars$am, "Am")),
+#'   annot.pal = list(
+#'     rainbow(n = 6), c("pink", "red", "darkred"), c("blue", "grey")),
+#'   annot.size = 4, # Increases top colorbar width for facets strips
+#'   theme_legend = theme(
+#'     legend.justification = c(0, 0.8)), # Justifies all legends on the left
+#'   lgd.space.height = 22,
+#'   facet = "Carb", # Facetting heatmap using annotation 'Carb'
+#'   dendrograms = FALSE, # Hide dendrogram since the facetting is On
+#'   dist.method = "none", # Disable clustering to let facetting work
+#'   raster = "Lanczos") # Rasterization using the Lanczos filter
+#' # Custom the theme of the heatmap
+#' gg2heatmap(
+#'   m = mat,
+#'   theme_heatmap = theme(
+#'     panel.border = element_rect(
+#'       color = "black", size = 1, fill = "transparent"), # Add a border
+#'     axis.text.y.right = element_text(size = 12), # Add right Y axis labels
+#'     axis.ticks.y.right = element_line(color = "black"), # Add Y axis ticks
+#'     axis.text.x = element_text(color = "red")), # Color X axis labels in red
+#'   y.axis.right = TRUE) # Enable display of Y axis on the right side
+#' # Custom the colorbar shape
+#' gg2heatmap(m = mat, guide_custom_bar = guide_colorbar(
+#'   title = "My custom colorbar", # Set colorbar title
+#'   barwidth = 10, # Set colorbar width
+#'   barheight = 0.5, # Set colorbar height
+#'   ticks.linewidth = 4, # Set ticks width
+#'   ticks.colour = "red", # Set ticks color
+#'   title.vjust = 1, # Set vertical justification of colorbar title
+#'   raster = TRUE, # Rasterize colorbar
+#'   nbin = 3, # Set the number of color bins in the colorbar
+#'   frame.colour = "green", # Set colorbar frame color
+#'   frame.linewidth = 2)) # Set colorbar frame linewidth
+#' # Custom colorbar caracteristics using 'scale_fill_gradient'-like functions
+#' gg2heatmap(m = mat, scale_fill_grad = scale_fill_gradientn(
+#'   colors = c("green", "black", "red"), # Set gradient colors
+#'   na.value = "grey", # Set missing value color
+#'   n.breaks = 10, # Set number of breaks
+#'   labels = c("<=-1", seq(-0.8, 0.8, by = 0.2), ">= 1"), # Map custom labels
+#'   limits = c(-1, 1), # Set limits for the colorbar
+#'   oob = scales::squish)) # Squish values out of the bound of limits
+#' # Custom vertical and horizontal separations width of annotations
+#' gg2heatmap(m = mat, annot.grps = list(
+#'   "Carb" = paste(mtcars$carb, "Carb"), "Gear" = paste(mtcars$gear, "Gear"),
+#'   "Am" = paste(mtcars$am, "Am")),
+#'   annot.pal = list(
+#'     rainbow(n = 6), c("pink", "red", "darkred"), c("blue", "grey")),
+#'   annot.size = 3, theme_legend = theme(legend.justification = c(0, 0.8)),
+#'   lgd.space.height = 22,
+#'   annot.sep = c(0.3, 0.1)) # Horizontal space of 0.3, and vertical of 0.1
+#' # Custom annotation theme
+#' gg2heatmap(
+#'   m = mat, annot.grps = list("Carb" = mtcars$carb),
+#'   annot.pal = rainbow(n = 6), theme_annot = theme(
+#'     panel.border = element_rect(
+#'       color = "black", # Set annotation border color to black
+#'       size = 1, # Set annotation border width to 1
+#'       fill = "transparent"))) # Make the annotation visible through the rect
+#' # Hide the annotation and annotation legends
+#' gg2heatmap(m = mat, show.annot = FALSE)
+#' # Merge annotations legends into a single legend
+#' gg2heatmap(
+#'   m = mat, annot.grps = list(
+#'     "Carb" = paste(mtcars$carb, "Carb"), "Gear" = paste(mtcars$gear, "Gear"),
+#'     "Am" = paste(mtcars$am, "Am")),
+#'   annot.pal = list(
+#'     rainbow(n = 6), c("pink", "red", "darkred"), c("blue", "grey")),
+#'   annot.size = 3,
+#'   lgd.merge = TRUE) # Merge annotations legends into a single legend
+#' # Custom legend theme
+#' gg2heatmap(m = mat, theme_legend = theme(
+#'   legend.background = element_rect(
+#'     fill = "lightblue", # Add lightblue background
+#'     color = "red"), # Add red border
+#'   legend.key.size = unit(0.5, "lines"), # Decrease legend keys overall size
+#'   legend.key.width = unit(1.4, "lines"), # Increase legend keys width
+#'   legend.text = element_text(color = "red"))) # Color legend labels in red
+#' # Increase legend space width on the left of the heatmap
+#' gg2heatmap(m = mat, lgd.space.width = 3)
+#' # Change legend space height
+#' gg2heatmap(m = mat, lgd.space.height = 15)
+#' # Disable automatic drawing of the heatmap (to only retrieve grobs data)
+#' gg2heatmap(m = mat, draw = FALSE)
+#' # Print step-by-step execution of gg2heatmap (useful for debugging)
+#' gg2heatmap(m = mat, verbose = TRUE)
+
 
 #TODO: Add option to hide subtitle information
+#TODO: Add option to disable the return of grobs after execution
 #TODO: Rewrite the assembling of plots using egg package functions and handling
 # all unsolved remaining cases.
 gg2heatmap <- function(
@@ -394,12 +489,6 @@ gg2heatmap <- function(
         stop(paste("Cannot compute distances on rows if heatmap is also",
                    "splitted on rows."))
     }
-    # #Check if rank.fun is a supported function
-    # rank.method <- c("sd")
-    # if(!is.null(rank.fun)){
-    #     if(!rank.fun %in% rank.method){
-    #         stop("ranking function not supported.")}
-    # }
     #Check if top.rows is an integer
     if(!is.null(top.rows)){
         if(is.numeric(top.rows)){
@@ -770,11 +859,12 @@ gg2heatmap <- function(
             axis.title.y = ggplot2::element_blank(),
             axis.ticks.length.x.top = ggplot2::unit(0, "pt")
         )
-        #Set theme_default_htmp
+        #Set theme_default_annot
         theme_default_annot <- ggplot2::theme(
             axis.text.y = ggplot2::element_text(size = 12, color = "black"),
             axis.ticks.y = ggplot2::element_blank(),
-            plot.margin = ggplot2::margin(0, 0, 2, 0)
+            plot.margin = ggplot2::margin(0, 0, 2, 0),
+            panel.background = ggplot2::element_rect(fill = "white")
         )
         #Update theme_heatmap
         if(is.null(theme_annot)){
@@ -961,7 +1051,7 @@ gg2heatmap <- function(
                 #Remove all customization
                 htmp <- htmp + theme_empty
                 #Catch heatmap in magick::image_graph()
-                raster.annot <- BiocompR::raster.ggplot.to.grob(
+                raster.grob <- BiocompR::raster.ggplot.to.grob(
                     gg.plot = htmp, filter = raster)
                 #Make grob annotation
                 raster.annot <- ggplot2::annotation_custom(
