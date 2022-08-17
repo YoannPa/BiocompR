@@ -874,7 +874,7 @@ gg2heatmap <- function(
                 theme_forced_annot
         }
 
-        #Set number of columns to display annotations facet.annotlegends
+        #Set number of columns to display annotations legends
         if(lgd.merge){
             # Build color tables for legends.
             col_table <- BiocompR::build.col_table(
