@@ -5,13 +5,13 @@ _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots 
 
 
 ### Ackowledgment
-_I would like to thank every people who contributed to the developpement of this package, with their code, their test dataset, their advices and their feedbacks._ - Yoann.
-**Contributors:
-* Dr. Schefzik R.<sup>2</sup>;  
-* Mr. Hruska D.<sup>1</sup>;  
-* Mrs. Bitto V.<sup>1</sup>;  
-* Dr. Kurilov R.<sup>1</sup>;  
-* Mrs. Wursthorn A.<sup>3</sup>.  
+_I would like to thank every people who contributed to the developpement of this package, with their code, their test dataset, their advices and their feedbacks. - Yoann_.  
+**Contributors:  
+* Dr. Schefzik R.<sup>2</sup>  
+* Mr. Hruska D.<sup>1</sup>  
+* Mrs. Bitto V.<sup>1</sup>  
+* Dr. Kurilov R.<sup>1</sup>  
+* Mrs. Wursthorn A.<sup>3</sup>  
 
 **1-** [**DKFZ - Division of Applied Bioinformatics, Germany.**](https://www.dkfz.de/en/applied-bioinformatics/index.php)  
 **2-** [**Klinik für Anästhesiologie und Operative Intensivmedizin, Medizinische Fakultät Mannheim, Universität Heidelberg, Germany.**](https://www.umm.de/klinik-fuer-anaesthesiologie-und-operative-intensivmedizin/)  
@@ -162,7 +162,7 @@ The current statues of this issue can be tracked [**here**](https://github.com/t
 If you encounters issues or if a feature you would expect is not available in a BiocompR function, please check if an existing issue adresses your point [here](https://github.com/YoannPa/BiocompR/issues/). If not, create a [new issue here](https://github.com/YoannPa/BiocompR/issues/new).  
 
 ## References
-⚠️ **Work in progress !**.  
+⚠️ **Work in progress !**  
 
 1. [_Share a legend between two ggplot2 graphs - Mara Averick_](https://github.com/tidyverse/ggplot2/wiki/Share-a-legend-between-two-ggplot2-graphs)  
 2. [_Align two plots on a page - Mara Averick_](https://github.com/tidyverse/ggplot2/wiki/Align-two-plots-on-a-page)  
@@ -172,5 +172,5 @@ If you encounters issues or if a feature you would expect is not available in a 
 6. [_What is the proper association measure of a variable with a PCA component?_](https://stats.stackexchange.com/questions/119746/what-is-the-proper-association-measure-of-a-variable-with-a-pca-component-on-a/)  
 
 ## Licence
-The repository BiocompR is currently under the GPL-3.0 licence.  
+BiocompR is currently under the GPL-3.0 licence.  
 
