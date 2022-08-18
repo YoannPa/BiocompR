@@ -9,7 +9,7 @@ _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots 
 
 ### Ackowledgment
 _I would like to thank every people who contributed to the developpement of this package, with their code, their test dataset, their advices and their feedbacks. - Yoann_.  
-**Contributors:  
+**Contributors:**  
 * Dr. Schefzik R.<sup>2</sup>  
 * Mr. Hruska D.<sup>1</sup>  
 * Mrs. Bitto V.<sup>1</sup>  
