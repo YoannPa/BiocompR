@@ -69,8 +69,8 @@ inst.pkgs = c('corrplot', 'data.table', 'devtools', 'fastcluster', 'ggdendro',
 install.packages(inst.pkgs)
 ```
 
-## Installing
-In R execute the following command
+## Installing BiocompR
+In R execute the following command:
 ```R
 devtools::install_github("YoannPa/BiocompR")
 ```
