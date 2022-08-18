@@ -30,7 +30,7 @@
 #'                 will be lighter than the original one. Thus, it is advised to
 #'                 use a dark color (Default: fill = "deepskyblue3").
 #' @return A \code{gg} plot object displaying boxplots and/or violin plots.
-#' @author Yoann Pageaud, Yassen Assenov.
+#' @author Yoann Pageaud.
 #' @importFrom data.table `:=` `.N`
 #' @export
 #' @examples

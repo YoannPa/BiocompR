@@ -2,11 +2,20 @@
 _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots dedicated to data comparison and dataset exploration and ultimately provides users with versatile and customizable graphics._  
 
 **Author: PAGEAUD Y.<sup>1</sup>**  
-**Contributors: SCHEFZIK R.<sup>2</sup>; HRUSKA D.<sup>1</sup>; BITTO V.<sup>1</sup>; KURILOV R.<sup>1</sup>; BEUMER N.<sup>1</sup>; WURSTHORN A.<sup>4</sup>; MAYAKONDA A.<sup>3</sup>; FEUERBACH L.<sup>1</sup>; TOTH R.<sup>3</sup>.**  
+
+
+### Ackowledgment
+_I would like to thank every people who contributed to the developpement of this package, with their code, their test dataset, their advices and their feedbacks._ - Yoann.
+**Contributors:
+* Dr. Schefzik R.<sup>2</sup>;  
+* Mr. Hruska D.<sup>1</sup>;  
+* Mrs. Bitto V.<sup>1</sup>;  
+* Dr. Kurilov R.<sup>1</sup>;  
+* Mrs. Wursthorn A.<sup>3</sup>.  
+
 **1-** [**DKFZ - Division of Applied Bioinformatics, Germany.**](https://www.dkfz.de/en/applied-bioinformatics/index.php)  
 **2-** [**Klinik für Anästhesiologie und Operative Intensivmedizin, Medizinische Fakultät Mannheim, Universität Heidelberg, Germany.**](https://www.umm.de/klinik-fuer-anaesthesiologie-und-operative-intensivmedizin/)  
-**3-** [**DKFZ - Computational Cancer Epigenomics, Germany.**](https://www.dkfz.de/en/CanEpi/CompEpigen/index.html)  
-**4-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
+**3-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
 **Version: 0.0.165 (Beta)**  
 **R Compatibility: Version 4.2.0**  
@@ -47,18 +56,10 @@ Currently the package BiocompR contains **29 functions**:
 * `warn.handle()` - Filters unrelevant warnings matching a regular expression.  
 
 ## Prerequisites
-### Under Linux: install the following dependencies
+### Under Linux: install the following libraries
 In the terminal do:  
 ```bash
 sudo apt-get install libcurl4-openssl-dev libxml2-dev libmagick++-dev
-```
-### Install Bioconductor dependencies
-In R do:
-```R
-if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-
-BiocManager::install("IRanges")
 ```
 ### Install CRAN dependencies
 ```R
@@ -161,7 +162,14 @@ The current statues of this issue can be tracked [**here**](https://github.com/t
 If you encounters issues or if a feature you would expect is not available in a BiocompR function, please check if an existing issue adresses your point [here](https://github.com/YoannPa/BiocompR/issues/). If not, create a [new issue here](https://github.com/YoannPa/BiocompR/issues/new).  
 
 ## References
-⚠️ **Work in progress !**  
+⚠️ **Work in progress !**.  
+
+1. [_Share a legend between two ggplot2 graphs - Mara Averick_](https://github.com/tidyverse/ggplot2/wiki/Share-a-legend-between-two-ggplot2-graphs)  
+2. [_Align two plots on a page - Mara Averick_](https://github.com/tidyverse/ggplot2/wiki/Align-two-plots-on-a-page)  
+3. [_ggfortify: Data Visualization Tools for Statistical Analysis Results_](https://cran.r-project.org/web/packages/ggfortify/index.html)  
+4. [_ggfortify: Plotting PCA (Principal Component Analysis_](https://cran.r-project.org/web/packages/ggfortify/vignettes/plot_pca.html)  
+5. [_Loadings vs eigenvectors in PCA: when to use one or another?_](https://stats.stackexchange.com/questions/143905/loadings-vs-eigenvectors-in-pca-when-to-use-one-or-another)  
+6. [_What is the proper association measure of a variable with a PCA component?_](https://stats.stackexchange.com/questions/119746/what-is-the-proper-association-measure-of-a-variable-with-a-pca-component-on-a/)  
 
 ## Licence
 The repository BiocompR is currently under the GPL-3.0 licence.  

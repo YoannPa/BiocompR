@@ -64,5 +64,5 @@ bivar.plot(data = iris[, c(1,3)], cat.step = 1, fill = "red", cat.max = 5) +
   labs(x = "Petal length", y = "Sepal length")
 }
 \author{
-Yoann Pageaud, Yassen Assenov.
+Yoann Pageaud.
 }
