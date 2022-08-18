@@ -70,16 +70,9 @@ install.packages(inst.pkgs)
 ```
 
 ## Installing
-1. In the Git repository click on "Clone or Download".
-2. Copy the HTTPS link.
-3. Open a terminal and type:
-```bash
-git clone https://github.com/YoannPa/BiocompR.git
-```
-4. Open the folder BiocompR and open the "BiocompR.Rproj" file in RStudio.
-5. In the RStudio console, type:
+In R execute the following command
 ```R
-devtools::install()
+devtools::install_github("YoannPa/BiocompR")
 ```
 
 ## Problems ? / I need help !
