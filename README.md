@@ -9,16 +9,10 @@ _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots 
 
 ### Ackowledgment
 _I would like to thank every people who contributed to the developpement of this package, with their code, their test dataset, their advices and their feedbacks. - Yoann_.  
-**Contributors:**  
-* Dr. Schefzik R.<sup>2</sup>  
-* Mr. Hruska D.<sup>1</sup>  
-* Mrs. Bitto V.<sup>1</sup>  
-* Dr. Kurilov R.<sup>1</sup>  
-* Mrs. Wursthorn A.<sup>3</sup>  
-
-**1-** [**DKFZ - Division of Applied Bioinformatics, Germany.**](https://www.dkfz.de/en/applied-bioinformatics/index.php)  
-**2-** [**Klinik für Anästhesiologie und Operative Intensivmedizin, Medizinische Fakultät Mannheim, Universität Heidelberg, Germany.**](https://www.umm.de/klinik-fuer-anaesthesiologie-und-operative-intensivmedizin/)  
-**3-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
+**Contributors:** Dr. Schefzik R.<sup>2</sup>; Mr. Hruska D.<sup>1</sup>; Mrs. Bitto V.<sup>1</sup>; Dr. Kurilov R.<sup>1</sup>; Mrs. Wursthorn A.<sup>3</sup>.  
+**1.** [**DKFZ - Division of Applied Bioinformatics, Germany.**](https://www.dkfz.de/en/applied-bioinformatics/index.php)  
+**2.** [**Klinik für Anästhesiologie und Operative Intensivmedizin, Medizinische Fakultät Mannheim, Universität Heidelberg, Germany.**](https://www.umm.de/klinik-fuer-anaesthesiologie-und-operative-intensivmedizin/)  
+**3.** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
 
 ## Content
