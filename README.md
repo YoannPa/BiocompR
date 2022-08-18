@@ -1,8 +1,11 @@
 # BiocompR - Advanced visualizations for data comparison
 _**BiocompR** is an R package built upon ggplot2 to improve commonly used plots dedicated to data comparison and dataset exploration and ultimately provides users with versatile and customizable graphics._  
 
+**Version: 0.0.165 (Beta)**  
+**R Compatibility: Version 4.2.0**  
+**Last Update: 17/08/2022**  
 **Author: PAGEAUD Y.<sup>1</sup>**  
-
+**How to cite:** _Pageaud Y. et al., BiocompR - Advanced visualizations for data comparison._  
 
 ### Ackowledgment
 _I would like to thank every people who contributed to the developpement of this package, with their code, their test dataset, their advices and their feedbacks. - Yoann_.  
@@ -17,10 +20,6 @@ _I would like to thank every people who contributed to the developpement of this
 **2-** [**Klinik für Anästhesiologie und Operative Intensivmedizin, Medizinische Fakultät Mannheim, Universität Heidelberg, Germany.**](https://www.umm.de/klinik-fuer-anaesthesiologie-und-operative-intensivmedizin/)  
 **3-** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
-**Version: 0.0.165 (Beta)**  
-**R Compatibility: Version 4.2.0**  
-**Last Update: 17/08/2022**  
-**How to cite:** _Pageaud Y. et al., BiocompR - Advanced visualizations for data comparison._
 
 ## Content
 Currently the package BiocompR contains **29 functions**:
