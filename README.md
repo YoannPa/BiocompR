@@ -15,7 +15,7 @@ _**BiocompR** is a R package built upon ggplot2, and using data.table. It improv
 ![GitHub](https://img.shields.io/github/license/YoannPa/BiocompR?color=brightgreen&style=for-the-badge)  
 
 ### Ackowledgment
-_I would like to thank every people who contributed to the developpement of this package, with their code, their test dataset, their advices and their feedbacks. - Yoann_.  
+_I would like to thank every people who contributed to the development of this package, with their code, their test datasets, their advices and feedbacks. - Yoann_.  
 **Contributors:** Dr. Schefzik R.<sup>2</sup>; Mr. Hruska D.<sup>1</sup>; Mrs. Bitto V.<sup>1</sup>; Dr. Kurilov R.<sup>1</sup>; Mr. Beumer N.<sup>1</sup>; Mrs. Wursthorn A.<sup>3</sup>.  
 **1.** [**DKFZ - Division of Applied Bioinformatics, Germany.**](https://www.dkfz.de/en/applied-bioinformatics/index.php)  
 **2.** [**Klinik für Anästhesiologie und Operative Intensivmedizin, Medizinische Fakultät Mannheim, Universität Heidelberg, Germany.**](https://www.umm.de/klinik-fuer-anaesthesiologie-und-operative-intensivmedizin/)  
@@ -84,7 +84,7 @@ For any questions **Not related to bugs or development** please check the sectio
 Error in UseMethod("depth") : 
   no applicable method for 'depth' applied to an object of class "NULL"
 ```
-This error seems to happen randomly when executing code using the ggplot2 and/or grid packages. Usually executing one more time the chuck of code solve the error. The current statues of this issue can be tracked [**here**](https://github.com/tidyverse/ggplot2/issues/2514).
+This error seems to happen randomly when executing code using the ggplot2 and/or grid packages. Usually executing one more time the chunck of code solve the error. The current statues of this issue can be tracked [**here**](https://github.com/tidyverse/ggplot2/issues/2514).
 
 
 **❎ Error in grid.Call(C_convert, x, as.integer(whatfrom), as.integer(whatto), : Viewport has zero dimension(s)**  
@@ -101,7 +101,7 @@ Warning message:
 In grid.Call(C_convert, x, as.integer(whatfrom), as.integer(whatto),  :
   reached elapsed time limit.
 ```
-This warning seems to happen randomly when executing code using the ggplot2 and/or grid packages. Usually after executing one more time the chuck of code the warning does not display anymore. The current statues of this issue can be tracked [**here**](https://stackoverflow.com/questions/51247102/reached-elapsed-time-limit-errors-in-r).
+This warning seems to happen randomly when executing code using the ggplot2 and/or grid packages. Usually after executing one more time the chunck of code the warning does not display anymore. The current statues of this issue can be tracked [**here**](https://stackoverflow.com/questions/51247102/reached-elapsed-time-limit-errors-in-r).
 
 **⚠️ Using alpha for a discrete variable is not advised.**
 ```R
