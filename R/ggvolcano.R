@@ -375,31 +375,33 @@ build.ggvolcano <- function(
   dt.data <- res.param[[2]]
   cutoff.values <- res.param[[3]]
   #Check x.cutoff values
-  x.cutoff.values <- BiocompR::chk.cutoff(
-    cutoff = x.cutoff, data.type = data.type)
+  if(!is.null(x.cutoff)){
+    x.cutoff.values <- BiocompR::chk.cutoff(
+      cutoff = x.cutoff, data.type = data.type)
+  }
   #If x.col.sign TRUE add grp color to data
   if(x.col.sign){
     if(data.type == "corr"){
       groups <- c("Negatively correlated", "Insufficiently correlated",
                   "Positively correlated")
-      dt.data[corr <= x.cutoff.values[1], grp := groups[1]]
-      dt.data[corr >= x.cutoff.values[2], grp := groups[3]]
-      dt.data[corr > x.cutoff.values[1] & corr < x.cutoff.values[2],
-           grp := groups[2]]
     } else if(data.type == "t.test"){
-      groups <- c("Negative log2(Fold change)", "Insufficient log2(Fold change)",
-                  "Positive log2(Fold change)")
-      dt.data[fold <= x.cutoff.values[1], grp := groups[1]]
-      dt.data[fold >= x.cutoff.values[2], grp := groups[3]]
-      dt.data[fold > x.cutoff.values[1] & fold < x.cutoff.values[2],
-           grp := groups[2]]
+      groups <- c(
+        "Negative log2(Fold change)", "Insufficient log2(Fold change)",
+        "Positive log2(Fold change)")
     } else if(data.type == "free"){
       groups <- c("Negatively associated", "Insufficiently associated",
                   "Positively associated")
-      dt.data[xval <= x.cutoff.values[1], grp := groups[1]]
-      dt.data[xval >= x.cutoff.values[2], grp := groups[3]]
-      dt.data[xval > x.cutoff.values[1] & xval < x.cutoff.values[2],
-           grp := groups[2]]
+    }
+    # Assign groups
+    if(!is.null(x.cutoff)){
+      dt.data[corr <= x.cutoff.values[1], grp := groups[1]]
+      dt.data[corr >= x.cutoff.values[2], grp := groups[3]]
+      dt.data[corr > x.cutoff.values[1] & corr < x.cutoff.values[2],
+              grp := groups[2]]
+    } else {
+      dt.data[corr < 0, grp := groups[1]]
+      dt.data[corr > 0, grp := groups[3]]
+      dt.data[corr == 0, grp := groups[2]]
     }
     dt.data[, grp := as.factor(grp)]
     dt.data[, grp := factor(grp, levels = levels(grp)[
@@ -425,8 +427,15 @@ build.ggvolcano <- function(
         x = dt.data[[2]], y = -log10(pval), alpha = `P-value`))
   }
   if(x.col.sign){
-    ggvol <- ggvol + ggplot2::scale_color_manual(
-      values = c("darkblue", "grey", "darkred"))
+    #Set X sign color palette
+    if(nrow(dt.data[grp == groups[1]]) != 0){
+      col.neg <- "darkblue" } else { col.neg <- NULL }
+    if(nrow(dt.data[grp == groups[2]]) != 0){
+      col.neutral <- "grey" } else { col.neutral <- NULL }
+    if(nrow(dt.data[grp == groups[3]]) != 0){
+      col.pos <- "darkred" } else { col.pos <- NULL }
+    xsign_palette <- c(col.neg, col.neutral, col.pos)
+    ggvol <- ggvol + ggplot2::scale_color_manual(values = xsign_palette)
   }
   #Make p-value cut-off
   ggvol <- ggvol + ggplot2::geom_hline(
@@ -505,10 +514,13 @@ build.ggvolcano <- function(
     ggplot2::labs(x = orig.cnames[2], y = paste0(
       "-log10(", orig.cnames[3], ")"), color = orig.cnames[4],
       size = orig.cnames[5])
-  #Return plot removing warning about discrete variable given to alpha
-  BiocompR::warn.handle(
-    pattern = "Using alpha for a discrete variable is not advised.",
-    print(ggvol))
+  # #Return plot removing warning about discrete variable given to alpha
+  # BiocompR::warn.handle(
+  #   pattern = "Using alpha for a discrete variable is not advised.",
+  #   print(ggvol))
+
+  # Return volcano plot
+  return(ggvol)
 }
 
 
@@ -584,6 +596,51 @@ build.ggvolcano <- function(
 #' @return A \code{gg} volcano plot of your correlation test results.
 #' @author Yoann Pageaud.
 #' @export
+#' @examples
+#' # Calculate correlation on mtcars dataset
+#' corr_res <- Hmisc::rcorr(x = as.matrix(mtcars))
+#' # Create data.table with labels, correlation values, and P values
+#' dt_corr <- data.table(
+#'   labels = rownames(corr_res$r)[-nrow(corr_res$r)],
+#'   correlation = corr_res$r[-nrow(corr_res$r), "carb"],
+#'   p_value = corr_res$P[-nrow(corr_res$r), "carb"])
+#' # Draw basic correlation volcano plot
+#' ggvolcano.corr(data = dt_corr)
+#' # Suppress the alpha warning when drawing a volcano
+#' warn.handle(
+#'   print(ggvolcano.corr(data = dt_corr)),
+#'   pattern = "Using alpha for a discrete variable is not advised.")
+#' # Set another P-value cutoff
+#' ggvolcano.corr(data = dt_corr, p.cutoff = 0.05)
+#' # Set an absolute correlation cutoff
+#' ggvolcano.corr(data = dt_corr, corr.cutoff = 0.4)
+#' # Set different negative and positive corelation cutoffs
+#' ggvolcano.corr(data = dt_corr, corr.cutoff = c(-0.3, 0.5))
+#' # Rename correlation cutoff title
+#' ggvolcano.corr(
+#'   data = dt_corr, corr.cutoff = 0.5,
+#'   title.cutoff = "Minimum absolute correlation")
+#' # Set a negative and positive correlation cutoff to show/hide point labels
+#' ggvolcano.corr(data = dt_corr, corr.cutoff = 0.4, label.cutoff = c(-0.4, 1))
+#' # Turn on autocolor based on X-axis sign of values and significance
+#' ggvolcano.corr(data = dt_corr, corr.cutoff = c(-0.6, 0.5), x.col.sign = TRUE)
+#' # Force a specific label display on not significantly correlated variable
+#' ggvolcano.corr(data = dt_corr, force.label = "am")
+#' # Force display of all point labels significant or not
+#' ggvolcano.corr(
+#'   data = dt_corr, force.label = rownames(corr_res$r)[-nrow(corr_res$r)])
+#' # Add 'group' data for colors
+#' dt_corr[, var_group := c(rep("1", 5), rep("2", 5))]
+#' ggvolcano.corr(data = dt_corr)
+#' # Add 'importance' data for point sizes
+#' dt_corr[, influence := c(rep(1, 3), rep(2, 3), rep(3, 4))]
+#' ggvolcano.corr(data = dt_corr)
+#' # Custom the volcano with ggplot2 components
+#' ggvolcano.corr(data = dt_corr) +
+#'   ggtitle("Correlation of mtcars variables with carburators") +
+#'   theme(plot.title = element_text(size = 14)) +
+#'   scale_color_manual(values = c("purple", "orange")) +
+#'   scale_size(breaks = c(1, 2, 3))
 
 ggvolcano.corr <- function(
   data, p.cutoff = 0.01, corr.cutoff = NULL,

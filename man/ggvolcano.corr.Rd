@@ -96,6 +96,52 @@ A \code{gg} volcano plot of your correlation test results.
 Plots results of correlation test between a single variable and multiple
 others as volcano plot.
 }
+\examples{
+# Calculate correlation on mtcars dataset
+corr_res <- Hmisc::rcorr(x = as.matrix(mtcars))
+# Create data.table with labels, correlation values, and P values
+dt_corr <- data.table(
+  labels = rownames(corr_res$r)[-nrow(corr_res$r)],
+  correlation = corr_res$r[-nrow(corr_res$r), "carb"],
+  p_value = corr_res$P[-nrow(corr_res$r), "carb"])
+# Draw basic correlation volcano plot
+ggvolcano.corr(data = dt_corr)
+# Suppress the alpha warning when drawing a volcano
+warn.handle(
+  print(ggvolcano.corr(data = dt_corr)),
+  pattern = "Using alpha for a discrete variable is not advised.")
+# Set another P-value cutoff
+ggvolcano.corr(data = dt_corr, p.cutoff = 0.05)
+# Set an absolute correlation cutoff
+ggvolcano.corr(data = dt_corr, corr.cutoff = 0.4)
+# Set different negative and positive corelation cutoffs
+ggvolcano.corr(data = dt_corr, corr.cutoff = c(-0.3, 0.5))
+# Rename correlation cutoff title
+ggvolcano.corr(
+  data = dt_corr, corr.cutoff = 0.5,
+  title.cutoff = "Minimum absolute correlation")
+# Set a negative and positive correlation cutoff to show/hide point labels
+ggvolcano.corr(data = dt_corr, corr.cutoff = 0.4, label.cutoff = c(-0.4, 1))
+# Turn on autocolor based on X-axis sign of values and significance
+ggvolcano.corr(data = dt_corr, corr.cutoff = c(-0.6, 0.5), x.col.sign = TRUE)
+# Force a specific label display on not significantly correlated variable
+ggvolcano.corr(data = dt_corr, force.label = "am")
+# Force display of all point labels significant or not
+ggvolcano.corr(
+  data = dt_corr, force.label = rownames(corr_res$r)[-nrow(corr_res$r)])
+# Add 'group' data for colors
+dt_corr[, var_group := c(rep("1", 5), rep("2", 5))]
+ggvolcano.corr(data = dt_corr)
+# Add 'importance' data for point sizes
+dt_corr[, influence := c(rep(1, 3), rep(2, 3), rep(3, 4))]
+ggvolcano.corr(data = dt_corr)
+# Custom the volcano with ggplot2 components
+ggvolcano.corr(data = dt_corr) +
+  ggtitle("Correlation of mtcars variables with carburators") +
+  theme(plot.title = element_text(size = 14)) +
+  scale_color_manual(values = c("purple", "orange")) +
+  scale_size(breaks = c(1, 2, 3))
+}
 \author{
 Yoann Pageaud.
 }
