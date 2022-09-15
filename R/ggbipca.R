@@ -59,7 +59,6 @@ rename_dt_col <- function(data, color.data, fill.data, shape.data){
     #Get variables that should be set as new colnames
     vars.to.set <- dt.varia[varval %in% names(table(dt.varia$varval)[
       table(dt.varia$varval) == 1])]$varnames
-    print(vars.to.set)
     #Set new colnames
     lapply(X = vars.to.set, FUN = function(v){
       if(v == "color.data"){
@@ -677,7 +676,7 @@ cross.biplot <- function(
   #Get loadings data for PCx & PCy
   if(loadings){
     # Get loadings data
-    loadings.data <- BiocompR:::get_loadings(prcomp.res = prcomp.res)
+    loadings.data <- BiocompR:::get_loadings(prcomp.res = prcomp.res, PCs = PC)
     #Define scale for plot data and loadings based on selected PCs
     scaler <- min(unlist(lapply(X = PC, FUN = function(p){
       max(abs(dt.scaled.pc[[p]]))/max(abs(loadings.data[[p]]))
