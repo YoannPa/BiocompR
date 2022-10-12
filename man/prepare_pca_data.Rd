@@ -29,4 +29,3 @@ Collects and computes needed metrics for PCA biplot.
 \author{
 Yoann Pageaud.
 }
-\keyword{internal}

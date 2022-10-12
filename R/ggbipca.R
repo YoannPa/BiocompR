@@ -156,9 +156,15 @@ rename_dt_col <- function(data, color.data, fill.data, shape.data){
 #'         labels to be displayed on the margins of each axis.
 #' @author Yoann Pageaud.
 #' @export
-#' @keywords internal
 
 prepare_pca_data <- function(prcomp.res, dt.annot, PCs, scale){
+  # Checking the number of PCs requested
+  if(length(PCs) > length(prcomp.res$sdev)){
+    warning(
+      paste("There are more components specified than actually available.",
+            "Reducing the number of PCs to all existing ones."))
+    PCs <- seq_along(prcomp.res$sdev)
+  }
   # Make PC names vector
   PC <- paste0("PC", PCs)
   # Get sdev from selected PCs
@@ -173,7 +179,9 @@ prepare_pca_data <- function(prcomp.res, dt.annot, PCs, scale){
   ve <- prcomp.res$sdev^2/sum(prcomp.res$sdev^2)
   lab.PC <- paste0(PC, " (", round(ve[PCs] * 100, 2), "%)")
 
-  ls.res <- list("PC" = PC, "scaled_PC" = dt.scaled.pc, "labels" = lab.PC)
+  ls.res <- list(
+    "PC" = PC, "scaled_PC" = dt.scaled.pc, "labels" = lab.PC,
+    "var.explained" = ve[PCs])
   return(ls.res)
 }
 
@@ -365,7 +373,7 @@ ggbipca <- function(
     data = data, color.data = color.data, fill.data = fill.data,
     shape.data = shape.data)
 
-  prepare.res <- prepare_pca_data(
+  prepare.res <- BiocompR:::prepare_pca_data(
     prcomp.res = prcomp.res, dt.annot = dt.annot, PCs = c(PCx, PCy),
     scale = scale)
   PC <- prepare.res$PC
@@ -664,7 +672,7 @@ cross.biplot <- function(
     data = data, color.data = color.data, fill.data = fill.data,
     shape.data = shape.data)
 
-  prepare.res <- prepare_pca_data(
+  prepare.res <- BiocompR:::prepare_pca_data(
     prcomp.res = prcomp.res, dt.annot = dt.annot, PCs = PCs, scale = scale)
   PC <- prepare.res$PC
   dt.scaled.pc <- prepare.res$scaled_PC
