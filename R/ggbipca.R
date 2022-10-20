@@ -40,7 +40,6 @@ get_loadings <- function(prcomp.res, PCs){
 #' @return A \code{data.table} with all annotations, and the colnames necessary
 #'         for color, fill, or shape, changed.
 #' @author Yoann Pageaud.
-#' @export
 #' @keywords internal
 
 rename_dt_col <- function(data, color.data, fill.data, shape.data){
@@ -65,8 +64,10 @@ rename_dt_col <- function(data, color.data, fill.data, shape.data){
         if(color.data %in% colnames(dt.annot)){
           data.table::setnames(
             x = dt.annot, old = color.data, new = "color.data")
-          if(is.null(levels(dt.annot$color.data))){
-            dt.annot[, color.data := as.factor(color.data)]
+          if(!is.numeric(dt.annot$color.data)){
+            if(is.null(levels(dt.annot$color.data))){
+              dt.annot[, color.data := as.factor(color.data)]
+            }
           }
         } else { stop(
           "'color.data' does not match any column name in 'data'.") }
@@ -369,7 +370,7 @@ ggbipca <- function(
   load.sqrd.length <- NULL
   quadrant <- NULL
 
-  dt.annot <- rename_dt_col(
+  dt.annot <- BiocompR:::rename_dt_col(
     data = data, color.data = color.data, fill.data = fill.data,
     shape.data = shape.data)
 
@@ -668,7 +669,7 @@ cross.biplot <- function(
   load.sqrd.length <- NULL
   quadrant <- NULL
 
-  dt.annot <- rename_dt_col(
+  dt.annot <- BiocompR:::rename_dt_col(
     data = data, color.data = color.data, fill.data = fill.data,
     shape.data = shape.data)
 
