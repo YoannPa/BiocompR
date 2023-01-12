@@ -1,6 +1,6 @@
 Package: BiocompR
 Title: BiocompR - Advanced visualizations for data comparison
-Version: 0.0.171
+Version: 0.0.172
 Authors@R: 
     person(given = "Yoann",
            family = "Pageaud",
@@ -18,7 +18,8 @@ Encoding: UTF-8
 LazyData: false
 Depends:
     data.table,
-    ggplot2
+    ggplot2,
+    R.devices
 Imports:
     corrplot,
     egg,
@@ -31,7 +32,7 @@ Imports:
     parallel,
     parallelDist,
     quantmod
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.2
 Suggests: 
     knitr,
     rmarkdown,

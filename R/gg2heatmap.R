@@ -944,11 +944,18 @@ gg2heatmap <- function(
     htmp
     #Convert ggplots into grobs
     if(is.null(facet)){
-        if(dd.cols){ ddgr_seg_col <- ggplot2::ggplotGrob(ddgr_seg_col) }
-        if(dd.rows){ ddgr_seg_row <- ggplot2::ggplotGrob(ddgr_seg_row) }
+        if(dd.cols){
+            ddgr_seg_col <- R.devices::suppressGraphics(
+                ggplot2::ggplotGrob(ddgr_seg_col))
+        }
+        if(dd.rows){
+            ddgr_seg_row <- R.devices::suppressGraphics(
+                ggplot2::ggplotGrob(ddgr_seg_row))
+        }
         if(show.annot){
             sidebar_legend <- col_sidebar$legends
-            col_sidebar_grob <- ggplot2::ggplotGrob(col_sidebar$sidebar)
+            col_sidebar_grob <- R.devices::suppressGraphics(
+                ggplot2::ggplotGrob(col_sidebar$sidebar))
             rm(col_sidebar)
         }
     } else { # Use the egg package
@@ -1070,7 +1077,7 @@ gg2heatmap <- function(
     #Remove melted_mat
     rm(melted_mat)
     if(verbose){ cat("Converting ggplot into grid object...") }
-    htmp <- ggplot2::ggplotGrob(x = htmp)
+    htmp <- R.devices::suppressGraphics(ggplot2::ggplotGrob(x = htmp))
     if(verbose){ cat("Done.\n") }
     #Resize grobs widths
     if(verbose){ cat("Redimensioning grobs...") }
