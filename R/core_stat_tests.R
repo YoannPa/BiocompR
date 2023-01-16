@@ -152,3 +152,275 @@ check_fun <- function(fun, param.name = "fun", ncores = 1){
     }
     return(packfun)
 }
+
+#' Tests association of an annotation with another one or with a PC.
+#'
+#' @param x           A \code{vector} of numerics or factors containing data
+#'                    from one annotation.
+#' @param y           A \code{vector} of numerics or factors containing data
+#'                    from a PCA principal component or another annotation.
+#' @param perm.matrix A \code{matrix} containing permutations of the order of
+#'                    rows, as integers, based on annotations length. The
+#'                    permutation matrix can optionally be used to test the
+#'                    significance of a correlation value between 2 annotations
+#'                    or an annotation and a PCA principal component.
+#' @return A \code{data.table} containing all results from an association test
+#'         between x and y.
+#' @author Yoann Pageaud.
+#' @export
+#' @examples
+#' # Most basic statistic test between 2 vectors of integers
+#' test.annots(x = 1:15, y = 24:10)
+
+test.annots <- function (x, y, perm.matrix = NULL){
+    # Set nominal parameter
+    nominal <- TRUE
+    #If annotation x or y is a date then convert it into integers
+    if(class(x) == "Date"){ x <- as.integer(x) }
+    if(class(y) == "Date"){ y <- as.integer(y) }
+    inds <- which(!(is.na(x) | is.na(y)))
+    if (length(inds) < 2) {
+        nominal <- FALSE
+        warning("Not enough common values.")
+    }
+    x <- x[inds]
+    if (is.factor(x)) {
+        x <- as.factor(as.character(x))
+        if (nlevels(x) < 2) {
+            nominal <- FALSE
+            warning("Not enough categories.")
+        }
+    }
+    y <- y[inds]
+    if (is.factor(y)) {
+        y <- as.factor(as.character(y))
+        if (nlevels(y) < 2) {
+            nominal <- FALSE
+            warning("Not enough categories.")
+        }
+    }
+    if(nominal){ # If a stat. test can be run
+        # Retrieve test p-value
+        get.p <- function(expr) {
+            tryCatch(suppressWarnings(expr$p.value), error = function(er){
+                as.double(NA)
+            })
+        }
+        if(is.factor(x)){
+            if(is.factor(y)) {
+                # If both vectors are factors do Non-parametric Fisher test with
+                # 50 000 replicates for Monte Carlo test.
+                simulate <- (nlevels(x) > 2 || nlevels(y) > 2)
+                dt.res <- data.table::data.table(
+                    test = "Fisher", correlation = NA, pvalue = get.p(
+                        fisher.test(
+                            x, y, conf.int = FALSE, simulate.p.value = simulate,
+                            B = 50000)))
+            } else if (nlevels(x) == 2) {
+                # If Y is a numeric vector and X has only 2 possible values do
+                # Non-parametric Wilcoxon–Mann–Whitney test
+                # aka Wilcoxon rank-sum test
+                values <- tapply(y, x, identity)
+                dt.res <- data.table::data.table(
+                    test = "Wilcoxon-Mann-Whitney", correlation = NA,
+                    pvalue = get.p(wilcox.test(
+                        values[[1]], values[[2]], alternative = "two.sided"))
+                )
+            } else {
+                # If X has multiple levels & Y is a numeric vector do
+                # Non-parametric Kruskal-Wallis test
+                dt.res <- data.table::data.table(
+                    test = "Kruskal-Wallis", correlation = NA, pvalue = get.p(
+                        kruskal.test(y, x)))
+            }
+        } else if(is.factor(y)) {
+            if (nlevels(y) == 2) {
+                # If X is a numeric vector and Y has only 2 possible values do
+                # Non-parametric Wilcoxon–Mann–Whitney test
+                # aka Wilcoxon rank-sum test
+                values <- tapply(x, y, identity)
+                dt.res <- data.table::data.table(
+                    test = "Wilcoxon-Mann-Whitney", correlation = NA,
+                    pvalue = get.p(wilcox.test(
+                        values[[1]], values[[2]], alternative = "two.sided")))
+            } else {
+                # If X is a numeric vector and Y has multiple levels do
+                # Non-parametric Kruskal-Wallis test
+                dt.res <- data.table::data.table(
+                    test = "Kruskal-Wallis", correlation = NA, pvalue = get.p(
+                        kruskal.test(x, y)))
+            }
+        } else {
+            # If both X & Y are numeric vectors do a correlation test
+            N <- length(inds)
+            if(is.null(perm.matrix)){
+                cor_res <- cor(x, y) # Calculate Pearson correlation
+                # Get T statistic
+                t_stat <- (cor_res*sqrt(N-2))/(sqrt(1-cor_res^2))
+                dt.res <- data.table::data.table(
+                    test = "Pearson Corr.", correlation = cor_res,
+                    pvalue = 2*pt(-abs(t_stat), N-2))
+            } else {
+                values <- apply(X = perm.matrix, MARGIN = 2, FUN = function(i){
+                    cor(x[i[i <= N]], y)
+                })
+                abs_val <- abs(values)
+                # Correlation p-value here is the proportion of times where the
+                # 1st correlation value is inferior or equal to calculated
+                # correlations in all permutations. 10 000 permutations to make
+                # sure that 1 result out of 10 000 will be significant enough if
+                # correlated.
+                dt.res <- data.table::data.table(
+                    test = "Pearson Corr.", correlation = values[1],
+                    pvalue = mean(abs_val[1] <= abs_val))
+            }
+        }
+    } else { # Empty data.table result when no test possible
+        dt.res <- data.table::data.table(
+            test = NA, correlation = NA, pvalue = NA)
+    }
+    return(dt.res)
+}
+
+#' Prepares annotations to be tested for associations.
+#'
+#' @param annot.table A \code{data.frame} containing all annotations, 1
+#'                    annotation per column.
+#' @param verbose     A \code{logical} to display information about the
+#'                    step-by-step processing of the data if TRUE
+#'                    (Default: verbose = FALSE).
+#' @return A \code{list} containing updated annotations, the number of
+#'         annotations available, and the annotation table itself.
+#' @author Yoann Pageaud.
+#' @export
+#' @examples
+#' # Create mtcars annotation table
+#' mtcars_annot <- data.table::as.data.table(
+#'     mtcars[, c("cyl", "vs", "am", "gear", "carb")], keep.rownames = "cars")
+#' # Prepare the annotations for testing
+#' ls_annot <- prepare_annot_asso(annot.table = mtcars_annot, verbose = TRUE)
+
+prepare_annot_asso <- function(annot.table, verbose = FALSE){
+    annots <- lapply(X = annot.table, FUN = function(x) {
+        # Exclude columns containing the same value for all rows
+        # (except when missing)
+        if(length(unique(na.omit(x))) < 2){ return(NULL) }
+        # Convert as factor character variables
+        if(is.character(x)){ x <- as.factor(x) }
+        # Convert as factor TRUE/FALSE variables
+        if(is.logical(x)){ x <- as.factor(x) }
+        if(is.factor(x)){ if(anyDuplicated(na.omit(x)) == 0) { return(NULL) } }
+        x
+    })
+    annots <- annots[!vapply(
+        X = annots, FUN = is.null, FUN.VALUE = logical(length = 1L))]
+    n.annot <- length(annots)
+    if(n.annot == 0){
+        stop("No suitable annotation found for association tests.")}
+    if(verbose){
+        cat(c("Testing the following annotations for associations:\n",
+              paste(names(annots), collapse = ", "), ".\n"))
+    }
+    res <- list(
+        "annotations" = annots, "n.annot" = n.annot,
+        "annot.table" = annot.table)
+    return(res)
+}
+
+#' Tests associations between a set of annotations and PCs from a prcomp object.
+#'
+#' @param annot.table A \code{data.frame} containing all annotations, 1
+#'                    annotation per column.
+#' @param prcomp.res A PCA result of classes \code{prcomp} or
+#'                   \code{irlba_prcomp} resulting from stats::prcomp() or
+#'                   irlba::prcomp_irlba().
+#' @param perm.count An \code{integer} specifying the number of permutations to
+#'                   realize on a vector, for the permutations matrix
+#'                   initialization, to be used for calculating the significance
+#'                   of a correlation test (Default: perm.count = 10000).
+#' @param max.PCs    An \code{integer} specifying the maximum number of
+#'                   principal components to consider for association tests with
+#'                   annotations (Default: max.PCs = 8).
+#' @param verbose    A \code{logical} to display information about the
+#'                   step-by-step processing of the data if TRUE
+#'                   (Default: verbose = FALSE).
+#' @return A \code{data.table} containing all association test results.
+#' @author Yoann Pageaud.
+#' @export
+#' @examples
+#' # Create mtcars annotation table
+#' mtcars_annot <- data.table::as.data.table(
+#'     mtcars[, c("cyl", "vs", "am", "gear", "carb")], keep.rownames = "cars")
+#' # Create mtcars matrix with scaled and transposed data
+#' mat_mtcars <- scale(as.matrix(
+#'     mtcars[, c("mpg", "disp", "hp", "drat", "wt", "qsec")]))
+#' # Compute PCA on mtcars matrix
+#' pcs_mtcars <- prcomp(x = mat_mtcars)
+#' # Test association between annotations and principal components
+#' asso_res <- test_asso_annot_pc(
+#'     annot.table = mtcars_annot, prcomp.res = pcs_mtcars, verbose = TRUE)
+#' # Table summarizing tests' results
+#' asso_res
+
+test_asso_annot_pc <- function(
+    annot.table, prcomp.res, perm.count = 10000, max.PCs = 8, verbose = FALSE){
+    prep.annot.table <- prepare_annot_asso(
+        annot.table = annot.table, verbose = verbose)
+    annots <- prep.annot.table$annotations
+    n.annot <- prep.annot.table$n.annot
+    annot.table <- prep.annot.table$annot.table
+
+    if(perm.count != 0 && (
+        (!is.null(prcomp.res)) || sum(!vapply(
+            X = annots, FUN = is.factor,
+            FUN.VALUE = logical(length = 1L))) >= 2)) {
+        # Create the random permutation matrix
+        perm.matrix <- mapply(
+            FUN = sample, rep(nrow(annot.table), times = perm.count))
+        perm.matrix[, 1] <- 1:nrow(perm.matrix)
+    } else {
+        warning("Cannot initialize the permutations matrix.")
+        perm.matrix <- NULL
+    }
+
+    pc.association.count <- max.PCs
+    # Get PCs % variance explained
+    PCA_metrics <- BiocompR::prepare_pca_data(
+        prcomp.res = prcomp.res, dt.annot = annot.table, PCs = 1:max.PCs,
+        scale = 1)
+    dpoints <- prcomp.res$x
+    if(!is.null(dpoints)){
+        if (ncol(dpoints) > pc.association.count) {
+            # Reduce principal components coordinates to the maximum number of
+            # dimensions wanted
+            dpoints <- dpoints[, 1:pc.association.count]
+        }
+        # Test all annotations against all PCs
+        ls_allres <- lapply(X = seq(n.annot), FUN = function(i){
+            if(verbose){ cat("Testing association of", names(annots)[i], "&\n") }
+            ls_tres <- lapply(X = seq(ncol(dpoints)), FUN = function(j){
+                if(verbose){ cat("\t", colnames(dpoints)[j], "\n") }
+                t.result <- BiocompR::test.annots(
+                    x = annots[[i]], y = dpoints[, j],
+                    perm.matrix = perm.matrix)
+                t.result[, c("annotation", "PC", "var.explained") := .(
+                    names(annots)[i], colnames(dpoints)[j],
+                    (PCA_metrics$var.explained*100)[j])]
+                t.result
+            })
+            data.table::rbindlist(l = ls_tres)
+        })
+        # Rbind all results
+        dt_allres <- data.table::rbindlist(l = ls_allres)
+        dt_allres[, log_trans_pval := -log10(pvalue)]
+        rm(ls_allres)
+        # Convert PC as factor to keep the right order
+        dt_allres[, PC := as.factor(x = PC)]
+        dt_allres[, PC := factor(
+            x = PC, levels = paste0("PC", seq(pc.association.count)))]
+    }
+    rm(dpoints)
+    # Return association test results
+    return(dt_allres)
+}
+
