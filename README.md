@@ -26,7 +26,7 @@ _I would like to thank every people who contributed to the development of this p
 Currently the package BiocompR contains **29 functions**:
 
 * `basic.sidebar()` - Draws a ggplot2 of a basic sidebar.  
-* `bivar.plot()` - Computes boxplots or violins from 1 variable values against ranges of a 2nd one.  
+* `bivar.plot()` - Draws boxplots or violins from a variable values against ranges of a 2nd one.  
 * `build.layout()` - Builds legends layout.
 * `check_fun()` - Checks if a function exists and package of origin.  
 * `cross.biplot()` - Computes and draws biplots for multiple principal components at once.  
@@ -53,6 +53,8 @@ Currently the package BiocompR contains **29 functions**:
 * `resize.grob.oneway()` - Resizes heights or widths of a grob based on the dimensions of another grob.  
 * `resize.grobs()` - Resizes heights or widths of multiple grobs based on a given grob dimensions.  
 * `sunset()` - Draws a sunset plot showing the completeness of a dataset.  
+* `test.annots()` - Tests association of an annotation with another one or with a PC.  
+* `test_asso_annot_pc()` - Tests associations between a set of annotations and PCs from a prcomp object.  
 * `warn.handle()` - Filters unrelevant warnings matching a regular expression.  
 
 ## Prerequisites

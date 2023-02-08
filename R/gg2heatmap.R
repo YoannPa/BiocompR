@@ -552,7 +552,7 @@ gg2heatmap <- function(
     thm_val <- theme_to_check[theme_to_check %in% names(theme_heatmap)]
     if(!identical(thm_val, character(0))){
         if(any(unlist(lapply(X = thm_val, FUN = function(t){
-            !BiocompR::is.elt_blank(theme_heatmap[[t]])}))) & !y.axis.right){
+            !BiocompR:::is.elt_blank(theme_heatmap[[t]])}))) & !y.axis.right){
             warning(paste("'y.axis.right' has to be set to TRUE in order to",
                           "display the Y-axis on the right side of the",
                           "heatmap."))
@@ -560,7 +560,7 @@ gg2heatmap <- function(
     }
 
     #Check annotations groups and palettes matching
-    BiocompR::check.annotations(data = m, annot.grps = annot.grps,
+    BiocompR:::check.annotations(data = m, annot.grps = annot.grps,
                                 annot.pal = annot.pal, verbose = verbose)
 
     #Handle NAs
@@ -759,11 +759,11 @@ gg2heatmap <- function(
     #Update theme_heatmap
     if(is.null(theme_heatmap)){
         theme_heatmap <- theme_default_htmp + theme_forced_htmp
-    } else{
+    } else {
         theme_heatmap <- theme_default_htmp + theme_heatmap + theme_forced_htmp
     }
     #Update guide_colorbar and force order parameter
-    guide_custom_bar <- BiocompR::update_guide_colorbar(
+    guide_custom_bar <- BiocompR:::update_guide_colorbar(
         new_guide = guide_custom_bar, forced_param = list("order" = 1))
     #Set heatmap source parameters
     htmp.source <- ggplot2::ggplot() +
@@ -812,12 +812,12 @@ gg2heatmap <- function(
         #Display legend of missing values if any
         htmp <- htmp + ggplot2::geom_tile(data = melted_mat, ggplot2::aes(
             x = variable, y = rn, fill = value, color = " "),
-            color = border.col, size = border.size, width = cell.width,
+            color = border.col, linewidth = border.size, width = cell.width,
             height = cell.height)
     } else {
         htmp <- htmp + ggplot2::geom_tile(
             data = melted_mat, ggplot2::aes(x = variable, y = rn, fill = value),
-            color = border.col, size = border.size,
+            color = border.col, linewidth = border.size,
             width = cell.width, height = cell.height)
     }
 
@@ -877,7 +877,7 @@ gg2heatmap <- function(
         #Set number of columns to display annotations legends
         if(lgd.merge){
             # Build color tables for legends.
-            col_table <- BiocompR::build.col_table(
+            col_table <- BiocompR:::build.col_table(
                 annot.grps = annot.grps, annot.pal = annot.pal)
             #Rbind list color tables because lgd.merge is TRUE
             col_table <- data.table::rbindlist(col_table, idcol = TRUE)
@@ -888,14 +888,14 @@ gg2heatmap <- function(
             col_table <- list(col_table[, c("Grps", "Cols"), ])
         } else {
             # Builds color tables for legends.
-            col_table <- BiocompR::build.col_table(
+            col_table <- BiocompR:::build.col_table(
                 annot.grps = annot.grps, annot.pal = annot.pal)
         }
         #Build legends layout
         lgd.layout <- BiocompR::build.layout(
             col_table = col_table, height.lgds.space = lgd.space.height)
         #Calculate legend length
-        lgd_sizes <- BiocompR::get.len.legends(col_table = col_table)
+        lgd_sizes <- BiocompR:::get.len.legends(col_table = col_table)
         #Calculate legend columns
         lgd.ncol <- ceiling(lgd_sizes/lgd.space.height)
 
@@ -936,7 +936,7 @@ gg2heatmap <- function(
                 data = xtrm.melted_mat,
                 mapping = ggplot2::aes(x = variable, y = rn, fill = value))
     }
-    htmp_legend <- BiocompR::get.lgd(gg2.obj = subplot.htmp + theme_heatmap)
+    htmp_legend <- BiocompR:::get.lgd(gg2.obj = subplot.htmp + theme_heatmap)
     rm(subplot.htmp)
 
     #Create ggplot2 heatmap

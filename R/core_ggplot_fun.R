@@ -33,7 +33,6 @@ load.palettes <- function(){
 #'                   (Default: verbose = FALSE).
 #' @return An error message if something goes wrong during annotations checks.
 #' @author Yoann Pageaud.
-#' @export
 #' @keywords internal
 
 check.annotations <- function(data, annot.grps, annot.pal, verbose = FALSE){
@@ -101,7 +100,6 @@ check.annotations <- function(data, annot.grps, annot.pal, verbose = FALSE){
 #' @param arg A \code{list}.
 #' @return A \code{logical}.
 #' @author Yoann Pageaud.
-#' @export
 #' @keywords internal
 
 is.elt_blank <- function(arg){
@@ -114,12 +112,12 @@ is.elt_blank <- function(arg){
 #' @param gg2.obj  A \code{gg} object with legends.
 #' @return A \code{gg} object only containing the legends of the plot.
 #' @author Yoann Pageaud.
-#' @export
 #' @keywords internal
 #' @references \href{https://github.com/tidyverse/ggplot2/wiki/Share-a-legend-between-two-ggplot2-graphs}{Share a legend between two ggplot2 graphs - Mara Averick}
 
 get.lgd <- function(gg2.obj){
-    tmp <- ggplot2::ggplot_gtable(ggplot2::ggplot_build(gg2.obj))
+    tmp <- R.devices::suppressGraphics(ggplot2::ggplot_gtable(
+        ggplot2::ggplot_build(gg2.obj)))
     leg <- which(vapply(X = tmp$grobs, FUN = function(x) x$name,
                         FUN.VALUE = character(length = 1)) == "guide-box")
     legend <- tmp$grobs[[leg]]
@@ -258,7 +256,6 @@ ggdend <- function(df, orientation, reverse.x = FALSE, theme_dend = NULL){
 #'                            legend.
 #' @return A \code{gg} object of a basic triangle plot (a 'geom_tile()').
 #' @author Yoann Pageaud.
-#' @export
 #' @keywords internal
 
 basic.ggplot.tri <- function(
@@ -311,7 +308,6 @@ basic.ggplot.tri <- function(
 #' @return A \code{list} of data.tables where categories of each annotation are
 #'         matched with their color palette.
 #' @author Yoann Pageaud.
-#' @export
 #' @keywords internal
 
 map.cat2pal <- function(origin.grps, groups, annot.pal){
@@ -350,7 +346,6 @@ map.cat2pal <- function(origin.grps, groups, annot.pal){
 #' @return A \code{data.table} list of categories matching their colors for each
 #'         legend.
 #' @author Yoann Pageaud.
-#' @export
 #' @keywords internal
 
 build.col_table <- function(annot.grps, annot.pal){
@@ -364,7 +359,7 @@ build.col_table <- function(annot.grps, annot.pal){
     #Create list of color tables
     if(is.list(annot.pal)){
         #Map categories to palettes
-        col_table <- BiocompR::map.cat2pal(origin.grps, groups, annot.pal)
+        col_table <- BiocompR:::map.cat2pal(origin.grps, groups, annot.pal)
     } else if(!is.list(annot.pal)){
         col_table <- lapply(X = origin.grps, FUN = function(grp){
             data.table::data.table(
@@ -381,7 +376,6 @@ build.col_table <- function(annot.grps, annot.pal){
 #'                  color palettes for legends.
 #' @return An \code{integer} list of sizes, one per legend to be displayed.
 #' @author Yoann Pageaud.
-#' @export
 #' @keywords internal
 
 get.len.legends <- function(col_table){
@@ -418,7 +412,7 @@ get.len.legends <- function(col_table){
 
 build.layout <- function(col_table, height.lgds.space){
     # Calculate legends length
-    lgd_sizes <- BiocompR::get.len.legends(col_table = col_table)
+    lgd_sizes <- BiocompR:::get.len.legends(col_table = col_table)
     #Compute the number of columns necessary for display of large legends
     ncol.by.lgd <- ceiling(lgd_sizes/height.lgds.space)
     # Calculate spatial disposition of legends based on their size and the
@@ -603,7 +597,7 @@ plot.col.sidebar <- function(
     #Create list of color tables
     if(is.list(annot.pal)) { #If a list of palettes is provided
         #Map categories to palettes
-        col_table <- BiocompR::map.cat2pal(origin.grps, groups, annot.pal)
+        col_table <- BiocompR:::map.cat2pal(origin.grps, groups, annot.pal)
     } else if(!is.list(annot.pal)){ #if a single palette is provided
         #Map groups to the same palette
         ls.df.grp.pal <- lapply(X = origin.grps, FUN = function(grp){
@@ -711,7 +705,7 @@ plot.col.sidebar <- function(
     }
     if(merge.lgd){ # Do not split legends
         sidebar.lgd <- list(
-            BiocompR::get.lgd(col_sidebar + ggplot2::labs(fill = lgd.name)))
+            BiocompR:::get.lgd(col_sidebar + ggplot2::labs(fill = lgd.name)))
     } else { # Split legends and return a list of legends
         if(annot.pos == "top"){
             dframe.annot$.id <- factor(
@@ -724,11 +718,12 @@ plot.col.sidebar <- function(
             #Get all legends separately
             sidebar.lgd <- lapply(
                 X = seq_along(levels(dframe.annot$.id)), FUN = function(i){
-                    BiocompR::get.lgd(BiocompR::basic.sidebar(
+                    BiocompR:::get.lgd(BiocompR::basic.sidebar(
                         data = dframe.annot[.id == levels(dframe.annot$.id)[i]],
                         palette = col_table[.id == i]$Cols,
                         lgd.ncol = lgd.ncol[i]) + theme_legend + ggplot2::labs(
                             fill = levels(dframe.annot$.id)[i]))
+
                 })
         } else {
             stop(paste(
@@ -868,7 +863,6 @@ annotation_custom2 <- function(
 #'                     'forced_param' will override old and new guide values.
 #' @return An updated \code{guide} of class 'colorbar'.
 #' @author Yoann Pageaud.
-#' @export
 #' @keywords internal
 
 update_guide_colorbar <- function(
