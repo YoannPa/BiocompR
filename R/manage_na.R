@@ -33,60 +33,62 @@
 #' @keywords internal
 
 row.impute.na <- function(
-  data, miss.mat = NULL, grp_tbl, nr, r, impute.fun, vinterpolate){
-  #Get groups to impute data in
-  sample_grps <- unique(grp_tbl[grp_tbl$samples %in% names(data[r,][
-    is.na(data[r,])]), ]$groups)
-  ls.grps <- lapply(X = sample_grps, FUN = function(grp){
-    #List sample names matching the group
+  data, miss.mat = NULL, grp_tbl, nr = NULL, r, grp.fun = "median",
+  impute.fun = "median", vinterpolate = FALSE){
+  sub.data <- data[r, ]
+  # Apply group function to each group to get 1 value per group
+  grp_vals <- unlist(lapply(X = unique(grp_tbl$groups), FUN = function(grp){
     samples.in.grp <- grp_tbl[grp_tbl$groups == grp, ]$samples
-    sub.data <- data[r, samples.in.grp]
-    #List Methylation values of the group on the row
-    if(all(is.na(sub.data))){
-      warning(paste0("imputation failed. No value available on row ", r,
-                     " in group ", grp,"."))
-      impute.vals <- sub.data
-      names(impute.vals) <- samples.in.grp
-      # stop("The group has NA for all its values.")
-    } else if(anyNA(sub.data)){
-      if(vinterpolate){
-        #Combine imputation by group with vertical imputation on column
-        impute.vals <- unlist(
-          lapply(X = names(sub.data[is.na(sub.data)]), FUN = function(i){
-            lead.val <- rev(data[which(miss.mat[seq(r - 1), i]), i])[1]
-            lag.val <- data[r + which(miss.mat[(r + 1):nr, i]), i][1]
-            if(length(lead.val) == 0){
-              impute.val <- eval(parse(text = paste0(
-                impute.fun, "(c(sub.data, lag.val), na.rm = TRUE)")))
-            } else if(length(lag.val) == 0){
-              impute.val <- eval(parse(text = paste0(
-                impute.fun, "(c(sub.data, lead.val), na.rm = TRUE)")))
-            } else {
-              impute.val <- eval(parse(text = paste0(
-                impute.fun, "(c(sub.data, lead.val, lag.val)",
-                ", na.rm = TRUE)")))
-            }
-            names(impute.val) <- i
-            return(impute.val)
-          }))
-      } else {
-        impute.vals <- rep(eval(
-          parse(text = paste0(impute.fun, "(x = sub.data, na.rm = TRUE)"))),
-          length(sub.data[is.na(sub.data)]))
-        names(impute.vals) <- names(sub.data[is.na(sub.data)])
-        # median(x = data[r, samples.in.grp], na.rm = TRUE)
-      }
+    grp.data <- sub.data[samples.in.grp]
+    if(all(is.na(grp.data))){
+      warning(paste0(
+        "imputation failed. No value available on row ", r," in group ", grp,
+        "."))
+      grp_val <- NA
+      names(grp_val) <- grp
+    } else {
+      grp_val <- eval(parse(text = paste0(
+        grp.fun, "(x = grp.data, na.rm = TRUE)")))
+      names(grp_val) <- grp
+      grp_val
     }
-    return(impute.vals)
-  })
-  # names(ls.grps) <- sample_grps
-  ls.grps <- unlist(ls.grps)
-  return(ls.grps)
+  }))
+  # Impute missing data
+  if(vinterpolate){
+    impute.vals <- unlist(lapply(
+      X = names(sub.data[is.na(sub.data)]), FUN = function(i){
+        grp.val <- eval(parse(text = paste0(
+          impute.fun, "(x = grp_vals, na.rm = TRUE)")))
+        lead.val <- rev(data[which(miss.mat[seq(r - 1), i]), i])[1]
+        if(r < nr){
+          lag.val <- data[r + which(miss.mat[(r + 1):nr, i]), i][1]
+        } else { lag.val <- NA }
+        if(is.na(lead.val)){
+          grp_tbl[grp_tbl$samples == i, ]$groups
+          impute.val <- eval(parse(text = paste0(
+            impute.fun, "(c(grp.val, lag.val), na.rm = TRUE)")))
+        } else if(is.na(lag.val)){
+          impute.val <- eval(parse(text = paste0(
+            impute.fun, "(c(grp.val, lead.val), na.rm = TRUE)")))
+        } else {
+          impute.val <- eval(parse(text = paste0(
+            impute.fun, "(c(grp.val, lead.val, lag.val), na.rm = TRUE)")))
+        }
+        names(impute.val) <- i
+        impute.val
+      }))
+  } else {
+    impute.vals <- rep(eval(parse(text = paste0(
+      impute.fun, "(x = grp_vals, na.rm = TRUE)"))), length(
+        data[r, ][is.na(data[r, ])]))
+    names(impute.vals) <- names(data[r, ][is.na(data[r, ])])
+  }
+  return(impute.vals)
 }
 
 
-#' Keeps, removes or imputes missing values in a matrix or a data.frame based on
-#' sample groups.
+#' Keeps, removes or imputes missing values in a matrix or a data.frame
+#' accounting for group size.
 #'
 #' @param data         A \code{matrix} or \code{data.frame} with column names.
 #' @param method       A \code{character} which defines the method to use for
@@ -144,8 +146,8 @@ row.impute.na <- function(
 #' manage.na(data = df, method = "impute", groups = grps)
 
 manage.na <- function(
-  data, method = "remove", groups, impute.fun = "median", vinterpolate = FALSE,
-  row.na.cut = NULL, ncores = 1){
+  data, method = "remove", groups, grp.fun = "median", impute.fun = "median",
+  vinterpolate = FALSE, row.na.cut = NULL, ncores = 1){
   if(is.data.frame(data)){ data <- as.matrix(data) }
   if(method != "keep"){ #If NA should not be kept
     if(any(is.na(data))) { #If any NA
@@ -159,33 +161,30 @@ manage.na <- function(
         }
       } else if(method == "impute"){ #Impute NAs with the median value by group
         #Parallel-remove rows containing only NAs
-        data <- data[
-          !unlist(parallel::mclapply(
-            X = seq(nrow(data)), mc.cores = ncores, FUN = function(r){
-              all(is.na(data[r, ])) })), , drop = FALSE]
+        data <- data[!unlist(parallel::mclapply(
+          X = seq(nrow(data)), mc.cores = ncores, FUN = function(r){
+            all(is.na(data[r, ])) })), , drop = FALSE]
         #Create logical matrix of missing value for vinterpolate
         if(vinterpolate){
           miss.mat <- !is.na(x = data)
           nr <- nrow(data)
+        } else {
+          miss.mat <- NULL
+          nr <- NULL
         }
-        #Precompute rowSums(is.na(data))
+        # Precompute rowSums(is.na(data))
+        pos.cov <- as.integer(rowSums(is.na(data)))
         if(!is.null(row.na.cut)){
-          pos.cov <- as.integer(rowSums(is.na(data)))
           rows.to.impute <- which(pos.cov <= row.na.cut & pos.cov > 0)
-        } else { rows.to.impute <- seq(nrow(data)) }
+        } else { rows.to.impute <- which(pos.cov > 0) }
         #Get groups of samples from sample conditions
         grp_tbl <- data.frame(samples = colnames(data), groups = groups)
         #TODO: Make parallel apply when it will be possible.
         invisible(lapply(X = rows.to.impute, FUN = function(r){
-          if(vinterpolate){
-            grp.imp <- row.impute.na(
-              data = data, miss.mat = miss.mat, grp_tbl = grp_tbl, nr = nr, r = r,
-              impute.fun = impute.fun, vinterpolate = vinterpolate)
-          } else {
-            grp.imp <- row.impute.na(
-              data = data, grp_tbl = grp_tbl, nr = nr, r = r,
-              impute.fun = impute.fun, vinterpolate = vinterpolate)
-          }
+          grp.imp <- row.impute.na(
+            data = data, miss.mat = miss.mat, grp_tbl = grp_tbl, nr = nr, r = r,
+            grp.fun = grp.fun, impute.fun = impute.fun,
+            vinterpolate = vinterpolate)
           base::`<<-` (data[r, names(grp.imp)], grp.imp)
           cat(paste0(round((r/max(rows.to.impute))*100, 3), "%\n"))
         }))

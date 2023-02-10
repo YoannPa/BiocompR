@@ -2,13 +2,14 @@
 % Please edit documentation in R/manage_na.R
 \name{manage.na}
 \alias{manage.na}
-\title{Keeps, removes or imputes missing values in a matrix or a data.frame based on
-sample groups.}
+\title{Keeps, removes or imputes missing values in a matrix or a data.frame
+accounting for group size.}
 \usage{
 manage.na(
   data,
   method = "remove",
   groups,
+  grp.fun = "median",
   impute.fun = "median",
   vinterpolate = FALSE,
   row.na.cut = NULL,
@@ -62,8 +63,8 @@ to be used to parallel-process the matrix
 A \code{matrix}.
 }
 \description{
-Keeps, removes or imputes missing values in a matrix or a data.frame based on
-sample groups.
+Keeps, removes or imputes missing values in a matrix or a data.frame
+accounting for group size.
 }
 \examples{
 # Creating a data.frame of 4 columns with 50 values in each:

@@ -4,7 +4,16 @@
 \alias{row.impute.na}
 \title{Imputes missing data in a matrix row.}
 \usage{
-row.impute.na(data, miss.mat = NULL, grp_tbl, nr, r, impute.fun, vinterpolate)
+row.impute.na(
+  data,
+  miss.mat = NULL,
+  grp_tbl,
+  nr = NULL,
+  r,
+  grp.fun = "median",
+  impute.fun = "median",
+  vinterpolate = FALSE
+)
 }
 \arguments{
 \item{data}{A \code{matrix}.}
