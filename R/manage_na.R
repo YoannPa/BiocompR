@@ -46,6 +46,7 @@ row.impute.na <- function(
         "."))
       grp_val <- NA
       names(grp_val) <- grp
+      grp_val
     } else {
       grp_val <- eval(parse(text = paste0(
         grp.fun, "(x = grp.data, na.rm = TRUE)")))
