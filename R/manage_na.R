@@ -41,9 +41,8 @@ row.impute.na <- function(
     samples.in.grp <- grp_tbl[grp_tbl$groups == grp, ]$samples
     grp.data <- sub.data[samples.in.grp]
     if(all(is.na(grp.data))){
-      warning(paste0(
-        "imputation failed. No value available on row ", r," in group ", grp,
-        "."))
+      message(paste(
+        "grp.fun failed on row", r,"in group", grp, "because of missing data."))
       grp_val <- NA
       names(grp_val) <- grp
       grp_val
