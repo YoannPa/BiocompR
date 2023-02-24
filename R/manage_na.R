@@ -121,8 +121,9 @@ row.impute.na <- function(
 #' @param row.na.cut   An \code{integer} specifying the cut-off for imputation
 #'                     on rows missing values. if NULL, all rows with missing
 #'                     values will be processed. if row.na.cut equals an
-#'                     integer, only rows with less NAs than the cut-off will be
-#'                     processed (Default: row.na.cut = NULL).
+#'                     integer, only rows containing a number of NAs smaller or
+#'                     equal to the cut-off will be processed
+#'                     (Default: row.na.cut = NULL).
 #' @param ncores       An \code{integer} to specify the number of cores/threads
 #'                     to be used to parallel-process the matrix
 #'                     (Default: ncores = 1).
