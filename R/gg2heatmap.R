@@ -45,7 +45,7 @@
 #'                        'package::function'. If rank.fun = NULL the order of
 #'                        rows in the matrix will be kept
 #'                        (Default: rank.fun = NULL;
-#'                        Supported: rank.fun = 'sd').
+#'                        Supported: rank.fun = 'stats::sd').
 #' @param top.rows        An \code{integer} to specify the number of top rows
 #'                        you want to display on the heatmap
 #'                        (Default: top.rows = NULL).
@@ -561,7 +561,7 @@ gg2heatmap <- function(
 
     #Check annotations groups and palettes matching
     BiocompR:::check.annotations(data = m, annot.grps = annot.grps,
-                                annot.pal = annot.pal, verbose = verbose)
+                                 annot.pal = annot.pal, verbose = verbose)
 
     #Handle NAs
     if(verbose){ cat("Managing missing values...") }
@@ -714,9 +714,12 @@ gg2heatmap <- function(
                 "facet.annot" = annot.grps[[facet]])
             melted_mat <- merge(x = melted_mat, y = dt.facet, by = "variable",
                                 all.x = TRUE, sort = FALSE)
-            melted_mat[, facet.annot := as.factor(facet.annot)]
-            melted_mat[, facet.annot := factor(
-                x = facet.annot, levels = sort(levels(facet.annot)))]
+            # If no factor defined, define some
+            if(!is.factor(melted_mat$facet.annot)){
+                melted_mat[, facet.annot := as.factor(facet.annot)]
+                melted_mat[, facet.annot := factor(
+                    x = facet.annot, levels = sort(levels(facet.annot)))]
+            }
             melted_mat[, variable := as.factor(variable)]
             melted_mat[, variable := factor(x = variable, levels = unique(
                 melted_mat, by = "variable")[order(facet.annot)]$variable)]
@@ -875,10 +878,10 @@ gg2heatmap <- function(
         }
 
         #Set number of columns to display annotations legends
+        # Builds color tables for legends.
+        col_table <- BiocompR:::build.col_table(
+            annot.grps = annot.grps, annot.pal = annot.pal)
         if(lgd.merge){
-            # Build color tables for legends.
-            col_table <- BiocompR:::build.col_table(
-                annot.grps = annot.grps, annot.pal = annot.pal)
             #Rbind list color tables because lgd.merge is TRUE
             col_table <- data.table::rbindlist(col_table, idcol = TRUE)
             if(!(is.list(annot.pal)) | length(annot.pal) == 1){
@@ -886,10 +889,6 @@ gg2heatmap <- function(
                 col_table <- col_table[!duplicated(x = Cols)]
             }
             col_table <- list(col_table[, c("Grps", "Cols"), ])
-        } else {
-            # Builds color tables for legends.
-            col_table <- BiocompR:::build.col_table(
-                annot.grps = annot.grps, annot.pal = annot.pal)
         }
         #Build legends layout
         lgd.layout <- BiocompR::build.layout(
@@ -941,7 +940,6 @@ gg2heatmap <- function(
 
     #Create ggplot2 heatmap
     htmp <- htmp + theme_heatmap + ggplot2::theme(legend.position = "none")
-    htmp
     #Convert ggplots into grobs
     if(is.null(facet)){
         if(dd.cols){
@@ -962,10 +960,10 @@ gg2heatmap <- function(
         if(!dd.rows & !dd.cols & show.annot){
             facet_size <- 0
             #Create main grob
-            main_grob <- egg::ggarrange(
+            main_grob <- R.devices::suppressGraphics(egg::ggarrange(
                 col_sidebar$sidebar, htmp, ncol = 1, nrow = 2,
                 heights = c(annot.size + facet_size, 30),
-                draw = FALSE)
+                draw = FALSE))
             #Get sidebar legends
             sidebar_legend <- col_sidebar$legends
         } else {

@@ -93,7 +93,7 @@ Functions should be specified using the syntax
 'package::function'. If rank.fun = NULL the order of
 rows in the matrix will be kept
 (Default: rank.fun = NULL;
-Supported: rank.fun = 'sd').}
+Supported: rank.fun = 'stats::sd').}
 
 \item{top.rows}{An \code{integer} to specify the number of top rows
 you want to display on the heatmap
