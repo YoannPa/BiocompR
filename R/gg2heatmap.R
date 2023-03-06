@@ -237,42 +237,42 @@
 #' @examples
 #' # Create the basic gg2heatmap
 #' mat <- as.matrix(t(scale(mtcars)))
-#' gg2heatmap(m = mat)
+#' res <- gg2heatmap(m = mat)
 #' # Apply Euclidean distance on rows, and Manhattan distance on columns
-#' gg2heatmap(m = mat, dist.method = c("euclidean", "manhattan"))
+#' res <- gg2heatmap(m = mat, dist.method = c("euclidean", "manhattan"))
 #' # Rank heatmap rows following their standard deviation
-#' gg2heatmap(m = mat, dist.method = c("none", "manhattan"),
+#' res <- gg2heatmap(m = mat, dist.method = c("none", "manhattan"),
 #'   rank.fun = "stats::sd", dendrograms = c(FALSE, TRUE))
 #' # Keep top 5 rows with highest standard variation
-#' gg2heatmap(m = mat, dist.method = c("none", "manhattan"),
+#' res <- gg2heatmap(m = mat, dist.method = c("none", "manhattan"),
 #'   rank.fun = "stats::sd", dendrograms = c(FALSE, TRUE), top.rows = 5)
 #' # Order rows and columns respectively by euclidean and manhattan distance,
 #' # and hide both dendrograms
-#' gg2heatmap(m = mat, dist.method = c("euclidean", "manhattan"),
+#' res <- gg2heatmap(m = mat, dist.method = c("euclidean", "manhattan"),
 #'   dendrograms = FALSE)
 #' # Change both dendrograms size
-#' gg2heatmap(m = mat, dist.method = c("euclidean", "manhattan"),
+#' res <- gg2heatmap(m = mat, dist.method = c("euclidean", "manhattan"),
 #'   dend.size = c(2, 5))
 #' # Custom themes of top and left dendrograms
-#' gg2heatmap(
+#' res <- gg2heatmap(
 #'   m = mat, theme_dend_top = theme(
 #'     panel.background = element_rect(
-#'       color = "red", size = 1, fill = "lightblue")),
+#'       color = "red", linewidth = 1, fill = "lightblue")),
 #'   theme_dend_left = theme(panel.background = element_rect(fill = "gold")))
 #' # Set heatmap title, and X and Y axis titles
-#' gg2heatmap(m = mat, plot.labs = labs(
+#' res <- gg2heatmap(m = mat, plot.labs = labs(
 #'   title = "mtcars example heatmap", x = "Cars", y = "Cars caracteristics"),
 #'   y.axis.right = TRUE, # To enable the display of Y-axis on the right
 #'   theme_heatmap = theme(
 #'     axis.title.y.right = element_text(size = 14, vjust = -10)))
 #' # Specify what 'rows' correspond to in the subtitle.
-#' gg2heatmap(m = mat, row.type = "caracteristics")
+#' res <- gg2heatmap(m = mat, row.type = "caracteristics")
 #' # Add 1 annotation for the top color bar
-#' gg2heatmap(
+#' res <- gg2heatmap(
 #'   m = mat,
 #'   annot.grps = list("Carb" = mtcars$carb), annot.pal = rainbow(n = 6))
 #' # Add more annotations, adjust colorbar width, and legends positions
-#' gg2heatmap(
+#' res <- gg2heatmap(
 #'   m = mat,
 #'   annot.grps = list( #Separate annotations must all have different values
 #'     "Carb" = paste(mtcars$carb, "Carb"),
@@ -285,7 +285,7 @@
 #'     legend.justification = c(0, 0.8)), # Justifies all legends on the left
 #'     lgd.space.height = 22) # Sets vertical space to avoid legends overlaps
 #' # Facetting on 1 of the annotations
-#' gg2heatmap(
+#' res <- gg2heatmap(
 #'   m = mat,
 #'   annot.grps = list(
 #'     "Carb" = paste(mtcars$carb, "Carb"),
@@ -308,23 +308,23 @@
 #'   rn %in% c('mpg', 'disp', 'hp', 'drat', 'qsec'), groups := "kinetic"]
 #' molten.cars[
 #'   rn %in% c('cyl', 'wt', 'vs', 'am', 'gear', 'carb'), groups := "mecanic"]
-#' gg2heatmap(
+#' res <- gg2heatmap(
 #'   m = molten.cars, split.by.rows = "groups", # Splitting on rows by 'groups'
 #'   dist.method = c('none', 'euclidean'), # Disable clustering on rows
 #'   dendrograms = c(FALSE, TRUE), # Disable dendrogram display on rows
 #'   lgd.space.width = 5, # Increase legend space
 #'   theme_heatmap = theme(
 #'     axis.text.y.left = element_text(size = 12), # Show Y labels on the left
-#'     axis.ticks.y.left = element_line(size = 0.5)), # Show Y ticks on the left
+#'     axis.ticks.y.left = element_line(linewidth = 0.5)), # Show Y ticks on left
 #'   theme_legend = theme(legend.justification = c(0.5, 0.5))) # Center legend
 #' # Custom heatmap cells borders color and width
-#' gg2heatmap(m = mat, border.col = "black", border.size = 0.5)
+#' res <- gg2heatmap(m = mat, border.col = "black", border.size = 0.5)
 #' # Custom heatmap cells height and width
-#' gg2heatmap(m = mat, cell.size = c(0.9, 0.5))
+#' res <- gg2heatmap(m = mat, cell.size = c(0.9, 0.5))
 #' # Plot a rastered heatmap using the Lanczos filter
-#' gg2heatmap(m = mat, raster = "Lanczos")
+#' res <- gg2heatmap(m = mat, raster = "Lanczos")
 #' # Plot a rastered faceted heatmap using the Lanczos filter
-#' gg2heatmap(
+#' res <- gg2heatmap(
 #'   m = mat,
 #'   annot.grps = list(
 #'     "Carb" = paste(mtcars$carb, "Carb"),
@@ -341,7 +341,7 @@
 #'   dist.method = "none", # Disable clustering to let facetting work
 #'   raster = "Lanczos") # Rasterization using the Lanczos filter
 #' # Custom the theme of the heatmap
-#' gg2heatmap(
+#' res <- gg2heatmap(
 #'   m = mat,
 #'   theme_heatmap = theme(
 #'     panel.border = element_rect(
@@ -351,7 +351,7 @@
 #'     axis.text.x = element_text(color = "red")), # Color X axis labels in red
 #'   y.axis.right = TRUE) # Enable display of Y axis on the right side
 #' # Custom the colorbar shape
-#' gg2heatmap(m = mat, guide_custom_bar = guide_colorbar(
+#' res <- gg2heatmap(m = mat, guide_custom_bar = guide_colorbar(
 #'   title = "My custom colorbar", # Set colorbar title
 #'   barwidth = 10, # Set colorbar width
 #'   barheight = 0.5, # Set colorbar height
@@ -363,7 +363,7 @@
 #'   frame.colour = "green", # Set colorbar frame color
 #'   frame.linewidth = 2)) # Set colorbar frame linewidth
 #' # Custom colorbar caracteristics using 'scale_fill_gradient'-like functions
-#' gg2heatmap(m = mat, scale_fill_grad = scale_fill_gradientn(
+#' res <- gg2heatmap(m = mat, scale_fill_grad = scale_fill_gradientn(
 #'   colors = c("green", "black", "red"), # Set gradient colors
 #'   na.value = "grey", # Set missing value color
 #'   n.breaks = 10, # Set number of breaks
@@ -371,7 +371,7 @@
 #'   limits = c(-1, 1), # Set limits for the colorbar
 #'   oob = scales::squish)) # Squish values out of the bound of limits
 #' # Custom vertical and horizontal separations width of annotations
-#' gg2heatmap(m = mat, annot.grps = list(
+#' res <- gg2heatmap(m = mat, annot.grps = list(
 #'   "Carb" = paste(mtcars$carb, "Carb"), "Gear" = paste(mtcars$gear, "Gear"),
 #'   "Am" = paste(mtcars$am, "Am")),
 #'   annot.pal = list(
@@ -380,7 +380,7 @@
 #'   lgd.space.height = 22,
 #'   annot.sep = c(0.3, 0.1)) # Horizontal space of 0.3, and vertical of 0.1
 #' # Custom annotation theme
-#' gg2heatmap(
+#' res <- gg2heatmap(
 #'   m = mat, annot.grps = list("Carb" = mtcars$carb),
 #'   annot.pal = rainbow(n = 6), theme_annot = theme(
 #'     panel.border = element_rect(
@@ -388,9 +388,9 @@
 #'       size = 1, # Set annotation border width to 1
 #'       fill = "transparent"))) # Make the annotation visible through the rect
 #' # Hide the annotation and annotation legends
-#' gg2heatmap(m = mat, show.annot = FALSE)
+#' res <- gg2heatmap(m = mat, show.annot = FALSE)
 #' # Merge annotations legends into a single legend
-#' gg2heatmap(
+#' res <- gg2heatmap(
 #'   m = mat, annot.grps = list(
 #'     "Carb" = paste(mtcars$carb, "Carb"), "Gear" = paste(mtcars$gear, "Gear"),
 #'     "Am" = paste(mtcars$am, "Am")),
@@ -399,7 +399,7 @@
 #'   annot.size = 3,
 #'   lgd.merge = TRUE) # Merge annotations legends into a single legend
 #' # Custom legend theme
-#' gg2heatmap(m = mat, theme_legend = theme(
+#' res <- gg2heatmap(m = mat, theme_legend = theme(
 #'   legend.background = element_rect(
 #'     fill = "lightblue", # Add lightblue background
 #'     color = "red"), # Add red border
@@ -407,19 +407,20 @@
 #'   legend.key.width = unit(1.4, "lines"), # Increase legend keys width
 #'   legend.text = element_text(color = "red"))) # Color legend labels in red
 #' # Increase legend space width on the left of the heatmap
-#' gg2heatmap(m = mat, lgd.space.width = 3)
+#' res <- gg2heatmap(m = mat, lgd.space.width = 3)
 #' # Change legend space height
-#' gg2heatmap(m = mat, lgd.space.height = 15)
+#' res <- gg2heatmap(m = mat, lgd.space.height = 15)
 #' # Disable automatic drawing of the heatmap (to only retrieve grobs data)
-#' gg2heatmap(m = mat, draw = FALSE)
+#' res <- gg2heatmap(m = mat, draw = FALSE)
 #' # Print step-by-step execution of gg2heatmap (useful for debugging)
-#' gg2heatmap(m = mat, verbose = TRUE)
+#' res <- gg2heatmap(m = mat, verbose = TRUE)
 
-
+#TODO: Add option raster.res to set lower resolution
 #TODO: Add option to hide subtitle information
 #TODO: Add option to disable the return of grobs after execution
 #TODO: Rewrite the assembling of plots using egg package functions and handling
 # all unsolved remaining cases.
+#TODO: Make it possible to facet without showing annotation
 gg2heatmap <- function(
     m, na.handle = 'remove', dist.method = 'manhattan', rank.fun = NULL,
     top.rows = NULL, dendrograms = TRUE, dend.size = 1, theme_dend_top = NULL,
@@ -1150,6 +1151,7 @@ gg2heatmap <- function(
         }
     } else {
         if(!(!is.null(facet) & !dd.rows & show.annot)){
+            #TODO: Cannot find upd.grob_w
             upd.grob_h <- list("htmp" = upd.grob_w$htmp)
         }
     }
