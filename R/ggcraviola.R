@@ -193,9 +193,10 @@ ggcraviola <- function(
   })
   box.dframe <- data.table::rbindlist(list.bp.stat)
   #Create Craviola plot
+  density.scaler <- mean(abs(data[[4]]), na.rm = TRUE)/2 # Deflt craviola scale
   list_dens.res <- lapply(X = list_vect.val1, FUN = stats::density)
   list_dens.df <- lapply(X = list_dens.res, FUN = function(i){
-    data.frame("y.pos" = i$x, "dens.curv" = i$y*craviola.width)
+    data.frame("y.pos" = i$x, "dens.curv" = i$y*density.scaler*craviola.width)
   })
   list_oriented_dens <- lapply(names(list_dens.df), function(i){
     if(as.integer(Annot.table[Annot.table[[1]] == i, 3]) == 1){

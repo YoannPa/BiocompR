@@ -27,21 +27,28 @@ ls.quantile <- function(ls, qtiles){
 #' @keywords internal
 
 bin.polygons <- function(list_oriented_dens, list.quant.lim, Annot.table){
+    # Remove quantiles with duplicated values
+    list.quant.lim <- lapply(X = list.quant.lim, FUN = function(i){
+        i[!duplicated(i) & !duplicated(i, fromLast = TRUE)]
+    })
     #Add quantile values to density positions vector and sort it.
     list_dens.pos <- lapply(list_oriented_dens, function(i){ i$y.pos })
     merged.pos <- Map(c, list.quant.lim, list_dens.pos)
-    merged.pos <- lapply(merged.pos,sort)
+    merged.pos <- lapply(merged.pos, sort)
     #Get density values from position-1 and position+1
     list_dens.val <- lapply(list_oriented_dens, function(i){ i$dens.curv })
     quant.pos <- lapply(seq_along(merged.pos), function(i){
         match(merged.pos[[i]][names(list.quant.lim[[i]])], merged.pos[[i]])
     })
-    val.before<-lapply(seq_along(quant.pos), function(i){
+    val.before <- lapply(seq_along(quant.pos), function(i){
         unlist(lapply(seq_along(quant.pos[[i]]), function(j){
-            list_dens.val[[i]][quant.pos[[i]][j]-j]
+            position_val <- quant.pos[[i]][j]
+            if(position_val-j != 0){
+                list_dens.val[[i]][position_val-j]
+            } else { list_dens.val[[i]][position_val] } #Take 1st val
         }))
     })
-    val.after<-lapply(seq_along(quant.pos), function(i){
+    val.after <- lapply(seq_along(quant.pos), function(i){
         unlist(lapply(seq_along(quant.pos[[i]]),function(j){
             list_dens.val[[i]][quant.pos[[i]][j]+1-j]
         }))
