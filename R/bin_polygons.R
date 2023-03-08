@@ -42,10 +42,7 @@ bin.polygons <- function(list_oriented_dens, list.quant.lim, Annot.table){
     })
     val.before <- lapply(seq_along(quant.pos), function(i){
         unlist(lapply(seq_along(quant.pos[[i]]), function(j){
-            position_val <- quant.pos[[i]][j]
-            if(position_val-j != 0){
-                list_dens.val[[i]][position_val-j]
-            } else { list_dens.val[[i]][position_val] } #Take 1st val
+            list_dens.val[[i]][quant.pos[[i]][j]-j]
         }))
     })
     val.after <- lapply(seq_along(quant.pos), function(i){
