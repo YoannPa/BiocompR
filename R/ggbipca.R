@@ -175,11 +175,20 @@ prepare_pca_data <- function(prcomp.res, dt.annot, PCs, scale){
   lam <- lam^scale
   # Scale PCA data
   dt.scaled.pc <- data.table::as.data.table(t(t(prcomp.res$x[, PC])/lam))
+  # dt.scaled.pc <- data.table::merge.data.table(
+  #   x = dt.scaled.pc, y = dt.annot, by.x = "rn", by.y = colnames(dt.annot)[1])
+  # # Reorder dt.scaled.pc
+  # ordered.cols <- colnames(dt.scaled.pc)[
+  #   c(2:(length(PCs) + 1), 1, (length(PCs) + 2):ncol(dt.scaled.pc))]
+  # dt.scaled.pc <- dt.scaled.pc[, ..ordered.cols, ]
+  # # Restore old key colname
+  # setnames(x = dt.scaled.pc, old = "rn", new = colnames(dt.annot)[1])
   dt.scaled.pc <- cbind(dt.scaled.pc, dt.annot)
+  
   # Calculate the percentage of variability explained by the principal component
   ve <- prcomp.res$sdev^2/sum(prcomp.res$sdev^2)
   lab.PC <- paste0(PC, " (", round(ve[PCs] * 100, 2), "%)")
-
+  
   ls.res <- list(
     "PC" = PC, "scaled_PC" = dt.scaled.pc, "labels" = lab.PC,
     "var.explained" = ve[PCs])
@@ -369,25 +378,25 @@ ggbipca <- function(
   #Fix BiocCheck() complaining about these objects initialization
   load.sqrd.length <- NULL
   quadrant <- NULL
-
+  
   dt.annot <- BiocompR:::rename_dt_col(
     data = data, color.data = color.data, fill.data = fill.data,
     shape.data = shape.data)
-
+  
   prepare.res <- BiocompR:::prepare_pca_data(
     prcomp.res = prcomp.res, dt.annot = dt.annot, PCs = c(PCx, PCy),
     scale = scale)
   PC <- prepare.res$PC
   dt.scaled.pc <- prepare.res$scaled_PC
   lab.PC <- prepare.res$labels
-
+  
   data.table::setnames(x = dt.scaled.pc, old = PC[1], new = "PCx")
   data.table::setnames(x = dt.scaled.pc, old = PC[2], new = "PCy")
   #Get loadings data for PCx & PCy
   if(loadings){
     # Get loadings data
     loadings.data <- BiocompR:::get_loadings(prcomp.res = prcomp.res, PCs = PC)
-
+    
     data.table::setnames(x = loadings.data, old = PC[1], new = "PCx")
     data.table::setnames(x = loadings.data, old = PC[2], new = "PCy")
     #Define scale for plot data and loadings based on selected PCs
@@ -396,7 +405,7 @@ ggbipca <- function(
       max(abs(dt.scaled.pc[["PCy"]]))/max(abs(loadings.data[["PCy"]])))
     loadings.data[, 2:3 := lapply(
       X = .SD, FUN = function(i){ i * scaler * 0.8 }), .SDcols = c(2, 3)]
-
+    
     if(!is.null(top.load.by.quad)){
       #Compute loadings length
       loadings.data[, load.sqrd.length := PCx^2 + PCy^2]
@@ -434,7 +443,7 @@ ggbipca <- function(
   biplt <- theme_biplot() + ggplot2::theme(
     axis.ticks = ggplot2::element_blank(),
     axis.title = ggplot2::element_text(size = 13))
-
+  
   if(!is.null(color.data) & is.null(shape.data) & is.null(fill.data)){
     biplt <- biplt +
       #Draw sample distribution
@@ -668,11 +677,11 @@ cross.biplot <- function(
   PCy <- NULL
   load.sqrd.length <- NULL
   quadrant <- NULL
-
+  
   dt.annot <- BiocompR:::rename_dt_col(
     data = data, color.data = color.data, fill.data = fill.data,
     shape.data = shape.data)
-
+  
   prepare.res <- BiocompR:::prepare_pca_data(
     prcomp.res = prcomp.res, dt.annot = dt.annot, PCs = PCs, scale = scale)
   PC <- prepare.res$PC
@@ -741,19 +750,19 @@ cross.biplot <- function(
     order(match(PC, levels(dt.scaled.pc$name.X)))]$lab.PC)
   data.table::setattr(dt.scaled.pc$name.Y, "levels", lab.PC[
     order(match(PC, levels(dt.scaled.pc$name.Y)))]$lab.PC)
-
+  
   #Make PCA ggplot
   biplt <- theme_biplot() + ggplot2::theme(
     panel.spacing = ggplot2::unit(0, "lines"),
     panel.border = ggplot2::element_rect(
-      color = "black", fill = NA, size = 0.5),
+      color = "black", fill = NA, linewidth = 0.5),
     axis.title = ggplot2::element_blank(),
     axis.text.x = ggplot2::element_text(angle = -45, hjust = 0, vjust = 0.5),
     strip.text = ggplot2::element_text(size = 13),
     strip.background = ggplot2::element_rect(
-      fill = "white", color = "black", size = 0.5)) +
+      fill = "white", color = "black", linewidth = 0.5)) +
     ggplot2::facet_grid(name.Y ~ name.X, scales = "free", space = "fixed")
-
+  
   if(!is.null(color.data) & is.null(shape.data) & is.null(fill.data)){
     biplt <- biplt +
       #Draw sample distribution
@@ -856,7 +865,7 @@ cross.biplot <- function(
         ggplot2::labs(shape = fill.data, fill = fill.data)
     }
   }
-
+  
   #Draw loadings
   if(loadings){
     biplt <- ggloadings(
