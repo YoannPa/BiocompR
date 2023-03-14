@@ -88,7 +88,7 @@ rename_dt_col <- function(data, color.data, fill.data, shape.data){
             dt.annot[, shape.data := as.factor(shape.data)]
           }
         } else { stop(
-          "'fill.data' does not match any column name in 'data'.") }
+          "'shape.data' does not match any column name in 'data'.") }
       }
     })
   }

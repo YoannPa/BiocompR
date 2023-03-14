@@ -424,3 +424,75 @@ test_asso_annot_pc <- function(
     return(dt_allres)
 }
 
+#' Write function description here.
+#'
+#' @param annot.table A \code{data.frame} containing all annotations, 1
+#'                    annotation per column.
+#' @param perm.count An \code{integer} specifying the number of permutations to
+#'                   realize on a vector, for the permutations matrix
+#'                   initialization, to be used for calculating the significance
+#'                   of a correlation test (Default: perm.count = 10000).
+#' @param verbose    A \code{logical} to display information about the
+#'                   step-by-step processing of the data if TRUE
+#'                   (Default: verbose = FALSE).
+#' @return A \code{data.table} containing all association test results.
+#' @author Yoann Pageaud.
+#' @export
+#' @examples
+#' # Create mtcars annotation table
+#' mtcars_annot <- data.table::as.data.table(
+#'     mtcars[, c("cyl", "vs", "am", "gear", "carb")], keep.rownames = "cars")
+#' # Test association between all annotations
+#' asso_res <- test_asso_all_annot(
+#'     annot.table = mtcars_annot, perm.count = 10000, verbose = TRUE)
+#' # Table summarizing tests' results
+#' asso_res
+
+test_asso_all_annot <- function(
+    annot.table, perm.count = 10000, verbose = FALSE){
+    prep_res <- BiocompR::prepare_annot_asso(
+        annot.table = annot.table, verbose = verbose)
+    annots <- prep_res$annotations
+    n.annot <- prep_res$n.annot
+    annot.table <- prep_res$annot.table
+    if(perm.count != 0 && sum(!vapply(
+        X = annots, FUN = is.factor, FUN.VALUE = logical(length = 1L))) >= 2) {
+        # Create the random permutation matrix
+        perm.matrix <- mapply(
+            FUN = sample, rep(nrow(annot.table), times = perm.count))
+        perm.matrix[, 1] <- 1:nrow(perm.matrix)
+    } else {
+        warning("Cannot initialize the permutations matrix.")
+        perm.matrix <- NULL
+    }
+    if (n.annot > 1) {
+        # Create matrix of tests combinations
+        test_matrix <- utils::combn(x = names(annots), m = 2)
+        # Test association between all annotations available
+        ls_annotres <- apply(X = test_matrix, MARGIN = 2, FUN = function(i){
+            if(verbose){ cat("Testing association of", i[1], "&", i[2], "\n") }
+            t.result <- BiocompR::test.annots(
+                x = annots[[i[1]]], y = annots[[i[2]]],
+                perm.matrix = perm.matrix)
+            t.result[, c("annotation1", "annotation2") := .(i[1], i[2])]
+        })
+        dt_annotres <- data.table::rbindlist(l = ls_annotres)
+        #Duplicate results for the full table
+        dt_annotres_bis <- data.table::copy(dt_annotres)
+        data.table::setnames(
+            x = dt_annotres_bis, old = "annotation1", new = "annotation2_new")
+        data.table::setnames(
+            x = dt_annotres_bis, old = "annotation2", new = "annotation1")
+        data.table::setnames(
+            x = dt_annotres_bis, old = "annotation2_new", new = "annotation2")
+        # Rbind all results
+        dt_annotres <- rbind(dt_annotres, dt_annotres_bis, use.names = TRUE)
+        rm(dt_annotres_bis, perm.matrix)
+        dt_annotres[, log_trans_pval := -log10(pvalue)]
+    } else {
+        stop(paste(
+            "only 1 annotation usable. Cannot compute association of an",
+            "annotation against itself alone."))
+    }
+    return(dt_annotres)
+}

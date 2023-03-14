@@ -9,13 +9,43 @@ plot_asso_annot_PC(
   prcomp.res,
   perm.count = 10000,
   max.PCs = 8,
+  p.treshold = 0.05,
   dataset.name = "dataset",
   PC.origin = NULL,
   verbose = FALSE
 )
 }
 \arguments{
-\item{param1}{A \code{type} parameter description.}
+\item{annot.table}{A \code{data.frame} containing annotations, 1 annotation
+per column.}
+
+\item{prcomp.res}{A PCA result of classes \code{prcomp} or
+\code{irlba_prcomp} resulting from stats::prcomp() or
+irlba::prcomp_irlba().}
+
+\item{perm.count}{An \code{integer} specifying the number of permutations to
+realize on a vector, for the permutations matrix
+initialization, to be used for calculating the significance
+of a correlation test (Default: perm.count = 10000).}
+
+\item{max.PCs}{An \code{integer} specifying the maximum number of
+principal components to consider for association tests with
+annotations (Default: max.PCs = 8).}
+
+\item{p.treshold}{A \code{numeric} specifying a value for the P-value
+significance threshold (Default: p.treshold = 0.05).}
+
+\item{dataset.name}{A \code{character} string specifying the name you want to
+give to your dataset, that will be included in the plot
+title (Default: dataset.name = "dataset").}
+
+\item{PC.origin}{A \code{character} string specifying what kind of data the
+prcomp object has been computed from (e.g. 'mtcars',
+'iris', 'mpg', ...) to be appended to the plot title.}
+
+\item{verbose}{A \code{logical} to display information about the
+step-by-step processing of the data if TRUE
+(Default: verbose = FALSE).}
 }
 \value{
 A \code{type} object returned description.
