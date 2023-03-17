@@ -808,17 +808,21 @@ resize.grob.oneway <- function(grob1, grob2, dimensions, positions){
 #'                filters is available in magick::filter_types()
 #'                (Default: raster = "Lanczos"). Warning: Be aware that
 #'                rasterization may take several minutes to process the ggplot.
+#' @param size    An \code{integer} specifying the size of a squared raster in
+#'                pixels. If size = 1080 -> raster = 1080x1080
+#'                (Default: size = 1080).
 #' @return A \code{grob} of the rasterized ggplot.
 #' @author Yoann Pageaud.
 #' @export
 
-raster.ggplot.to.grob <- function(gg.plot, filter = "Lanczos"){
+raster.gg2grob <- function(
+    gg.plot, filter = "Lanczos", size = 1080){
     #Catch heatmap in magick::image_graph()
     fig <- magick::image_graph(width = 2160, height = 2160, res = 96)
     print(gg.plot)
     grDevices::dev.off()
     rastered <- magick::image_resize(
-        image = fig, geometry = "1080x1080", filter = filter)
+        image = fig, geometry = paste0(size, "x", size), filter = filter)
     #Create raster grob
     raster.grob <- grid::rasterGrob(
         rastered, width = grid::unit(1, "npc"), height = grid::unit(1, "npc"),
@@ -826,7 +830,6 @@ raster.ggplot.to.grob <- function(gg.plot, filter = "Lanczos"){
     #Return grob annotation
     return(raster.grob)
 }
-
 
 #' This is a special geom intended for use as static annotations derived from
 #' ggplot2::annotation_custom() matching a specific panel on a faceted ggplot.

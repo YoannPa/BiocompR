@@ -141,13 +141,17 @@
 #'                               cell height, and the second numeric will apply
 #'                               to cell width.}
 #'                        }
-#' @param raster          A \code{character} to be used as a filter for matrix
+#' @param raster.filter   A \code{character} to be used as a filter for matrix
 #'                        rasterization. The list of the supported rasterization
 #'                        filters is available in magick::filter_types(). If no
-#'                        value is specified for 'raster' the original ggplot2
-#'                        heatmap is displayed (Default: raster = NULL).
+#'                        value is specified for 'raster.filter' the original
+#'                        ggplot2 heatmap is displayed
+#'                        (Default: raster.filter = NULL).
 #'                        Warning: Be aware that rasterization may take several
 #'                        more minutes than the usual process time.
+#' @param raster.size     An \code{integer} specifying the size of a squared
+#'                        raster in pixels. If raster.size = 1080 -> raster =
+#'                        1080x1080 (Default: raster.size = 1080).
 #' @param theme_heatmap   A ggplot2 \code{theme} to specify any theme parameter
 #'                        you wish to custom on the heatmap part of the plot
 #'                        (Default: theme_heatmap = NULL). For more information
@@ -307,7 +311,7 @@
 #' molten.cars[
 #'   rn %in% c('mpg', 'disp', 'hp', 'drat', 'qsec'), groups := "kinetic"]
 #' molten.cars[
-#'   rn %in% c('cyl', 'wt', 'vs', 'am', 'gear', 'carb'), groups := "mecanic"]
+#'   rn %in% c('cyl', 'wt', 'vs', 'am', 'gear', 'carb'), groups := "mechanic"]
 #' res <- gg2heatmap(
 #'   m = molten.cars, split.by.rows = "groups", # Splitting on rows by 'groups'
 #'   dist.method = c('none', 'euclidean'), # Disable clustering on rows
@@ -322,7 +326,9 @@
 #' # Custom heatmap cells height and width
 #' res <- gg2heatmap(m = mat, cell.size = c(0.9, 0.5))
 #' # Plot a rastered heatmap using the Lanczos filter
-#' res <- gg2heatmap(m = mat, raster = "Lanczos")
+#' res <- gg2heatmap(m = mat, raster.filter = "Lanczos")
+#' # Plot a rastered heatmap using the Lanczos filter changing the raster size
+#' res <- gg2heatmap(m = mat, raster.filter = "Lanczos", raster.size = 240)
 #' # Plot a rastered faceted heatmap using the Lanczos filter
 #' res <- gg2heatmap(
 #'   m = mat,
@@ -339,13 +345,13 @@
 #'   facet = "Carb", # Facetting heatmap using annotation 'Carb'
 #'   dendrograms = FALSE, # Hide dendrogram since the facetting is On
 #'   dist.method = "none", # Disable clustering to let facetting work
-#'   raster = "Lanczos") # Rasterization using the Lanczos filter
+#'   raster.filter = "Lanczos") # Rasterization using the Lanczos filter
 #' # Custom the theme of the heatmap
 #' res <- gg2heatmap(
 #'   m = mat,
 #'   theme_heatmap = theme(
 #'     panel.border = element_rect(
-#'       color = "black", size = 1, fill = "transparent"), # Add a border
+#'       color = "black", linewidth = 1, fill = "transparent"), # Add a border
 #'     axis.text.y.right = element_text(size = 12), # Add right Y axis labels
 #'     axis.ticks.y.right = element_line(color = "black"), # Add Y axis ticks
 #'     axis.text.x = element_text(color = "red")), # Color X axis labels in red
@@ -358,7 +364,7 @@
 #'   ticks.linewidth = 4, # Set ticks width
 #'   ticks.colour = "red", # Set ticks color
 #'   title.vjust = 1, # Set vertical justification of colorbar title
-#'   raster = TRUE, # Rasterize colorbar
+#'   raster.filter = TRUE, # Rasterize colorbar
 #'   nbin = 3, # Set the number of color bins in the colorbar
 #'   frame.colour = "green", # Set colorbar frame color
 #'   frame.linewidth = 2)) # Set colorbar frame linewidth
@@ -385,7 +391,7 @@
 #'   annot.pal = rainbow(n = 6), theme_annot = theme(
 #'     panel.border = element_rect(
 #'       color = "black", # Set annotation border color to black
-#'       size = 1, # Set annotation border width to 1
+#'       linewidth = 1, # Set annotation border width to 1
 #'       fill = "transparent"))) # Make the annotation visible through the rect
 #' # Hide the annotation and annotation legends
 #' res <- gg2heatmap(m = mat, show.annot = FALSE)
@@ -415,7 +421,6 @@
 #' # Print step-by-step execution of gg2heatmap (useful for debugging)
 #' res <- gg2heatmap(m = mat, verbose = TRUE)
 
-#TODO: Add option raster.res to set lower resolution
 #TODO: Add option to hide subtitle information
 #TODO: Add option to disable the return of grobs after execution
 #TODO: Rewrite the assembling of plots using egg package functions and handling
@@ -426,8 +431,9 @@ gg2heatmap <- function(
     top.rows = NULL, dendrograms = TRUE, dend.size = 1, theme_dend_top = NULL,
     theme_dend_left = NULL, imputation.grps = NULL, ncores = 1,
     plot.labs = NULL, row.type = 'rows', facet = NULL, split.by.rows = NULL,
-    border.col = NA, border.size = 0.1, cell.size = 1, raster = NULL,
-    theme_heatmap = NULL, guide_custom_bar = ggplot2::guide_colorbar(
+    border.col = NA, border.size = 0.1, cell.size = 1, raster.filter = NULL,
+    raster.size = 1080, theme_heatmap = NULL,
+    guide_custom_bar = ggplot2::guide_colorbar(
         title = "Values", barwidth = 15, ticks.linewidth = 1,
         title.vjust = 0.86),
     scale_fill_grad = ggplot2::scale_fill_gradientn(
@@ -561,8 +567,9 @@ gg2heatmap <- function(
     }
 
     #Check annotations groups and palettes matching
-    BiocompR:::check.annotations(data = m, annot.grps = annot.grps,
-                                 annot.pal = annot.pal, verbose = verbose)
+    BiocompR:::check.annotations(
+        data = m, annot.grps = annot.grps, annot.pal = annot.pal,
+        verbose = verbose)
 
     #Handle NAs
     if(verbose){ cat("Managing missing values...") }
@@ -606,13 +613,16 @@ gg2heatmap <- function(
         }
     }
     #Set theme_dend_top plot.margin based on them_heatmap plot.margin
-    if(!is.null(theme_heatmap)){ if(!is.null(theme_heatmap$plot.margin)){
-        if(is.null(theme_dend_top)){ theme_dend_top <- ggplot2::theme(
-            plot.margin = theme_heatmap$plot.margin) } else {
+    if(!is.null(theme_heatmap)){
+        if(!is.null(theme_heatmap$plot.margin)){
+            if(is.null(theme_dend_top)){
+                theme_dend_top <- ggplot2::theme(
+                    plot.margin = theme_heatmap$plot.margin)
+            } else {
                 theme_dend_top <- theme_dend_top + ggplot2::theme(
                     plot.margin = theme_heatmap$plot.margin)
             }
-    }
+        }
     }
     #Compute rows distances & create rows dendrogram
     if(method.rows != 'none'){
@@ -660,7 +670,6 @@ gg2heatmap <- function(
     } else if(dd.cols & method.cols == 'none'){
         stop("Cannot plot dendrogram on columns with method.cols = 'none'.")
     }
-
     #Reorder rows and columns matrix following dendrograms orders
     if(method.rows != 'none' & method.cols != 'none'){
         # Keep rows selected for the method applied on rows
@@ -796,7 +805,7 @@ gg2heatmap <- function(
                 ggplot2::theme(
                     panel.spacing = ggplot2::unit(0, "lines"),
                     strip.background = ggplot2::element_rect(
-                        color = "black", size = 0.5))
+                        color = "black", linewidth = 0.5))
         }
     } else {
         #If m is a molten data.frame and split.by.rows is on
@@ -850,11 +859,9 @@ gg2heatmap <- function(
             annot.grps <- lapply(
                 X = annot.grps, FUN = function(i){ i[column.order] })
         }
-
         #Get ordered sample names
         if(method.cols != "none"){ sample.names <- colnames(dframe)
         } else { sample.names <- colnames(dframe) }
-
         #Set theme_forced_annot
         theme_forced_annot <- ggplot2::theme(
             axis.text.x = ggplot2::element_blank(),
@@ -877,7 +884,6 @@ gg2heatmap <- function(
             theme_annot <- theme_default_annot + theme_annot +
                 theme_forced_annot
         }
-
         #Set number of columns to display annotations legends
         # Builds color tables for legends.
         col_table <- BiocompR:::build.col_table(
@@ -905,8 +911,9 @@ gg2heatmap <- function(
             legend.text = ggplot2::element_text(size = 11)
         )
         #Update theme_legend
-        if(is.null(theme_legend)){ theme_legend <- theme_default_legend } else{
-            theme_legend <- theme_default_legend + theme_legend }
+        if(is.null(theme_legend)){
+            theme_legend <- theme_default_legend
+        } else { theme_legend <- theme_default_legend + theme_legend }
         #Create Color Sidebar
         col_sidebar <- BiocompR::plot.col.sidebar(
             sample.names = sample.names, annot.grps = annot.grps,
@@ -938,6 +945,153 @@ gg2heatmap <- function(
     }
     htmp_legend <- BiocompR:::get.lgd(gg2.obj = subplot.htmp + theme_heatmap)
     rm(subplot.htmp)
+
+    # #Create ggplot2 heatmap
+    # htmp <- htmp + theme_heatmap + ggplot2::theme(legend.position = "none")
+    # #Convert ggplots into grobs
+    # if(is.null(facet)){
+    #     if(dd.cols){
+    #         ddgr_seg_col <- R.devices::suppressGraphics(
+    #             ggplot2::ggplotGrob(ddgr_seg_col))
+    #     }
+    #     if(dd.rows){
+    #         ddgr_seg_row <- R.devices::suppressGraphics(
+    #             ggplot2::ggplotGrob(ddgr_seg_row))
+    #     }
+    #     if(show.annot){
+    #         sidebar_legend <- col_sidebar$legends
+    #         col_sidebar_grob <- R.devices::suppressGraphics(
+    #             ggplot2::ggplotGrob(col_sidebar$sidebar))
+    #         rm(col_sidebar)
+    #     }
+    # } else { # Use the egg package
+    #     if(!dd.rows & !dd.cols & show.annot){
+    #         facet_size <- 0
+    #         #Create main grob
+    #         main_grob <- R.devices::suppressGraphics(egg::ggarrange(
+    #             col_sidebar$sidebar, htmp, ncol = 1, nrow = 2,
+    #             heights = c(annot.size + facet_size, 30),
+    #             draw = FALSE))
+    #         #Get sidebar legends
+    #         sidebar_legend <- col_sidebar$legends
+    #     } else {
+    #         if(dd.cols){
+    #             stop("Cannot facet and apply clustering on the data.")
+    #         } else if(dd.rows){
+    #             #TODO: Handle this case!
+    #             stop(paste("Cannot plot heatmap with row dendrogram and",
+    #                        "annotation yet. Please contact the developper."))
+    #         }
+    #     }
+    #     if(show.annot){ rm(col_sidebar) }
+    # }
+    if(verbose){ cat("Done.\n") }
+
+    #Heatmap rasterization
+    if(!is.null(raster.filter)){
+        if(verbose){ cat("Rasterizing...\n") }
+        if(raster.filter %in% magick::filter_types()){
+            #Create "empty" theme
+            theme_empty <- ggplot2::theme(
+                plot.margin = ggplot2::margin(0, 0, 0, 0),
+                panel.grid = ggplot2::element_blank(),
+                panel.background = ggplot2::element_rect(fill = "transparent"),
+                plot.background = ggplot2::element_rect(fill = "transparent"),
+                axis.title.x = ggplot2::element_blank(),
+                axis.text.x = ggplot2::element_blank(),
+                axis.ticks.x = ggplot2::element_blank(),
+                axis.title.y.right = ggplot2::element_blank(),
+                axis.ticks.y.right = ggplot2::element_blank(),
+                axis.text.y.right = ggplot2::element_blank(),
+                axis.title.y.left = ggplot2::element_blank(),
+                axis.ticks.y.left = ggplot2::element_blank(),
+                axis.text.y.left = ggplot2::element_blank(),
+                axis.ticks.length = ggplot2::unit(0, "pt"),
+                legend.position = "none")
+
+            #If facet is used
+            if(!is.null(facet)){
+                if(verbose){ cat("Facet rasterization:\n") }
+                ls.rasters <- lapply(
+                    X = levels(melted_mat$facet.annot), FUN = function(i){
+                        if(verbose){ cat(paste("\t", i, "\n")) }
+                        #Create sub DT
+                        sub.melted <- melted_mat[facet.annot == i]
+                        #Create sub heatmap and remove all customization
+                        sub.htmp <- ggplot2::ggplot() +
+                            ggplot2::geom_tile(data = sub.melted, ggplot2::aes(
+                                x = variable, y = rn, fill = value),
+                                color = border.col, linewidth = border.size,
+                                width = cell.width, height = cell.height) +
+                            scale_fill_grad +
+                            ggplot2::scale_color_manual(values = NA) +
+                            ggplot2::scale_x_discrete(expand = c(0, 0)) +
+                            ggplot2::scale_y_discrete(expand = c(0, 0)) +
+                            ggplot2::guides(fill = guide_custom_bar) +
+                            ggplot2::guides(color = ggplot2::guide_legend(
+                                "NA", override.aes = list(
+                                    fill = scale_fill_grad$na.value),
+                                title.vjust = 0.5, order = 2)) +
+                            ggplot2::labs(x = plot.labs$x, y = plot.labs$y) +
+                            theme_empty +
+                            ggplot2::theme(legend.position = "none")
+                        rm(sub.melted)
+                        #Rasterize ggplot into a grob
+                        raster.grob <- BiocompR::raster.gg2grob(
+                            gg.plot = sub.htmp, filter = raster.filter,
+                            size = raster.size)
+                        # raster.grob <- BiocompR::raster.ggplot.to.grob(
+                        #     gg.plot = sub.htmp, filter = raster)
+                        rm(sub.htmp)
+                        #Make grob annotation
+                        raster.annot <- BiocompR:::annotation_custom2(
+                            grob = raster.grob, xmin = -Inf, xmax = Inf,
+                            ymin = -Inf, ymax = Inf,
+                            data = melted_mat[facet.annot == i])
+                        rm(raster.grob)
+                        return(raster.annot)
+                    })
+                #Fit the list of raster grobs into a ggplot
+                htmp <- ggplot2::ggplot(
+                    data = melted_mat, ggplot2::aes(
+                        x = variable, y = rn, fill = value)) +
+                    ggplot2::geom_blank() + theme_heatmap +
+                    ggplot2::theme(legend.position = "none") +
+                    ggplot2::labs(x = plot.labs$x, y = plot.labs$y) +
+                    ggplot2::facet_grid(. ~ facet.annot, scales = "free",
+                                        space = "free") +
+                    ggplot2::theme(
+                        panel.spacing = ggplot2::unit(0, "lines"),
+                        strip.background = ggplot2::element_blank(),
+                        strip.text = ggplot2::element_blank()) +
+                    ggplot2::scale_x_discrete(
+                        expand = ggplot2::expansion(add = 0.5)) +
+                    ls.rasters
+
+            } else {
+                #Remove all customization
+                htmp <- htmp + theme_empty
+                #Catch heatmap in magick::image_graph()
+                raster.grob <- BiocompR::raster.gg2grob(
+                    gg.plot = htmp, filter = raster.filter, size = raster.size)
+                # raster.grob <- BiocompR::raster.ggplot.to.grob(
+                #     gg.plot = htmp, filter = raster)
+                #Make grob annotation
+                raster.annot <- ggplot2::annotation_custom(
+                    raster.grob, -Inf, Inf, -Inf, Inf)
+                #Fit the raster grob into a ggplot
+                htmp <- ggplot2::ggplot(
+                    data = melted_mat, ggplot2::aes(
+                        x = variable, y = rn, fill = value)) +
+                    ggplot2::geom_blank() + raster.annot + theme_heatmap +
+                    ggplot2::theme(legend.position = "none") +
+                    ggplot2::labs(x = plot.labs$x, y = plot.labs$y) +
+                    ggplot2::scale_x_discrete(
+                        expand = ggplot2::expansion(add = 0.5))
+            }
+        } else { stop("Rasterization filter not supported.") }
+        if(verbose){ cat("Done.\n") }
+    }
 
     #Create ggplot2 heatmap
     htmp <- htmp + theme_heatmap + ggplot2::theme(legend.position = "none")
@@ -978,101 +1132,7 @@ gg2heatmap <- function(
         }
         if(show.annot){ rm(col_sidebar) }
     }
-    if(verbose){ cat("Done.\n") }
 
-    #Heatmap rasterization
-    if(!is.null(raster)){
-        if(verbose){ cat("Rasterizing...\n") }
-        if(raster %in% magick::filter_types()){
-            #Create "empty" theme
-            theme_empty <- ggplot2::theme(
-                plot.margin = ggplot2::margin(0, 0, 0, 0),
-                panel.grid = ggplot2::element_blank(),
-                panel.background = ggplot2::element_rect(fill = "transparent"),
-                plot.background = ggplot2::element_rect(fill = "transparent"),
-                axis.title.x = ggplot2::element_blank(),
-                axis.text.x = ggplot2::element_blank(),
-                axis.ticks.x = ggplot2::element_blank(),
-                axis.title.y.right = ggplot2::element_blank(),
-                axis.ticks.y.right = ggplot2::element_blank(),
-                axis.text.y.right = ggplot2::element_blank(),
-                axis.title.y.left = ggplot2::element_blank(),
-                axis.ticks.y.left = ggplot2::element_blank(),
-                axis.text.y.left = ggplot2::element_blank(),
-                axis.ticks.length = ggplot2::unit(0, "pt"))
-
-            #If facet is used
-            if(!is.null(facet)){
-                if(verbose){ cat("Facet rasterization:\n") }
-                ls.rasters <- lapply(
-                    X = levels(melted_mat$facet.annot), FUN = function(i){
-                        if(verbose){ cat(paste("\t", i, "\n")) }
-                        #Create sub DT
-                        sub.melted <- melted_mat[facet.annot == i]
-                        #Create sub heatmap and remove all customization
-                        sub.htmp <- ggplot2::ggplot() +
-                            ggplot2::geom_tile(data = sub.melted, ggplot2::aes(
-                                x = variable, y = rn, fill = value,
-                                color = " ")) +
-                            scale_fill_grad +
-                            ggplot2::scale_color_manual(values = NA) +
-                            ggplot2::scale_x_discrete(expand = c(0, 0)) +
-                            ggplot2::scale_y_discrete(expand = c(0, 0)) +
-                            ggplot2::guides(fill = guide_custom_bar) +
-                            ggplot2::guides(color = ggplot2::guide_legend(
-                                "NA", override.aes = list(
-                                    fill = scale_fill_grad$na.value),
-                                title.vjust = 0.5, order = 2)) +
-                            ggplot2::labs(x = plot.labs$x, y = plot.labs$y) +
-                            theme_empty +
-                            ggplot2::theme(legend.position = "none")
-                        rm(sub.melted)
-                        #Rasterize ggplot into a grob
-                        raster.grob <- BiocompR::raster.ggplot.to.grob(
-                            gg.plot = sub.htmp, filter = raster)
-                        rm(sub.htmp)
-                        #Make grob annotation
-                        raster.annot <- BiocompR:::annotation_custom2(
-                            grob = raster.grob, xmin = -Inf, xmax = Inf,
-                            ymin = -Inf, ymax = Inf,
-                            data = melted_mat[facet.annot == i])
-                        rm(raster.grob)
-                        return(raster.annot)
-                    })
-                #Fit the list of raster grobs into a ggplot
-                htmp <- ggplot2::ggplot(
-                    data = melted_mat, ggplot2::aes(
-                        x = variable, y = rn, fill = value)) +
-                    ggplot2::geom_blank() + theme_heatmap +
-                    ggplot2::theme(legend.position = "none") +
-                    ggplot2::labs(x = plot.labs$x, y = plot.labs$y) +
-                    ggplot2::facet_grid(. ~ facet.annot, scales = "free",
-                                        space = "free") +
-                    ggplot2::theme(
-                        panel.spacing = ggplot2::unit(0, "lines"),
-                        strip.background = ggplot2::element_blank(),
-                        strip.text = ggplot2::element_blank()) +
-                    ls.rasters
-            } else {
-                #Remove all customization
-                htmp <- htmp + theme_empty
-                #Catch heatmap in magick::image_graph()
-                raster.grob <- BiocompR::raster.ggplot.to.grob(
-                    gg.plot = htmp, filter = raster)
-                #Make grob annotation
-                raster.annot <- ggplot2::annotation_custom(
-                    raster.grob, -Inf, Inf, -Inf, Inf)
-                #Fit the raster grob into a ggplot
-                htmp <- ggplot2::ggplot(
-                    data = melted_mat, ggplot2::aes(
-                        x = variable, y = rn, fill = value)) +
-                    ggplot2::geom_blank() + raster.annot + theme_heatmap +
-                    ggplot2::theme(legend.position = "none") +
-                    ggplot2::labs(x = plot.labs$x, y = plot.labs$y)
-            }
-        } else { stop("Rasterization filter not supported.") }
-        if(verbose){ cat("Done.\n") }
-    }
     #Remove melted_mat
     rm(melted_mat)
     if(verbose){ cat("Converting ggplot into grid object...") }

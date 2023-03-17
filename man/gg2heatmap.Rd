@@ -23,7 +23,8 @@ gg2heatmap(
   border.col = NA,
   border.size = 0.1,
   cell.size = 1,
-  raster = NULL,
+  raster.filter = NULL,
+  raster.size = 1080,
   theme_heatmap = NULL,
   guide_custom_bar = ggplot2::guide_colorbar(title = "Values", barwidth = 15,
     ticks.linewidth = 1, title.vjust = 0.86),
@@ -204,13 +205,18 @@ width and height of cells taking values between 0 and
        to cell width.}
 }}
 
-\item{raster}{A \code{character} to be used as a filter for matrix
+\item{raster.filter}{A \code{character} to be used as a filter for matrix
 rasterization. The list of the supported rasterization
 filters is available in magick::filter_types(). If no
-value is specified for 'raster' the original ggplot2
-heatmap is displayed (Default: raster = NULL).
+value is specified for 'raster.filter' the original
+ggplot2 heatmap is displayed
+(Default: raster.filter = NULL).
 Warning: Be aware that rasterization may take several
 more minutes than the usual process time.}
+
+\item{raster.size}{An \code{integer} specifying the size of a squared
+raster in pixels. If raster.size = 1080 -> raster =
+1080x1080 (Default: raster.size = 1080).}
 
 \item{theme_heatmap}{A ggplot2 \code{theme} to specify any theme parameter
 you wish to custom on the heatmap part of the plot
@@ -389,7 +395,7 @@ molten.cars <- melt.data.table(
 molten.cars[
   rn \%in\% c('mpg', 'disp', 'hp', 'drat', 'qsec'), groups := "kinetic"]
 molten.cars[
-  rn \%in\% c('cyl', 'wt', 'vs', 'am', 'gear', 'carb'), groups := "mecanic"]
+  rn \%in\% c('cyl', 'wt', 'vs', 'am', 'gear', 'carb'), groups := "mechanic"]
 res <- gg2heatmap(
   m = molten.cars, split.by.rows = "groups", # Splitting on rows by 'groups'
   dist.method = c('none', 'euclidean'), # Disable clustering on rows
@@ -404,7 +410,9 @@ res <- gg2heatmap(m = mat, border.col = "black", border.size = 0.5)
 # Custom heatmap cells height and width
 res <- gg2heatmap(m = mat, cell.size = c(0.9, 0.5))
 # Plot a rastered heatmap using the Lanczos filter
-res <- gg2heatmap(m = mat, raster = "Lanczos")
+res <- gg2heatmap(m = mat, raster.filter = "Lanczos")
+# Plot a rastered heatmap using the Lanczos filter changing the raster size
+res <- gg2heatmap(m = mat, raster.filter = "Lanczos", raster.size = 240)
 # Plot a rastered faceted heatmap using the Lanczos filter
 res <- gg2heatmap(
   m = mat,
@@ -421,13 +429,13 @@ res <- gg2heatmap(
   facet = "Carb", # Facetting heatmap using annotation 'Carb'
   dendrograms = FALSE, # Hide dendrogram since the facetting is On
   dist.method = "none", # Disable clustering to let facetting work
-  raster = "Lanczos") # Rasterization using the Lanczos filter
+  raster.filter = "Lanczos") # Rasterization using the Lanczos filter
 # Custom the theme of the heatmap
 res <- gg2heatmap(
   m = mat,
   theme_heatmap = theme(
     panel.border = element_rect(
-      color = "black", size = 1, fill = "transparent"), # Add a border
+      color = "black", linewidth = 1, fill = "transparent"), # Add a border
     axis.text.y.right = element_text(size = 12), # Add right Y axis labels
     axis.ticks.y.right = element_line(color = "black"), # Add Y axis ticks
     axis.text.x = element_text(color = "red")), # Color X axis labels in red
@@ -440,7 +448,7 @@ res <- gg2heatmap(m = mat, guide_custom_bar = guide_colorbar(
   ticks.linewidth = 4, # Set ticks width
   ticks.colour = "red", # Set ticks color
   title.vjust = 1, # Set vertical justification of colorbar title
-  raster = TRUE, # Rasterize colorbar
+  raster.filter = TRUE, # Rasterize colorbar
   nbin = 3, # Set the number of color bins in the colorbar
   frame.colour = "green", # Set colorbar frame color
   frame.linewidth = 2)) # Set colorbar frame linewidth
@@ -467,7 +475,7 @@ res <- gg2heatmap(
   annot.pal = rainbow(n = 6), theme_annot = theme(
     panel.border = element_rect(
       color = "black", # Set annotation border color to black
-      size = 1, # Set annotation border width to 1
+      linewidth = 1, # Set annotation border width to 1
       fill = "transparent"))) # Make the annotation visible through the rect
 # Hide the annotation and annotation legends
 res <- gg2heatmap(m = mat, show.annot = FALSE)
