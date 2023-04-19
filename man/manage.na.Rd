@@ -76,6 +76,7 @@ df <- data.frame("col1" = rnorm(n = 50, mean = 25, sd = 4),
 # col1 and col4 contain missing data
 df$col1[1:10] <- NA
 df$col4[40:50] <- NA
+df
 # Create 2 groups: grp1 & grp2.
 # col1 and col2 are in grp1, col3 and col4 are in grp2.
 grps <- c("grp1","grp1","grp2","grp2")

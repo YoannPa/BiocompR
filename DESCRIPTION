@@ -1,6 +1,6 @@
 Package: BiocompR
 Title: BiocompR - Advanced visualizations for data comparison
-Version: 0.0.198
+Version: 0.0.199
 Authors@R: 
     person(given = "Yoann",
            family = "Pageaud",
@@ -28,6 +28,7 @@ Imports:
     ggrepel,
     grid,
     gridExtra,
+    magick,
     psych,
     parallel,
     parallelDist,
