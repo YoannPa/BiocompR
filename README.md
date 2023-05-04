@@ -23,7 +23,7 @@ _I would like to thank every people who contributed to the development of this p
 
 
 ## Content
-Currently the package BiocompR contains **29 functions**:
+Currently the package BiocompR contains **31 functions**:
 
 * `basic.sidebar()` - Draws a ggplot2 of a basic sidebar.  
 * `bivar.plot()` - Draws boxplots or violins from a variable values against ranges of a 2nd one.  
@@ -31,7 +31,7 @@ Currently the package BiocompR contains **29 functions**:
 * `check_fun()` - Checks if a function exists and package of origin.  
 * `cross.biplot()` - Computes and draws biplots for multiple principal components at once.  
 * `EVA()` - Computes eigenvectors, principal component scores and correlations from a correlation test.  
-* `fancy.hist()` - Computes in parallel and plot an histogram using ggplot2 from a given vector of values.  
+* `gghist()` - Plots an histogram using ggplot2 from a numeric or character vector.  
 * `fused.plot()` - Creates a plot summarizing results from 2 different pairwise comparisons.  
 * `fused.view()` - Displays 2 matrices of results as a fused plot.  
 * `gg2heatmap()` - Creates a custom heatmap with dendrograms and annotations.  
@@ -58,11 +58,6 @@ Currently the package BiocompR contains **29 functions**:
 * `warn.handle()` - Filters unrelevant warnings matching a regular expression.  
 
 ## Prerequisites
-### Under Linux: install the following libraries
-In the terminal do:  
-```bash
-sudo apt-get install libcurl4-openssl-dev libxml2-dev libmagick++-dev
-```
 ### Install CRAN dependencies
 ```R
 inst.pkgs = c('corrplot', 'data.table', 'devtools', 'fastcluster', 'ggdendro',
