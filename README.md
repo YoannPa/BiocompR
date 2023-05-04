@@ -31,7 +31,6 @@ Currently the package BiocompR contains **31 functions**:
 * `check_fun()` - Checks if a function exists and package of origin.  
 * `cross.biplot()` - Computes and draws biplots for multiple principal components at once.  
 * `EVA()` - Computes eigenvectors, principal component scores and correlations from a correlation test.  
-* `gghist()` - Plots an histogram using ggplot2 from a numeric or character vector.  
 * `fused.plot()` - Creates a plot summarizing results from 2 different pairwise comparisons.  
 * `fused.view()` - Displays 2 matrices of results as a fused plot.  
 * `gg2heatmap()` - Creates a custom heatmap with dendrograms and annotations.  
@@ -41,6 +40,7 @@ Currently the package BiocompR contains **31 functions**:
 * `ggdend()` - Creates a dendogram in ggplot2.  
 * `ggdensity_map` - Plots a density color map from a matrix or a molten data.frame.  
 * `ggeigenvector()` - Creates an eigenvector plot using ggplot2.  
+* `gghist()` - Plots an histogram using ggplot2 from a numeric or character vector.  
 * `ggpanel.corr()` - Plots results of correlation test between a single variable and multiple others as jittered scatter plot divided into 4 different panels.  
 * `ggvolcano.corr()` - Plots results of correlation test between a single variable and multiple others as volcano plot.  
 * `ggvolcano.free()` - Plots any kind of results with P-values that can be displayed as a volcano plot.  
