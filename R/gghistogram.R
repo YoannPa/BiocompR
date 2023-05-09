@@ -28,9 +28,12 @@
 #'                   (Default: round.grad = 1).
 #' @param bin.col    A \code{character} matching a R color code to be used to
 #'                   fill the histogram bins (Default: bin.col = "#0570b0").
-#' @param show.annot A \code{logical} specifying whether the median and the
-#'                   cut-off annotation should be displayed (show.annot = TRUE)
-#'                   or not (Default: show.annot = FALSE).
+#' @param show.annot A \code{character} specifying what annotations should be
+#'                   displayed on the histogram (Supoorted: show.annot = c(
+#'                   "cutoff", "median", "all", "none");
+#'                   Default: show.annot = "none").
+#' @param label.size A \code{integer} specifying the size of annotations'
+#'                   labels (Default: label.size = 4).
 #' @param facet      A \code{numeric} or \code{character} vector of the same
 #'                   length as x, optionally with n levels to be used to
 #'                   generate n histograms in separate panels.
@@ -65,7 +68,9 @@
 #' # Turn verbose on.
 #' gghist(x = distrib, nbins = 10, verbose = TRUE)
 #' # Display first valley cut-off and median of the distribution.
-#' gghist(x = distrib, show.annot = TRUE)
+#' gghist(x = distrib, show.annot = "all")
+#' # Change annotations' labels size
+#' gghist(x = distrib, show.annot = "all", label.size = 3)
 #' # Set another filling color to the histogram
 #' gghist(x = distrib, bin.col = "orange")
 #' # Facet the data into 4 panels A, B, C & D
@@ -96,7 +101,7 @@
 gghist <- function(
     x, xmin = min(x, na.rm = TRUE), xmax = max(x, na.rm = TRUE),
     binwidth = NULL, nbins = NULL, ngrads = 10, round.grad = 1,
-    bin.col = "#0570b0", show.annot = FALSE, facet = NULL,
+    bin.col = "#0570b0", show.annot = "none", label.size = 4, facet = NULL,
     frow = NULL, fcol = NULL, verbose = FALSE){
     # Check if is any NAs
     if(any(is.na(x))){ x <- x[!is.na(x)] }
@@ -127,19 +132,20 @@ gghist <- function(
             }
             histo <- ggplot2::ggplot() +
                 ggplot2::geom_histogram(
-                    data = dt.distrib, mapping = ggplot2::aes(x = x), boundary = 0,
-                    binwidth = binwidth, fill = bin.col, alpha = 0.7)
+                    data = dt.distrib, mapping = ggplot2::aes(x = x),
+                    boundary = 0, binwidth = binwidth, fill = bin.col,
+                    alpha = 0.7)
         } else {
             if(!is.null(nbins)){
                 histo <- ggplot2::ggplot() +
                     ggplot2::geom_histogram(
-                        data = dt.distrib, mapping = ggplot2::aes(x = x), boundary = 0,
-                        bins = nbins, fill = bin.col, alpha = 0.7)
+                        data = dt.distrib, mapping = ggplot2::aes(x = x),
+                        boundary = 0, bins = nbins, fill = bin.col, alpha = 0.7)
             } else {
                 histo <- ggplot2::ggplot() +
                     ggplot2::geom_histogram(
-                        data = dt.distrib, mapping = ggplot2::aes(x = x), boundary = 0,
-                        fill = bin.col, alpha = 0.7)
+                        data = dt.distrib, mapping = ggplot2::aes(x = x),
+                        boundary = 0, fill = bin.col, alpha = 0.7)
             }
         }
         if(!is.null(facet)){
@@ -263,16 +269,33 @@ gghist <- function(
                     facets = ggplot2::vars(facet), nrow = frow, ncol = fcol)
         }
     } else { stop("format not supported for 'x'.") }
+
     #Get recommended cut-off value and median
-    if(show.annot){
-        if(is.numeric(x)){
-            if(verbose){
-                cat("show.annot: On. Computing median and cut-off...") }
-            cutoff.val <- quantmod::findValleys(
-                x = ggplot2::layer_data(histo)$count)[1]
-            median.val <- stats::median(x, na.rm = TRUE)
+    if(is.numeric(x)){
+        if(show.annot != "none"){
+            if(verbose){ cat("show.annot: On. Computing annotations...") }
+            if(show.annot == "all"){
+                show.median <- TRUE
+                show.cutoff <- TRUE
+            } else if(show.annot == "median"){
+                show.median <- TRUE
+                show.cutoff <- FALSE
+            } else if(show.annot == "cutoff"){
+                show.median <- FALSE
+                show.cutoff <- TRUE
+            } else { stop("Unsupported value for 'show.annot'.") }
+            if(show.cutoff){
+                cutoff.val <- quantmod::findValleys(
+                    x = ggplot2::layer_data(histo)$count)[1]
+            }
+            if(show.median){ median.val <- stats::median(x, na.rm = TRUE) }
             if(verbose){ cat("Done.\n") }
-        } else if(is.character(x)){
+        } else if(show.annot == "none"){
+            show.median <- FALSE
+            show.cutoff <- FALSE
+        } else { stop("Unsupported value for 'show.annot'.") }
+    } else if(is.character(x)){
+        if(show.annot != "none"){
             warning("'show.annot' ignored for character data.")
         }
     }
@@ -306,31 +329,37 @@ gghist <- function(
             panel.grid.minor = ggplot2::element_line(colour = "grey")
         )
     #Add annotations
-    if(show.annot){
-        if(is.numeric(x)){
+    if(is.numeric(x)){
+        #If recommended cut-off inferior or equal to median, plot cut-off
+        if(show.annot == "all"){
+            if(cutoff.val >= median.val){
+                if(verbose){
+                    cat("Turning 'show.cutoff' off: cut-off value >= median.\n")
+                }
+                show.cutoff <- FALSE
+            }
+        }
+        if(show.median){
             histo <- histo +
                 ggplot2::geom_vline(
                     xintercept = median.val, color = "#313695",
                     linewidth = 0.7) +
-                ggrepel::geom_label_repel(data = data.frame(), ggplot2::aes(
-                    x = median.val, y = Inf, fontface = 2, label = paste0(
-                        "median = ", round(x = median.val, digits = 2))),
-                    vjust = 0.5, color = "#313695")
-            #If recommended cut-off inferior or equal to median, plot cut-off
-            if(cutoff.val <= median.val){
-                histo <- histo +
-                    ggplot2::geom_vline(
-                        xintercept = cutoff.val, color = "#d7191c",
-                        linewidth = 0.7) +
-                    ggrepel::geom_label_repel(
-                        data = data.frame(),
-                        ggplot2::aes(
-                            x = cutoff.val, y = Inf, fontface = 2,
-                            label = paste0(
-                                "cut-off = ", round(
-                                    x = cutoff.val, digits = 2))), vjust = 0.5,
-                        color = "#d7191c")
-            }
+                ggrepel::geom_label_repel(
+                    data = data.frame(), mapping = ggplot2::aes(
+                        x = median.val, y = Inf, fontface = 2, label = paste0(
+                            "median = ", round(x = median.val, digits = 2))),
+                    vjust = 0.5, color = "#313695", size = label.size)
+        }
+        if(show.cutoff){
+            histo <- histo +
+                ggplot2::geom_vline(
+                    xintercept = cutoff.val, color = "#d7191c",
+                    linewidth = 0.7) +
+                ggrepel::geom_label_repel(
+                    data = data.frame(), mapping = ggplot2::aes(
+                        x = cutoff.val, y = Inf, fontface = 2, label = paste0(
+                            "cut-off = ", round(x = cutoff.val, digits = 2))),
+                    vjust = 0.5, color = "#d7191c", size = label.size)
         }
     }
     if(verbose){ cat("Done.\n") }

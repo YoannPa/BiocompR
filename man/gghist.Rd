@@ -13,7 +13,8 @@ gghist(
   ngrads = 10,
   round.grad = 1,
   bin.col = "#0570b0",
-  show.annot = FALSE,
+  show.annot = "none",
+  label.size = 4,
   facet = NULL,
   frow = NULL,
   fcol = NULL,
@@ -54,9 +55,13 @@ to be considered when calculating graduations
 \item{bin.col}{A \code{character} matching a R color code to be used to
 fill the histogram bins (Default: bin.col = "#0570b0").}
 
-\item{show.annot}{A \code{logical} specifying whether the median and the
-cut-off annotation should be displayed (show.annot = TRUE)
-or not (Default: show.annot = FALSE).}
+\item{show.annot}{A \code{character} specifying what annotations should be
+displayed on the histogram (Supoorted: show.annot = c(
+"cutoff", "median", "all", "none");
+Default: show.annot = "none").}
+
+\item{label.size}{A \code{integer} specifying the size of annotations'
+labels (Default: label.size = 4).}
 
 \item{facet}{A \code{numeric} or \code{character} vector of the same
 length as x, optionally with n levels to be used to
@@ -102,7 +107,9 @@ gghist(x = distrib, nbins = 50, xmin = 0, xmax = 10)
 # Turn verbose on.
 gghist(x = distrib, nbins = 10, verbose = TRUE)
 # Display first valley cut-off and median of the distribution.
-gghist(x = distrib, show.annot = TRUE)
+gghist(x = distrib, show.annot = "all")
+# Change annotations' labels size
+gghist(x = distrib, show.annot = "all", label.size = 3)
 # Set another filling color to the histogram
 gghist(x = distrib, bin.col = "orange")
 # Facet the data into 4 panels A, B, C & D
