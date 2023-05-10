@@ -18,6 +18,7 @@ gghist(
   facet = NULL,
   frow = NULL,
   fcol = NULL,
+  to.numeric = FALSE,
   verbose = FALSE
 )
 }
@@ -72,6 +73,10 @@ panels for the facet_wrap() display.}
 
 \item{fcol}{An \code{integer} to specify the number of columns to
 display panels for the facet_wrap() display.}
+
+\item{to.numeric}{A \code{logical} specifying whether x data should be
+converted to numerical data (to.numeric = TRUE) or not
+(Default: to.numeric = FALSE), if x is a character vector.}
 
 \item{verbose}{A \code{logical} to verbose details about the histogram
 computation. It may be useful to understand how the
