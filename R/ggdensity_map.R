@@ -9,8 +9,8 @@
 #'               (Default: from = min(x, na.rm = TRUE)).
 #' @param to     A \code{numeric} to specify the maximum value to which the
 #'               kernel estimation ends (Default: to = max(x, na.rm = TRUE)).
-#' @param ncores An integer to specify the number of cores/threads to be used to
-#'               parallel-compute densities on matrix columns.
+#' @param ncores An \code{integer} to specify the number of cores/threads to be
+#'               used to parallel-compute densities on matrix columns.
 #' @return A \code{list} of data.tables containing the density data, one
 #'         data.table per column.
 #' @author Yoann Pageaud.
@@ -74,8 +74,8 @@ colDensity <- function(
 #'                 molten data.frame should be faceted on rows
 #'                 (Default: facet.by = "rows") or on columns
 #'                 (facet.by = "cols").
-#' @param ncores   An integer to specify the number of cores/threads to be used
-#'                 to parallel-compute densities on matrix columns
+#' @param ncores   An \code{integer} to specify the number of cores/threads to
+#'                 be used to parallel-compute densities on matrix columns
 #'                 (Default: ncores = 1).
 #' @param verbose  A \code{logical} to specify whether the function process
 #'                 should be verbose (verbose = TRUE), or mute

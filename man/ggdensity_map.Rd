@@ -70,8 +70,8 @@ molten data.frame should be faceted on rows
 (Default: facet.by = "rows") or on columns
 (facet.by = "cols").}
 
-\item{ncores}{An integer to specify the number of cores/threads to be used
-to parallel-compute densities on matrix columns
+\item{ncores}{An \code{integer} to specify the number of cores/threads to
+be used to parallel-compute densities on matrix columns
 (Default: ncores = 1).}
 
 \item{verbose}{A \code{logical} to specify whether the function process

@@ -44,6 +44,8 @@
 #' @param to.numeric A \code{logical} specifying whether x data should be
 #'                   converted to numerical data (to.numeric = TRUE) or not
 #'                   (Default: to.numeric = FALSE), if x is a character vector.
+#' @param ncores     An \code{integer} to specify the number of cores/threads to
+#'                   be used to parallel-compute densities on matrix columns.
 #' @param verbose    A \code{logical} to verbose details about the histogram
 #'                   computation. It may be useful to understand how the
 #'                   resulting histogram was drawn.
@@ -92,6 +94,9 @@
 #' gghist(x = distrib_char, binwidth = 3)
 #' # Turn verbose on to understand what happened to binwidth internally.
 #' gghist(x = distrib_char, binwidth = 3, verbose = TRUE)
+#' # Convert the character data into numerical data
+#' # (useful if no convenient divisor available for character data)
+#' gghist(x = distrib_char, binwidth = 1, to.numeric = TRUE)
 #' # Facet the character data into 2 panels 1 & 2
 #' gghist(
 #'     x = distrib_char, binwidth = 3,
@@ -105,7 +110,7 @@ gghist <- function(
     x, xmin = min(x, na.rm = TRUE), xmax = max(x, na.rm = TRUE),
     binwidth = NULL, nbins = NULL, ngrads = 10, round.grad = 1,
     bin.col = "#0570b0", show.annot = "none", label.size = 4, facet = NULL,
-    frow = NULL, fcol = NULL, to.numeric = FALSE, verbose = FALSE){
+    frow = NULL, fcol = NULL, to.numeric = FALSE, ncores = 1, verbose = FALSE){
     # Check if is any NAs
     if(any(is.na(x))){ x <- x[!is.na(x)] }
     if(is.numeric(x)){
@@ -164,12 +169,12 @@ gghist <- function(
                 cat("Character strings will be lost.\n")
             }
             if(!is.null(facet)){
-                dt.facet <- data.table::data.table(x = x, facet = facet)
-                dt.facet[, x := as.factor(x)]
-                dt.facet[, x := factor(x, levels = unique(x))]
-                dt.facet[, x := as.numeric(x)]
-                dt.distrib <- dt.facet
-            }
+                dt.count <- data.table::data.table(x = x, facet = facet)
+            } else { dt.count <- data.table::data.table(x) }
+            dt.count[, x := as.factor(x)]
+            dt.count[, x := factor(x, levels = unique(x))]
+            dt.count[, x := as.numeric(x)]
+            dt.distrib <- dt.count
             if(!is.null(binwidth)){
                 if(!is.null(nbins)){
                     warning("'binwidth' and 'nbins' parameters are clashing. Ignoring 'nbins'.")
@@ -184,7 +189,8 @@ gghist <- function(
                     histo <- ggplot2::ggplot() +
                         ggplot2::geom_histogram(
                             data = dt.distrib, mapping = ggplot2::aes(x = x),
-                            boundary = 0, bins = nbins, fill = bin.col, alpha = 0.7)
+                            boundary = 0, bins = nbins, fill = bin.col,
+                            alpha = 0.7)
                 } else {
                     histo <- ggplot2::ggplot() +
                         ggplot2::geom_histogram(
@@ -194,12 +200,9 @@ gghist <- function(
             }
             if(!is.null(facet)){
                 histo <- histo +
-                    # ggplot2::facet_wrap(
-                    #     facets = ggplot2::vars(facet), nrow = frow, ncol = fcol,
-                    #     scales = "free", spa)
                     ggplot2::facet_grid(
-                        rows = frow, cols = ggplot2::vars(facet),
-                        scales = "free_x", space = "free_x")
+                        cols = ggplot2::vars(facet), scales = "free_x",
+                        space = "free_x")
             }
         } else {
             if(!is.null(facet)){
@@ -207,20 +210,21 @@ gghist <- function(
                 dt.facet[, N := .N, by = c("x", "facet")]
                 dt.count <- unique(dt.facet)
                 dt.count[, facet := as.factor(facet)]
-                # Check if some facets have missing counts and complete with zeros
+                # Check if some facets have missing counts and complete with 0s
                 ref.vect <- unique(dt.count$x)
                 ls.dt <- split.data.frame(x = dt.count, f = dt.count$facet)
-                ls.dt <- lapply(X = names(ls.dt), FUN = function(i){
-                    if(all(ref.vect %in% ls.dt[[i]]$x)){
-                        ls.dt[[i]]
-                    } else {
-                        ref.vect[!(ref.vect %in% ls.dt[[i]]$x)]
-                        dt.zero <- data.table::data.table(
-                            x = ref.vect[!(ref.vect %in% ls.dt[[i]]$x)],
-                            facet = i, N = 0)
-                        rbind(ls.dt[[i]], dt.zero)
-                    }
-                })
+                ls.dt <- parallel::mclapply(
+                    X = names(ls.dt), mc.cores = ncores, FUN = function(i){
+                        if(all(ref.vect %in% ls.dt[[i]]$x)){
+                            ls.dt[[i]]
+                        } else {
+                            ref.vect[!(ref.vect %in% ls.dt[[i]]$x)]
+                            dt.zero <- data.table::data.table(
+                                x = ref.vect[!(ref.vect %in% ls.dt[[i]]$x)],
+                                facet = i, N = 0)
+                            rbind(ls.dt[[i]], dt.zero)
+                        }
+                    })
                 dt.count <- data.table::rbindlist(ls.dt)
             } else { dt.count <- data.table::data.table(table(x)) }
             if(!is.null(binwidth)){
@@ -234,11 +238,15 @@ gghist <- function(
                         warning(
                             "'binwidth' and 'nbins' parameters are clashing. Ignoring 'nbins'.")
                         nbins <- nrow(
-                            dt.count[facet == levels(dt.count$facet)[1]])/binwidth
+                            dt.count[
+                                facet == levels(dt.count$facet)[1]])/binwidth
                     } else {
-                        if(verbose){ cat("Updating 'nbins' with 'binwidth'.\n") }
+                        if(verbose){
+                            cat("Updating 'nbins' with 'binwidth'.\n")
+                        }
                         nbins <- nrow(
-                            dt.count[facet == levels(dt.count$facet)[1]])/binwidth
+                            dt.count[
+                                facet == levels(dt.count$facet)[1]])/binwidth
                     }
                 } else {
                     if(!is.null(nbins)){
@@ -246,7 +254,9 @@ gghist <- function(
                             "'binwidth' and 'nbins' parameters are clashing. Ignoring 'nbins'.")
                         nbins <- nrow(dt.count)/binwidth
                     } else {
-                        if(verbose){ cat("Updating 'nbins' with 'binwidth'.\n") }
+                        if(verbose){
+                            cat("Updating 'nbins' with 'binwidth'.\n")
+                        }
                         nbins <- nrow(dt.count)/binwidth }
                 }
             }
@@ -258,13 +268,13 @@ gghist <- function(
                     if(!(nrow(dt.count[
                         facet == levels(dt.count$facet)[1]])/nbins)%%1 == 0){
                         if(verbose){
-                            cat("Cannot plot histogram with current 'nbins' value.",
-                                "Using closest divisor as 'nbins'.\n")
+                            cat("Cannot plot histogram with current 'nbins'",
+                                "value. Using closest divisor as 'nbins'.\n")
                         }
                         ls_divisor <- parallel::mclapply(
                             X = seq(nrow(dt.count[
                                 facet == levels(dt.count$facet)[1]])-1),
-                            mc.cores = 8, FUN = function(i){
+                            mc.cores = ncores, FUN = function(i){
                                 res <- nrow(dt.count[
                                     facet == levels(dt.count$facet)[1]])/i
                                 if(res%%1 == 0){ res } else { NA }
@@ -272,29 +282,34 @@ gghist <- function(
                         dt_div <- data.table::data.table(
                             "divisor" = unlist(ls_divisor),
                             "prox" = abs(nbins - unlist(ls_divisor)))
-                        nbins <- dt_div[prox == min(prox, na.rm = TRUE), ]$divisor
+                        nbins <- dt_div[
+                            prox == min(prox, na.rm = TRUE), ]$divisor
                     }
                 } else {
                     if(!(nrow(dt.count)/nbins)%%1 == 0){
                         if(verbose){
-                            cat("Cannot plot histogram with current 'nbins' value.",
-                                "Using closest divisor as 'nbins'.\n")
+                            cat("Cannot plot histogram with current 'nbins'",
+                                "value. Using closest divisor as 'nbins'.\n")
                         }
-                        ls_divisor <- lapply(
-                            X = seq(nrow(dt.count)-1), FUN = function(i){
+                        ls_divisor <- parallel::mclapply(
+                            X = seq(nrow(dt.count)-1), mc.cores = ncores,
+                            FUN = function(i){
                                 res <- nrow(dt.count)/i
                                 if(res%%1 == 0){ res } else { NA }
                             })
                         dt_div <- data.table::data.table(
                             "divisor" = unlist(ls_divisor),
                             "prox" = abs(nbins - unlist(ls_divisor)))
-                        nbins <- dt_div[prox == min(prox, na.rm = TRUE), ]$divisor
+                        nbins <- dt_div[
+                            prox == min(prox, na.rm = TRUE), ]$divisor
                     }
                 }
                 if(!is.null(facet)){
-                    step <- nrow(dt.count[facet == levels(dt.count$facet)[1]])/nbins
+                    step <- nrow(
+                        dt.count[facet == levels(dt.count$facet)[1]])/nbins
                     dt.count <- dt.count[order(facet, x)]
-                    dt.count[, index := rep(seq(nbins), each = step), by = facet]
+                    dt.count[, index := rep(
+                        seq(nbins), each = step), by = facet]
                     dt.count[, N := sum(N), by = c("index", "facet")]
                     dt.count[, x := paste(
                         x, collapse = " & "), by = c("index", "facet")]
@@ -318,7 +333,7 @@ gghist <- function(
         }
     } else { stop("format not supported for 'x'.") }
 
-    #Get recommended cut-off value and median
+    # Get recommended cut-off value and median
     if(is.numeric(x)){
         if(show.annot != "none"){
             if(verbose){ cat("show.annot: On. Computing annotations...") }
@@ -347,7 +362,7 @@ gghist <- function(
             warning("'show.annot' ignored for character data.")
         }
     }
-    #Define limits of the plots for lower minimum and highter maximum
+    # Define limits of the plots for lower minimum and highter maximum
     if(is.numeric(x)){
         if(xmax > max(x, na.rm = TRUE) | xmin < min(x, na.rm = TRUE)){
             histo <- histo +
@@ -363,9 +378,11 @@ gghist <- function(
     } else if(is.character(x)){
         if(!to.numeric){
             histo <- histo + ggplot2::scale_x_discrete(expand = c(0, 0))
+        } else {
+            histo <- histo + ggplot2::scale_x_continuous(expand = c(0, 0))
         }
     }
-    #Default ggplot
+    # Default ggplot
     if(verbose){ cat("Creating histogram plot...") }
     histo <- histo +
         ggplot2::scale_y_continuous(expand = c(0, 0)) +
@@ -378,7 +395,7 @@ gghist <- function(
             panel.grid.major = ggplot2::element_line(colour = "grey"),
             panel.grid.minor = ggplot2::element_line(colour = "grey")
         )
-    #Add annotations
+    # Add annotations
     if(is.numeric(x)){
         #If recommended cut-off inferior or equal to median, plot cut-off
         if(show.annot == "all"){

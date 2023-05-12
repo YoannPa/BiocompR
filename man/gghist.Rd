@@ -19,6 +19,7 @@ gghist(
   frow = NULL,
   fcol = NULL,
   to.numeric = FALSE,
+  ncores = 1,
   verbose = FALSE
 )
 }
@@ -78,6 +79,9 @@ display panels for the facet_wrap() display.}
 converted to numerical data (to.numeric = TRUE) or not
 (Default: to.numeric = FALSE), if x is a character vector.}
 
+\item{ncores}{An \code{integer} to specify the number of cores/threads to
+be used to parallel-compute densities on matrix columns.}
+
 \item{verbose}{A \code{logical} to verbose details about the histogram
 computation. It may be useful to understand how the
 resulting histogram was drawn.}
@@ -133,6 +137,9 @@ gghist(x = distrib_char, nbins = 10)
 gghist(x = distrib_char, binwidth = 3)
 # Turn verbose on to understand what happened to binwidth internally.
 gghist(x = distrib_char, binwidth = 3, verbose = TRUE)
+# Convert the character data into numerical data
+# (useful if no convenient divisor available for character data)
+gghist(x = distrib_char, binwidth = 1, to.numeric = TRUE)
 # Facet the character data into 2 panels 1 & 2
 gghist(
     x = distrib_char, binwidth = 3,

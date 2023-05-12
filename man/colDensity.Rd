@@ -25,8 +25,8 @@ kernel estimation starts
 \item{to}{A \code{numeric} to specify the maximum value to which the
 kernel estimation ends (Default: to = max(x, na.rm = TRUE)).}
 
-\item{ncores}{An integer to specify the number of cores/threads to be used to
-parallel-compute densities on matrix columns.}
+\item{ncores}{An \code{integer} to specify the number of cores/threads to be
+used to parallel-compute densities on matrix columns.}
 }
 \value{
 A \code{list} of data.tables containing the density data, one
