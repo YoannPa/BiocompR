@@ -452,7 +452,8 @@ gg2heatmap <- function(
     rn <- NULL
     raster.grob <- NULL
     #Check m is a matrix
-    if(is.matrix(m)){ m.type <- "matrix" } else { if(is.data.frame(m)){
+    if(is.matrix(m)){ m.type <- "matrix"
+    } else if(is.data.frame(m)){
         #Check if data.table, if not convert into data.table
         if(!data.table::is.data.table(m)){ m <- data.table::as.data.table(m) }
         #Get number columns of data.frame
@@ -470,7 +471,7 @@ gg2heatmap <- function(
         m <- m[, -c(seq(1, n.col-2)), with = FALSE]
         m <- data.table:::as.matrix.data.table(x = m, rownames = "I")
         m.type <- "molten"
-    } else { stop("m must be a matrix or a molten data.frame.") }}
+    } else { stop("m must be a matrix or a molten data.frame.") }
     #Check if na.handle method  supported
     na.method <- c('keep', 'impute', 'remove')
     if(!na.handle %in% na.method){ stop("na.handle method not supported.") }
@@ -1121,6 +1122,9 @@ gg2heatmap <- function(
                 draw = FALSE))
             #Get sidebar legends
             sidebar_legend <- col_sidebar$legends
+            # Convert sidebar to a grob
+            col_sidebar_grob <- R.devices::suppressGraphics(
+                ggplot2::ggplotGrob(col_sidebar$sidebar))
         } else {
             if(dd.cols){
                 stop("Cannot facet and apply clustering on the data.")
@@ -1177,6 +1181,8 @@ gg2heatmap <- function(
         if(show.annot){
             if(is.null(facet)){
                 ls.w.grobs <- list('sidebar' = col_sidebar_grob, 'htmp' = htmp)
+            } else {
+                htmp_grob <- htmp
             }
         } else { ls.w.grobs <- list('htmp' = htmp) }
 
@@ -1337,7 +1343,9 @@ gg2heatmap <- function(
     if(show.annot){
         if(!dd.rows & !is.null(facet)){
             ls.res <- list(
-                "result.grob" = final.plot, "heatmap.lgd.grob" = htmp_legend,
+                "result.grob" = final.plot, "heatmap.grob" = htmp_grob,
+                "heatmap.lgd.grob" = htmp_legend,
+                "sidebar.grob" = col_sidebar_grob,
                 "sidebar.lgds.grob" = right.legends)
         } else {
             ls.res <- list(
