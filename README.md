@@ -23,7 +23,7 @@ _I would like to thank every people who contributed to the development of this p
 
 
 ## Content
-Currently the package BiocompR contains **31 functions**:
+Currently the package BiocompR contains **32 functions**:
 
 * `basic.sidebar()` - Draws a ggplot2 of a basic sidebar.  
 * `bivar.plot()` - Draws boxplots or violins from a variable values against ranges of a 2nd one.  
@@ -34,7 +34,8 @@ Currently the package BiocompR contains **31 functions**:
 * `fused.plot()` - Creates a plot summarizing results from 2 different pairwise comparisons.  
 * `fused.view()` - Displays 2 matrices of results as a fused plot.  
 * `gg2heatmap()` - Creates a custom heatmap with dendrograms and annotations.  
-* `ggbipca()` - Computes and draws a custom PCA biplot.  
+* `ggbipca()` - Computes and draws a custom PCA biplot.
+* `ggcirclart()` - Circlizes ggplot2 objects.
 * `ggcoverage()` - Plots an annotated barplot.  
 * `ggcraviola()` - Draws a craviola plot (half-splitted and percentile-binned violin plot).  
 * `ggdend()` - Creates a dendogram in ggplot2.  
