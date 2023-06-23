@@ -138,9 +138,9 @@ ggcirclart <- function(
                         scale_y_reverse(expand = c(0, 0))
                 } else { stop("Unsupported value for 'wrap_to'.") }
             }
-        } else if(class(circlized_gg$facet)[1] != "FacetNull"){
-            stop("Something went wrong. Please contact developer.")
-        }
+        } else if(class(circlized_gg$facet)[1] == "FacetNull"){
+            circlized_gg <- circlized_gg + scale_y_reverse(expand = c(0, 0))
+        } else { stop("Something went wrong. Please contact developer.") }
     } else { stop("This geom is not supported yet. Please contact developer.") }
     return(circlized_gg)
 }
