@@ -273,8 +273,8 @@
 #' res <- gg2heatmap(m = mat, row.type = "caracteristics")
 #' # Add 1 annotation for the top color bar
 #' res <- gg2heatmap(
-#'   m = mat,
-#'   annot.grps = list("Carb" = mtcars$carb), annot.pal = rainbow(n = 6))
+#'   m = mat, annot.grps = list("Carb" = mtcars$carb),
+#'   annot.pal = grDevices::rainbow(n = 6))
 #' # Add more annotations, adjust colorbar width, and legends positions
 #' res <- gg2heatmap(
 #'   m = mat,
@@ -283,8 +283,8 @@
 #'     "Gear" = paste(mtcars$gear, "Gear"),
 #'     "Am" = paste(mtcars$am, "Am")),
 #'   annot.pal = list( #Palettes order must matches annotations order
-#'     rainbow(n = 6), c("pink", "red", "darkred"), c("blue", "grey")),
-#'   annot.size = 3, # Increases top colorbar width
+#'     grDevices::rainbow(n = 6), c("pink", "red", "darkred"),
+#'     c("blue", "grey")), annot.size = 3, # Increases top colorbar width
 #'   theme_legend = theme(
 #'     legend.justification = c(0, 0.8)), # Justifies all legends on the left
 #'     lgd.space.height = 22) # Sets vertical space to avoid legends overlaps
@@ -296,8 +296,9 @@
 #'     "Gear" = paste(mtcars$gear, "Gear"),
 #'     "Am" = paste(mtcars$am, "Am")),
 #'   annot.pal = list(
-#'     rainbow(n = 6), c("pink", "red", "darkred"), c("blue", "grey")),
-#'   annot.size = 4, # Increases top colorbar width for facets strips
+#'     grDevices::rainbow(n = 6), c("pink", "red", "darkred"),
+#'     c("blue", "grey")),
+#'     annot.size = 4, # Increases top colorbar width for facets strips
 #'   theme_legend = theme(
 #'     legend.justification = c(0, 0.8)), # Justifies all legends on the left
 #'     lgd.space.height = 22,
@@ -337,8 +338,9 @@
 #'     "Gear" = paste(mtcars$gear, "Gear"),
 #'     "Am" = paste(mtcars$am, "Am")),
 #'   annot.pal = list(
-#'     rainbow(n = 6), c("pink", "red", "darkred"), c("blue", "grey")),
-#'   annot.size = 4, # Increases top colorbar width for facets strips
+#'     grDevices::rainbow(n = 6), c("pink", "red", "darkred"),
+#'     c("blue", "grey")),
+#'     annot.size = 4, # Increases top colorbar width for facets strips
 #'   theme_legend = theme(
 #'     legend.justification = c(0, 0.8)), # Justifies all legends on the left
 #'   lgd.space.height = 22,
@@ -381,14 +383,15 @@
 #'   "Carb" = paste(mtcars$carb, "Carb"), "Gear" = paste(mtcars$gear, "Gear"),
 #'   "Am" = paste(mtcars$am, "Am")),
 #'   annot.pal = list(
-#'     rainbow(n = 6), c("pink", "red", "darkred"), c("blue", "grey")),
-#'   annot.size = 3, theme_legend = theme(legend.justification = c(0, 0.8)),
+#'     grDevices::rainbow(n = 6), c("pink", "red", "darkred"),
+#'     c("blue", "grey")), annot.size = 3,
+#'   theme_legend = theme(legend.justification = c(0, 0.8)),
 #'   lgd.space.height = 22,
 #'   annot.sep = c(0.3, 0.1)) # Horizontal space of 0.3, and vertical of 0.1
 #' # Custom annotation theme
 #' res <- gg2heatmap(
 #'   m = mat, annot.grps = list("Carb" = mtcars$carb),
-#'   annot.pal = rainbow(n = 6), theme_annot = theme(
+#'   annot.pal = grDevices::rainbow(n = 6), theme_annot = theme(
 #'     panel.border = element_rect(
 #'       color = "black", # Set annotation border color to black
 #'       linewidth = 1, # Set annotation border width to 1
@@ -401,8 +404,8 @@
 #'     "Carb" = paste(mtcars$carb, "Carb"), "Gear" = paste(mtcars$gear, "Gear"),
 #'     "Am" = paste(mtcars$am, "Am")),
 #'   annot.pal = list(
-#'     rainbow(n = 6), c("pink", "red", "darkred"), c("blue", "grey")),
-#'   annot.size = 3,
+#'     grDevices::rainbow(n = 6), c("pink", "red", "darkred"),
+#'     c("blue", "grey")), annot.size = 3,
 #'   lgd.merge = TRUE) # Merge annotations legends into a single legend
 #' # Custom legend theme
 #' res <- gg2heatmap(m = mat, theme_legend = theme(

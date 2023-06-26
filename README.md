@@ -43,6 +43,7 @@ Currently the package BiocompR contains **32 functions**:
 * `ggeigenvector()` - Creates an eigenvector plot using ggplot2.  
 * `gghist()` - Plots an histogram using ggplot2 from a numeric or character vector.  
 * `ggpanel.corr()` - Plots results of correlation test between a single variable and multiple others as jittered scatter plot divided into 4 different panels.  
+* `ggstackbar()` - Draws stacked barplots from an annotation table.
 * `ggvolcano.corr()` - Plots results of correlation test between a single variable and multiple others as volcano plot.  
 * `ggvolcano.free()` - Plots any kind of results with P-values that can be displayed as a volcano plot.  
 * `ggvolcano.test()` - Plots results of a Plots results of statistical tests as volcano plot.  

@@ -1,6 +1,6 @@
 Package: BiocompR
 Title: BiocompR - Advanced visualizations for data comparison
-Version: 0.0.206
+Version: 0.0.208
 Authors@R: 
     person(given = "Yoann",
            family = "Pageaud",
@@ -26,6 +26,7 @@ Imports:
     fastcluster,
     ggdendro,
     ggrepel,
+    grDevices,
     grid,
     gridExtra,
     magick,
