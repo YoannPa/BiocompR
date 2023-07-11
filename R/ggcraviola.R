@@ -106,7 +106,6 @@
 #' scale_fill_manual(labels = c("Control", "Case"), # Rename conditions
 #'                   values = c("dodgerblue", "darkorange")) # Change colors
 
-#TODO: Add verbose option
 #TODO: Add ncores option to speed-up ggcraviola using multiple cores
 #TODO: Check if the Sample column is really necessary
 ggcraviola <- function(
@@ -351,5 +350,5 @@ ggcraviola <- function(
       ggplot2::geom_point(data = box.dframe, mapping = ggplot2::aes(
         x = x, y = mean), size = 2, color = "red")
   }
-  craviola.plot
+  return(craviola.plot)
 }
