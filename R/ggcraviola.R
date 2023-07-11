@@ -52,6 +52,9 @@
 #' @param lines.col      A \code{character} matching a color to use for the
 #'                       border lines of the craviola's bins\cr
 #'                       (Default: lines.col = NA).
+#' @param verbose        A \code{logical} to display information about the
+#'                        step-by-step processing of the data if TRUE
+#'                        (Default: verbose = FALSE).
 #' @return A \code{gg} craviola plot.
 #' @author Yoann Pageaud.
 #' @importFrom data.table `:=` `.SD`
@@ -103,12 +106,13 @@
 #' scale_fill_manual(labels = c("Control", "Case"), # Rename conditions
 #'                   values = c("dodgerblue", "darkorange")) # Change colors
 
+#TODO: Add verbose option
 #TODO: Add ncores option to speed-up ggcraviola using multiple cores
 #TODO: Check if the Sample column is really necessary
 ggcraviola <- function(
   data, craviola.width = 1, boxplots = TRUE, boxplot.width = 0.04,
   mean.value = TRUE, bins = FALSE, bins.quantiles = seq(0.1, 0.9, 0.1),
-  bin.fun = "sd", lines.col = NA){
+  bin.fun = "sd", lines.col = NA, verbose = FALSE){
   #Fix BiocCheck() complaining about these objects initialization
   Samples <- NULL
   dens.curv <- NULL
@@ -125,7 +129,9 @@ ggcraviola <- function(
   if(!data.table::is.data.table(data)){
     data <- data.table::as.data.table(data) }
   #Make annotation table
+  if(verbose){ cat("Creating annotation table...") }
   unique.dt <- unique(x = data, by = 1)
+  if(verbose){ cat("Done.\n") }
   if(ncol(data) < 4){
     if(nrow(unique.dt) == 2) {
       colnames(data)[1] <- "Samples"
@@ -139,7 +145,13 @@ ggcraviola <- function(
       data <- merge(
         x = Annot.table[, -4], y = data, by = "Samples", all.y = TRUE)
     } else{ stop("Missing columns in the data provided.") }
-  } else { Annot.table <- unique.dt[, seq(3), with = FALSE] }
+  } else {
+    Annot.table <- unique.dt[, seq(3), with = FALSE]
+    data.table::setnames(
+      x = Annot.table, old = colnames(Annot.table)[2], new = "Groups")
+    data.table::setnames(
+      x = Annot.table, old = colnames(Annot.table)[1], new = "Samples")
+  }
   if(nrow(unique(Annot.table, by = 3)) > 2){
     stop("More than 2 conditions inputed. Only 2 conditions tolerated.")
   }
@@ -151,10 +163,12 @@ ggcraviola <- function(
   #Check if all conditional variables are factors
   if(!all(Annot.table[, lapply(X = .SD, FUN = is.factor)] == TRUE)){
     #Convert annotations and data conditional variable into factors
+    if(verbose){ cat("Converting conditional variables as factors...") }
     Annot.table <- Annot.table[, lapply(X = .SD, FUN = as.factor)]
     cols <- colnames(data)[seq(3)]
     data[, (cols) := lapply(
       X = .SD, FUN = as.factor), .SDcols = cols]
+    if(verbose){ cat("Done.\n") }
   }
   original.var.col <- levels(Annot.table[[3]])
   if(length(levels(Annot.table[[3]])) > 2) {
@@ -172,10 +186,15 @@ ggcraviola <- function(
       x = Annot.table[[2]], name = "levels", value = as.character(
         seq_along(levels(Annot.table[[2]]))))
   }
+  if(verbose){ cat("Splitting dataset on samples...") }
   mylist_data <- split(x = data, f = data[[1]])
   list_val1 <- lapply(X = mylist_data, FUN = subset, select = 4)
+  rm(mylist_data)
   list_vect.val1 <- lapply(X = list_val1, FUN = unlist, use.names = FALSE)
+  rm(list_val1)
+  if(verbose){ cat("Done.\n") }
   #Create stats plots
+  if(verbose){ cat("Compute boxplot stats...") }
   list.bp.stat <- lapply(seq_along(list_vect.val1), function(i){
     qiles <- stats::quantile(list_vect.val1[[i]])
     means <- mean(list_vect.val1[[i]])
@@ -192,12 +211,15 @@ ggcraviola <- function(
       "max" = qiles[5], "mean" = means, "pos.crav" = round(x.pos))
   })
   box.dframe <- data.table::rbindlist(list.bp.stat)
+  if(verbose){ cat("Done.\n") }
   #Create Craviola plot
+  if(verbose){ cat("Compute density on each distribution...") }
   density.scaler <- mean(abs(data[[4]]), na.rm = TRUE)/2 # Deflt craviola scale
   list_dens.res <- lapply(X = list_vect.val1, FUN = stats::density)
   list_dens.df <- lapply(X = list_dens.res, FUN = function(i){
     data.frame("y.pos" = i$x, "dens.curv" = i$y*density.scaler*craviola.width)
   })
+  if(verbose){ cat("Done.\n") }
   list_oriented_dens <- lapply(names(list_dens.df), function(i){
     if(as.integer(Annot.table[Annot.table[[1]] == i, 3]) == 1){
       base::`<<-` (
@@ -211,10 +233,12 @@ ggcraviola <- function(
     } else { list_dens.df[[i]] }
   })
   #Remove density values outside the extrema
+  if(verbose){ cat("Cutting density at the extrema...") }
   xtrems <- BiocompR:::ls.quantile(ls = list_vect.val1, qtiles = c(0, 1))
   bined.xtrm.dens <- BiocompR:::bin.polygons(
     list_oriented_dens = list_oriented_dens, list.quant.lim = xtrems,
     Annot.table = Annot.table)
+  if(verbose){ cat("Done.\n") }
   #Keep only bin 1 for each sample
   list_oriented_dens <- lapply(seq_along(bined.xtrm.dens), function(i){
     df <- bined.xtrm.dens[[i]][bined.xtrm.dens[[i]]$bin == 1, c(2, 3)]
@@ -282,6 +306,7 @@ ggcraviola <- function(
       cbind, Var1 = Annot.table[[1]], Var.grp = Annot.table[[2]],
       Var.col = Annot.table[[3]], list_oriented_dens[Annot.table[[1]]])
   }
+  rm(list_vect.val1)
   #Make data.frame
   dframe <- do.call(rbind, list.dframes)
 

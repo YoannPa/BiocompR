@@ -13,7 +13,8 @@ ggcraviola(
   bins = FALSE,
   bins.quantiles = seq(0.1, 0.9, 0.1),
   bin.fun = "sd",
-  lines.col = NA
+  lines.col = NA,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -76,6 +77,10 @@ Default: bin.fun = "sd").}
 \item{lines.col}{A \code{character} matching a color to use for the
 border lines of the craviola's bins\cr
 (Default: lines.col = NA).}
+
+\item{verbose}{A \code{logical} to display information about the
+step-by-step processing of the data if TRUE
+(Default: verbose = FALSE).}
 }
 \value{
 A \code{gg} craviola plot.
