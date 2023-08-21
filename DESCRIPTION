@@ -1,6 +1,6 @@
 Package: BiocompR
 Title: BiocompR - Advanced visualizations for data comparison
-Version: 0.0.210
+Version: 0.0.211
 Authors@R: 
     person(given = "Yoann",
            family = "Pageaud",
@@ -38,6 +38,7 @@ RoxygenNote: 7.2.3
 Suggests: 
     knitr,
     rmarkdown,
-    magick
+    magick,
+    Hmisc
 VignetteBuilder: knitr
 biocViews: Software, Infrastructure, DataRepresentation

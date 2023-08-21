@@ -425,6 +425,8 @@
 #' res <- gg2heatmap(m = mat, verbose = TRUE)
 
 #TODO: Add option to hide subtitle information
+#TODO: Add option to pass number of columns and rows for legends instead of
+# building the layout internally.
 #TODO: Add option to disable the return of grobs after execution
 #TODO: Rewrite the assembling of plots using egg package functions and handling
 # all unsolved remaining cases.

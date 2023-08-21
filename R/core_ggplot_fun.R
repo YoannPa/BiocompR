@@ -1,22 +1,4 @@
 
-#' Loads pre-defined palettes.
-#'
-#' @return Loads \code{character} vectors of colors to be used as palettes.
-#' @author Yoann Pageaud.
-#' @export
-#' @examples
-#' #To load pre-defined palettes
-#' load.palettes()
-
-load.palettes <- function(){
-    base::`<<-` ("pal_sunset", c("red", "gold", "blue4"))
-    base::`<<-` ("pal_westworld", c("sienna1", "lightgoldenrod", "skyblue3"))
-    base::`<<-` ("pal_startrek", c("red", "goldenrod1", "dodgerblue"))
-    base::`<<-` ("pal_margesimpson", c("lightgreen", "gold", "dodgerblue2"))
-    base::`<<-` ("pal_eighties", c("darkviolet", "deeppink", "blue4"))
-    base::`<<-` ("pal_insta", c("deeppink", "red", "goldenrod1"))
-}
-
 #' Checks matching between annotation groups and annotation palettes.
 #'
 #' @param data       A \code{matrix} or a \code{data.frame} with column names.

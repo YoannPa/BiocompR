@@ -111,7 +111,7 @@
 ggcraviola <- function(
   data, craviola.width = 1, boxplots = TRUE, boxplot.width = 0.04,
   mean.value = TRUE, bins = FALSE, bins.quantiles = seq(0.1, 0.9, 0.1),
-  bin.fun = "sd", lines.col = NA, verbose = FALSE){
+  bin.fun = "sd", lines.col = NA, linewidth = 0.5, verbose = FALSE){
   #Fix BiocCheck() complaining about these objects initialization
   Samples <- NULL
   dens.curv <- NULL
@@ -180,11 +180,11 @@ ggcraviola <- function(
     stop("More levels than matching values found in column 1 of data.")
   }
   amount.grp <- length(unique(Annot.table[[2]]))
-  if(amount.grp > 1){
+  # if(amount.grp > 1){
     data.table::setattr(
       x = Annot.table[[2]], name = "levels", value = as.character(
         seq_along(levels(Annot.table[[2]]))))
-  }
+  # }
   if(verbose){ cat("Splitting dataset on samples...") }
   mylist_data <- split(x = data, f = data[[1]])
   list_val1 <- lapply(X = mylist_data, FUN = subset, select = 4)
@@ -311,8 +311,10 @@ ggcraviola <- function(
 
   #Plot
   craviola.plot <- ggplot2::ggplot() +
-    ggplot2::scale_x_continuous(breaks = as.integer(levels(dframe$Var.grp))-1,
-                                labels = levels(data[[2]])) +
+    ggplot2::scale_x_continuous(
+        breaks = as.integer(levels(dframe$Var.grp))-1,
+        labels = levels(data[[2]]),
+        expand = ggplot2::expansion(mult = c(0.01, 0.01))) +
     ggplot2::xlab(colnames(Annot.table)[2]) + ggplot2::ylab(colnames(data)[4]) +
     ggplot2::labs(fill = colnames(Annot.table)[3], color = "Extrema",
                   alpha = colnames(data)[5]) +
@@ -336,7 +338,7 @@ ggcraviola <- function(
       ggplot2::geom_polygon(
         data = dframe, mapping = ggplot2::aes(
           dens.curv, y.pos, fill = Var.col, group = interaction(Var.col, Var1)),
-        colour = lines.col)
+        colour = lines.col, linewidth = linewidth)
   }
   if(boxplots){ #boxplots TRUE
     craviola.plot <- craviola.plot +

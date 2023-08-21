@@ -14,6 +14,7 @@ ggcraviola(
   bins.quantiles = seq(0.1, 0.9, 0.1),
   bin.fun = "sd",
   lines.col = NA,
+  linewidth = 0.5,
   verbose = FALSE
 )
 }
