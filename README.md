@@ -10,7 +10,7 @@ _**BiocompR** is an R package built upon ggplot2, and using data.table. It impro
 **How to cite:** _Pageaud Y. et al., BiocompR - Advanced visualizations for data comparison._  
 
 ![GitHub R package version](https://img.shields.io/github/r-package/v/YoannPa/BiocompR?label=Package%20version&logo=RStudio&logoColor=white&style=for-the-badge)  
-<img src="https://img.shields.io/static/v1?label=compatibility&message=4.2.0&color=blue&logo=R&logoColor=white&style=for-the-badge" />  
+<img src="https://img.shields.io/static/v1?label=compatibility&message=4.3.1&color=blue&logo=R&logoColor=white&style=for-the-badge" />  
 ![GitHub last commit](https://img.shields.io/github/last-commit/YoannPa/BiocompR?logo=git&style=for-the-badge)  
 ![GitHub](https://img.shields.io/github/license/YoannPa/BiocompR?color=brightgreen&style=for-the-badge)  
 
@@ -21,11 +21,17 @@ _I would like to thank every people who contributed to the development of this p
 **2.** [**Klinik für Anästhesiologie und Operative Intensivmedizin, Medizinische Fakultät Mannheim, Universität Heidelberg, Germany.**](https://www.umm.de/klinik-fuer-anaesthesiologie-und-operative-intensivmedizin/)  
 **3.** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
+## Installing BiocompR
+In R execute the following command:
+```R
+devtools::install_github("YoannPa/BiocompR")
+```
 
 ## Content
 Currently the package BiocompR contains **32 functions**:
 
-* `basic.sidebar()` - Draws a ggplot2 of a basic sidebar.  
+* `basic.sidebar()` - Draws a ggplot2 of a basic sidebar.
+* `biopalette()` - A color palette advisor for biology plots.
 * `bivar.plot()` - Draws boxplots or violins from a variable values against ranges of a 2nd one.  
 * `build.layout()` - Builds legends layout.
 * `check_fun()` - Checks if a function exists and package of origin.  
@@ -47,8 +53,7 @@ Currently the package BiocompR contains **32 functions**:
 * `ggvolcano.corr()` - Plots results of correlation test between a single variable and multiple others as volcano plot.  
 * `ggvolcano.free()` - Plots any kind of results with P-values that can be displayed as a volcano plot.  
 * `ggvolcano.test()` - Plots results of a Plots results of statistical tests as volcano plot.  
-* `ks.plot()` - Computes pairwise Kolmogorov-Smirnov tests on a matrix and display results in a fused plot.  
-* `load.palettes()` - Loads pre-defined palettes.  
+* `ks.plot()` - Computes pairwise Kolmogorov-Smirnov tests on a matrix and display results in a fused plot.
 * `manage.na()` - Keeps, removes or imputes missing values in a matrix or a data.frame based on sample groups.  
 * `plot.col.sidebar()` - Creates a colored side annotation bars in ggplot2.  
 * `raster.ggplot.to.grob()` - Rasterize a gg plot into a raster grob.  
@@ -58,21 +63,6 @@ Currently the package BiocompR contains **32 functions**:
 * `test.annots()` - Tests association of an annotation with another one or with a PC.  
 * `test_asso_annot_pc()` - Tests associations between a set of annotations and PCs from a prcomp object.  
 * `warn.handle()` - Filters unrelevant warnings matching a regular expression.  
-
-## Prerequisites
-### Install CRAN dependencies
-```R
-inst.pkgs = c('corrplot', 'data.table', 'devtools', 'fastcluster', 'ggdendro',
-	      'ggplot2', 'ggrepel', 'grid', 'gridExtra', 'psych', 'parallel',
-	      'parallelDist', 'quantmod', 'magick')
-install.packages(inst.pkgs)
-```
-
-## Installing BiocompR
-In R execute the following command:
-```R
-devtools::install_github("YoannPa/BiocompR")
-```
 
 ## Problems ? / I need help !
 For any questions **Not related to bugs or development** please check the section "**Known Issues**" available below. If the issue you experience is not adressed in the known issues you can write me at [y.pageaud@dkfz.de](y.pageaud@dkfz.de).
