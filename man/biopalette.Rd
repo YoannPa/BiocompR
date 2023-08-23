@@ -4,35 +4,54 @@
 \alias{biopalette}
 \title{A color palette advisor for biology plots.}
 \usage{
-biopalette(x = "all", type = "all", length = 1)
+biopalette(x = NULL, name = NULL, type = NULL)
 }
 \arguments{
-\item{x}{A \code{character} vector of keywords. Currently supported
-keywords are: "all", "color blind", "protanopia",
+\item{x}{A \code{character} vector of keywords.
+Currently supported keywords are: "color blind", "protanopia",
 "deuteranopia", "viridis", "biocompr", "tritanopia",
 "methylation", "expression", "test vs control",
 "chromatin accessibility", "completeness" and "bonus". You can
 pass multiple keywords to x as a character vector:
-e.g. x = c("color blind", "deuteranopia", "methylation") will
-return the "BiocompR_deflt", "viridis_D_viridis" and
-"viridis_E_cividis" palettes.}
+e.g. x = c("protanopia","methylation","biocompr") will return
+2 BiocompR methylation palettes.}
+
+\item{name}{A \code{character} matching a specific palette name.}
 
 \item{type}{A \code{character} matching the data type you are working with.
-Supported types are: c("sequential", "diverging",
+Supported types are: type = c("sequential", "diverging",
 "qualitative").}
-
-\item{length}{An \code{integer} specifying the minimum number of colors
-palettes should contain.}
 }
 \value{
-A \code{data.table} of the queried palettes.
+When x = NULL and name = NULL, the whole palette \code{data.table}
+        stored in biopalette().
+        When 1 matching palette is found, it is returned as a
+        \code{character} vector.
+        When multiple matches are found, matches are returned as a
+        \code{list} of palettes.
 }
 \description{
 A color palette advisor for biology plots.
 }
 \examples{
-#To show all palettes available
+# To show all palettes available in biopalette()
 biopalette()
+# To show all palettes from BiocompR
+biopalette(x = "biocompr")
+# To show all palettes suiting for methylation data
+biopalette(x = "methylation")
+# To show color blind safe palettes
+biopalette(x = "color blind")
+# To show color blind safe palettes from BiocompR suiting for methylation
+# data
+biopalette(x = c("color blind", "biocompr", "methylation"))
+# biopalette() also supports partial match with supported keywords
+# e.g. 'expr' for 'expression'
+biopalette(x = "expr")
+# To show a palette using its name: e.g. the 'Okabe-Ito' palette
+biopalette(name = "Okabe-Ito")
+# To show palettes suiting specific data type: e.g. qualitative data
+biopalette(type = "qualitative")
 }
 \author{
 Yoann Pageaud.
