@@ -42,24 +42,25 @@
 #' # Set custom color palette
 #' ls_res <- ggstackbar(
 #'     dt = ggplot2::mpg, cols = c('manufacturer', 'model', 'year'),
-#'     y_breaks = 21, pal = ggsci::pal_npg(palette = c("nrc"), alpha = 1)(10))
+#'     y_breaks = 21, pal = biopalette(name = "ggsci_Nature", mute = TRUE))
 #' ls_res$manufacturer
 #' # Set number of lines on which to display legend's keys to 5 lines
 #' ls_res <- ggstackbar(
 #'     dt = ggplot2::mpg, cols = c('manufacturer', 'model', 'year'),
-#'     y_breaks = 21, pal = ggsci::pal_npg(palette = c("nrc"), alpha = 1)(10),
+#'     y_breaks = 21, pal = biopalette(name = "ggsci_Nature", mute = TRUE),
 #'     lgd_nrow = 5)
 #' ls_res$manufacturer
 #' # Arrange the output result in a single plot
 #' ls_res <- ggstackbar(
 #'     dt = ggplot2::mpg, cols = c('manufacturer', 'model', 'year'),
-#'     y_breaks = 21, pal = ggsci::pal_npg(palette = c("nrc"), alpha = 1)(10),
+#'     y_breaks = 21, pal = biopalette(name = "ggsci_Nature", mute = TRUE),
 #'     lgd_nrow = 38)
 #' egg::ggarrange(plots = ls_res, nrow = 1)
 
 ggstackbar <- function(
-    dt, cols = NULL, y_breaks = 11, pal = grDevices::rainbow(n = 10),
-    lgd_nrow = 35, rm.null = FALSE, verbose = TRUE){
+    dt, cols = NULL, y_breaks = 11, pal = BiocompR::biopalette(
+        name = "rcartocolor_safe", mute = TRUE), lgd_nrow = 35, rm.null = FALSE,
+    verbose = TRUE){
     if(!data.table::is.data.table(dt)){ dt <- data.table::as.data.table(dt) }
     if(is.null(cols)){ cols <- colnames(dt) } # Get all colnames from data.table
     ls_plt <- lapply(X = cols, FUN = function(i){

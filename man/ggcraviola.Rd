@@ -133,8 +133,9 @@ theme(plot.title = element_text(hjust = 0.5),
       panel.grid.major.y = element_line(color = "grey"),
       panel.grid.minor.y = element_line(color = "grey")) +
 scale_y_continuous(expand = c(0, 0)) + #Expand fully plot panel on Y-axis
-scale_fill_manual(labels = c("Control", "Case"), # Rename conditions
-                  values = c("dodgerblue", "darkorange")) # Change colors
+scale_fill_manual(
+  labels = c("Control", "Case"), # Rename conditions
+  values = biopalette(name = "BiocompR_cond3", mute = TRUE)) # Change colors
 }
 \author{
 Yoann Pageaud.

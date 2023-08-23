@@ -28,8 +28,8 @@ gg2heatmap(
   theme_heatmap = NULL,
   guide_custom_bar = ggplot2::guide_colorbar(title = "Values", barwidth = 15,
     ticks.linewidth = 1, title.vjust = 0.86),
-  scale_fill_grad = ggplot2::scale_fill_gradientn(colors = c("steelblue", "gray95",
-    "darkorange"), na.value = "black"),
+  scale_fill_grad = ggplot2::scale_fill_gradientn(colors = biopalette(name =
+    "BiocompR_meth", mute = TRUE), na.value = "black"),
   annot.grps = list(Groups = seq(ncol(m))),
   annot.pal = grDevices::rainbow(n = ncol(m)),
   annot.size = 1,
@@ -456,7 +456,7 @@ res <- gg2heatmap(m = mat, guide_custom_bar = guide_colorbar(
   frame.linewidth = 2)) # Set colorbar frame linewidth
 # Custom colorbar caracteristics using 'scale_fill_gradient'-like functions
 res <- gg2heatmap(m = mat, scale_fill_grad = scale_fill_gradientn(
-  colors = c("green", "black", "red"), # Set gradient colors
+  colors = biopalette(name = "BiocompR_meth2", mute = TRUE), # Set gradient
   na.value = "grey", # Set missing value color
   n.breaks = 10, # Set number of breaks
   labels = c("<=-1", seq(-0.8, 0.8, by = 0.2), ">= 1"), # Map custom labels

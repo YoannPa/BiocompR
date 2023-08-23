@@ -103,8 +103,9 @@
 #'       panel.grid.major.y = element_line(color = "grey"),
 #'       panel.grid.minor.y = element_line(color = "grey")) +
 #' scale_y_continuous(expand = c(0, 0)) + #Expand fully plot panel on Y-axis
-#' scale_fill_manual(labels = c("Control", "Case"), # Rename conditions
-#'                   values = c("dodgerblue", "darkorange")) # Change colors
+#' scale_fill_manual(
+#'   labels = c("Control", "Case"), # Rename conditions
+#'   values = biopalette(name = "BiocompR_cond3", mute = TRUE)) # Change colors
 
 #TODO: Add ncores option to speed-up ggcraviola using multiple cores
 #TODO: Check if the Sample column is really necessary
@@ -320,7 +321,8 @@ ggcraviola <- function(
                   alpha = colnames(data)[5]) +
     ggplot2::guides(fill = ggplot2::guide_legend(order = 1)) +
     ggplot2::scale_fill_manual(
-      values = c("blue", "red"), labels = original.var.col)
+      values = BiocompR::biopalette(name = "BiocompR_cond", mute = TRUE),
+      labels = original.var.col)
 
   #Plot Options
   if(bins){ #bins TRUE

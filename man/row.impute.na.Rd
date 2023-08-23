@@ -2,7 +2,7 @@
 % Please edit documentation in R/manage_na.R
 \name{row.impute.na}
 \alias{row.impute.na}
-\title{Imputes missing data in a matrix row.}
+\title{Imputes missing at random (MAR) data in a matrix row.}
 \usage{
 row.impute.na(
   data,
@@ -37,8 +37,13 @@ the matrix data.}
 \item{r}{An \code{integer} specifying the position of the row of
 interest for imputation in the matrix data.}
 
-\item{impute.fun}{A \code{character} specifying the function to be used for
-imputation (Default: impute.fun = "median").}
+\item{grp.fun}{A \code{character} specifying the function to be used on
+values from a same group
+(Default: impute.fun = "median").}
+
+\item{impute.fun}{A \code{character} specifying the function to apply to
+all groups values obtained using 'grp.fun' for imputation
+(Default: impute.fun = "median").}
 
 \item{vinterpolate}{A \code{logical} specifying whether vertical
 interpolation should be applied on missing values, based
@@ -53,7 +58,7 @@ A \code{numeric} vector containing the imputed values of the row for
         each groups of columns.
 }
 \description{
-Imputes missing data in a matrix row.
+Imputes missing at random (MAR) data in a matrix row.
 }
 \author{
 Yoann Pageaud.

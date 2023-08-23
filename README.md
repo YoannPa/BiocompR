@@ -50,6 +50,7 @@ Currently the package BiocompR contains **32 functions**:
 * `gghist()` - Plots an histogram using ggplot2 from a numeric or character vector.  
 * `ggpanel.corr()` - Plots results of correlation test between a single variable and multiple others as jittered scatter plot divided into 4 different panels.  
 * `ggstackbar()` - Draws stacked barplots from an annotation table.
+* `ggsunset()` - Draws a sunset plot showing the completeness of a dataset.  
 * `ggvolcano.corr()` - Plots results of correlation test between a single variable and multiple others as volcano plot.  
 * `ggvolcano.free()` - Plots any kind of results with P-values that can be displayed as a volcano plot.  
 * `ggvolcano.test()` - Plots results of a Plots results of statistical tests as volcano plot.  
@@ -59,7 +60,6 @@ Currently the package BiocompR contains **32 functions**:
 * `raster.ggplot.to.grob()` - Rasterize a gg plot into a raster grob.  
 * `resize.grob.oneway()` - Resizes heights or widths of a grob based on the dimensions of another grob.  
 * `resize.grobs()` - Resizes heights or widths of multiple grobs based on a given grob dimensions.  
-* `sunset()` - Draws a sunset plot showing the completeness of a dataset.  
 * `test.annots()` - Tests association of an annotation with another one or with a PC.  
 * `test_asso_annot_pc()` - Tests associations between a set of annotations and PCs from a prcomp object.  
 * `warn.handle()` - Filters unrelevant warnings matching a regular expression.  

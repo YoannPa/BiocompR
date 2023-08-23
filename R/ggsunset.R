@@ -4,12 +4,11 @@
 #' @param mat              A \code{matrix}.
 #' @param title            A \code{character} to specify the title of your plot.
 #' @param col.pal          A \code{character} vector of length 3 matching R
-#'                         colors to used as a palette for the plot.
-#'                         Alternatively, col.pal can use the palettes provides
-#'                         within the script of the function:
-#'                         pal_sunset, pal_westworld, pal_startrek,
-#'                         pal_margesimpson, pal_eighties, pal_insta\cr
-#'                         (Default: col.pal = pal_sunset).
+#'                         colors to used as a palette for the plot. col.pal can
+#'                         use the palettes provided by the \link{biopalette}
+#'                         function.\cr
+#'                         (Default: col.pal = biopalette(
+#'                         name = "BiocompR_sunset", mute = TRUE)).
 #' @param horizontal       A \code{logical} to specify whether the plot should
 #'                         be drawn vertically or horizontally\cr
 #'                         (Default: horizontal = FALSE).
@@ -34,13 +33,53 @@
 #' @author Yoann Pageaud.
 #' @importFrom data.table `:=` `.I`
 #' @export
+#' @examples
+#' # Creating a matrix with randomly distributed 65% NAs (MARs)
+#' rand_vect <- rnorm(n = 100, mean = 0, sd = 1)
+#' rand_vect[sample(100, 65)] <- NA
+#' rand_mat <- matrix(data = rand_vect, ncol = 5)
+#' # Basic sunset plot
+#' ggsunset(mat = rand_mat)
+#' # Change plot title on the left when the sunset is vertical
+#' ggsunset(mat = rand_mat, title = "My new title")
+#' # Change plot direction to horizontal (title now at the top)
+#' ggsunset(mat = rand_mat, title = "My new title", horizontal = TRUE)
+#' # Reverse the stacking
+#' ggsunset(mat = rand_mat, reverse = TRUE)
+#' # Change the number of graduations to something more meaningful
+#' ggsunset(mat = rand_mat, n.grad = 5)
+#' # Increase the label display cutoff to move labels on the right margin
+#' ggsunset(mat = rand_mat, n.grad = 5, display.cutoff = 0.5)
+#' # Increase the margin labels display cutoff to hide labels of smaller bins
+#' # (This also automatically aggregate labels of contiguous smaller bins)
+#' ggsunset(
+#'     mat = rand_mat, n.grad = 5, display.cutoff = 0.5,
+#'     display.num.smpl = 0.2)
+#' # Change the color palette, e.g. using biopalette()
+#' ggsunset(
+#'     mat = rand_mat, n.grad = 5, reverse = TRUE,
+#'     col.pal = biopalette(name = "Instagram", mute = TRUE))
+#' # Free customization with ggplot2
+#' ggsunset(
+#'     mat = rand_mat, n.grad = 5, reverse = TRUE,
+#'     col.pal = biopalette(name = "Instagram", mute = TRUE)) +
+#'     theme(
+#'         panel.border = element_rect( # Change plot border color
+#'             color = "black", fill = "transparent", linewidth = 1),
+#'         legend.position = "right", # plot legend on the right
+#'         plot.margin = margin(0.3, 0, 0.3, 0.3, unit = "cm")) + # New margins
+#'     guides( # Customize the colorbar legend
+#'         fill = guide_colorbar(
+#'             title = "N. columns", barheight = 5, barwidth = 1,
+#'             ticks.linewidth = 0.5, ticks.colour = "black",
+#'             frame.colour = "black"))
 
-sunset <- function(
+ggsunset <- function(
     mat, title = "Number of rows without missing data",
-    col.pal = c("red", "gold", "blue4"), horizontal = FALSE, reverse = FALSE,
-    n.grad = 15, display.cutoff = 0.03, display.num.smpl = 0.01,
-    lgd.pos = "bottom"){
-    #Fix BiocCheck() complaining about these objects initialization
+    col.pal = c("red", "gold", "blue4"),
+    horizontal = FALSE, reverse = FALSE, n.grad = 15, display.cutoff = 0.03,
+    display.num.smpl = 0.01){
+    # Fix BiocCheck() complaining about these objects initialization
     index <- NULL
     . <- NULL
     sample.amount <- NULL
@@ -122,12 +161,13 @@ sunset <- function(
     pos_str <- data.table::data.table(
         dt.data[hiden == TRUE & right.y.hiden == TRUE]$index)
     #Get groups of following samples
+    if(nrow(pos_str) != 0){
     smpl_intervals <- do.call(
         rbind, by(pos_str, cumsum(c(0, diff(pos_str$V1) != 1)), function(g){
             data.table::data.table(start = min(g$V1), end = max(g$V1),
                                    width = diff(range(g$V1)) + 1)}))
     #Get groups average label.pos cumulative diff_bins
-    if(nrow(smpl_intervals) != 0){
+    # if(nrow(smpl_intervals) != 0){
         invisible(lapply(smpl_intervals[, .I], function(i){
             dt_grp <- dt.data[index >= smpl_intervals[i, ]$start &
                                   index <= smpl_intervals[i, ]$end]
@@ -174,19 +214,15 @@ sunset <- function(
                     new.dt$right.y.hiden)]
         }))
     }
-    #"Sunset" Plot of the Amount of CpGs Covered by Number of Samples
+    # "Sunset" Plot of the Amount of data covered by number of samples
     sun.plt <- ggplot2::ggplot() + ggplot2::theme_gray() +
         ggplot2::theme(legend.title.align = 0.5,
                        legend.text = ggplot2::element_text(size = 12),
-                       legend.position = lgd.pos) +
+                       legend.position = "bottom") +
         ggplot2::geom_bar(
             data = dt.data, mapping = ggplot2::aes(
                 x = 0, y = data.covered, fill = sample.amount),
             stat = "identity") +
-        ggplot2::geom_text(
-            data = dt.data[hiden == FALSE], mapping = ggplot2::aes(
-                x = 0, y = label.pos, label = sample.string), vjust = 0.35,
-            hjust = 0.5, color = "white", size = 5) +
         ggplot2::scale_fill_gradient2(
             low = col.pal[1], mid = col.pal[2], high = col.pal[3],
             midpoint = round(N/2), breaks = round(seq(
@@ -207,9 +243,13 @@ sunset <- function(
         ggplot2::guides(
             fill = ggplot2::guide_colorbar(
                 ticks.linewidth = 2, ticks.colour = "black"))
-    if(horizontal) {
+    if(horizontal){
         sun.plt <- sun.plt +
             ggplot2::ggtitle(title) +
+            ggplot2::geom_text(
+                data = dt.data[hiden == FALSE], mapping = ggplot2::aes(
+                    x = 0, y = label.pos, label = sample.string), vjust = 0.35,
+                hjust = 0.5, angle = -90, color = "white", size = 5) +
             ggplot2::theme(
                 plot.title = ggplot2::element_text(
                     title, size = 15, hjust = 0.5),
@@ -218,11 +258,15 @@ sunset <- function(
                 axis.text.y = ggplot2::element_blank(),
                 axis.text.x = ggplot2::element_text(size = 12, face = "bold"),
                 legend.title = ggplot2::element_text(size = 14, vjust = 0.8),
-                plot.margin = ggplot2::margin(0.1, 0, 0, 20, unit = "cm")) +
+                plot.margin = ggplot2::margin(0.5, 1, 0, 1, unit = "cm")) +
             ggplot2::labs(fill = "Number of Samples") +
             ggplot2::coord_flip()
     } else {
         sun.plt <- sun.plt +
+            ggplot2::geom_text(
+                data = dt.data[hiden == FALSE], mapping = ggplot2::aes(
+                    x = 0, y = label.pos, label = sample.string), vjust = 0.35,
+                hjust = 0.5, angle = 0, color = "white", size = 5) +
             ggplot2::theme(
                 axis.title.x = ggplot2::element_blank(),
                 axis.text.x = ggplot2::element_blank(),
@@ -235,5 +279,5 @@ sunset <- function(
             ggplot2::ylab(title) +
             ggplot2::labs(fill = "Number\nof samples")
     }
-    sun.plt
+    return(sun.plt)
 }

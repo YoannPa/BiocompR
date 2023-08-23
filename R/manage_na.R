@@ -1,5 +1,5 @@
 
-#' Imputes missing data in a matrix row.
+#' Imputes missing at random (MAR) data in a matrix row.
 #'
 #' @param data         A \code{matrix}.
 #' @param miss.mat     A logical \code{matrix} where cells are TRUE when there
@@ -17,8 +17,12 @@
 #'                     the matrix data.
 #' @param r            An \code{integer} specifying the position of the row of
 #'                     interest for imputation in the matrix data.
-#' @param impute.fun   A \code{character} specifying the function to be used for
-#'                     imputation (Default: impute.fun = "median").
+#' @param grp.fun      A \code{character} specifying the function to be used on
+#'                     values from a same group
+#'                     (Default: impute.fun = "median").
+#' @param impute.fun   A \code{character} specifying the function to apply to
+#'                     all groups values obtained using 'grp.fun' for imputation
+#'                     (Default: impute.fun = "median").
 #' @param vinterpolate A \code{logical} specifying whether vertical
 #'                     interpolation should be applied on missing values, based
 #'                     on previous and next available values in a column
@@ -87,8 +91,8 @@ row.impute.na <- function(
 }
 
 
-#' Keeps, removes or imputes missing values in a matrix or a data.frame
-#' accounting for group size.
+#' Keeps, removes or imputes missing at random (MAR) values in a matrix or a
+#' data.frame accounting for group size.
 #'
 #' @param data         A \code{matrix} or \code{data.frame} with column names.
 #' @param method       A \code{character} which defines the method to use for
@@ -98,18 +102,23 @@ row.impute.na <- function(
 #'                      \item{'remove' removes all rows containing at least 1
 #'                      NA.}
 #'                      \item{'impute' removes rows containing only NAs and
-#'                      impute missing values in remaining rows. The imputation
-#'                      uses the groups defined in the parameter 'groups': e.g.
-#'                      in row 1 if the value of sample_1 is NA, the missing
-#'                      value will be imputed using the median of values from
-#'                      other samples of the same group than sample_1.}
+#'                      imputes missing at random values (MARs) in remaining
+#'                      rows. The imputation uses the groups defined in the
+#'                      parameter 'groups': e.g. in row 1 if the value of
+#'                      sample_1 is NA, the missing value will be imputed
+#'                      calculating the median of all sample groups' medians,
+#'                      including the sample group in which sample_1 is.}
 #'                     }
 #' @param groups       A vector of length ncol(data) specifying the groups to
 #'                     which samples belong. Order of groups in the vector has
 #'                     to match the order of column names in data to properly
 #'                     associate samples and groups.
-#' @param impute.fun   A \code{character} specifying the function to be used for
-#'                     imputation (Default: impute.fun = "median").
+#' @param grp.fun      A \code{character} specifying the function to be used on
+#'                     values from a same group
+#'                     (Default: impute.fun = "median").
+#' @param impute.fun   A \code{character} specifying the function to apply to
+#'                     all groups values obtained using 'grp.fun' for imputation
+#'                     (Default: impute.fun = "median").
 #' @param vinterpolate A \code{logical} specifying whether vertical
 #'                     interpolation should be applied on missing values, based
 #'                     on previous and next available values in a column
@@ -146,6 +155,7 @@ row.impute.na <- function(
 #' manage.na(data = df, method = "remove", groups = grps)
 #' # Impute by group the missing data (and remove rows missing all values)
 #' manage.na(data = df, method = "impute", groups = grps)
+#' @references \href{https://stefvanbuuren.name/fimd/sec-MCAR.html}{Concepts of MCAR, MAR and MNAR - Stef van Buuren}
 
 manage.na <- function(
   data, method = "remove", groups, grp.fun = "median", impute.fun = "median",

@@ -10,7 +10,7 @@ ggdensity_map(
   var.col = "variable",
   val.col = "value",
   grp.col = "group",
-  col.map = "plasma",
+  col.map = biopalette(name = "viridis_C_plasma", mute = TRUE),
   from = NULL,
   to = NULL,
   sort.fun = NULL,
@@ -46,11 +46,11 @@ the name of the column containing values.}
 \item{grp.col}{A \code{character} when m is a molten data.frame to specify
 the name of the groups column.}
 
-\item{col.map}{A \code{character} specifying a color map to use for the
-density heatmap (Default: col.map = "plasma"; Supported:
-col.map = c("A", "B", "C", "D", "E", "F", "G", "H")). For
-more information about color maps see
-\link[ggplot2]{scale_fill_viridis_c}.}
+\item{col.map}{A \code{character} vector of colors specifying a color map to
+use for the density heatmap (Default: col.map = biopalette(
+name = "viridis_C_plasma", mute = TRUE). It is advised to use
+'viridis' palettes from \link{biopalette}, but any color
+gradient is supported.}
 
 \item{from}{A \code{numeric} to specify the minimum value from which the
 kernel estimation starts
@@ -102,7 +102,9 @@ ggdensity_map(m = molten.iris, grp.col = "Species", from = 2, to = 5) +
   theme(axis.text.x = element_text(size = 12))
 # Change the color map:
 ggdensity_map(
-  m = molten.iris, grp.col = "Species", col.map = "D", from = 2, to = 5) +
+  m = molten.iris, grp.col = "Species",
+  col.map = biopalette(name = "viridis_D_viridis", mute = TRUE),
+  from = 2, to = 5) +
   theme(axis.text.x = element_text(size = 12))
 # Facetting the density heatmap by columns:
 ggdensity_map(m = molten.iris, grp.col = "Species", facet.by = "cols") +

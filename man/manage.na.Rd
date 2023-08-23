@@ -2,8 +2,8 @@
 % Please edit documentation in R/manage_na.R
 \name{manage.na}
 \alias{manage.na}
-\title{Keeps, removes or imputes missing values in a matrix or a data.frame
-accounting for group size.}
+\title{Keeps, removes or imputes missing at random (MAR) values in a matrix or a
+data.frame accounting for group size.}
 \usage{
 manage.na(
   data,
@@ -26,11 +26,12 @@ managing NAs:
  \item{'remove' removes all rows containing at least 1
  NA.}
  \item{'impute' removes rows containing only NAs and
- impute missing values in remaining rows. The imputation
- uses the groups defined in the parameter 'groups': e.g.
- in row 1 if the value of sample_1 is NA, the missing
- value will be imputed using the median of values from
- other samples of the same group than sample_1.}
+ imputes missing at random values (MARs) in remaining
+ rows. The imputation uses the groups defined in the
+ parameter 'groups': e.g. in row 1 if the value of
+ sample_1 is NA, the missing value will be imputed
+ calculating the median of all sample groups' medians,
+ including the sample group in which sample_1 is.}
 }}
 
 \item{groups}{A vector of length ncol(data) specifying the groups to
@@ -38,8 +39,13 @@ which samples belong. Order of groups in the vector has
 to match the order of column names in data to properly
 associate samples and groups.}
 
-\item{impute.fun}{A \code{character} specifying the function to be used for
-imputation (Default: impute.fun = "median").}
+\item{grp.fun}{A \code{character} specifying the function to be used on
+values from a same group
+(Default: impute.fun = "median").}
+
+\item{impute.fun}{A \code{character} specifying the function to apply to
+all groups values obtained using 'grp.fun' for imputation
+(Default: impute.fun = "median").}
 
 \item{vinterpolate}{A \code{logical} specifying whether vertical
 interpolation should be applied on missing values, based
@@ -64,8 +70,8 @@ to be used to parallel-process the matrix
 A \code{matrix}.
 }
 \description{
-Keeps, removes or imputes missing values in a matrix or a data.frame
-accounting for group size.
+Keeps, removes or imputes missing at random (MAR) values in a matrix or a
+data.frame accounting for group size.
 }
 \examples{
 # Creating a data.frame of 4 columns with 50 values in each:
@@ -84,6 +90,9 @@ grps <- c("grp1","grp1","grp2","grp2")
 manage.na(data = df, method = "remove", groups = grps)
 # Impute by group the missing data (and remove rows missing all values)
 manage.na(data = df, method = "impute", groups = grps)
+}
+\references{
+\href{https://stefvanbuuren.name/fimd/sec-MCAR.html}{Concepts of MCAR, MAR and MNAR - Stef van Buuren}
 }
 \author{
 Yoann Pageaud.

@@ -82,7 +82,7 @@ ggcoverage(
   data = df, round.unit = 0, invert.percent = TRUE, decreasing.order = TRUE,
   rev.stack = TRUE, horizontal = TRUE, log.scaled = TRUE) +
   ggtitle("This is a ggcoverage barplot!") + # Add title
-  labs(x = "Samples", y = "Coverages") + #Set X and Y axis titles
+  labs(x = "Samples", y = "Coverages") + # Set X and Y axis titles
  theme(
     plot.title = element_text(hjust = 0.5),
    axis.text = element_text(size = 14, color = "black"), # Custom axis text
@@ -110,8 +110,10 @@ ggcoverage(
     # Change X-axis labels
     labels = c("0" = 1, "1" = 10, "2.0" = 100)) +
   guides(fill = guide_legend(title = "Coverage legend")) + # Set legend title
-  scale_fill_manual(labels = c("Remaining", "Subset"), # Rename conditions
-                    values = c("#D6604D", "#4393C3")) + # Change colors
+  scale_fill_manual(
+    labels = c("Remaining", "Subset"), # Rename conditions
+    # Change colors
+    values = rev(biopalette(name = "BiocompR_cond", mute = TRUE))) +
   facet_grid(df$col4 ~ ., scales = "free", space = "free_y") # Add grouping
 }
 \author{

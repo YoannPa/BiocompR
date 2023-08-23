@@ -55,11 +55,11 @@ colDensity <- function(
 #'                 the name of the column containing values.
 #' @param grp.col  A \code{character} when m is a molten data.frame to specify
 #'                 the name of the groups column.
-#' @param col.map  A \code{character} specifying a color map to use for the
-#'                 density heatmap (Default: col.map = "plasma"; Supported:
-#'                 col.map = c("A", "B", "C", "D", "E", "F", "G", "H")). For
-#'                 more information about color maps see
-#'                 \link[ggplot2]{scale_fill_viridis_c}.
+#' @param col.map  A \code{character} vector of colors specifying a color map to
+#'                 use for the density heatmap (Default: col.map = biopalette(
+#'                 name = "viridis_C_plasma", mute = TRUE). It is advised to use
+#'                 'viridis' palettes from \link{biopalette}, but any color
+#'                 gradient is supported.
 #' @param from     A \code{numeric} to specify the minimum value from which the
 #'                 kernel estimation starts
 #'                 (Default: from = min(m, na.rm = TRUE)).
@@ -101,7 +101,9 @@ colDensity <- function(
 #'   theme(axis.text.x = element_text(size = 12))
 #' # Change the color map:
 #' ggdensity_map(
-#'   m = molten.iris, grp.col = "Species", col.map = "D", from = 2, to = 5) +
+#'   m = molten.iris, grp.col = "Species",
+#'   col.map = biopalette(name = "viridis_D_viridis", mute = TRUE),
+#'   from = 2, to = 5) +
 #'   theme(axis.text.x = element_text(size = 12))
 #' # Facetting the density heatmap by columns:
 #' ggdensity_map(m = molten.iris, grp.col = "Species", facet.by = "cols") +
@@ -109,7 +111,8 @@ colDensity <- function(
 
 ggdensity_map <- function(
     m, rn.col = "rn", var.col = "variable", val.col = "value",
-    grp.col = "group", col.map = "plasma", from = NULL, to = NULL,
+    grp.col = "group", col.map = biopalette(
+        name = "viridis_C_plasma", mute = TRUE), from = NULL, to = NULL,
     sort.fun = NULL, facet.by = "rows", ncores = 1, verbose = FALSE){
     #Fix BiocCheck() complaining about these objects initialization
     variable <- NULL
@@ -228,7 +231,8 @@ ggdensity_map <- function(
     ggdensmap <- ggplot2::ggplot() +
         ggplot2::geom_tile(data = dt.density, mapping = ggplot2::aes(
             x = variable, y = value, fill = dens)) +
-        ggplot2::scale_fill_viridis_c(option = col.map) +
+        # ggplot2::scale_fill_viridis_c(option = col.map) +
+        ggplot2::scale_fill_gradientn(colors = col.map) +
         ggplot2::scale_y_continuous(expand = c(0, 0)) +
         ggplot2::scale_x_discrete(expand = c(0, 0)) +
         ggplot2::theme(

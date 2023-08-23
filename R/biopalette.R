@@ -13,10 +13,14 @@
 #' @param type   A \code{character} matching the data type you are working with.
 #'               Supported types are: type = c("sequential", "diverging",
 #'               "qualitative").
+#' @param mute   A \code{logical} to turn off (Default: mute = FALSE) or on
+#'               (mute = TRUE) palette name display when loading a palette. You
+#'               may want to turn it off to not be bothered by the palette name
+#'               every time you load a palette (especially in for loops).
 #' @return When x = NULL and name = NULL, the whole palette \code{data.table}
-#'         stored in biopalette().
+#'         stored in biopalette() is returned.\cr
 #'         When 1 matching palette is found, it is returned as a
-#'         \code{character} vector.
+#'         \code{character} vector.\cr
 #'         When multiple matches are found, matches are returned as a
 #'         \code{list} of palettes.
 #' @author Yoann Pageaud.
@@ -38,19 +42,31 @@
 #' biopalette(x = "expr")
 #' # To show a palette using its name: e.g. the 'Okabe-Ito' palette
 #' biopalette(name = "Okabe-Ito")
+#' # Mute the palette name
+#' biopalette(name = "Okabe-Ito", mute = TRUE)
 #' # To show palettes suiting specific data type: e.g. qualitative data
 #' biopalette(type = "qualitative")
+#' @references \href{https://colorbrewer2.org/}{RColorBrewer - Erich Neuwirth}
+#' @references \href{https://nanx.me/ggsci/}{Xiao N (2023). ggsci: Scientific Journal and Sci-Fi Themed Color Palettes for 'ggplot2'.}
+#' @references \href{https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html}{Garnier, Simon, Ross, Noam, Rudis, Robert, Camargo, Pedro A, Sciaini, Marco, Scherer, Cédric (2023). viridis(Lite) - Colorblind-Friendly Color Maps for R. doi:10.5281/zenodo.4679423, viridis package version 0.6.4}
+#' @references \href{https://cran.r-project.org/web/packages/dichromat/index.html}{Dichromat: Color Schemes for Dichromats - Thomas Lumley et al.}
+#' @references \href{https://www.nature.com/articles/s41586-020-1969-6}{Pan-cancer analysis of whole genomes - The ICGC/TCGA Pan-Cancer Analysis of Whole Genomes Consortium}
+#' @references \href{https://github.com/YoannPa/methview.qc}{Pageaud Y. et al., Visualize quality control data from methylation array dataset with methview.qc}
+#' @references \href{https://jfly.uni-koeln.de/color/}{Color Universal Design (CUD) - How to make figures and presentations that are friendly to Colorblind people - Masataka Okabe & Kei Ito}
+#' @references \href{https://jakubnowosad.com/rcartocolor/}{Nowosad, J. (2018). 'CARTOColors' Palettes. R package version 1.0.0.}
+#' @references \href{https://academic.oup.com/bioinformatics/article/32/18/2847/1743594}{Gu Z, Eils R, Schlesner M (2016). “Complex heatmaps reveal patterns and correlations in multidimensional genomic data.” Bioinformatics. doi:10.1093/bioinformatics/btw313.}
 
-biopalette <- function(x = NULL, name = NULL, type = NULL){
+biopalette <- function(x = NULL, name = NULL, type = NULL, mute = FALSE){
     # Palettes data.table
     dt_palette <- data.table::data.table(
         "names" = c(
             "BiocompR_meth",
             "BiocompR_meth2",
             "BiocompR_meth3",
-            "BiocompR_testvsctrl",
-            "BiocompR_testvsctrl2",
-            "ComplexHeatmap_gwr",
+            "BiocompR_cond",
+            "BiocompR_cond2",
+            "BiocompR_cond3",
+            "ComplexHeatmap_expr",
             "ggsci_COSMIC",
             "ggsci_Frontiers",
             "ggsci_GSEA",
@@ -92,6 +108,7 @@ biopalette <- function(x = NULL, name = NULL, type = NULL){
             "diverging",
             "diverging",
             "diverging",
+            "qualitative",
             "qualitative",
             "qualitative",
             "diverging",
@@ -138,6 +155,7 @@ biopalette <- function(x = NULL, name = NULL, type = NULL){
             c("color blind", "protanopia", "deuteranopia", "tritanopia", "methylation", "biocompr"),
             c("color blind", "protanopia", "deuteranopia", "tritanopia", "test vs control", "biocompr"),
             c("color blind", "protanopia", "deuteranopia", "tritanopia", "test vs control", "biocompr"),
+            c("color blind", "protanopia", "deuteranopia", "tritanopia", "test vs control", "biocompr"),
             c("protanopia", "tritanopia","expression", "RNA", "ComplexHeatmap"),
             c("mutations", "ggsci"),
             c("ggsci"),
@@ -182,6 +200,7 @@ biopalette <- function(x = NULL, name = NULL, type = NULL){
             c("blue", "yellow"),
             c("#4393C3", "#D6604D"),
             c("#BF812D", "#5AB4AC"),
+            c("dodgerblue", "darkorange"),
             c("green", "white", "red"),
             c("#2E2A2BFF", "#CF4E9CFF", "#8C57A2FF", "#358DB9FF", "#82581FFF", "#2F509EFF", "#E5614CFF", "#97A1A7FF", "#3DA873FF", "#DC9445FF"),
             c("#D51317FF", "#F39200FF", "#EFD500FF", "#95C11FFF", "#007B3DFF", "#31B7BCFF", "#0094CDFF"),
@@ -242,14 +261,18 @@ biopalette <- function(x = NULL, name = NULL, type = NULL){
         } else {
             dt_res <- dt_palette[names == name]
             if(is.null(type)){
-                cat(dt_res$names, "\n")
+                if(!mute){
+                    cat(dt_res$names, "\n")
+                }
                 res <- dt_res$palettes[[1]]
             } else {
                 dt_res <- dt_res[types == type]
                 if(nrow(dt_res) == 0){
                     stop("No palette matching this name and this palette type.")
                 } else {
-                    cat(dt_res$names, "\n")
+                    if(!mute){
+                        cat(dt_res$names, "\n")
+                    }
                     res <- dt_res$palettes[[1]]
                 }
             }
@@ -267,7 +290,9 @@ biopalette <- function(x = NULL, name = NULL, type = NULL){
         if(nrow(dt_res) == 1){
             # If only 1 palette returns only the vector of color code
             if(is.null(type)){
-                cat(dt_res$names, "\n")
+                if(!mute){
+                    cat(dt_res$names, "\n")
+                }
                 res <- dt_res$palettes[[1]]
             } else {
                 dt_res <- dt_res[types == type]
@@ -276,7 +301,9 @@ biopalette <- function(x = NULL, name = NULL, type = NULL){
                         "No palette matching this combination of keywords and",
                         "matching this palette type."))
                 } else {
-                    cat(dt_res$names, "\n")
+                    if(!mute){
+                        cat(dt_res$names, "\n")
+                    }
                     res <- dt_res$palettes[[1]]
                 }
             }
