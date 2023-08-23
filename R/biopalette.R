@@ -8,7 +8,7 @@
 #'               "chromatin accessibility", "completeness" and "bonus". You can
 #'               pass multiple keywords to x as a character vector:
 #'               e.g. x = c("protanopia","methylation","biocompr") will return
-#'               the BiocompR methylation palette.
+#'               2 BiocompR methylation palettes.
 #' @param name   A \code{character} matching a specific palette name.
 #' @param type   A \code{character} matching the data type you are working with.
 #'               Supported types are: type = c("sequential", "diverging",
@@ -34,8 +34,8 @@
 #' # data
 #' biopalette(x = c("color blind", "biocompr", "methylation"))
 #' # biopalette() also supports partial match with supported keywords
-#' # e.g. 'meth' for 'methylation'
-#' biopalette(x = "meth")
+#' # e.g. 'expr' for 'expression'
+#' biopalette(x = "expr")
 #' # To show a palette using its name: e.g. the 'Okabe-Ito' palette
 #' biopalette(name = "Okabe-Ito")
 #' # To show palettes suiting specific data type: e.g. qualitative data
