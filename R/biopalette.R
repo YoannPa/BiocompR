@@ -1,22 +1,71 @@
+#' Plots a single color palette as a color bar.
+#'
+#' @param dt A \code{data.table} subsetted from the \link{biopalette} function
+#'           internal palettes data.table.
+#' @return A \code{gg} plot object showing the colors of the palette
+#'         (a 'geom_tile()').
+#' @author Yoann Pageaud.
+#' @keywords internal
+
+plot_col <- function(dt){
+    dt_pal <- data.table::data.table(
+        "Samples" = dt$palettes[[1]], "Groups" = dt$palettes[[1]],
+        ".id" = dt$names)
+    basic_pal <- basic.sidebar(data = dt_pal, palette = dt$palettes[[1]])
+    basic_pal <- basic_pal +
+        ggplot2::theme(
+            legend.position = "none",
+            axis.title = ggplot2::element_blank(),
+            axis.text.x = ggplot2::element_blank(),
+            axis.text.y = ggplot2::element_text(color = "black"),
+            axis.ticks = ggplot2::element_blank(),
+            axis.ticks.length.x = ggplot2::unit(x = 0, units = "lines")
+        ) +
+        ggplot2::scale_x_discrete(expand = c(0, 0)) +
+        ggplot2::scale_y_discrete(expand = c(0, 0))
+    return(basic_pal)
+}
+
+
+#' Plots all palettes from a given palette data.table object.
+#'
+#' @param dt A \code{data.table} subsetted from the \link{biopalette} function
+#'           internal palettes data.table.
+#' @return An \code{egg} plot of all color palettes contained in the input
+#'         data.table.
+#' @author Yoann Pageaud.
+#' @keywords internal
+
+plot_palette <- function(dt){
+    ls_pal <- lapply(X = seq(nrow(dt)), FUN = function(i){
+        plot_col(dt = dt[i])
+    })
+    return(egg::ggarrange(plots = ls_pal, ncol = 1))
+}
 
 #' A color palette advisor for biology plots.
 #'
-#' @param x      A \code{character} vector of keywords.
-#'               Currently supported keywords are: "color blind", "protanopia",
-#'               "deuteranopia", "viridis", "biocompr", "tritanopia",
-#'               "methylation", "expression", "test vs control",
-#'               "chromatin accessibility", "completeness" and "bonus". You can
-#'               pass multiple keywords to x as a character vector:
-#'               e.g. x = c("protanopia","methylation","biocompr") will return
-#'               2 BiocompR methylation palettes.
-#' @param name   A \code{character} matching a specific palette name.
-#' @param type   A \code{character} matching the data type you are working with.
-#'               Supported types are: type = c("sequential", "diverging",
-#'               "qualitative").
-#' @param mute   A \code{logical} to turn off (Default: mute = FALSE) or on
-#'               (mute = TRUE) palette name display when loading a palette. You
-#'               may want to turn it off to not be bothered by the palette name
-#'               every time you load a palette (especially in for loops).
+#' @param x        A \code{character} vector of keywords.
+#'                 Notable keywords are: "color blind", "protanopia",
+#'                 "deuteranopia", "tritanopia", "methylation", "expression",
+#'                 "test vs control", "chromatin accessibility", "RNA",
+#'                 "mutations", "enrichment analysis", "genomic annotations",
+#'                 "tumor type", "tumor grade", "GWAS", "quality control",
+#'                 "fluorescence", "allele", "SNP", "organs", and packages of
+#'                 origin for those palettes. You can
+#'                 pass multiple keywords to x as a character vector:
+#'                 e.g. x = c("protanopia","methylation","biocompr") will return
+#'                 2 BiocompR methylation palettes.
+#' @param name     A \code{character} matching a specific palette name.
+#' @param type     A \code{character} matching the data type you are working
+#'                 with. Supported types are:
+#'                 type = c("sequential", "diverging", "qualitative").
+#' @param show.pal A \code{logical} to plot color palettes returned by your
+#'                 query (show = TRUE) or not (Default: show = FALSE).
+#' @param mute     A \code{logical} to turn off (Default: mute = FALSE) or on
+#'                 (mute = TRUE) palette name display when looking for a palette
+#'                 using keywords. A palette name is not displayed when you call
+#'                 it using the 'name' argument.
 #' @return When x = NULL and name = NULL, the whole palette \code{data.table}
 #'         stored in biopalette() is returned.\cr
 #'         When 1 matching palette is found, it is returned as a
@@ -56,7 +105,8 @@
 #' @references \href{https://jakubnowosad.com/rcartocolor/}{Nowosad, J. (2018). 'CARTOColors' Palettes. R package version 1.0.0.}
 #' @references \href{https://academic.oup.com/bioinformatics/article/32/18/2847/1743594}{Gu Z, Eils R, Schlesner M (2016). “Complex heatmaps reveal patterns and correlations in multidimensional genomic data.” Bioinformatics. doi:10.1093/bioinformatics/btw313.}
 
-biopalette <- function(x = NULL, name = NULL, type = NULL, mute = FALSE){
+biopalette <- function(
+    x = NULL, name = NULL, type = NULL, show.pal = FALSE, mute = FALSE){
     # Palettes data.table
     dt_palette <- data.table::data.table(
         "names" = c(
@@ -252,34 +302,32 @@ biopalette <- function(x = NULL, name = NULL, type = NULL, mute = FALSE){
         if(is.null(name)){
             if(is.null(type)){
                 # Return full data.table of palettes
+                if(show.pal){ plot_palette(dt = dt_palette) }
                 res <- dt_palette
             } else {
                 dt_res <- dt_palette[types == type]
+                if(show.pal){ plot_palette(dt = dt_res) }
                 res <- dt_res$palettes
                 names(res) <- dt_res$names
             }
         } else {
             dt_res <- dt_palette[names == name]
             if(is.null(type)){
-                if(!mute){
-                    cat(dt_res$names, "\n")
-                }
+                if(show.pal){ plot_palette(dt = dt_res) }
                 res <- dt_res$palettes[[1]]
             } else {
                 dt_res <- dt_res[types == type]
                 if(nrow(dt_res) == 0){
                     stop("No palette matching this name and this palette type.")
                 } else {
-                    if(!mute){
-                        cat(dt_res$names, "\n")
-                    }
+                    if(show.pal){ plot_palette(dt = dt_res) }
                     res <- dt_res$palettes[[1]]
                 }
             }
         }
     } else {
         if(length(x) > 1){
-            key_pattern = paste(x, collapse="|")
+            key_pattern = paste(x, collapse = "|")
         } else { key_pattern = x }
 
         dt_res <- dt_palette[
@@ -293,6 +341,7 @@ biopalette <- function(x = NULL, name = NULL, type = NULL, mute = FALSE){
                 if(!mute){
                     cat(dt_res$names, "\n")
                 }
+                if(show.pal){ plot_palette(dt = dt_res) }
                 res <- dt_res$palettes[[1]]
             } else {
                 dt_res <- dt_res[types == type]
@@ -301,13 +350,13 @@ biopalette <- function(x = NULL, name = NULL, type = NULL, mute = FALSE){
                         "No palette matching this combination of keywords and",
                         "matching this palette type."))
                 } else {
-                    if(!mute){
-                        cat(dt_res$names, "\n")
-                    }
+                    if(show.pal){ plot_palette(dt = dt_res) }
+                    if(!mute){ cat(dt_res$names, "\n") }
                     res <- dt_res$palettes[[1]]
                 }
             }
         } else if(nrow(dt_res) > 1){
+            if(show.pal){ plot_palette(dt = dt_res) }
             # If multiple palettes returns a named list of palettes
             res <- dt_res$palettes
             names(res) <- dt_res$names
