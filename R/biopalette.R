@@ -11,7 +11,7 @@ plot_col <- function(dt){
     dt_pal <- data.table::data.table(
         "Samples" = dt$palettes[[1]], "Groups" = dt$palettes[[1]],
         ".id" = dt$names)
-    basic_pal <- basic.sidebar(data = dt_pal, palette = dt$palettes[[1]])
+    basic_pal <- BiocompR::basic.sidebar(data = dt_pal, palette = dt$palettes[[1]])
     basic_pal <- basic_pal +
         ggplot2::theme(
             legend.position = "none",
@@ -38,7 +38,7 @@ plot_col <- function(dt){
 
 plot_palette <- function(dt){
     ls_pal <- lapply(X = seq(nrow(dt)), FUN = function(i){
-        plot_col(dt = dt[i])
+        BiocompR:::plot_col(dt = dt[i])
     })
     return(egg::ggarrange(plots = ls_pal, ncol = 1))
 }
@@ -302,25 +302,25 @@ biopalette <- function(
         if(is.null(name)){
             if(is.null(type)){
                 # Return full data.table of palettes
-                if(show.pal){ plot_palette(dt = dt_palette) }
+                if(show.pal){ BiocompR:::plot_palette(dt = dt_palette) }
                 res <- dt_palette
             } else {
                 dt_res <- dt_palette[types == type]
-                if(show.pal){ plot_palette(dt = dt_res) }
+                if(show.pal){ BiocompR:::plot_palette(dt = dt_res) }
                 res <- dt_res$palettes
                 names(res) <- dt_res$names
             }
         } else {
             dt_res <- dt_palette[names == name]
             if(is.null(type)){
-                if(show.pal){ plot_palette(dt = dt_res) }
+                if(show.pal){ BiocompR:::plot_palette(dt = dt_res) }
                 res <- dt_res$palettes[[1]]
             } else {
                 dt_res <- dt_res[types == type]
                 if(nrow(dt_res) == 0){
                     stop("No palette matching this name and this palette type.")
                 } else {
-                    if(show.pal){ plot_palette(dt = dt_res) }
+                    if(show.pal){ BiocompR:::plot_palette(dt = dt_res) }
                     res <- dt_res$palettes[[1]]
                 }
             }
@@ -341,7 +341,7 @@ biopalette <- function(
                 if(!mute){
                     cat(dt_res$names, "\n")
                 }
-                if(show.pal){ plot_palette(dt = dt_res) }
+                if(show.pal){ BiocompR:::plot_palette(dt = dt_res) }
                 res <- dt_res$palettes[[1]]
             } else {
                 dt_res <- dt_res[types == type]
@@ -350,13 +350,13 @@ biopalette <- function(
                         "No palette matching this combination of keywords and",
                         "matching this palette type."))
                 } else {
-                    if(show.pal){ plot_palette(dt = dt_res) }
+                    if(show.pal){ BiocompR:::plot_palette(dt = dt_res) }
                     if(!mute){ cat(dt_res$names, "\n") }
                     res <- dt_res$palettes[[1]]
                 }
             }
         } else if(nrow(dt_res) > 1){
-            if(show.pal){ plot_palette(dt = dt_res) }
+            if(show.pal){ BiocompR:::plot_palette(dt = dt_res) }
             # If multiple palettes returns a named list of palettes
             res <- dt_res$palettes
             names(res) <- dt_res$names

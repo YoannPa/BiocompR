@@ -4,21 +4,21 @@
 \alias{bin.polygons}
 \title{Bins density object following specific percentiles.}
 \usage{
-bin.polygons(list_oriented_dens, list.quant.lim, Annot.table)
+bin.polygons(list_oriented_dens, list.quant.lim, annot_table)
 }
 \arguments{
-\item{list_oriented_dens}{A \code{list} of data.frames, each dataframes
-describeing a density distribution.}
+\item{list_oriented_dens}{A \code{list} of data.frames, each data.frame
+describing a density distribution.}
 
 \item{list.quant.lim}{A \code{list} of vectors, each vectors containing
 values of specific percentiles.}
 
-\item{Annot.table}{A \code{data.frame} containing annotations about
+\item{annot_table}{A \code{data.frame} containing annotations about
 the distributions.}
 }
 \value{
 A \code{list} of modified data.frames of the density distributions
-containing breaks to be used for delimitating bins.
+containing breaks to be used for delimiting bins.
 }
 \description{
 Bins density object following specific percentiles.

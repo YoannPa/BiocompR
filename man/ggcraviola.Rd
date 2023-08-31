@@ -12,7 +12,7 @@ ggcraviola(
   mean.value = TRUE,
   bins = FALSE,
   bins.quantiles = seq(0.1, 0.9, 0.1),
-  bin.fun = "sd",
+  bin.fun = "stats::sd",
   lines.col = NA,
   linewidth = 0.5,
   verbose = FALSE
@@ -22,27 +22,30 @@ ggcraviola(
 \item{data}{A \code{data.frame}. 2 formats of data.frame are
                       supported:
 \itemize{
- \item{A "complete" data.frame of 5 columns:
+ \item{A "complete" data.frame of 4 columns:
   \itemize{
-   \item{column 1 must be the samples column.}
-   \item{column 2 must be the "grouping" variable column. There must not be
-         more than 2 samples in each group}
-   \item{column 3 must be the "filling color" variable column.}
-   \item{column 4 must be the "value" column.}
-   \item{column 5 can be the additionnal "opacity" variable column to be used
-   if bins = TRUE.}
+   \item{column 1 must be the "group" column. There must not be
+         more than 2 conditions in each group.}
+   \item{column 2 must be the "condition" column.}
+   \item{column 3 must be the "values" column.}
+   \item{column 4 is optional. It should be another "values" column to be
+         used if bins = TRUE. When 'bins' is TRUE, the function specified in
+         'bin.fun' is applied on the column 4 for each bin of each
+         distribution. The result obtain for each bin is then associated with
+         a specific shade of the filling colors.}
   }
  }
  \item{A "minimal" data.frame of 2 columns:
   \itemize{
-   \item{column 1 must be the samples column. This column can take a maximum
-   of 2 possible levels. Based on this column ggcraviola will guess the
-   "grouping" and the "filling".}
-   \item{column 2 must be the "value" column.}
+   \item{column 1 must be the "samples" column. This column can take a
+   maximum of 2 possible levels. Based on this column ggcraviola() will
+   extrapolate the "grouping" and the "filling".}
+   \item{column 2 must be the "values" column.}
   }
-  The "minimal" data.frame is usefull to easily plot 1 craviola with 2
-  distributions. You cannot plot more than 1 craviola with the "minimal"
-  data.frame format. the "minimal" format also do not support the binning.
+  The "minimal" data.frame is useful to easily plot a single craviola to
+  compare 2 distributions. You cannot plot more than 1 craviola with the
+  "minimal" data.frame format. the "minimal" format also do not support the
+  binning.
  }
 }}
 
@@ -70,13 +73,14 @@ bins as percentiles of distributions\cr
 (Default: bins.quantiles = seq(0.1,0.9,0.1)).}
 
 \item{bin.fun}{A \code{character} to specify the function to apply on
-values of the additional variable for each bin of
-distrubutions\cr
-(Supported: bin.fun = c("sd","mad","mean");
-Default: bin.fun = "sd").}
+values stored in the column 4 of the complete
+data.frame, for each bin of each distribution.\cr
+Examples of functions supported: bin.fun = c(
+"stats::sd", "stats::mad", "base::mean",
+"stats::median"); Default: bin.fun = "stats::sd".}
 
 \item{lines.col}{A \code{character} matching a color to use for the
-border lines of the craviola's bins\cr
+border lines of craviolas' bins\cr
 (Default: lines.col = NA).}
 
 \item{verbose}{A \code{logical} to display information about the
@@ -90,32 +94,30 @@ A \code{gg} craviola plot.
 Draws a craviola plot (half-splitted and percentile-binned violin plot).
 }
 \examples{
-#Using a 'minimal' data.frame:
+# Using a 'minimal' data.frame:
 df.minimal = data.frame(
   Samples = rep(paste0("Sample", c(1:2)), each = 1000),
   Values = c(rnorm(1000, 0), rnorm(1000, 0.5)))
 ggcraviola(data = df.minimal, lines.col = "black")
 
-#Using a 'complete' data.frame:
+# Using a 'complete' data.frame:
 df.complete = data.frame(
-  Samples = rep(paste0("Sample", c(1:6)), each = 1000),
-  Groups = rep(c('A', 'B', 'C'), each = 2000),
-  Conditions = rep(c('I', 'J'), each = 1000,3),
-  Values = c(rnorm(1000, 0), rnorm(1000, 0.5),
-    rnorm(1000, 3), rnorm(1000, 3.5),
-    rnorm(1000, -3), rnorm(1000, -3.5)))
+    Groups = rep(c('A', 'B', 'C'), each = 2000),
+    Conditions = rep(c('I', 'J'), each = 1000,3),
+    Values = c(rnorm(1000, 0), rnorm(1000, 0.5),
+               rnorm(1000, 3), rnorm(1000, 3.5),
+               rnorm(1000, -3), rnorm(1000, -3.5)))
 ggcraviola(data = df.complete, lines.col = "black")
 
-#Using a 'complete' data.frame with support of an additional variable:
+# Using a 'complete' data.frame with support of an additional variable:
 df.complete2 = data.frame(
-  Samples = rep(paste0("Sample", c(1:6)), each = 1000),
-  Groups = rep(c('A', 'B', 'C'), each = 2000),
-  Conditions = rep(c('I', 'J'), each = 1000, 3),
-  Values = c(rnorm(1000, 0), rnorm(1000, 0.5),
-    rnorm(1000, 3), rnorm(1000, 3.5),
-    rnorm(1000, -3), rnorm(1000, -3.5)),
-  Scnd.Var = rep(rep(x = c(60, 50, 40, 30, 20, 10, 30, 40, 50, 60),
-                     each = 100), 6))
+    Groups = rep(c('A', 'B', 'C'), each = 2000),
+    Conditions = rep(c('I', 'J'), each = 1000, 3),
+    Values = c(rnorm(1000, 0), rnorm(1000, 0.5),
+               rnorm(1000, 3), rnorm(1000, 3.5),
+               rnorm(1000, -3), rnorm(1000, -3.5)),
+    Scnd.Var = rep(rep(x = c(60, 50, 40, 30, 20, 10, 30, 40, 50, 60),
+                       each = 100), 6))
 ggcraviola(data = df.complete2, lines.col = "black", bins = TRUE)
 
 #Use ggplot2 to add components and customize the Craviola plot

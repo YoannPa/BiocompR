@@ -4,28 +4,34 @@
 \alias{biopalette}
 \title{A color palette advisor for biology plots.}
 \usage{
-biopalette(x = NULL, name = NULL, type = NULL, mute = FALSE)
+biopalette(x = NULL, name = NULL, type = NULL, show.pal = FALSE, mute = FALSE)
 }
 \arguments{
 \item{x}{A \code{character} vector of keywords.
-Currently supported keywords are: "color blind", "protanopia",
-"deuteranopia", "viridis", "biocompr", "tritanopia",
-"methylation", "expression", "test vs control",
-"chromatin accessibility", "completeness" and "bonus". You can
+Notable keywords are: "color blind", "protanopia",
+"deuteranopia", "tritanopia", "methylation", "expression",
+"test vs control", "chromatin accessibility", "RNA",
+"mutations", "enrichment analysis", "genomic annotations",
+"tumor type", "tumor grade", "GWAS", "quality control",
+"fluorescence", "allele", "SNP", "organs", and packages of
+origin for those palettes. You can
 pass multiple keywords to x as a character vector:
 e.g. x = c("protanopia","methylation","biocompr") will return
 2 BiocompR methylation palettes.}
 
 \item{name}{A \code{character} matching a specific palette name.}
 
-\item{type}{A \code{character} matching the data type you are working with.
-Supported types are: type = c("sequential", "diverging",
-"qualitative").}
+\item{type}{A \code{character} matching the data type you are working
+with. Supported types are:
+type = c("sequential", "diverging", "qualitative").}
+
+\item{show.pal}{A \code{logical} to plot color palettes returned by your
+query (show = TRUE) or not (Default: show = FALSE).}
 
 \item{mute}{A \code{logical} to turn off (Default: mute = FALSE) or on
-(mute = TRUE) palette name display when loading a palette. You
-may want to turn it off to not be bothered by the palette name
-every time you load a palette (especially in for loops).}
+(mute = TRUE) palette name display when looking for a palette
+using keywords. A palette name is not displayed when you call
+it using the 'name' argument.}
 }
 \value{
 When x = NULL and name = NULL, the whole palette \code{data.table}
