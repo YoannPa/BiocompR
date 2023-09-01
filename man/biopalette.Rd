@@ -7,17 +7,24 @@
 biopalette(x = NULL, name = NULL, type = NULL, show.pal = FALSE, mute = FALSE)
 }
 \arguments{
-\item{x}{A \code{character} vector of keywords.
-Notable keywords are: "color blind", "protanopia",
-"deuteranopia", "tritanopia", "methylation", "expression",
-"test vs control", "chromatin accessibility", "RNA",
-"mutations", "enrichment analysis", "genomic annotations",
-"tumor type", "tumor grade", "GWAS", "quality control",
-"fluorescence", "allele", "SNP", "organs", and packages of
-origin for those palettes. You can
-pass multiple keywords to x as a character vector:
+\item{x}{A \code{character} vector of keywords.\cr
+Supported keywords can be of 4 types:
+\itemize{
+ \item{A package name: e.g. 'biocompr', 'ggsci', 'viridis',
+ ...}
+ \item{A biology or clinic data type: e.g. 'methylation',
+ 'test vs control', 'expression', 'genomic annotations',
+ 'tumor type', ...}
+ \item{A type of color blindness: e.g. 'protanopia',
+ 'deuteranopia', 'tritanopia', 'color blind'.}
+ \item{A consortium name: 'PCAWG'.}
+}
+All available keywords are accessible in the biopalette
+internal data.table, by using biopalette() without any
+argument.
+You can pass multiple keywords to x as a character vector:
 e.g. x = c("protanopia","methylation","biocompr") will return
-2 BiocompR methylation palettes.}
+2 BiocompR methylation palettes protanopia safe.}
 
 \item{name}{A \code{character} matching a specific palette name.}
 
@@ -26,7 +33,7 @@ with. Supported types are:
 type = c("sequential", "diverging", "qualitative").}
 
 \item{show.pal}{A \code{logical} to plot color palettes returned by your
-query (show = TRUE) or not (Default: show = FALSE).}
+query (show.pal = TRUE) or not (Default: show.pal = FALSE).}
 
 \item{mute}{A \code{logical} to turn off (Default: mute = FALSE) or on
 (mute = TRUE) palette name display when looking for a palette
@@ -45,26 +52,36 @@ When x = NULL and name = NULL, the whole palette \code{data.table}
 A color palette advisor for biology plots.
 }
 \examples{
-# To show all palettes available in biopalette()
-biopalette()
-# To show all palettes from BiocompR
+# To print the internal data.table of all palettes available in biopalette()
+# and to plot all palettes.
+biopalette(show.pal = TRUE)
+# To list all palettes from BiocompR
 biopalette(x = "biocompr")
-# To show all palettes suiting for methylation data
+# To plot palettes matching a given query
+biopalette(x = "biocompr", show.pal = TRUE)
+# To list all palettes suiting for methylation data
 biopalette(x = "methylation")
-# To show color blind safe palettes
+# To list color blind safe palettes
 biopalette(x = "color blind")
-# To show color blind safe palettes from BiocompR suiting for methylation
+# Not all palettes are fully colorblind safe, so you can select palette safe
+# for a specific color blindness (protanopia, deuteranopia or tritanopia).
+biopalette(x = "deuteranopia")
+# To list color blind safe palettes from BiocompR suiting for methylation
 # data
 biopalette(x = c("color blind", "biocompr", "methylation"))
 # biopalette() also supports partial match with supported keywords
 # e.g. 'expr' for 'expression'
 biopalette(x = "expr")
-# To show a palette using its name: e.g. the 'Okabe-Ito' palette
+# If keywords return a single palette you can mute the palette name printed
+biopalette(x = c("protanopia","tumor type","ggsci"), mute = TRUE)
+# To get a palette using its name: e.g. the 'Okabe-Ito' palette
 biopalette(name = "Okabe-Ito")
-# Mute the palette name
-biopalette(name = "Okabe-Ito", mute = TRUE)
-# To show palettes suiting specific data type: e.g. qualitative data
+# To list palettes suiting specific data type: e.g. qualitative data
 biopalette(type = "qualitative")
+# Use case of biopalette() in a ggplot2 figure
+ggplot(mtcars, aes(mpg, wt, colour = factor(cyl))) +
+    geom_point() +
+    scale_color_manual(values = biopalette(name = "BiocompR_sunset"))
 }
 \references{
 \href{https://colorbrewer2.org/}{RColorBrewer - Erich Neuwirth}

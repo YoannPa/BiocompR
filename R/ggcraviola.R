@@ -438,7 +438,8 @@ ggcraviola <- function(
       x = old_cols[which(colnames(data) == "groups")],
       y = old_cols[which(colnames(data) == "vals")],
       fill = old_cols[which(colnames(data) == "conds")],
-      alpha = old_cols[which(colnames(data) == "opac")]) +
+      alpha = paste0(
+          bin.fun, "(", old_cols[which(colnames(data) == "opac")], ")")) +
     ggplot2::guides(fill = ggplot2::guide_legend(order = 1)) +
     ggplot2::scale_fill_manual(
       values = BiocompR::biopalette(name = "BiocompR_cond"),
