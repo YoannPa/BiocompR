@@ -226,6 +226,9 @@
 #'                        should be displayed on the right (y.axis.right = TRUE)
 #'                        or not (y.axis.right = FALSE)
 #'                        (Default: y.axis.right = FALSE).
+#' @param show.sub        A \code{logical} to specify whether the subtitle
+#'                        should be shown (Default: show.sub = TRUE) or not
+#'                        (show.sub = FALSE).
 #' @param draw            A \code{logical} to specify whether the final heatmap
 #'                        should be drawn automatically when gg2heatmap()
 #'                        execution ends (draw = TRUE), or if it shouldn't
@@ -419,12 +422,15 @@
 #' res <- gg2heatmap(m = mat, lgd.space.width = 3)
 #' # Change legend space height
 #' res <- gg2heatmap(m = mat, lgd.space.height = 15)
+#' # Hide the subtitle on the final heatmap
+#' res <- gg2heatmap(m = mat, show.sub = FALSE)
 #' # Disable automatic drawing of the heatmap (to only retrieve grobs data)
 #' res <- gg2heatmap(m = mat, draw = FALSE)
 #' # Print step-by-step execution of gg2heatmap (useful for debugging)
 #' res <- gg2heatmap(m = mat, verbose = TRUE)
 
 #TODO: Add option to hide subtitle information
+#TODO: Add option to support factors when given in input for ordering legends.
 #TODO: Add option to pass number of columns and rows for legends instead of
 # building the layout internally.
 #TODO: Add option to disable the return of grobs after execution
@@ -442,13 +448,12 @@ gg2heatmap <- function(
         title = "Values", barwidth = 15, ticks.linewidth = 1,
         title.vjust = 0.86),
     scale_fill_grad = ggplot2::scale_fill_gradientn(
-        colors = biopalette(name = "BiocompR_meth", mute = TRUE),
-        na.value = "black"),
+        colors = biopalette(name = "BiocompR_meth"), na.value = "black"),
     annot.grps = list("Groups" = seq(ncol(m))),
     annot.pal = grDevices::rainbow(n = ncol(m)), annot.size = 1, annot.sep = 0,
     theme_annot = NULL, show.annot = TRUE, lgd.merge = FALSE,
-    theme_legend = NULL, lgd.space.width = 1,
-    lgd.space.height = 26, y.axis.right = FALSE, draw = TRUE, verbose = FALSE){
+    theme_legend = NULL, lgd.space.width = 1, lgd.space.height = 26,
+    y.axis.right = FALSE, show.sub = TRUE, draw = TRUE, verbose = FALSE){
     #Fix BiocCheck() complaining about these objects initialization
     rows <- NULL
     value <- NULL
@@ -1328,14 +1333,24 @@ gg2heatmap <- function(
             widths = c(20, def.lgd.width + lgd.space.width))
     } else { arranged.grob <- main_grob }
 
-    final.plot <- gridExtra::arrangeGrob(gridExtra::arrangeGrob(
-        top = grid::textGrob(
-            plot.labs$title, gp = grid::gpar(fontsize = 15, font = 1)),
-        grobs = list(grid::textGrob(paste0(
+    if(show.sub){
+        subtitle_grob <- grid::textGrob(paste0(
             "Columns ordered by ", method.cols, " distance; Rows ordered by ",
             method.rows, " distance; ", nrow(dframe), " ", row.type, "."),
-            gp = grid::gpar(fontsize = 12, fontface = 3L)), arranged.grob,
-            htmp_legend), nrow = 3, heights = c(3, 50, 6)))
+            gp = grid::gpar(fontsize = 12, fontface = 3L))
+        final.plot <- gridExtra::arrangeGrob(gridExtra::arrangeGrob(
+            top = grid::textGrob(
+                plot.labs$title, gp = grid::gpar(fontsize = 15, font = 1)),
+            grobs = list(subtitle_grob, arranged.grob, htmp_legend), nrow = 3,
+            heights = c(3, 50, 6)))
+    } else {
+        final.plot <- gridExtra::arrangeGrob(gridExtra::arrangeGrob(
+            top = grid::textGrob(
+                plot.labs$title, gp = grid::gpar(fontsize = 15, font = 1)),
+            grobs = list(arranged.grob, htmp_legend), nrow = 2,
+            heights = c(50, 6)))
+    }
+
     rm(main_grob)
     #Plot final heatmap
     if(draw){

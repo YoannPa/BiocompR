@@ -28,7 +28,7 @@ devtools::install_github("YoannPa/BiocompR")
 ```
 
 ## Content
-Currently the package BiocompR contains **32 functions**:
+Currently the package BiocompR contains **33 functions**:
 
 * `basic.sidebar()` - Draws a ggplot2 of a basic sidebar.
 * `biopalette()` - A color palette advisor for biology plots.

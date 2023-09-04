@@ -29,7 +29,7 @@ gg2heatmap(
   guide_custom_bar = ggplot2::guide_colorbar(title = "Values", barwidth = 15,
     ticks.linewidth = 1, title.vjust = 0.86),
   scale_fill_grad = ggplot2::scale_fill_gradientn(colors = biopalette(name =
-    "BiocompR_meth", mute = TRUE), na.value = "black"),
+    "BiocompR_meth"), na.value = "black"),
   annot.grps = list(Groups = seq(ncol(m))),
   annot.pal = grDevices::rainbow(n = ncol(m)),
   annot.size = 1,
@@ -41,6 +41,7 @@ gg2heatmap(
   lgd.space.width = 1,
   lgd.space.height = 26,
   y.axis.right = FALSE,
+  show.sub = TRUE,
   draw = TRUE,
   verbose = FALSE
 )
@@ -306,6 +307,10 @@ should be displayed on the right (y.axis.right = TRUE)
 or not (y.axis.right = FALSE)
 (Default: y.axis.right = FALSE).}
 
+\item{show.sub}{A \code{logical} to specify whether the subtitle
+should be shown (Default: show.sub = TRUE) or not
+(show.sub = FALSE).}
+
 \item{draw}{A \code{logical} to specify whether the final heatmap
 should be drawn automatically when gg2heatmap()
 execution ends (draw = TRUE), or if it shouldn't
@@ -503,6 +508,8 @@ res <- gg2heatmap(m = mat, theme_legend = theme(
 res <- gg2heatmap(m = mat, lgd.space.width = 3)
 # Change legend space height
 res <- gg2heatmap(m = mat, lgd.space.height = 15)
+# Hide the subtitle on the final heatmap
+res <- gg2heatmap(m = mat, show.sub = FALSE)
 # Disable automatic drawing of the heatmap (to only retrieve grobs data)
 res <- gg2heatmap(m = mat, draw = FALSE)
 # Print step-by-step execution of gg2heatmap (useful for debugging)
