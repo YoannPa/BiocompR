@@ -364,16 +364,20 @@ res <- gg2heatmap(m = mat, row.type = "caracteristics")
 res <- gg2heatmap(
   m = mat, annot.grps = list("Carb" = mtcars$carb),
   annot.pal = grDevices::rainbow(n = 6))
-# Add more annotations, adjust colorbar width, and legends positions
+# Convert annotation as factor to order legend keys using levels
+res <- gg2heatmap(
+  m = mat, annot.grps = list("Carb" = as.factor(mtcars$carb)),
+  annot.pal = grDevices::rainbow(n = 6))
+# Add more annotations as factor, adjust colorbar width, and justify legends
 res <- gg2heatmap(
   m = mat,
   annot.grps = list( #Separate annotations must all have different values
-    "Carb" = paste(mtcars$carb, "Carb"),
-    "Gear" = paste(mtcars$gear, "Gear"),
-    "Am" = paste(mtcars$am, "Am")),
+    "Carb" = as.factor(paste(mtcars$carb, "Carb")),
+    "Gear" = as.factor(paste(mtcars$gear, "Gear")),
+    "Am" = as.factor(paste(mtcars$am, "Am"))),
   annot.pal = list( #Palettes order must matches annotations order
     grDevices::rainbow(n = 6), c("pink", "red", "darkred"),
-    c("blue", "grey")), annot.size = 3, # Increases top colorbar width
+    c("grey", "blue")), annot.size = 3, # Increases top colorbar width
   theme_legend = theme(
     legend.justification = c(0, 0.8)), # Justifies all legends on the left
     lgd.space.height = 22) # Sets vertical space to avoid legends overlaps
@@ -381,12 +385,12 @@ res <- gg2heatmap(
 res <- gg2heatmap(
   m = mat,
   annot.grps = list(
-    "Carb" = paste(mtcars$carb, "Carb"),
-    "Gear" = paste(mtcars$gear, "Gear"),
-    "Am" = paste(mtcars$am, "Am")),
+    "Carb" = as.factor(paste(mtcars$carb, "Carb")),
+    "Gear" = as.factor(paste(mtcars$gear, "Gear")),
+    "Am" = as.factor(paste(mtcars$am, "Am"))),
   annot.pal = list(
     grDevices::rainbow(n = 6), c("pink", "red", "darkred"),
-    c("blue", "grey")),
+    c("grey", "blue")),
     annot.size = 4, # Increases top colorbar width for facets strips
   theme_legend = theme(
     legend.justification = c(0, 0.8)), # Justifies all legends on the left
@@ -422,7 +426,7 @@ res <- gg2heatmap(m = mat, raster.filter = "Lanczos", raster.size = 240)
 # Plot a rastered faceted heatmap using the Lanczos filter
 res <- gg2heatmap(
   m = mat,
-  annot.grps = list(
+  annot.grps = list( # Annotations are not as factors in this example
     "Carb" = paste(mtcars$carb, "Carb"),
     "Gear" = paste(mtcars$gear, "Gear"),
     "Am" = paste(mtcars$am, "Am")),
@@ -470,7 +474,7 @@ res <- gg2heatmap(m = mat, scale_fill_grad = scale_fill_gradientn(
 # Custom vertical and horizontal separations width of annotations
 res <- gg2heatmap(m = mat, annot.grps = list(
   "Carb" = paste(mtcars$carb, "Carb"), "Gear" = paste(mtcars$gear, "Gear"),
-  "Am" = paste(mtcars$am, "Am")),
+  "Am" = paste(mtcars$am, "Am")), # Annotations are not as factors
   annot.pal = list(
     grDevices::rainbow(n = 6), c("pink", "red", "darkred"),
     c("blue", "grey")), annot.size = 3,
@@ -479,7 +483,7 @@ res <- gg2heatmap(m = mat, annot.grps = list(
   annot.sep = c(0.3, 0.1)) # Horizontal space of 0.3, and vertical of 0.1
 # Custom annotation theme
 res <- gg2heatmap(
-  m = mat, annot.grps = list("Carb" = mtcars$carb),
+  m = mat, annot.grps = list("Carb" = as.factor(mtcars$carb)),
   annot.pal = grDevices::rainbow(n = 6), theme_annot = theme(
     panel.border = element_rect(
       color = "black", # Set annotation border color to black
@@ -490,8 +494,9 @@ res <- gg2heatmap(m = mat, show.annot = FALSE)
 # Merge annotations legends into a single legend
 res <- gg2heatmap(
   m = mat, annot.grps = list(
-    "Carb" = paste(mtcars$carb, "Carb"), "Gear" = paste(mtcars$gear, "Gear"),
-    "Am" = paste(mtcars$am, "Am")),
+    "Carb" = as.factor(paste(mtcars$carb, "Carb")),
+    "Gear" = as.factor(paste(mtcars$gear, "Gear")),
+    "Am" = as.factor(paste(mtcars$am, "Am"))),
   annot.pal = list(
     grDevices::rainbow(n = 6), c("pink", "red", "darkred"),
     c("blue", "grey")), annot.size = 3,

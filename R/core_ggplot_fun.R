@@ -331,17 +331,22 @@ map.cat2pal <- function(origin.grps, groups, annot.pal){
 #' @keywords internal
 
 build.col_table <- function(annot.grps, annot.pal){
-    #Create list of groups in their original order
-    origin.grps <- lapply(X = annot.grps, FUN = function(i){
-        if(is.factor(i)){ levels(i) } else { levels(as.factor(i)) }
-    })
-    #Update levels following the new order of the annotation
-    groups <- lapply(X = lapply(X = annot.grps, FUN = function(i){
-        factor(x = i, levels =  unique(i))}), FUN = levels)
-    #Create list of color tables
+    # Create list of groups using levels of annotation groups
+    origin.grps <- lapply(X = annot.grps, FUN = levels)
+    # origin.grps <- lapply(X = annot.grps, FUN = function(i){
+    #     if(is.factor(i)){ levels(i) } else { levels(as.factor(i)) }
+    # })
+
+    # Update levels following the new order of the annotation
+    groups <- origin.grps
+    # groups <- lapply(X = lapply(X = annot.grps, FUN = function(i){
+    #     factor(x = i, levels =  unique(i))}), FUN = levels)
+
+    # Create list of color tables
     if(is.list(annot.pal)){
-        #Map categories to palettes
-        col_table <- BiocompR:::map.cat2pal(origin.grps, groups, annot.pal)
+        # Map categories to palettes
+        col_table <- BiocompR:::map.cat2pal(
+            origin.grps = origin.grps, groups = groups, annot.pal = annot.pal)
     } else if(!is.list(annot.pal)){
         col_table <- lapply(X = origin.grps, FUN = function(grp){
             data.table::data.table(
@@ -565,30 +570,34 @@ plot.col.sidebar <- function(
         axis.text.x = ggplot2::element_text(size = 12),
         axis.text.y = ggplot2::element_text(size = 12)),
     set.x.title, set.y.title, dendro.pos, facet = NULL){
-    #Fix BiocCheck() complaining about these objects initialization
+    # Fix BiocCheck() complaining about these objects initialization
     Grps <- NULL
     Cols <- NULL
     .id <- NULL
-    #Create list of groups in their original order
+    # Create list of groups in their original order
     origin.grps <- lapply(X = annot.grps, FUN = function(i){
         if(is.factor(i)){ levels(i) } else { levels(as.factor(i)) }
     })
-    #Update levels following the new order of the annotation
-    groups <- lapply(X = lapply(X = annot.grps, FUN = function(i){
-        factor(x = i, levels =  unique(i))}), FUN = levels)
-    #Create list of color tables
-    if(is.list(annot.pal)) { #If a list of palettes is provided
-        #Map categories to palettes
+    # Update levels following the new order of the annotation
+    groups <- origin.grps
+    # groups <- lapply(X = lapply(X = annot.grps, FUN = function(i){
+    #     factor(x = i, levels =  unique(i))}), FUN = levels)
+
+    # Create list of color tables
+    if(is.list(annot.pal)){ # If a list of palettes is provided
+        # Map categories to palettes
         col_table <- BiocompR:::map.cat2pal(origin.grps, groups, annot.pal)
     } else if(!is.list(annot.pal)){ #if a single palette is provided
-        #Map groups to the same palette
+        # Map groups to the same palette
         ls.df.grp.pal <- lapply(X = origin.grps, FUN = function(grp){
-            data.frame(
+            data.table::data.table(
                 "Grps" = grp, "Cols" = annot.pal, stringsAsFactors = FALSE)
+            # data.frame(
+            #     "Grps" = grp, "Cols" = annot.pal, stringsAsFactors = FALSE)
         })
         col_table <- lapply(seq_along(groups), function(i){
             if(length(groups[[i]]) == length(annot.pal)){
-                #If groups match colors
+                # If groups match colors
                 ls.df.grp.pal[[i]][
                     match(groups[[i]], ls.df.grp.pal[[i]]$Grps), ]
             } else {
@@ -596,53 +605,71 @@ plot.col.sidebar <- function(
                             "' levels do not match the length of the ",
                             "corresponding palette."))}
         })
-    } else { #If not a list or a vector
+    } else { # If not a list or a vector
         stop(paste(
             "Unknown type for 'annot.pal'. 'annot.pal' should be either",
             "a list or a vector."))
     }
-    #Create list of annotation data.frames
+    # Create list of annotation data.tables
     dframe.annot <- lapply(annot.grps, function(i){
-        data.frame("Samples" = sample.names, "Groups" = i)
+        data.table::data.table("Samples" = sample.names, "Groups" = i)
+        # data.frame("Samples" = sample.names, "Groups" = i)
     })
-    #Order samples following the correlation order provided and categories by
-    # alphabetical order
+    # Order samples following the correlation order provided
     dframe.annot <- lapply(dframe.annot, function(i){
-        i[["Samples"]] <- factor(i[["Samples"]], levels = i[["Samples"]])
-        i[["Groups"]] <- factor(i[["Groups"]], levels = unique(i[["Groups"]]))
-        i
+        dt_annot <- i
+        sample_order <- dt_annot$Samples
+        dt_annot[, Samples := as.factor(Samples)]
+        dt_annot[, Samples := factor(x = Samples, levels = sample_order)]
+        dt_annot
     })
-    #Rbind all annotations
+    # # Order samples following the correlation order provided and categories by
+    # # alphabetical order
+    # dframe.annot <- lapply(dframe.annot, function(i){
+    #     i[["Samples"]] <- factor(i[["Samples"]], levels = i[["Samples"]])
+    #     i[["Groups"]] <- factor(i[["Groups"]], levels = unique(i[["Groups"]]))
+    #     i
+    # })
+
+    # Rbind all annotations
     dframe.annot <- data.table::rbindlist(dframe.annot, idcol = TRUE)
-    #Convert .id as factors
-    dframe.annot$.id <- factor(
-        x = dframe.annot$.id, levels = unique(dframe.annot$.id))
-    if(annot.pos == "top"){ #Change order of levels
-        dframe.annot$.id <- factor(
-            x = dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
+    unique_id <- unique(dframe.annot$.id)
+    # Convert .id as factors
+    dframe.annot[, .id :=  as.factor(.id)]
+    dframe.annot[, .id :=  factor(x = .id, levels = unique_id)]
+    # dframe.annot$.id <- factor(
+    #     x = dframe.annot$.id, levels = unique(dframe.annot$.id))
+
+    if(annot.pos == "top"){ # Change order of levels
+        dframe.annot[, .id :=  factor(x = .id, levels = rev(unique_id))]
+        # dframe.annot$.id <- factor(
+        #     x = dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
     }
-    #Check color tables
+
+    # Check color tables
     col_table <- lapply(X = col_table, FUN = function(tbl){
-        if(any(duplicated(tbl$Cols))){ #Check palette consistency
+        if(any(duplicated(tbl$Cols))){ # Check palette consistency
             stop(paste(
                 "1 color in a palette has been associated to more than 1",
                 "group."))
         }
-        if(any(duplicated(tbl$Grps))){ #Check annotation consistency
+        if(any(duplicated(tbl$Grps))){ # Check annotation consistency
             warning("Duplicated group name provided. Removing duplicated...")
             tbl <- tbl[!duplicated(Grps)]
+            tbl
         } else { tbl }
     })
     col_table <- data.table::rbindlist(col_table, idcol = TRUE)
     if(!is.list(annot.pal)){
-        if(any(duplicated(col_table$Cols))){ #Check palette consistency
+        if(any(duplicated(col_table$Cols))){ # Check palette consistency
             col_table <- col_table[!duplicated(x = Cols)]
         }
     }
     #Plot color sidebars
     col_sidebar <- BiocompR::basic.sidebar(
-        data = dframe.annot, palette = col_table$Cols, annot.sep = annot.sep,
-        annot.cut = annot.cut, facet = facet, lgd.ncol = lgd.ncol[1])
+        data = data.table::copy(dframe.annot), palette = col_table$Cols,
+        annot.sep = annot.sep, annot.cut = annot.cut, facet = facet,
+        lgd.ncol = lgd.ncol[1])
     #Add legend theme parameters if some
     col_sidebar <- col_sidebar + theme_legend
     #Modify base plot following its position
@@ -690,8 +717,9 @@ plot.col.sidebar <- function(
             BiocompR:::get.lgd(col_sidebar + ggplot2::labs(fill = lgd.name)))
     } else { # Split legends and return a list of legends
         if(annot.pos == "top"){
-            dframe.annot$.id <- factor(
-                dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
+            dframe.annot[, .id :=  factor(x = .id, levels = unique_id)]
+            # dframe.annot$.id <- factor(
+            #     dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
         }
         #Generate separate legends if more than 1 palette available or if only 1
         # annotation is used
