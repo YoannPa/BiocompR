@@ -150,27 +150,32 @@ plot_asso_all_annot <- function(
         annot.table = annot.table, perm.count = perm.count, verbose = verbose)
     # Plot association tests results
     max_log_pval <- ceiling(max(asso_res$log_trans_pval, na.rm = TRUE))
-    asso_plot <- ggplot(
-        data = asso_res, mapping = aes(
+    asso_plot <- ggplot2::ggplot(
+        data = asso_res, mapping = ggplot2::aes(
             x = annotation1, y = annotation2, fill = log_trans_pval,
             color = test, label = round(log_trans_pval, 1))) +
-        geom_tile(size = 1, width = 0.8, height = 0.8) +
-        geom_text(color = "black") +
-        scale_fill_gradient2(
+        ggplot2::geom_tile(size = 1, width = 0.8, height = 0.8) +
+        ggplot2::geom_text(color = "black") +
+        ggplot2::scale_fill_gradient2(
             low = "darkblue", mid = "white", high = "darkred",
             midpoint = -log10(0.05), limits = c(
                 0, max_log_pval), breaks = seq(0, max_log_pval, by = 1)) +
-        theme(axis.text = element_text(size = 12, colour = "black"),
-              axis.text.x = element_text(angle = -45, hjust = 0, vjust = 0.1),
-              axis.title = element_blank(),
-              axis.ticks = element_blank(),
-              panel.background = element_rect(fill = NA, colour = NA),
-              panel.grid = element_line(colour = "black", linewidth = 0.5),
-              legend.text = element_text(size = 11), legend.box.just = "left",
-              plot.title = element_text(hjust = 0.5)) +
-        guides(fill = guide_colorbar(
+        ggplot2::theme(
+            axis.text = ggplot2::element_text(size = 12, colour = "black"),
+            axis.text.x = ggplot2::element_text(
+                angle = -45, hjust = 0, vjust = 0.1),
+            axis.title = ggplot2::element_blank(),
+            axis.ticks = ggplot2::element_blank(),
+            panel.background = ggplot2::element_rect(fill = NA, colour = NA),
+            panel.grid = ggplot2::element_line(
+                colour = "black", linewidth = 0.5),
+            legend.text = ggplot2::element_text(size = 11),
+            legend.box.just = "left",
+            plot.title = ggplot2::element_text(hjust = 0.5)) +
+        ggplot2::guides(fill = ggplot2::guide_colorbar(
             ticks.colour = "black", frame.colour = "black")) +
-        labs(fill = "-Log10(P.value)", color = "Stat. test used") +
-        ggtitle(paste("Associations between all annotations from", cohort.name))
+        ggplot2::labs(fill = "-Log10(P.value)", color = "Stat. test used") +
+        ggplot2::ggtitle(
+            paste("Associations between all annotations from", cohort.name))
     return(asso_plot)
 }
