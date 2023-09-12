@@ -28,7 +28,7 @@ gg2heatmap(
   theme_heatmap = NULL,
   guide_custom_bar = ggplot2::guide_colorbar(title = "Values", barwidth = 15,
     ticks.linewidth = 1, title.vjust = 0.86),
-  scale_fill_grad = ggplot2::scale_fill_gradientn(colors = biopalette(name =
+  scale_fill_grad = ggplot2::scale_fill_gradientn(colors = BiocompR::biopalette(name =
     "BiocompR_meth"), na.value = "black"),
   annot.grps = list(Groups = seq(ncol(m))),
   annot.pal = grDevices::rainbow(n = ncol(m)),

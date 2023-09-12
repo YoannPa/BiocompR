@@ -909,3 +909,109 @@ update_guide_colorbar <- function(
     class(new_guide) <- c("guide", "colorbar")
     return(new_guide)
 }
+
+#' Draft using the egg package for the gg2heatmap layout
+#'
+#' @param param1 A \code{type} parameter description.
+#' @return A \code{type} object returned description.
+#' @author Yoann Pageaud.
+#' @keywords internal
+
+heatmap_layout <- function(){
+    # Create empty ggplot
+    ggempty <- ggplot2::ggplot(data.frame()) +
+        ggplot2::theme(
+            plot.margin = ggplot2::margin(0, 0, 0, 0, unit = "cm"),
+            panel.background = ggplot2::element_rect(fill = NA))
+    # Create Heatmap layout
+    if(dd.rows & dd.cols & show.annot){
+        main_grob <- R.devices::suppressGraphics(egg::ggarrange(
+            ggempty, ggempty, ddgr_seg_row, ddgr_seg_col, col_sidebar$sidebar, htmp,
+            heights = c(dend.col.size + 2, annot.size, 30),
+            widths = c(dend.row.size + 1, 10), byrow = FALSE))
+    } else if(dd.rows & dd.cols & !show.annot){
+        main_grob <- R.devices::suppressGraphics(egg::ggarrange(
+            ggempty, ddgr_seg_row, ddgr_seg_col, htmp,
+            heights = c(dend.col.size + 2, 30),
+            widths = c(dend.row.size + 1, 10), byrow = FALSE))
+    } else if(!dd.rows & !dd.cols & show.annot){
+        main_grob <- R.devices::suppressGraphics(egg::ggarrange(
+            col_sidebar$sidebar, htmp, heights = c(annot.size, 30), byrow = FALSE))
+    } else if(!dd.rows & !dd.cols & !show.annot){
+        main_grob <- R.devices::suppressGraphics(egg::ggarrange(
+            htmp, byrow = FALSE))
+    } else if(dd.rows & !dd.cols & show.annot){
+        main_grob <- R.devices::suppressGraphics(egg::ggarrange(
+            ggempty, ddgr_seg_row, col_sidebar$sidebar, htmp,
+            heights = c(annot.size, 30),
+            widths = c(dend.row.size + 1, 10), byrow = FALSE))
+    } else if(dd.rows & !dd.cols & !show.annot){
+        main_grob <- R.devices::suppressGraphics(egg::ggarrange(
+            ddgr_seg_row, htmp, widths = c(dend.row.size + 1, 10), byrow = FALSE))
+    } else if(!dd.rows & dd.cols & show.annot){
+        main_grob <- R.devices::suppressGraphics(egg::ggarrange(
+            ddgr_seg_col, col_sidebar$sidebar, htmp,
+            heights = c(dend.col.size + 2, annot.size, 30), byrow = FALSE))
+    } else if(!dd.rows & dd.cols & !show.annot){
+        main_grob <- R.devices::suppressGraphics(egg::ggarrange(
+            ddgr_seg_col, col_sidebar$sidebar, htmp,
+            heights = c(dend.col.size + 2, annot.size, 30), byrow = FALSE))
+    }
+    # Add annotation legends or not
+    if(show.annot){
+        sidebar_legend <- col_sidebar$legends
+        if(anyNA(lgd.layout)){
+            lgd.layout[is.na(lgd.layout)] <- max(lgd.layout, na.rm = TRUE) + 1
+            # Add an empty grob in the legend to stack them to the top
+            sidebar_legend <- c(sidebar_legend, list(grid::textGrob("")))
+        }
+        right.legends <- gridExtra::arrangeGrob(
+            grobs = sidebar_legend, layout_matrix = lgd.layout)
+        # Set default legend width space
+        def.lgd.width <- 2
+        arranged.grob <- gridExtra::arrangeGrob(
+            grobs = list(main_grob, right.legends), ncol = 2,
+            widths = c(20, def.lgd.width + lgd.space.width))
+    } else {
+        arranged.grob <- main_grob
+    }
+    # Plot result
+    grid::grid.draw(arranged.grob)
+}
+
+
+#' Proof of concept for making a multi-panel clustered ggplot2 heatmap.
+#'
+#' @param ls_col_ggdend A \code{list} of ggplot2 dendrograms on matrix colums.
+#' @param ls_ggannot    A \code{list} of ggplot2 geom_tile() serving as color
+#'                      annotation sidebars.
+#' @param ls_row_ggdend A \code{list} of ggplot2 dendrograms on matrix rows.
+#' @param ls_ggheatmap  A \code{list} of ggplot2 geom_tile() serving as
+#'                      heatmaps.
+#' @return A \code{type} object returned description.
+#' @author Yoann Pageaud.
+#' @keywords internal
+
+ggclust_layout <- function(
+    ls_col_ggdend, ls_ggannot, ls_row_ggdend, ls_ggheatmap){
+    cut_range <- sqrt(length(ls_htmp))
+    ls_htmp <- lapply(
+        X = seq(1, length(ls_htmp) - cut_range + 1, by = cut_range),
+        FUN = function(i){
+            ls_htmp[seq(i, i+cut_range-1)]
+        })
+    ls_row_htmp <- Map(list, ls_ddgr_row, ls_htmp)
+    ls_row_htmp <- lapply(X = ls_row_htmp, FUN = function(i){
+        c(list(i[[1]]), i[[2]])
+    })
+    ls_row_htmp <- do.call(c, ls_row_htmp)
+    # Create empty ggplot
+    ggempty <- ggplot2::ggplot(data.frame()) +
+        ggplot2::theme(
+            plot.margin = ggplot2::margin(0, 0, 0, 0, unit = "cm"),
+            panel.background = ggplot2::element_rect(fill = NA))
+    ls_plots <- c(
+        list(ggempty), ls_ddgr_col, list(ggempty), ls_sidebar, ls_row_htmp)
+    clustmap <- egg::ggarrange(plots = ls_plots, nrow = 5, ncol = 4)
+    return(clustmap)
+}

@@ -451,7 +451,8 @@ gg2heatmap <- function(
         title = "Values", barwidth = 15, ticks.linewidth = 1,
         title.vjust = 0.86),
     scale_fill_grad = ggplot2::scale_fill_gradientn(
-        colors = biopalette(name = "BiocompR_meth"), na.value = "black"),
+        colors = BiocompR::biopalette(name = "BiocompR_meth"),
+        na.value = "black"),
     annot.grps = list("Groups" = seq(ncol(m))),
     annot.pal = grDevices::rainbow(n = ncol(m)), annot.size = 1, annot.sep = 0,
     theme_annot = NULL, show.annot = TRUE, lgd.merge = FALSE,
@@ -1073,6 +1074,9 @@ gg2heatmap <- function(
 
     # Create ggplot2 heatmap
     htmp <- htmp + theme_heatmap + ggplot2::theme(legend.position = "none")
+
+
+
     # Convert ggplots into grobs
     if(is.null(facet)){
         if(dd.cols){
