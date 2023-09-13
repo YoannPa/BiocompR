@@ -348,16 +348,17 @@ res <- gg2heatmap(m = mat, dist.method = c("euclidean", "manhattan"),
   dend.size = c(2, 5))
 # Custom themes of top and left dendrograms
 res <- gg2heatmap(
-  m = mat, theme_dend_top = theme(
-    panel.background = element_rect(
+  m = mat, theme_dend_top = ggplot2::theme(
+    panel.background = ggplot2::element_rect(
       color = "red", linewidth = 1, fill = "lightblue")),
-  theme_dend_left = theme(panel.background = element_rect(fill = "gold")))
+  theme_dend_left = ggplot2::theme(
+      panel.background = ggplot2::element_rect(fill = "gold")))
 # Set heatmap title, and X and Y axis titles
 res <- gg2heatmap(m = mat, plot.labs = labs(
   title = "mtcars example heatmap", x = "Cars", y = "Cars caracteristics"),
   y.axis.right = TRUE, # To enable the display of Y-axis on the right
-  theme_heatmap = theme(
-    axis.title.y.right = element_text(size = 14, vjust = -10)))
+  theme_heatmap = ggplot2::theme(
+    axis.title.y.right = ggplot2::element_text(size = 14)))
 # Specify what 'rows' correspond to in the subtitle.
 res <- gg2heatmap(m = mat, row.type = "caracteristics")
 # Add 1 annotation for the top color bar
@@ -378,7 +379,7 @@ res <- gg2heatmap(
   annot.pal = list( #Palettes order must matches annotations order
     grDevices::rainbow(n = 6), c("pink", "red", "darkred"),
     c("grey", "blue")), annot.size = 3, # Increases top colorbar width
-  theme_legend = theme(
+  theme_legend = ggplot2::theme(
     legend.justification = c(0, 0.8)), # Justifies all legends on the left
     lgd.space.height = 22) # Sets vertical space to avoid legends overlaps
 # Facetting on 1 of the annotations
@@ -392,7 +393,7 @@ res <- gg2heatmap(
     grDevices::rainbow(n = 6), c("pink", "red", "darkred"),
     c("grey", "blue")),
     annot.size = 4, # Increases top colorbar width for facets strips
-  theme_legend = theme(
+  theme_legend = ggplot2::theme(
     legend.justification = c(0, 0.8)), # Justifies all legends on the left
     lgd.space.height = 22,
   facet = "Carb", # Facetting heatmap using annotation 'Carb'
@@ -411,10 +412,10 @@ res <- gg2heatmap(
   dist.method = c('none', 'euclidean'), # Disable clustering on rows
   dendrograms = c(FALSE, TRUE), # Disable dendrogram display on rows
   lgd.space.width = 5, # Increase legend space
-  theme_heatmap = theme(
+  theme_heatmap = ggplot2::theme(
     axis.text.y.left = element_text(size = 12), # Show Y labels on the left
     axis.ticks.y.left = element_line(linewidth = 0.5)), # Show Y ticks on left
-  theme_legend = theme(legend.justification = c(0.5, 0.5))) # Center legend
+  theme_legend = ggplot2::theme(legend.justification = c(0.5, 0.5))) # Center legend
 # Custom heatmap cells borders color and width
 res <- gg2heatmap(m = mat, border.col = "black", border.size = 0.5)
 # Custom heatmap cells height and width
@@ -434,7 +435,7 @@ res <- gg2heatmap(
     grDevices::rainbow(n = 6), c("pink", "red", "darkred"),
     c("blue", "grey")),
     annot.size = 4, # Increases top colorbar width for facets strips
-  theme_legend = theme(
+  theme_legend = ggplot2::theme(
     legend.justification = c(0, 0.8)), # Justifies all legends on the left
   lgd.space.height = 22,
   facet = "Carb", # Facetting heatmap using annotation 'Carb'
@@ -443,14 +444,18 @@ res <- gg2heatmap(
   raster.filter = "Lanczos") # Rasterization using the Lanczos filter
 # Custom the theme of the heatmap
 res <- gg2heatmap(
-  m = mat,
-  theme_heatmap = theme(
-    panel.border = element_rect(
-      color = "black", linewidth = 1, fill = "transparent"), # Add a border
-    axis.text.y.right = element_text(size = 12), # Add right Y axis labels
-    axis.ticks.y.right = element_line(color = "black"), # Add Y axis ticks
-    axis.text.x = element_text(color = "red")), # Color X axis labels in red
-  y.axis.right = TRUE) # Enable display of Y axis on the right side
+    m = mat,
+    theme_heatmap = ggplot2::theme(
+        panel.border = ggplot2::element_rect(
+            color = "black", linewidth = 1,
+            fill = "transparent"), # Add a border
+        axis.text.y.right = ggplot2::element_text(
+            size = 12), # Add right Y axis labels
+        axis.ticks.y.right = ggplot2::element_line(
+            color = "black"), # Add Y axis ticks
+        axis.text.x = ggplot2::element_text(
+            color = "red")), # Color X axis labels in red
+    y.axis.right = TRUE) # Enable display of Y axis on the right side
 # Custom the colorbar shape
 res <- gg2heatmap(m = mat, guide_custom_bar = guide_colorbar(
   title = "My custom colorbar", # Set colorbar title
@@ -464,51 +469,55 @@ res <- gg2heatmap(m = mat, guide_custom_bar = guide_colorbar(
   frame.colour = "green", # Set colorbar frame color
   frame.linewidth = 2)) # Set colorbar frame linewidth
 # Custom colorbar caracteristics using 'scale_fill_gradient'-like functions
-res <- gg2heatmap(m = mat, scale_fill_grad = scale_fill_gradientn(
-  colors = biopalette(name = "BiocompR_meth2", mute = TRUE), # Set gradient
-  na.value = "grey", # Set missing value color
-  n.breaks = 10, # Set number of breaks
-  labels = c("<=-1", seq(-0.8, 0.8, by = 0.2), ">= 1"), # Map custom labels
-  limits = c(-1, 1), # Set limits for the colorbar
-  oob = scales::squish)) # Squish values out of the bound of limits
+res <- gg2heatmap(m = mat, scale_fill_grad = ggplot2::scale_fill_gradientn(
+    colors = BiocompR::biopalette(
+        name = "BiocompR_meth2", mute = TRUE), # Set gradient
+    na.value = "grey", # Set missing value color
+    n.breaks = 10, # Set number of breaks
+    labels = c("<=-1", seq(-0.8, 0.8, by = 0.2), ">= 1"), # Map custom labels
+    limits = c(-1, 1), # Set limits for the colorbar
+    oob = scales::squish)) # Squish values out of the bound of limits
 # Custom vertical and horizontal separations width of annotations
 res <- gg2heatmap(m = mat, annot.grps = list(
-  "Carb" = paste(mtcars$carb, "Carb"), "Gear" = paste(mtcars$gear, "Gear"),
-  "Am" = paste(mtcars$am, "Am")), # Annotations are not as factors
-  annot.pal = list(
-    grDevices::rainbow(n = 6), c("pink", "red", "darkred"),
-    c("blue", "grey")), annot.size = 3,
-  theme_legend = theme(legend.justification = c(0, 0.8)),
-  lgd.space.height = 22,
-  annot.sep = c(0.3, 0.1)) # Horizontal space of 0.3, and vertical of 0.1
+    "Carb" = paste(mtcars$carb, "Carb"), "Gear" = paste(mtcars$gear, "Gear"),
+    "Am" = paste(mtcars$am, "Am")), # Annotations are not as factors
+    annot.pal = list(
+        grDevices::rainbow(n = 6), c("pink", "red", "darkred"),
+        c("blue", "grey")), annot.size = 3,
+    theme_legend = ggplot2::theme(legend.justification = c(0, 0.8)),
+    lgd.space.height = 22,
+    annot.sep = c(0.3, 0.1)) # Horizontal space of 0.3, and vertical of 0.1
 # Custom annotation theme
 res <- gg2heatmap(
-  m = mat, annot.grps = list("Carb" = as.factor(mtcars$carb)),
-  annot.pal = grDevices::rainbow(n = 6), theme_annot = theme(
-    panel.border = element_rect(
-      color = "black", # Set annotation border color to black
-      linewidth = 1, # Set annotation border width to 1
-      fill = "transparent"))) # Make the annotation visible through the rect
+    m = mat, annot.grps = list("Carb" = as.factor(mtcars$carb)),
+    annot.pal = grDevices::rainbow(n = 6), theme_annot = ggplot2::theme(
+        panel.border = ggplot2::element_rect(
+            color = "black", # Set annotation border color to black
+            linewidth = 1, # Set annotation border width to 1
+            fill = "transparent"))) # Make annotation visible through rect.
 # Hide the annotation and annotation legends
 res <- gg2heatmap(m = mat, show.annot = FALSE)
 # Merge annotations legends into a single legend
 res <- gg2heatmap(
-  m = mat, annot.grps = list(
-    "Carb" = as.factor(paste(mtcars$carb, "Carb")),
-    "Gear" = as.factor(paste(mtcars$gear, "Gear")),
-    "Am" = as.factor(paste(mtcars$am, "Am"))),
-  annot.pal = list(
-    grDevices::rainbow(n = 6), c("pink", "red", "darkred"),
-    c("blue", "grey")), annot.size = 3,
-  lgd.merge = TRUE) # Merge annotations legends into a single legend
+    m = mat, annot.grps = list(
+        "Carb" = as.factor(paste(mtcars$carb, "Carb")),
+        "Gear" = as.factor(paste(mtcars$gear, "Gear")),
+        "Am" = as.factor(paste(mtcars$am, "Am"))),
+    annot.pal = list(
+        grDevices::rainbow(n = 6), c("pink", "red", "darkred"),
+        c("blue", "grey")), annot.size = 3,
+    lgd.merge = TRUE) # Merge annotations legends into a single legend
 # Custom legend theme
-res <- gg2heatmap(m = mat, theme_legend = theme(
-  legend.background = element_rect(
-    fill = "lightblue", # Add lightblue background
-    color = "red"), # Add red border
-  legend.key.size = unit(0.5, "lines"), # Decrease legend keys overall size
-  legend.key.width = unit(1.4, "lines"), # Increase legend keys width
-  legend.text = element_text(color = "red"))) # Color legend labels in red
+res <- gg2heatmap(m = mat, theme_legend = ggplot2::theme(
+    legend.background = ggplot2::element_rect(
+        fill = "lightblue", # Add lightblue background
+        color = "red"), # Add red border
+    legend.key.size = ggplot2::unit(
+        0.5, "lines"), # Decrease legend keys overall size
+    legend.key.width = ggplot2::unit(
+        1.4, "lines"), # Increase legend keys width
+    legend.text = ggplot2::element_text(
+        color = "red"))) # Color legend labels in red
 # Increase legend space width on the left of the heatmap
 res <- gg2heatmap(m = mat, lgd.space.width = 3)
 # Change legend space height

@@ -2,18 +2,29 @@
 % Please edit documentation in R/core_ggplot_fun.R
 \name{heatmap_layout}
 \alias{heatmap_layout}
-\title{Draft using the egg package for the gg2heatmap layout}
+\title{Builds the gg2heatmap layout using the egg package}
 \usage{
-heatmap_layout()
-}
-\arguments{
-\item{param1}{A \code{type} parameter description.}
+heatmap_layout(
+  dd.rows,
+  dd.cols,
+  show.annot,
+  ddgr_seg_row,
+  ddgr_seg_col,
+  sidebar,
+  htmp,
+  legends,
+  dend.row.size,
+  dend.col.size,
+  annot.size,
+  lgd.layout,
+  lgd.space.width
+)
 }
 \value{
-A \code{type} object returned description.
+A \code{egg} object of the assembled heatmap.
 }
 \description{
-Draft using the egg package for the gg2heatmap layout
+Builds the gg2heatmap layout using the egg package
 }
 \author{
 Yoann Pageaud.

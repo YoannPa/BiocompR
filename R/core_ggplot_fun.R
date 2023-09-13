@@ -910,14 +910,16 @@ update_guide_colorbar <- function(
     return(new_guide)
 }
 
-#' Draft using the egg package for the gg2heatmap layout
+#' Builds the gg2heatmap layout using the egg package
 #'
-#' @param param1 A \code{type} parameter description.
-#' @return A \code{type} object returned description.
+#' @return A \code{egg} object of the assembled heatmap.
 #' @author Yoann Pageaud.
 #' @keywords internal
 
-heatmap_layout <- function(){
+heatmap_layout <- function(
+    dd.rows, dd.cols, show.annot, ddgr_seg_row, ddgr_seg_col, sidebar, htmp,
+    legends, dend.row.size, dend.col.size, annot.size, lgd.layout,
+    lgd.space.width){
     # Create empty ggplot
     ggempty <- ggplot2::ggplot(data.frame()) +
         ggplot2::theme(
@@ -926,57 +928,58 @@ heatmap_layout <- function(){
     # Create Heatmap layout
     if(dd.rows & dd.cols & show.annot){
         main_grob <- R.devices::suppressGraphics(egg::ggarrange(
-            ggempty, ggempty, ddgr_seg_row, ddgr_seg_col, col_sidebar$sidebar, htmp,
+            ggempty, ggempty, ddgr_seg_row, ddgr_seg_col, sidebar, htmp,
             heights = c(dend.col.size + 2, annot.size, 30),
-            widths = c(dend.row.size + 1, 10), byrow = FALSE))
+            widths = c(dend.row.size + 1, 10), byrow = FALSE, draw = FALSE))
     } else if(dd.rows & dd.cols & !show.annot){
         main_grob <- R.devices::suppressGraphics(egg::ggarrange(
             ggempty, ddgr_seg_row, ddgr_seg_col, htmp,
             heights = c(dend.col.size + 2, 30),
-            widths = c(dend.row.size + 1, 10), byrow = FALSE))
+            widths = c(dend.row.size + 1, 10), byrow = FALSE, draw = FALSE))
     } else if(!dd.rows & !dd.cols & show.annot){
         main_grob <- R.devices::suppressGraphics(egg::ggarrange(
-            col_sidebar$sidebar, htmp, heights = c(annot.size, 30), byrow = FALSE))
+            sidebar, htmp, heights = c(annot.size, 30), byrow = FALSE,
+            draw = FALSE))
     } else if(!dd.rows & !dd.cols & !show.annot){
         main_grob <- R.devices::suppressGraphics(egg::ggarrange(
-            htmp, byrow = FALSE))
+            htmp, byrow = FALSE, draw = FALSE))
     } else if(dd.rows & !dd.cols & show.annot){
         main_grob <- R.devices::suppressGraphics(egg::ggarrange(
-            ggempty, ddgr_seg_row, col_sidebar$sidebar, htmp,
-            heights = c(annot.size, 30),
-            widths = c(dend.row.size + 1, 10), byrow = FALSE))
+            ggempty, ddgr_seg_row, sidebar, htmp,
+            heights = c(annot.size, 30), widths = c(dend.row.size + 1, 10),
+            byrow = FALSE, draw = FALSE))
     } else if(dd.rows & !dd.cols & !show.annot){
         main_grob <- R.devices::suppressGraphics(egg::ggarrange(
-            ddgr_seg_row, htmp, widths = c(dend.row.size + 1, 10), byrow = FALSE))
+            ddgr_seg_row, htmp, widths = c(dend.row.size + 1, 10),
+            byrow = FALSE, draw = FALSE))
     } else if(!dd.rows & dd.cols & show.annot){
         main_grob <- R.devices::suppressGraphics(egg::ggarrange(
-            ddgr_seg_col, col_sidebar$sidebar, htmp,
-            heights = c(dend.col.size + 2, annot.size, 30), byrow = FALSE))
+            ddgr_seg_col, sidebar, htmp,
+            heights = c(dend.col.size + 2, annot.size, 30), byrow = FALSE,
+            draw = FALSE))
     } else if(!dd.rows & dd.cols & !show.annot){
         main_grob <- R.devices::suppressGraphics(egg::ggarrange(
-            ddgr_seg_col, col_sidebar$sidebar, htmp,
-            heights = c(dend.col.size + 2, annot.size, 30), byrow = FALSE))
+            ddgr_seg_col, sidebar, htmp,
+            heights = c(dend.col.size + 2, annot.size, 30), byrow = FALSE,
+            draw = FALSE))
     }
     # Add annotation legends or not
     if(show.annot){
-        sidebar_legend <- col_sidebar$legends
         if(anyNA(lgd.layout)){
             lgd.layout[is.na(lgd.layout)] <- max(lgd.layout, na.rm = TRUE) + 1
             # Add an empty grob in the legend to stack them to the top
-            sidebar_legend <- c(sidebar_legend, list(grid::textGrob("")))
+            legends <- c(legends, list(grid::textGrob("")))
         }
         right.legends <- gridExtra::arrangeGrob(
-            grobs = sidebar_legend, layout_matrix = lgd.layout)
+            grobs = legends, layout_matrix = lgd.layout)
         # Set default legend width space
-        def.lgd.width <- 2
         arranged.grob <- gridExtra::arrangeGrob(
             grobs = list(main_grob, right.legends), ncol = 2,
-            widths = c(20, def.lgd.width + lgd.space.width))
-    } else {
-        arranged.grob <- main_grob
-    }
-    # Plot result
-    grid::grid.draw(arranged.grob)
+            widths = c(20, 2 + lgd.space.width))
+    } else { arranged.grob <- main_grob }
+    # # Plot result
+    # grid::grid.draw(arranged.grob)
+    return(arranged.grob)
 }
 
 
