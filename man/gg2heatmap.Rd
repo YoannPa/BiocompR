@@ -40,9 +40,11 @@ gg2heatmap(
   theme_legend = NULL,
   lgd.space.width = 1,
   lgd.space.height = 26,
+  lgd.ncol = NULL,
   y.axis.right = FALSE,
   show.sub = TRUE,
   draw = TRUE,
+  return_plots = "all",
   verbose = FALSE
 )
 }
@@ -302,6 +304,11 @@ space (Default: lgd.space.width = 1).}
 \item{lgd.space.height}{An \code{integer} specifying the height of the legend
 space (Default: lgd.space.height = 29).}
 
+\item{lgd.ncol}{An \code{integer} to override the internal legend
+layout build, to specify the number of columns on
+which legends' keys should be displayed
+(Default: lgd.ncol = NULL).}
+
 \item{y.axis.right}{A \code{logical} to specify whether the heatmap Y axis
 should be displayed on the right (y.axis.right = TRUE)
 or not (y.axis.right = FALSE)
@@ -315,6 +322,16 @@ should be shown (Default: show.sub = TRUE) or not
 should be drawn automatically when gg2heatmap()
 execution ends (draw = TRUE), or if it shouldn't
 (draw = FALSE).}
+
+\item{return_plots}{A \code{character} specifying which plot objects
+should be returned by gg2heatmap().
+\itemize{
+ \item{return_plots = "all" (default) will return the
+ heatmap plot, the grobs composing the heatmap, and
+ the gg objects from which the grobs have been made.}
+ \item{return_plots = "main" will only return the
+ heatmap plot.}
+}}
 
 \item{verbose}{A \code{logical} to display information about the
 step-by-step processing of the data if TRUE
@@ -495,6 +512,9 @@ res <- gg2heatmap(
             color = "black", # Set annotation border color to black
             linewidth = 1, # Set annotation border width to 1
             fill = "transparent"))) # Make annotation visible through rect.
+# Override the internal legend layout build to specify the number of columns
+# to display legends' keys (e.g. display legend keys on 4 columns)
+res <- gg2heatmap(m = mat, lgd.ncol = 4)
 # Hide the annotation and annotation legends
 res <- gg2heatmap(m = mat, show.annot = FALSE)
 # Merge annotations legends into a single legend
@@ -526,6 +546,16 @@ res <- gg2heatmap(m = mat, lgd.space.height = 15)
 res <- gg2heatmap(m = mat, show.sub = FALSE)
 # Disable automatic drawing of the heatmap (to only retrieve grobs data)
 res <- gg2heatmap(m = mat, draw = FALSE)
+# Access a specific gg object used to build the heatmap (e.g. a dendrogram)
+res <- gg2heatmap(m = mat, draw = FALSE)
+res$ggplots$cols_dendrogram
+# Return and access all grobs and gg objects used to build the heatmap
+res <- gg2heatmap(m = mat, draw = FALSE, return_plots = "all")
+egg::ggarrange(plots = res$ggplots) # 'ggplots' contains all gg objects
+gridExtra::grid.arrange( # 'legends' contains legends as grobs
+    grobs = list(
+        res$legends$heatmap_legends, res$legends$annotation_legends[[1]]),
+    nrow = 1)
 # Print step-by-step execution of gg2heatmap (useful for debugging)
 res <- gg2heatmap(m = mat, verbose = TRUE)
 }

@@ -384,28 +384,37 @@ get.len.legends <- function(col_table){
 #'                          }
 #' @param height.lgds.space An \code{integer} specifying the height of legend
 #'                          space on final plot.
+#' @param ncol.override     An \code{integer} to override the layout build,
+#'                          specifying the number of columns on which legends'
+#'                          keys should be displayed.
 #' @return A \code{matrix} to be used as a layout for legend grobs display on
 #'         final plot.
 #' @author Yoann Pageaud.
 #' @export
 #' @examples
-#' #Building the simplest layout with 1 legend and 2 categories
-#' build.layout(col_table = list(data.table::data.table(
+#' # Building the simplest layout with 1 legend and 2 categories
+#' build_legends_layout(col_table = list(data.table::data.table(
 #'   'Grps' = c('cat 1', 'cat 2'), 'Cols' = c('blue', 'red'))),
 #'   height.lgds.space = 29)
-#' #If more annotations are passed in the list height.lgds.space let the
+#' # If more annotations are passed in the list height.lgds.space let the
 #' # function stacks legends up to a total size of 29 units on 1 column, before
 #' # generating a new column if there is not enough space.
 
-build.layout <- function(col_table, height.lgds.space){
+build_legends_layout <- function(
+    col_table, height.lgds.space, ncol.override = NULL){
     # Calculate legends length
     lgd_sizes <- BiocompR:::get.len.legends(col_table = col_table)
     #Compute the number of columns necessary for display of large legends
-    ncol.by.lgd <- ceiling(lgd_sizes/height.lgds.space)
+    if(is.null(ncol.override)){
+        ncol.by.lgd <- ceiling(lgd_sizes/height.lgds.space)
+    } else if(all.equal(ncol.override, as.integer(ncol.override)) == TRUE){
+        ncol.by.lgd <- ncol.override
+    } else { stop("Value not supported. 'ncol.override' must be an integer.") }
+
     # Calculate spatial disposition of legends based on their size and the
     # number of columns they occupy to create layout matrix by column
     legend_ids <- seq(length(col_table))
-    columns <- lapply(X = seq(length(col_table)), FUN = function(i){
+    columns <- lapply(X = legend_ids, FUN = function(i){
         if(i %in% legend_ids){
             lgd_position <- which(cumsum(lgd_sizes) <= height.lgds.space)
             if(length(lgd_position) == 0){
@@ -982,6 +991,67 @@ heatmap_layout <- function(
     return(arranged.grob)
 }
 
+#' Prepares gg2heatmap() results
+#'
+#' @return A \code{list} of grobs and gg objects composing the heatmap.
+#' @author Yoann Pageaud.
+#' @keywords internal
+
+prepare_plot_export <- function(
+    return_plots, dd.rows, dd.cols, show.annot, ddgr_seg_row, ddgr_seg_col,
+    col_sidebar, htmp, htmp_legend, final.plot){
+    if(return_plots == "all"){
+        if(dd.rows & dd.cols & show.annot){
+            grob_list <- list(
+                "heatmap_legends" = htmp_legend,
+                "annotation_legends" = col_sidebar$legends)
+            ggplot_list <- list(
+                "rows_dendrogram" = ddgr_seg_row,
+                "cols_dendrogram" = ddgr_seg_col,
+                "annotation_bars" = col_sidebar$sidebar, "heatmap" = htmp)
+        } else if(dd.rows & dd.cols & !show.annot){
+            grob_list <- list("heatmap_legends" = htmp_legend)
+            ggplot_list <- list(
+                "rows_dendrogram" = ddgr_seg_row,
+                "cols_dendrogram" = ddgr_seg_col, "heatmap" = htmp)
+        } else if(!dd.rows & !dd.cols & show.annot){
+            grob_list <- list(
+                "heatmap_legends" = htmp_legend,
+                "annotation_legends" = col_sidebar$legends)
+            ggplot_list <- list(
+                "annotation_bars" = col_sidebar$sidebar, "heatmap" = htmp)
+        } else if(!dd.rows & !dd.cols & !show.annot){
+            grob_list <- list("heatmap_legends" = htmp_legend)
+            ggplot_list <- list("heatmap" = htmp)
+        } else if(dd.rows & !dd.cols & show.annot){
+            grob_list <- list(
+                "heatmap_legends" = htmp_legend,
+                "annotation_legends" = col_sidebar$legends)
+            ggplot_list <- list(
+                "rows_dendrogram" = ddgr_seg_row,
+                "annotation_bars" = col_sidebar$sidebar, "heatmap" = htmp)
+        } else if(dd.rows & !dd.cols & !show.annot){
+            grob_list <- list("heatmap_legends" = htmp_legend)
+            ggplot_list <- list(
+                "rows_dendrogram" = ddgr_seg_row, "heatmap" = htmp)
+        } else if(!dd.rows & dd.cols & show.annot){
+            grob_list <- list(
+                "heatmap_legends" = htmp_legend,
+                "annotation_legends" = col_sidebar$legends)
+            ggplot_list <- list(
+                "cols_dendrogram" = ddgr_seg_col,
+                "annotation_bars" = col_sidebar$sidebar, "heatmap" = htmp)
+        } else if(!dd.rows & dd.cols & !show.annot){
+            grob_list <- list("heatmap_legends" = htmp_legend)
+            ggplot_list <- list(
+                "cols_dendrogram" = ddgr_seg_col, "heatmap" = htmp)
+        }
+        ls.res <- list(
+            "main plot" = final.plot, "ggplots" = ggplot_list,
+            "legends" = grob_list)
+    } else if(return_plots == "main"){ ls.res <- final.plot }
+    return(ls.res)
+}
 
 #' Proof of concept for making a multi-panel clustered ggplot2 heatmap.
 #'

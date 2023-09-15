@@ -222,6 +222,10 @@
 #'                        space (Default: lgd.space.width = 1).
 #' @param lgd.space.height An \code{integer} specifying the height of the legend
 #'                         space (Default: lgd.space.height = 29).
+#' @param lgd.ncol        An \code{integer} to override the internal legend
+#'                        layout build, to specify the number of columns on
+#'                        which legends' keys should be displayed
+#'                        (Default: lgd.ncol = NULL).
 #' @param y.axis.right    A \code{logical} to specify whether the heatmap Y axis
 #'                        should be displayed on the right (y.axis.right = TRUE)
 #'                        or not (y.axis.right = FALSE)
@@ -233,6 +237,15 @@
 #'                        should be drawn automatically when gg2heatmap()
 #'                        execution ends (draw = TRUE), or if it shouldn't
 #'                        (draw = FALSE).
+#' @param return_plots    A \code{character} specifying which plot objects
+#'                        should be returned by gg2heatmap().
+#'                        \itemize{
+#'                         \item{return_plots = "all" (default) will return the
+#'                         heatmap plot, the grobs composing the heatmap, and
+#'                         the gg objects from which the grobs have been made.}
+#'                         \item{return_plots = "main" will only return the
+#'                         heatmap plot.}
+#'                        }
 #' @param verbose         A \code{logical} to display information about the
 #'                        step-by-step processing of the data if TRUE
 #'                        (Default: verbose = FALSE).
@@ -409,6 +422,9 @@
 #'             color = "black", # Set annotation border color to black
 #'             linewidth = 1, # Set annotation border width to 1
 #'             fill = "transparent"))) # Make annotation visible through rect.
+#' # Override the internal legend layout build to specify the number of columns
+#' # to display legends' keys (e.g. display legend keys on 4 columns)
+#' res <- gg2heatmap(m = mat, lgd.ncol = 4)
 #' # Hide the annotation and annotation legends
 #' res <- gg2heatmap(m = mat, show.annot = FALSE)
 #' # Merge annotations legends into a single legend
@@ -440,14 +456,19 @@
 #' res <- gg2heatmap(m = mat, show.sub = FALSE)
 #' # Disable automatic drawing of the heatmap (to only retrieve grobs data)
 #' res <- gg2heatmap(m = mat, draw = FALSE)
+#' # Access a specific gg object used to build the heatmap (e.g. a dendrogram)
+#' res <- gg2heatmap(m = mat, draw = FALSE)
+#' res$ggplots$cols_dendrogram
+#' # Return and access all grobs and gg objects used to build the heatmap
+#' res <- gg2heatmap(m = mat, draw = FALSE, return_plots = "all")
+#' egg::ggarrange(plots = res$ggplots) # 'ggplots' contains all gg objects
+#' gridExtra::grid.arrange( # 'legends' contains legends as grobs
+#'     grobs = list(
+#'         res$legends$heatmap_legends, res$legends$annotation_legends[[1]]),
+#'     nrow = 1)
 #' # Print step-by-step execution of gg2heatmap (useful for debugging)
 #' res <- gg2heatmap(m = mat, verbose = TRUE)
 
-#TODO: Add option to pass number of columns and rows for legends instead of
-# building the layout internally.
-#TODO: Add option to disable the return of grobs after execution
-#TODO: Rewrite the assembling of plots using egg package functions and handling
-# all unsolved remaining cases.
 #TODO: Make it possible to facet without showing annotation
 gg2heatmap <- function(
     m, na.handle = 'remove', dist.method = 'manhattan', rank.fun = NULL,
@@ -466,7 +487,8 @@ gg2heatmap <- function(
     annot.pal = grDevices::rainbow(n = ncol(m)), annot.size = 1, annot.sep = 0,
     theme_annot = NULL, show.annot = TRUE, lgd.merge = FALSE,
     theme_legend = NULL, lgd.space.width = 1, lgd.space.height = 26,
-    y.axis.right = FALSE, show.sub = TRUE, draw = TRUE, verbose = FALSE){
+    lgd.ncol = NULL, y.axis.right = FALSE, show.sub = TRUE, draw = TRUE,
+    return_plots = "all", verbose = FALSE){
     # Fix BiocCheck() complaining about these objects initialization
     rows <- NULL
     value <- NULL
@@ -590,6 +612,10 @@ gg2heatmap <- function(
                           "display the Y-axis on the right side of the",
                           "heatmap."))
         }
+    }
+    # Check return_plots value
+    if(!return_plots %in% c("all", "main")){
+        stop("'return_plots' value not supported.")
     }
 
     # Check annotations groups and palettes matching
@@ -927,13 +953,19 @@ gg2heatmap <- function(
             }
             col_table <- list(col_table[, c("Grps", "Cols"), ])
         }
-        # Build legends layout
-        lgd.layout <- BiocompR::build.layout(
-            col_table = col_table, height.lgds.space = lgd.space.height)
         # Calculate legend length
         lgd_sizes <- BiocompR:::get.len.legends(col_table = col_table)
         # Calculate legend columns
-        lgd.ncol <- ceiling(lgd_sizes/lgd.space.height)
+        if(is.null(lgd.ncol)){
+            lgd.ncol <- ceiling(lgd_sizes/lgd.space.height)
+        } else if(all.equal(lgd.ncol, as.integer(lgd.ncol)) == TRUE){
+            lgd.ncol <- rep(lgd.ncol, times = length(lgd_sizes))
+        }
+
+        # Build legends layout
+        lgd.layout <- BiocompR::build_legends_layout(
+            col_table = col_table, height.lgds.space = lgd.space.height,
+            ncol.override = as.numeric(lgd.ncol[1]))
 
         # Set theme_default_legend
         theme_default_legend <- ggplot2::theme(
@@ -1084,7 +1116,7 @@ gg2heatmap <- function(
     # Create ggplot2 heatmap
     if(verbose){ cat("Assembling heatmap into a grid object...") }
     htmp <- htmp + theme_heatmap + ggplot2::theme(legend.position = "none")
-    arranged.grob <- heatmap_layout(
+    arranged.grob <- BiocompR:::heatmap_layout(
         dd.rows = dd.rows, dd.cols = dd.cols, show.annot = show.annot,
         ddgr_seg_row = ddgr_seg_row, ddgr_seg_col = ddgr_seg_col,
         sidebar = col_sidebar$sidebar, htmp = htmp,
@@ -1119,63 +1151,26 @@ gg2heatmap <- function(
 
     # Prepare results
     if(verbose){ cat("Exporting results...") }
-    if(dd.rows & dd.cols & show.annot){
-        grob_list <- list(
-            "heatmap_legends" = htmp_legend,
-            "annotation_legends" = col_sidebar$legends)
-        ggplot_list <- list(
-            "rows_dendrogram" = ddgr_seg_row, "cols_dendrogram" = ddgr_seg_col,
-            "annotation_bar" = col_sidebar$sidebar, "heatmap" = htmp)
-    } else if(dd.rows & dd.cols & !show.annot){
-        grob_list <- list("heatmap_legends" = htmp_legend)
-        ggplot_list <- list(
-            "rows_dendrogram" = ddgr_seg_row, "cols_dendrogram" = ddgr_seg_col,
-            "heatmap" = htmp)
-    } else if(!dd.rows & !dd.cols & show.annot){
-        grob_list <- list(
-            "heatmap_legends" = htmp_legend,
-            "annotation_legends" = col_sidebar$legends)
-        ggplot_list <- list(
-            "annotation_bar" = col_sidebar$sidebar, "heatmap" = htmp)
-    } else if(!dd.rows & !dd.cols & !show.annot){
-        grob_list <- list("heatmap_legends" = htmp_legend)
-        ggplot_list <- list("heatmap" = htmp)
-    } else if(dd.rows & !dd.cols & show.annot){
-        grob_list <- list(
-            "heatmap_legends" = htmp_legend,
-            "annotation_legends" = col_sidebar$legends)
-        ggplot_list <- list(
-            "rows_dendrogram" = ddgr_seg_row,
-            "annotation_bar" = col_sidebar$sidebar, "heatmap" = htmp)
-    } else if(dd.rows & !dd.cols & !show.annot){
-        grob_list <- list("heatmap_legends" = htmp_legend)
-        ggplot_list <- list(
-            "rows_dendrogram" = ddgr_seg_row, "heatmap" = htmp)
-    } else if(!dd.rows & dd.cols & show.annot){
-        grob_list <- list(
-            "heatmap_legends" = htmp_legend,
-            "annotation_legends" = col_sidebar$legends)
-        ggplot_list <- list(
-            "cols_dendrogram" = ddgr_seg_col,
-            "annotation_bar" = col_sidebar$sidebar, "heatmap" = htmp)
-    } else if(!dd.rows & dd.cols & !show.annot){
-        grob_list <- list("heatmap_legends" = htmp_legend)
-        ggplot_list <- list("cols_dendrogram" = ddgr_seg_col, "heatmap" = htmp)
-    }
+    ls.res <- BiocompR:::prepare_plot_export(
+        return_plots = return_plots, dd.rows = dd.rows, dd.cols = dd.cols,
+        show.annot = show.annot, ddgr_seg_row = ddgr_seg_row,
+        ddgr_seg_col = ddgr_seg_col, col_sidebar = col_sidebar, htmp = htmp,
+        htmp_legend = htmp_legend, final.plot = final.plot)
     rm(htmp_legend)
-    ls.res <- list(
-        "main plot" = final.plot, "grobs" = grob_list,"ggplots" = ggplot_list)
     if(verbose){ cat("Done.\n") }
 
     # Plot final heatmap
     if(draw){
         grid::grid.newpage()
         grid::grid.draw(final.plot)
-    } else { if(verbose){
-        message(paste("To draw heatmap use grid::grid.draw() on",
-                      "your_object$result.grob"))
-    }}
+    } else {
+        if(verbose){
+            message(paste(
+                "To draw the heatmap use grid::grid.draw() on",
+                "your_object$`main plot`"))
+        }
+    }
     rm(final.plot)
-    # Return a list of grobs with final plot and separate grobs.
+    # Return a list of grobs with final plot and separate grobs and ggplots.
     return(ls.res)
 }
