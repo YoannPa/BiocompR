@@ -469,7 +469,14 @@ basic.sidebar <- function(
     facet.annot <- NULL
     Groups <- NULL
     Samples <- NULL
-    #Create a basic sidebar plot
+    # Set palette if facet is on
+    if(!is.null(facet)){
+        dt_levcol <- data.table::data.table(
+            "levels" = levels(data$Groups), "colors" = palette)
+        sublev <- data[.id == facet]$Groups
+        palette <- dt_levcol[!levels %in% levels(droplevels(sublev))]$colors
+    }
+    # Create a basic sidebar plot
     basic <- ggplot2::ggplot() +
         ggplot2::theme(
             legend.justification = c(1, 1),
@@ -489,6 +496,7 @@ basic.sidebar <- function(
         data <- merge(
             x = data, y = dt.facet[, c("Samples", "facet.annot"), ],
             by = "Samples", all.x = TRUE)
+        data <- data[.id != facet]
         #Plot annotation bar with facet
         basic <- basic + ggplot2::geom_tile(data = data, mapping = ggplot2::aes(
             x = Samples, y = .id, fill = Groups, height = 1 - annot.sep,
@@ -498,7 +506,7 @@ basic.sidebar <- function(
             ggplot2::theme(
                 panel.spacing = ggplot2::unit(0, "lines"),
                 strip.background = ggplot2::element_rect(
-                    color = "black", size = 0.5))
+                    color = "black", linewidth = 0.5))
     } else {
         basic <- basic + ggplot2::geom_tile(data = data, mapping = ggplot2::aes(
             x = Samples, y = .id, fill = Groups, height = 1 - annot.sep,
@@ -589,9 +597,6 @@ plot.col.sidebar <- function(
     })
     # Update levels following the new order of the annotation
     groups <- origin.grps
-    # groups <- lapply(X = lapply(X = annot.grps, FUN = function(i){
-    #     factor(x = i, levels =  unique(i))}), FUN = levels)
-
     # Create list of color tables
     if(is.list(annot.pal)){ # If a list of palettes is provided
         # Map categories to palettes
@@ -601,8 +606,6 @@ plot.col.sidebar <- function(
         ls.df.grp.pal <- lapply(X = origin.grps, FUN = function(grp){
             data.table::data.table(
                 "Grps" = grp, "Cols" = annot.pal, stringsAsFactors = FALSE)
-            # data.frame(
-            #     "Grps" = grp, "Cols" = annot.pal, stringsAsFactors = FALSE)
         })
         col_table <- lapply(seq_along(groups), function(i){
             if(length(groups[[i]]) == length(annot.pal)){
@@ -622,7 +625,6 @@ plot.col.sidebar <- function(
     # Create list of annotation data.tables
     dframe.annot <- lapply(annot.grps, function(i){
         data.table::data.table("Samples" = sample.names, "Groups" = i)
-        # data.frame("Samples" = sample.names, "Groups" = i)
     })
     # Order samples following the correlation order provided
     dframe.annot <- lapply(dframe.annot, function(i){
@@ -632,13 +634,6 @@ plot.col.sidebar <- function(
         dt_annot[, Samples := factor(x = Samples, levels = sample_order)]
         dt_annot
     })
-    # # Order samples following the correlation order provided and categories by
-    # # alphabetical order
-    # dframe.annot <- lapply(dframe.annot, function(i){
-    #     i[["Samples"]] <- factor(i[["Samples"]], levels = i[["Samples"]])
-    #     i[["Groups"]] <- factor(i[["Groups"]], levels = unique(i[["Groups"]]))
-    #     i
-    # })
 
     # Rbind all annotations
     dframe.annot <- data.table::rbindlist(dframe.annot, idcol = TRUE)
@@ -646,13 +641,9 @@ plot.col.sidebar <- function(
     # Convert .id as factors
     dframe.annot[, .id :=  as.factor(.id)]
     dframe.annot[, .id :=  factor(x = .id, levels = unique_id)]
-    # dframe.annot$.id <- factor(
-    #     x = dframe.annot$.id, levels = unique(dframe.annot$.id))
 
     if(annot.pos == "top"){ # Change order of levels
         dframe.annot[, .id :=  factor(x = .id, levels = rev(unique_id))]
-        # dframe.annot$.id <- factor(
-        #     x = dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
     }
 
     # Check color tables
@@ -674,14 +665,15 @@ plot.col.sidebar <- function(
             col_table <- col_table[!duplicated(x = Cols)]
         }
     }
-    #Plot color sidebars
+    # Plot color sidebars
     col_sidebar <- BiocompR::basic.sidebar(
+    # col_sidebar <- basic.sidebar(
         data = data.table::copy(dframe.annot), palette = col_table$Cols,
         annot.sep = annot.sep, annot.cut = annot.cut, facet = facet,
         lgd.ncol = lgd.ncol[1])
-    #Add legend theme parameters if some
+    # Add legend theme parameters if some
     col_sidebar <- col_sidebar + theme_legend
-    #Modify base plot following its position
+    # Modify base plot following its position
     if(annot.pos == "top"){
         theme_annot <- theme_annot + ggplot2::theme(
             axis.text.x.top = theme_annot$axis.text.x,
@@ -726,15 +718,24 @@ plot.col.sidebar <- function(
             BiocompR:::get.lgd(col_sidebar + ggplot2::labs(fill = lgd.name)))
     } else { # Split legends and return a list of legends
         if(annot.pos == "top"){
+            if(!is.null(facet)){
+                dframe.annot <- dframe.annot[.id != facet]
+                unique_id <- unique_id[unique_id != facet]
+                dframe.annot[, Groups := droplevels(Groups)]
+                col_table <- col_table[Grps %in% levels(dframe.annot$Groups)]
+                col_table[, .id := as.factor(.id)]
+                data.table::setattr(
+                    x = col_table$.id, name = "levels",
+                    value = as.character(seq(length(levels(col_table$.id)))))
+                col_table[, .id := as.integer(as.character(.id))]
+            }
             dframe.annot[, .id :=  factor(x = .id, levels = unique_id)]
-            # dframe.annot$.id <- factor(
-            #     dframe.annot$.id, levels = rev(levels(dframe.annot$.id)))
         }
-        #Generate separate legends if more than 1 palette available or if only 1
-        # annotation is used
+        # Generate separate legends if more than 1 palette available or if only
+        # 1 annotation is used
         if((is.list(annot.pal) & length(annot.pal) > 1) | length(
             levels(dframe.annot$.id)) == 1){
-            #Get all legends separately
+            # Get all legends separately
             sidebar.lgd <- lapply(
                 X = seq_along(levels(dframe.annot$.id)), FUN = function(i){
                     BiocompR:::get.lgd(BiocompR::basic.sidebar(
@@ -742,7 +743,6 @@ plot.col.sidebar <- function(
                         palette = col_table[.id == i]$Cols,
                         lgd.ncol = lgd.ncol[i]) + theme_legend + ggplot2::labs(
                             fill = levels(dframe.annot$.id)[i]))
-
                 })
         } else {
             stop(paste(

@@ -469,7 +469,6 @@
 #' # Print step-by-step execution of gg2heatmap (useful for debugging)
 #' res <- gg2heatmap(m = mat, verbose = TRUE)
 
-#TODO: Make it possible to facet without showing annotation
 gg2heatmap <- function(
     m, na.handle = 'remove', dist.method = 'manhattan', rank.fun = NULL,
     top.rows = NULL, dendrograms = TRUE, dend.size = 1, theme_dend_top = NULL,
