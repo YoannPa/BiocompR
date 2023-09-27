@@ -15,7 +15,7 @@ fused.plot(
   order.method,
   order.select,
   hclust.method = "complete",
-  p.adjust,
+  p.adjust = "BH",
   annot.grps = list(Groups = seq(ncol(data))),
   annot.pal = grDevices::rainbow(n = ncol(data)),
   annot.pos = "top",
@@ -25,8 +25,8 @@ fused.plot(
   annot.split = FALSE,
   dendro.pos = "none",
   dendro.size = 0,
-  grid.col = "grey",
-  grid.thickness = 0.5,
+  grid_col = "white",
+  grid_linewidth = 0.3,
   axis.title = ggplot2::element_blank(),
   axis.title.x = ggplot2::element_blank(),
   axis.title.y = ggplot2::element_blank(),
@@ -79,7 +79,8 @@ fused.plot(
   raster = TRUE,
   raster1 = NULL,
   raster2 = NULL,
-  add.ggplot.arg = NULL
+  add.ggplot.arg = NULL,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -139,12 +140,13 @@ for the hierarchical clustering if the ordering
 method is 'hclust'.\cr Possible methods are:
 'ward.D','ward.D2', 'single', 'complete',
 'average' (= UPGMA), 'mcquitty' (= WPGMA),
-median' (= WPGMC) or 'centroid' (= UPGMC).}
+'median' (= WPGMC) or 'centroid' (= UPGMC).}
 
 \item{p.adjust}{A \code{character} specifying what adjustment
-for multiple tests should be used.\cr Possible
-values are: "holm", "hochberg", "hommel",
-"bonferroni", "BH", "BY", "fdr", "none".}
+for multiple tests should be used.\cr
+(Default: p.adjust = "BH"; Supported:
+p.adjust = c("holm", "hochberg", "hommel",
+"bonferroni", "BH", "BY", "fdr", "none")).}
 
 \item{annot.grps}{A \code{list} of vectors of groups to which
 variables belongs for the annotation sidebars.
@@ -173,10 +175,10 @@ dendrograms if the selected order is 'hclust'.
 \item{dendro.size}{An \code{integer} to increase or decrease the
 size of the dendrogram.}
 
-\item{grid.col}{A \code{character} specifying the color of the
+\item{grid_col}{A \code{character} specifying the color of the
 grid.}
 
-\item{grid.thickness}{A \code{double} value for the thickness of the
+\item{grid_linewidth}{A \code{double} value for the thickness of the
 grid.}
 
 \item{axis.title}{An \code{element_text} object to setup axes
@@ -211,9 +213,6 @@ legend.}
 
 \item{set.lgd2.title}{A \code{character}to be used as the title of the
 legend.}
-
-\item{diag.col}{A \code{character} defining the color of cells
-with of the empty diagonal.}
 
 \item{lgd.pal1}{A \code{character} vector of colors to use for
 the palette of the upper triangle.}
@@ -343,6 +342,9 @@ should be rasterized.}
 colors in the lower triangle associated legend
 should be rasterized.}
 
+\item{diagonal_col}{A \code{character} defining the color of cells
+with of the empty diagonal.}
+
 \item{add.ggplot.args}{Ultimate ggplot2 additionnal components that you
 want to pass to the plot (Use only if you are an
 ggplot2 advanced user).}
@@ -361,6 +363,9 @@ A \code{gtable} object plotted automatically and a \code{list} of
 }
 \description{
 Creates a plot summarizing results from 2 different pairwise comparisons.
+}
+\references{
+\href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6099145/#B13}{Why, When and How to Adjust Your P Values? Mohieddin Jafari and Naser Ansari-Pour - Cell J. 2019 Winter; 20(4): 604–607.}
 }
 \author{
 Yoann Pageaud.

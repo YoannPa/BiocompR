@@ -70,7 +70,23 @@ fused.view <- function(
     annot.pal = grDevices::rainbow(n = length(sample.names)), annot.pos = 'top',
     annot.size = 0, annot.text = NULL, annot.lgd.merge = FALSE,
     annot.split = FALSE, dendro.pos = 'none', dendro.size = 0,
-    grid.col = "grey", grid.thickness = 0.5,
+    grid_col = "white", grid_linewidth = 0.3,
+    upper_theme = NULL,
+    upper_scale_fill_grad = ggplot2::scale_fill_gradientn(
+        colors = BiocompR::biopalette(name = "viridis_C_plasma"),
+        name = "Upper\ntriangle values"),
+    upper_guide_custom_bar = ggplot2::guide_colorbar(
+        barheight = 28, barwidth = 0.7, ticks.linewidth = 0.5,
+        ticks.colour = "black", frame.linewidth = 0.5, frame.colour = "black"),
+    lower_theme = NULL,
+    lower_scale_fill_grad = ggplot2::scale_fill_gradientn(
+        colors = BiocompR::biopalette(name = "viridis_D_viridis"),
+        name = "Lower\ntriangle values"),
+    lower_guide_custom_bar = ggplot2::guide_colorbar(
+        barheight = 0.7, barwidth = 28, ticks.linewidth = 0.5,
+        ticks.colour = "black", frame.linewidth = 0.5, frame.colour = "black"),
+    diagonal_col = "white",
+    plot_title = NULL,
     axis.title = ggplot2::element_blank(),
     axis.title.x = ggplot2::element_blank(),
     axis.title.y = ggplot2::element_blank(),
@@ -78,55 +94,49 @@ fused.view <- function(
     axis.text.x = ggplot2::element_text(angle = 90, hjust = 0, vjust = 0.5),
     axis.text.y = ggplot2::element_blank(),
     axis.ticks = ggplot2::element_line(color = "black"),
-    set.x.title = NULL, set.y.title = NULL,
-    set.lgd1.title = NULL, set.lgd2.title = NULL,
-    diag.col = "white",
-    lgd.pal1 = c("blue", "orange"), lgd.pal2 = c("green","red"),
-    lgd.title = ggplot2::element_blank(), lgd.title1 = ggplot2::element_blank(),
     lgd.title2 = ggplot2::element_blank(),
-    lgd.text = ggplot2::element_text(size = 12),
-    lgd.text1 = ggplot2::element_blank(),
     lgd.text2 = ggplot2::element_blank(),
     lgd.breaks = NULL, lgd.breaks1 = 5, lgd.breaks2 = 5,
     lgd.labels = NULL, lgd.labels1 = NULL, lgd.labels2 = NULL,
     lgd.round = NULL, lgd.round1 = 2, lgd.round2 = 2,
     lgd.limits = NULL, lgd.limits1 = NULL, lgd.limits2 = NULL,
-    lgd.ticks = TRUE, lgd.ticks1 = NULL, lgd.ticks2 = NULL,
-    lgd.ticks.linewidth = NULL, lgd.ticks.linewidth1 = 2,
-    lgd.ticks.linewidth2 = 2,
-    lgd.nbin = NULL, lgd.nbin1 = 5, lgd.nbin2 = 5,
-    lgd.height1 = 30, lgd.height2 = 1, lgd.width1 = 1, lgd.width2 = 30,
+    lgd.ticks2 = NULL,
+    lgd.ticks.linewidth2 = 2, lgd.nbin2 = 5,
+    lgd.height2 = 1, lgd.width2 = 30,
     lgd.frame.col = "grey", lgd.frame.linewidth = 1.5,
     lgd.frame.linewidth1 = NULL, lgd.frame.linewidth2 = NULL,
-    raster = NULL, raster1 = TRUE, raster2 = TRUE,
-    add.ggplot.arg = NULL
+    raster2 = TRUE,
+    # add.ggplot.arg = NULL,
+    verbose = FALSE
 ){
-    #Order Method
-    if(order.method %in% c("AOE","FPC","hclust","alphabet","default")){
-        cat(paste("Apply",order.method,"ordering method.\n"))
+    # Order Method
+    if(order.method %in% c("AOE", "FPC", "hclust", "alphabet", "default")){
+        cat(paste("Apply", order.method, "ordering method.\n"))
 
         if(order.method == "hclust"){
-            #check hclust.method
+            # Check hclust.method
             if(hclust.method %in% c(
                 'ward.D', 'ward.D2', 'single', 'complete', 'average',
                 'mcquitty', 'median', 'centroid')){
-                cat(paste("Apply",hclust.method,"clustering method.\n"))
+                if(verbose){
+                    cat("Apply", hclust.method, "clustering method.\n")
+                }
             } else { stop("the clustering method is not supported.") }
-            #check dendrogram
+            # Check dendrogram
             if(dendro.pos != "none"){
-                if(!dendro.pos %in% c('top','left','both')){
+                if(!dendro.pos %in% c('top', 'left', 'both')){
                     stop("dendrogram cannot be put here.")
                 }
             }
         } else {
-            #check dendrogram
+            # Check dendrogram
             if(dendro.pos != "none"){
                 stop(paste("order != 'hclust'. Dendrogram cannot be generated",
                            "if rows & cols are not ordered following the",
                            "hierarchical clustering."))
             }
         }
-        #order select
+        # Order select
         if(order.method %in% c("AOE", "FPC", "hclust", "alphabet")){
             if(!order.select %in% c('upper', 'lower')){
                 stop("Wrong value for order.select - You can only select",
@@ -136,12 +146,12 @@ fused.view <- function(
         }
     } else { stop("the order method is not supported.") }
 
-    #Overwrite the plot titles if they take the same parameters
-    if(!BiocompR::is.elt_blank(axis.title)){
+    # Overwrite the plot titles if they take the same parameters
+    if(!BiocompR:::is.elt_blank(axis.title)){
         axis.title.x <- axis.title
         axis.title.y <- axis.title
     }
-    #Label matching Breaks
+    # Label matching Breaks
     if(!is.null(lgd.labels)){
         if(length(lgd.labels) != length(seq(lgd.breaks))){
             stop("the number of labels does not match the number of breaks.")
@@ -159,47 +169,47 @@ fused.view <- function(
                        "breaks for lower triangle legend."))
         }
     }
-    #Overwrite the legends rounds if they take the same parameters
+    # Overwrite the legends rounds if they take the same parameters
     if(!is.null(lgd.round)){ lgd.round1 <- lgd.round; lgd.round2 <- lgd.round }
-    #Overwrite the legends titles if they take the same parameters
-    if(!BiocompR::is.elt_blank(lgd.title)){
+    # Overwrite the legends titles if they take the same parameters
+    if(!BiocompR:::is.elt_blank(lgd.title)){
         lgd.title1 <- lgd.title; lgd.title2 <- lgd.title }
-    #Overwrite the legends titles if they take the same parameters
-    if(!BiocompR::is.elt_blank(lgd.text)){
+    # Overwrite the legends titles if they take the same parameters
+    if(!BiocompR:::is.elt_blank(lgd.text)){
         lgd.text1 <- lgd.text; lgd.text2 <- lgd.text }
-    #Overwrite the legends breaks if they take the same parameters
+    # Overwrite the legends breaks if they take the same parameters
     if(!is.null(lgd.breaks)){
         lgd.breaks1 <- lgd.breaks; lgd.breaks2 <- lgd.breaks}
-    #Overwrite the legends bins if they take the same value
+    # Overwrite the legends bins if they take the same value
     if(!is.null(lgd.nbin)){ lgd.nbin1 <- lgd.nbin; lgd.nbin2 <- lgd.nbin }
-    #Overwrite the legends raster arg if they take the same value
+    # Overwrite the legends raster arg if they take the same value
     if(!is.null(raster)){ raster1 <- raster ; raster2 <- raster }
-    #Overwrite the legends ticks arg if they take the same value
+    # Overwrite the legends ticks arg if they take the same value
     if(!is.null(lgd.ticks)){ lgd.ticks1 <- lgd.ticks ; lgd.ticks2 <- lgd.ticks }
-    #Overwrite the legends ticks linewidth arg if they take the same value
+    # Overwrite the legends ticks linewidth arg if they take the same value
     if(!is.null(lgd.ticks.linewidth)){
         lgd.ticks.linewidth1 <- lgd.ticks.linewidth
         lgd.ticks.linewidth2 <- lgd.ticks.linewidth
     }
-    #Overwrite the legends frame linewidth arg if they take the same value
+    # Overwrite the legends frame linewidth arg if they take the same value
     if(!is.null(lgd.frame.linewidth)){
         lgd.frame.linewidth1 <- lgd.frame.linewidth
         lgd.frame.linewidth2 <- lgd.frame.linewidth
     }
 
-    #Get order of the correlations for the method used
+    # Get order of the correlations for the method used
     if(order.select == 'upper'){
         if(order.method %in% c("AOE", "FPC", "hclust")){
             correlation.order <- corrplot::corrMatOrder(
                 upper.mat, order = order.method, hclust.method = hclust.method)
         } else if(order.method == "alphabet"){
-            #Fix bug of corrMatOrder when alphabet order
+            # Fix bug of corrMatOrder when alphabet order
             correlation.order <- BiocompR::fix.corrMatOrder.alphabet(
                 cor.order = correlation.order, str = colnames(upper.mat))
         }else if(order.method == 'default'){
             correlation.order<-seq(ncol(upper.mat))}
         if(dendro.pos != "none"){
-            #Generate Hierarchy Cluster
+            # Generate Hierarchy Cluster
             hierarchy.clust <- fastcluster::hclust(
                 d = stats::as.dist(1-upper.mat), method = hclust.method)
         }
@@ -208,44 +218,65 @@ fused.view <- function(
             correlation.order <- corrplot::corrMatOrder(
                 lower.mat, order = order.method, hclust.method = hclust.method)
         } else if(order.method == "alphabet"){
-            #Fix bug of corrMatOrder when alphabet order
+            # Fix bug of corrMatOrder when alphabet order
             correlation.order<-BiocompR::fix.corrMatOrder.alphabet(
                 cor.order = correlation.order, str = colnames(upper.mat))
         } else if(order.method == 'default'){
             correlation.order <- seq(ncol(lower.mat))}
         if(dendro.pos != "none"){
-            #Generate Hierarchy Cluster
+            # Generate Hierarchy Cluster
             hierarchy.clust <- fastcluster::hclust(
                 d = stats::as.dist(1-lower.mat), method = hclust.method)
         }
     }
-    #Generate Dendrogram
+    # Generate Dendrogram
     if(dendro.pos != "none"){
         dendrogram <- stats::as.dendrogram(hierarchy.clust)
         ddgr_dat <- ggdendro::dendro_data(dendrogram) #Dendrogram data
         ddgr_seg <- BiocompR::ggdend( #Get dendrogram segments
             df = ddgr_dat$segments, orientation = dendro.pos, reverse.x = TRUE)
     }
-    #Re-order rows and columns
+    # Re-order rows and columns
     if(order.method != 'default'){
-        upper.mat<-upper.mat[correlation.order,correlation.order]
-        lower.mat<-lower.mat[correlation.order,correlation.order]
+        upper.mat <- upper.mat[correlation.order, correlation.order]
+        lower.mat <- lower.mat[correlation.order, correlation.order]
     }
-    #Replace half matrices by NAs
+    # Replace half matrices by NAs
     upper.mat[upper.tri(upper.mat)] <- NA
     lower.mat[lower.tri(lower.mat)] <- NA
-    #Melt Correlation matrix
-    upper.melt <- data.table::melt(upper.mat, na.rm = TRUE)
-    lower.melt <- data.table::melt(lower.mat, na.rm = TRUE)
-    #Invert order of samples
-    upper.melt$Var2 <- factor(upper.melt$Var2,
-                              levels = rev(levels(upper.melt$Var2)))
-    lower.melt$Var2 <- factor(lower.melt$Var2,
-                              levels = rev(levels(lower.melt$Var2)))
-    #Replace identical correlations by NA
-    upper.melt[upper.melt$Var1 == upper.melt$Var2,]$value <- NA
-    lower.melt[lower.melt$Var1 == lower.melt$Var2,]$value <- NA
-    #Overwrite min and max of upper and lower melt matrices if limits have been
+    # Melt Correlation matrix
+    dt.upper <- data.table::as.data.table(x = upper.mat, keep.rownames = "Var1")
+    upper.melt <- data.table::melt.data.table(
+        data = dt.upper, id.vars = "Var1", variable.name = "Var2", na.rm = TRUE,
+        measure.vars = colnames(dt.upper)[-c(1)])
+    upper.melt[, Var1 := as.factor(x = Var1)]
+    upper.melt[, Var1 := factor(
+        x = Var1, levels = as.character(unique(upper.melt$Var1)))]
+    # upper.melt <- data.table::melt(upper.mat, na.rm = TRUE)
+    dt.lower <- data.table::as.data.table(x = lower.mat, keep.rownames = "Var1")
+    lower.melt <- data.table::melt.data.table(
+        data = dt.lower, id.vars = "Var1", variable.name = "Var2", na.rm = TRUE,
+        measure.vars = colnames(dt.lower)[-c(1)])
+    lower.melt[, Var1 := as.factor(x = Var1)]
+    lower.melt[, Var1 := factor(
+        x = Var1, levels = as.character(unique(lower.melt$Var1)))]
+    # lower.melt <- data.table::melt(lower.mat, na.rm = TRUE)
+
+    # Invert order of samples
+    upper.melt[, Var2 := factor(x = Var2, levels = rev(levels(Var2)))]
+    lower.melt[, Var2 := factor(x = Var2, levels = rev(levels(Var2)))]
+    # upper.melt$Var2 <- factor(upper.melt$Var2,
+    #                           levels = rev(levels(upper.melt$Var2)))
+    # lower.melt$Var2 <- factor(lower.melt$Var2,
+    #                           levels = rev(levels(lower.melt$Var2)))
+
+    # Replace identical correlations by NA
+    upper.melt[Var1 == Var2, value := NA]
+    lower.melt[Var1 == Var2, value := NA]
+    # upper.melt[upper.melt$Var1 == upper.melt$Var2,]$value <- NA
+    # lower.melt[lower.melt$Var1 == lower.melt$Var2,]$value <- NA
+
+    # Overwrite min and max of upper and lower melt matrices if limits have been
     # given for legends.
     if(is.null(lgd.limits)){
         upper.minmax <- BiocompR:::min.max.update(
@@ -276,54 +307,114 @@ fused.view <- function(
             }
         }
     }
-    #Upper plot
-    upper.ggplot <- BiocompR::basic.ggplot.tri(
-        melt.tri = upper.melt, grid.col = grid.col,
-        grid.thickness = grid.thickness,
-        lgd.title = lgd.title1, lgd.text = lgd.text1, lgd.pal = lgd.pal1,
-        min_tri = min_upper, max_tri = max_upper, lgd.breaks = lgd.breaks1,
-        lgd.round = lgd.round1, lgd.ticks = lgd.ticks1, lgd.nbin = lgd.nbin1,
-        lgd.height = lgd.height1, lgd.width = lgd.width1, rasteri = raster1,
-        lgd.ticks.linewidth = lgd.ticks.linewidth1,
-        lgd.frame.col = lgd.frame.col,
-        lgd.frame.linewidth = lgd.frame.linewidth1, diag.col = diag.col,
-        set.lgd.title = set.lgd1.title) +
-        ggplot2::theme(axis.text = axis.text) +
-        ggplot2::labs(x = set.x.title, y = set.y.title)
+    # Define default theme
+    upper_default_fused <- ggplot2::theme(
+        axis.title = ggplot2::element_text(size = 13),
+        legend.title = ggplot2:: element_text(size = 13),
+        legend.text = ggplot2::element_text(size = 9),
+        legend.justification = c(1, 0),
+        plot.margin = ggplot2::margin(0, 0, 0, 0))
+    # Update theme
+    upper_theme <- upper_default_fused + upper_theme
+    # Update upper_scale_fill_grad na.value to add diagonal_col
+    upper_scale_fill_grad$na.value <- diagonal_col
+    # Upper plot
+    upper.ggplot <- ggtriangle(
+        melt_tri = upper.melt, grid_col = grid_col,
+        grid_linewidth = grid_linewidth, ggtri_theme = upper_theme,
+        scale_fill_grad = upper_scale_fill_grad,
+        guide_custom_bar = upper_guide_custom_bar) +
+        ggtitle(plot_title)
+
+    # upper.ggplot <- ggtriangle(
+    #     melt_tri = upper.melt,
+    #     grid_col = grid.col,
+    #     grid_linewidth = grid_linewidth,
+    #     ggtri_theme = ggplot2::theme(
+    #         legend.title = lgd.title1,
+    #         legend.text = legend.text = ggplot2::element_text(size = 12),
+    #         legend.justification = c(1, 0),
+    #         plot.margin = ggplot2::margin(0, 0, 0, 0), axis.text = axis.text),
+    # scale_fill_grad = ggplot2::scale_fill_gradientn(
+    #     colors = lgd.pal1,
+    #     breaks = round(
+    #         seq(min_upper, max_upper, length.out = lgd.breaks1),
+    #         lgd.round1),
+    #     labels = round(
+    #         seq(min_upper, max_upper, length.out = lgd.breaks1),
+    #         lgd.round1), na.value = diag.col, name = set.lgd1.title),
+    #     guide_custom_bar = ggplot2::guide_colorbar(
+    #         ticks = lgd.ticks1, nbin = lgd.nbin1, barheight = lgd.height1,
+    #         barwidth = lgd.width1, raster = raster1,
+    #         ticks.linewidth = lgd.ticks.linewidth1,
+    #         frame.colour = lgd.frame.col,
+    #         frame.linewidth = lgd.frame.linewidth1),
+    #     plot.labs = ggplot2::labs(x = set.x.title, y = set.y.title)
+    # )
+    # upper.ggplot <- BiocompR:::basic.ggplot.tri(
+    #     melt.tri = upper.melt, grid.col = grid.col,
+    #     grid.thickness = grid.thickness,
+    #     lgd.title = lgd.title1, lgd.text = lgd.text1, lgd.pal = lgd.pal1,
+    #     min_tri = min_upper, max_tri = max_upper, lgd.breaks = lgd.breaks1,
+    #     lgd.round = lgd.round1, lgd.ticks = lgd.ticks1, lgd.nbin = lgd.nbin1,
+    #     lgd.height = lgd.height1, lgd.width = lgd.width1, rasteri = raster1,
+    #     lgd.ticks.linewidth = lgd.ticks.linewidth1,
+    #     lgd.frame.col = lgd.frame.col,
+    #     lgd.frame.linewidth = lgd.frame.linewidth1, diag.col = diag.col,
+    #     set.lgd.title = set.lgd1.title) +
+    #     ggplot2::theme(axis.text = axis.text) +
+    #     ggplot2::labs(x = set.x.title, y = set.y.title)
+
     if(annot.pos == "top"){
         upper.ggplot <- upper.ggplot + ggplot2::theme(
-            axis.text.x = ggplot2::element_blank(),axis.text.y = axis.text.y,
-            axis.ticks.x = ggplot2::element_blank(),axis.ticks.y = axis.ticks,
-            axis.title.x = ggplot2::element_blank(),axis.title.y = axis.title.y)
-    } else if(annot.pos == "left"){
-        upper.ggplot <- upper.ggplot + ggplot2::theme(
-            axis.text.x.top = axis.text.x,
-            axis.text.y = ggplot2::element_blank(),
-            axis.ticks.x = axis.ticks, axis.ticks.y = ggplot2::element_blank(),
-            axis.title.x = axis.title.x,
-            axis.title.y = ggplot2::element_blank())
-    } else { stop("'annot.pos' value not supported.") }
-    if(!is.null(add.ggplot.arg)){
-        upper.ggplot <- upper.ggplot + add.ggplot.arg
-    }
-    #Lower plot
-    lower.ggplot <- BiocompR::basic.ggplot.tri(
-        melt.tri = lower.melt, grid.col = grid.col,
-        grid.thickness = grid.thickness, lgd.title = lgd.title2,
-        lgd.text = lgd.text2, lgd.pal = lgd.pal2, min_tri = min_lower,
-        max_tri = max_lower, lgd.breaks = lgd.breaks2, lgd.round = lgd.round2,
-        lgd.ticks = lgd.ticks2, lgd.nbin = lgd.nbin2, lgd.height = lgd.height2,
-        lgd.width = lgd.width2, rasteri = raster2,
-        lgd.ticks.linewidth = lgd.ticks.linewidth2,
-        lgd.frame.col = lgd.frame.col,
-        lgd.frame.linewidth = lgd.frame.linewidth2, diag.col = diag.col,
-        set.lgd.title = set.lgd2.title) +
-        ggplot2::theme(axis.title = ggplot2::element_blank(),
-                       axis.text = ggplot2::element_blank(),
-                       axis.ticks = ggplot2::element_blank(),
-                       axis.ticks.length = ggplot2::unit(0, "pt"),
-                       legend.direction = 'horizontal')
-    #Plot Color Sidebar
+            axis.text.x.top = ggplot2::element_blank(),
+            axis.ticks.x = ggplot2::element_blank())
+    } else if(annot.pos != "left"){ stop("'annot.pos' value not supported.") }
+
+    # if(!is.null(add.ggplot.arg)){
+    #     upper.ggplot <- upper.ggplot + add.ggplot.arg
+    # }
+
+    # Define default theme
+    lower_default_fused <- ggplot2::theme(
+        axis.title = ggplot2::element_blank(),
+        axis.text.x.top = ggplot2::element_blank(),
+        axis.text.y.right = ggplot2::element_blank(),
+        axis.ticks = ggplot2::element_blank(),
+        axis.ticks.length = ggplot2::unit(0, "pt"),
+        legend.direction = 'horizontal',
+        legend.position = "bottom",
+        legend.justification = c(1, 0),
+        plot.margin = ggplot2::margin(0, 0, 0, 0))
+    # Update theme
+    lower_theme <- lower_default_fused + lower_theme
+    # Update lower_scale_fill_grad na.value to add diagonal_col
+    lower_scale_fill_grad$na.value <- diagonal_col
+    # Lower plot
+    lower.ggplot <- ggtriangle(
+        melt_tri = lower.melt, grid_col = grid_col,
+        grid_linewidth = grid_linewidth, ggtri_theme = lower_theme,
+        scale_fill_grad = lower_scale_fill_grad,
+        guide_custom_bar = lower_guide_custom_bar)
+
+    # lower.ggplot <- BiocompR:::basic.ggplot.tri(
+    #     melt.tri = lower.melt, grid_col = grid_col,
+    #     grid_linewidth = grid_linewidth, lgd.title = lgd.title2,
+    #     lgd.text = lgd.text2, lgd.pal = lgd.pal2, min_tri = min_lower,
+    #     max_tri = max_lower, lgd.breaks = lgd.breaks2, lgd.round = lgd.round2,
+    #     lgd.ticks = lgd.ticks2, lgd.nbin = lgd.nbin2, lgd.height = lgd.height2,
+    #     lgd.width = lgd.width2, rasteri = raster2,
+    #     lgd.ticks.linewidth = lgd.ticks.linewidth2,
+    #     lgd.frame.col = lgd.frame.col,
+    #     lgd.frame.linewidth = lgd.frame.linewidth2, diag.col = diag.col,
+    #     set.lgd.title = set.lgd2.title) +
+    #     ggplot2::theme(axis.title = ggplot2::element_blank(),
+    #                    axis.text = ggplot2::element_blank(),
+    #                    axis.ticks = ggplot2::element_blank(),
+    #                    axis.ticks.length = ggplot2::unit(0, "pt"),
+    #                    legend.direction = 'horizontal')
+
+    # Plot Color Sidebar
     col_sidebar <- BiocompR:::plot.col.sidebar(
         sample.names = sample.names, annot.grps = annot.grps,
         annot.pal = annot.pal, annot.pos = annot.pos,
@@ -479,11 +570,12 @@ fused.view <- function(
 #'                              method is 'hclust'.\cr Possible methods are:
 #'                              'ward.D','ward.D2', 'single', 'complete',
 #'                              'average' (= UPGMA), 'mcquitty' (= WPGMA),
-#'                              median' (= WPGMC) or 'centroid' (= UPGMC).
+#'                              'median' (= WPGMC) or 'centroid' (= UPGMC).
 #' @param p.adjust              A \code{character} specifying what adjustment
-#'                              for multiple tests should be used.\cr Possible
-#'                              values are: "holm", "hochberg", "hommel",
-#'                              "bonferroni", "BH", "BY", "fdr", "none".
+#'                              for multiple tests should be used.\cr
+#'                              (Default: p.adjust = "BH"; Supported:
+#'                              p.adjust = c("holm", "hochberg", "hommel",
+#'                              "bonferroni", "BH", "BY", "fdr", "none")).
 #' @param annot.grps            A \code{list} of vectors of groups to which
 #'                              variables belongs for the annotation sidebars.
 #'                              Vectors' lengths have to match the number of
@@ -505,9 +597,9 @@ fused.view <- function(
 #'                              \cr Possible values are: 'top','left','none'.
 #' @param dendro.size           An \code{integer} to increase or decrease the
 #'                              size of the dendrogram.
-#' @param grid.col              A \code{character} specifying the color of the
+#' @param grid_col              A \code{character} specifying the color of the
 #'                              grid.
-#' @param grid.thickness        A \code{double} value for the thickness of the
+#' @param grid_linewidth        A \code{double} value for the thickness of the
 #'                              grid.
 #' @param axis.title            An \code{element_text} object to setup axes
 #'                              titles.
@@ -531,7 +623,7 @@ fused.view <- function(
 #'                              legend.
 #' @param set.lgd2.title        A \code{character}to be used as the title of the
 #'                              legend.
-#' @param diag.col              A \code{character} defining the color of cells
+#' @param diagonal_col              A \code{character} defining the color of cells
 #'                              with of the empty diagonal.
 #' @param lgd.pal1              A \code{character} vector of colors to use for
 #'                              the palette of the upper triangle.
@@ -639,17 +731,18 @@ fused.view <- function(
 #'        }
 #' @author Yoann Pageaud.
 #' @export
+#' @references \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6099145/#B13}{Why, When and How to Adjust Your P Values? Mohieddin Jafari and Naser Ansari-Pour - Cell J. 2019 Winter; 20(4): 604–607.}
 
 #TODO: Add parameter documentation for annot.text.
 fused.plot <- function(
     data, ncores, upper.comp, upper.value, lower.comp, lower.value,
     na.rm = 'pairwise', order.method, order.select, hclust.method = 'complete',
-    p.adjust, annot.grps = list("Groups" = seq(ncol(data))),
+    p.adjust = "BH", annot.grps = list("Groups" = seq(ncol(data))),
     annot.pal = grDevices::rainbow(n = ncol(data)), annot.pos = 'top',
     annot.size = 0, annot.text = NULL, annot.lgd.merge = FALSE,
     annot.split = FALSE,
     dendro.pos = 'none', dendro.size = 0,
-    grid.col = "grey",grid.thickness = 0.5,
+    grid_col = "white",grid_linewidth = 0.3,
     axis.title = ggplot2::element_blank(),
     axis.title.x = ggplot2::element_blank(),
     axis.title.y = ggplot2::element_blank(),
@@ -677,71 +770,79 @@ fused.plot <- function(
     lgd.width1 = 1, lgd.width2 = 30,
     lgd.frame.col = "grey", lgd.frame.linewidth = 1.5,
     lgd.frame.linewidth1 = NULL, lgd.frame.linewidth2 = NULL,
-    raster = TRUE, raster1 = NULL, raster2 = NULL, add.ggplot.arg = NULL){
-    #Fix BiocCheck() complaining about these objects initialization
+    raster = TRUE, raster1 = NULL, raster2 = NULL, add.ggplot.arg = NULL,
+    verbose = FALSE){
+    # Fix BiocCheck() complaining about these objects initialization
     statistic <- NULL
-    #Data format
+    # Data format
     if(!(is.matrix(data))){if(is.data.frame(data)){data<-as.matrix(data)
     } else { stop("data is neither a matrix or a dataframe.") } }
-    #Upper value type
+    # Upper value type
     if(!(upper.value %in% c('r', 'n', 'stat', 'p', 'se'))){
         stop("value type unknown for upper.value")
     }
-    #Lower value type
+    # Lower value type
     if(!(lower.value %in% c('r', 'n', 'stat', 'p', 'se'))){
         stop("value type unknown for lower.value")
     }
-    #Comparison Type
+    # Comparison Type
     if(na.rm %in% c("pairwise", "complete")){
         cat(paste("Apply", na.rm, "deletion of missing data.\n"))
     } else { stop("the value of na.rm is not supported.") }
 
-    #P-value adjustment method
+    # P-value adjustment method
     if(p.adjust %in% c(
         "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none")){
         cat(paste("Apply", p.adjust, "multiple testing adjustment.\n"))
     } else { stop("multiple testing adjustment method is not supported.") }
 
-    #Groups and palettes matching
-    BiocompR::check.annotations(
-        data = data, annot.grps = annot.grps, annot.pal = annot.pal)
+    # Groups and palettes matching
+    BiocompR:::check.annotations(
+        data = data, annot.grps = annot.grps, annot.pal = annot.pal,
+        verbose = verbose)
 
-    #Position annotation
-    if(!annot.pos %in% c("top","left","both")){
+    # Position annotation
+    if(!annot.pos %in% c("top", "left", "both")){
         stop("annotation sidebar cannot be put here.")
     }
 
-    #Checking comparisons
-    if(upper.comp %in% c("pearson","spearman","kendall")){
+    # Checking comparisons
+    if(upper.comp %in% c("pearson", "spearman", "kendall")){
         #Overwrite "stat" by "t" for correlation
         if(upper.value == "stat"){ upper.value <- 't' }
-        #Compute correlation
-        cat(paste("Compute pairwise",upper.comp,"correlation test..."))
+        # Compute correlation
+        if(verbose){
+            cat("Compute pairwise", upper.comp, "correlation test...")
+        }
         upper.correlation.res <- psych::corr.test(
             data, use = na.rm, method = upper.comp, adjust = p.adjust)
-        upper.mat<-upper.correlation.res[[upper.value]]
-        upper.res<-upper.mat
-        cat("Done.\n")
+        upper.mat <- upper.correlation.res[[upper.value]]
+        upper.res <- upper.mat
+        if(verbose){ cat("Done.\n") }
         if(lower.comp == upper.comp){
-            #Overwrite "stat" by "t" for correlation
+            # Overwrite "stat" by "t" for correlation
             if(lower.value == "stat"){ lower.value <- 't' }
-            #Assign same matrix
+            # Assign same matrix
             lower.correlation.res <- upper.correlation.res
-            lower.mat<-lower.correlation.res[[lower.value]]
+            lower.mat <- lower.correlation.res[[lower.value]]
         } else {
-            if(lower.comp %in% c("pearson","spearman","kendall")){
-                #Overwrite "stat" by "t" for correlation
+            if(lower.comp %in% c( "pearson", "spearman", "kendall")){
+                # Overwrite "stat" by "t" for correlation
                 if(lower.value == "stat"){ lower.value <- 't' }
-                #Compute correlation
-                cat(paste("Compute pairwise",lower.comp,"correlation test..."))
+                # Compute correlation
+                if(verbose){
+                    cat("Compute pairwise", lower.comp, "correlation test...")
+                }
                 lower.correlation.res <- psych::corr.test(
                     data, use = na.rm, method = lower.comp, adjust = p.adjust)
-                lower.mat<-lower.correlation.res[[lower.value]]
-                cat("Done.\n")
+                lower.mat <- lower.correlation.res[[lower.value]]
+                if(verbose){ cat("Done.\n") }
             } else if(lower.comp == "KS"){
                 if(lower.value %in% c('n', 'stat', 'p')){
-                    cat(paste("Compute pairwise", lower.comp, "test..."))
-                    #Compute Kolmogorov-Smirnov test
+                    if(verbose){
+                        cat("Compute pairwise", lower.comp, "test...")
+                    }
+                    # Compute Kolmogorov-Smirnov test
                     ks.res <- BiocompR::pairwise.ks(
                         data = data, statistic = lower.value, ncores = ncores)
                     lower.mat <- ks.res$res.statistic
@@ -757,7 +858,7 @@ fused.plot <- function(
     } else if(upper.comp == "KS"){
         if(upper.value %in% c('n', 'stat', 'p')){
             cat(paste("Compute pairwise", upper.comp, "test..."))
-            #Compute Kolmogorov Smirnov test
+            # Compute Kolmogorov Smirnov test
             ks.res <- BiocompR::pairwise.ks(
                 data = data, statistic = upper.value, ncores = ncores)
             upper.mat <- ks.res$res.statistic
@@ -795,7 +896,8 @@ fused.plot <- function(
     } else { stop("'upper.comp' value not supported yet.") }
 
     #Create Fused Plot
-    fused.res <- BiocompR::fused.view(
+    # fused.res <- BiocompR::fused.view(
+    fused.res <- fused.view(
         sample.names = colnames(data), upper.mat = upper.mat,
         lower.mat = lower.mat, order.select = order.select,
         order.method = order.method, hclust.method = hclust.method,
@@ -803,13 +905,13 @@ fused.plot <- function(
         annot.size = annot.size, annot.text = annot.text,
         annot.lgd.merge = annot.lgd.merge, annot.split = annot.split,
         dendro.pos = dendro.pos, dendro.size = dendro.size,
-        grid.col = grid.col, grid.thickness = grid.thickness,
+        grid_col = grid_col, grid_linewidth = grid_linewidth,
         axis.title = axis.title, axis.title.x = axis.title.x,
         axis.title.y = axis.title.y, axis.text = axis.text,
         axis.text.x = axis.text.x, axis.text.y = axis.text.y,
         axis.ticks = axis.ticks, set.x.title = set.x.title,
         set.y.title = set.y.title, set.lgd1.title = set.lgd1.title,
-        set.lgd2.title = set.lgd2.title, diag.col = diag.col,
+        set.lgd2.title = set.lgd2.title, diagonal_col = diagonal_col,
         lgd.pal1 = lgd.pal1, lgd.pal2 = lgd.pal2,
         lgd.title = lgd.title, lgd.title1 = lgd.title1,
         lgd.title2 = lgd.title2, lgd.text = lgd.text, lgd.text1 = lgd.text1,
