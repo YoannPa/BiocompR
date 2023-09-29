@@ -19,8 +19,8 @@
     ggplot2::element_blank()),
   theme_annot = ggplot2::theme(axis.text.x = ggplot2::element_text(size = 12),
     axis.text.y = ggplot2::element_text(size = 12)),
-  set.x.title,
-  set.y.title,
+  set.x.title = NULL,
+  set.y.title = NULL,
   dendro.pos,
   facet = NULL
 )

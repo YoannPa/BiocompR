@@ -2,7 +2,7 @@
 % Please edit documentation in R/fused_plot.R
 \name{fused.view}
 \alias{fused.view}
-\title{Displays 2 matrices of results as a fused plot.}
+\title{Displays 2 triangle matrices together as a fused plot.}
 \usage{
 fused.view(
   sample.names,
@@ -14,9 +14,12 @@ fused.view(
   annot.grps = list(Groups = seq(length(sample.names))),
   annot.pal = grDevices::rainbow(n = length(sample.names)),
   annot.pos = "top",
-  annot.size = 0,
+  annot.size = 1,
   annot.text = NULL,
-  annot.lgd.merge = FALSE,
+  lgd.merge = FALSE,
+  lgd.ncol = NULL,
+  lgd.space.height = 26,
+  lgd.space.width = 1,
   annot.split = FALSE,
   dendro.pos = "none",
   dendro.size = 0,
@@ -25,13 +28,13 @@ fused.view(
   upper_theme = NULL,
   upper_scale_fill_grad = ggplot2::scale_fill_gradientn(colors =
     BiocompR::biopalette(name = "viridis_C_plasma"), name = "Upper\\ntriangle values"),
-  upper_guide_custom_bar = ggplot2::guide_colorbar(barheight = 28, barwidth = 0.7,
+  upper_guide_custom_bar = ggplot2::guide_colorbar(barheight = 23, barwidth = 0.7,
     ticks.linewidth = 0.5, ticks.colour = "black", frame.linewidth = 0.5, frame.colour =
     "black"),
   lower_theme = NULL,
   lower_scale_fill_grad = ggplot2::scale_fill_gradientn(colors =
     BiocompR::biopalette(name = "viridis_D_viridis"), name = "Lower\\ntriangle values"),
-  lower_guide_custom_bar = ggplot2::guide_colorbar(barheight = 0.7, barwidth = 28,
+  lower_guide_custom_bar = ggplot2::guide_colorbar(barheight = 0.7, barwidth = 23,
     ticks.linewidth = 0.5, ticks.colour = "black", frame.linewidth = 0.5, frame.colour =
     "black"),
   diagonal_col = "white",
@@ -77,7 +80,7 @@ fused.view(
 A \code{type} object returned description.
 }
 \description{
-Displays 2 matrices of results as a fused plot.
+Displays 2 triangle matrices together as a fused plot.
 }
 \author{
 Yoann Pageaud.

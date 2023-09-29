@@ -21,7 +21,7 @@ fused.plot(
   annot.pos = "top",
   annot.size = 0,
   annot.text = NULL,
-  annot.lgd.merge = FALSE,
+  lgd.merge = FALSE,
   annot.split = FALSE,
   dendro.pos = "none",
   dendro.size = 0,

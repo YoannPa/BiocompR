@@ -54,7 +54,7 @@ fix.corrMatOrder.alphabet <- function(cor.order, str){
     }))
 }
 
-#' Displays 2 matrices of results as a fused plot.
+#' Displays 2 triangle matrices together as a fused plot.
 #'
 #' @param param1 A \code{type} parameter description.
 #' @return A \code{type} object returned description.
@@ -68,7 +68,8 @@ fused.view <- function(
     order.select, order.method, hclust.method,
     annot.grps = list("Groups" = seq(length(sample.names))),
     annot.pal = grDevices::rainbow(n = length(sample.names)), annot.pos = 'top',
-    annot.size = 0, annot.text = NULL, annot.lgd.merge = FALSE,
+    annot.size = 1, annot.text = NULL, lgd.merge = FALSE, lgd.ncol = NULL,
+    lgd.space.height = 26, lgd.space.width = 1,
     annot.split = FALSE, dendro.pos = 'none', dendro.size = 0,
     grid_col = "white", grid_linewidth = 0.3,
     upper_theme = NULL,
@@ -76,14 +77,14 @@ fused.view <- function(
         colors = BiocompR::biopalette(name = "viridis_C_plasma"),
         name = "Upper\ntriangle values"),
     upper_guide_custom_bar = ggplot2::guide_colorbar(
-        barheight = 28, barwidth = 0.7, ticks.linewidth = 0.5,
+        barheight = 23, barwidth = 0.7, ticks.linewidth = 0.5,
         ticks.colour = "black", frame.linewidth = 0.5, frame.colour = "black"),
     lower_theme = NULL,
     lower_scale_fill_grad = ggplot2::scale_fill_gradientn(
         colors = BiocompR::biopalette(name = "viridis_D_viridis"),
         name = "Lower\ntriangle values"),
     lower_guide_custom_bar = ggplot2::guide_colorbar(
-        barheight = 0.7, barwidth = 28, ticks.linewidth = 0.5,
+        barheight = 0.7, barwidth = 23, ticks.linewidth = 0.5,
         ticks.colour = "black", frame.linewidth = 0.5, frame.colour = "black"),
     diagonal_col = "white",
     plot_title = NULL,
@@ -207,7 +208,7 @@ fused.view <- function(
             correlation.order <- BiocompR::fix.corrMatOrder.alphabet(
                 cor.order = correlation.order, str = colnames(upper.mat))
         }else if(order.method == 'default'){
-            correlation.order<-seq(ncol(upper.mat))}
+            correlation.order <- seq(ncol(upper.mat))}
         if(dendro.pos != "none"){
             # Generate Hierarchy Cluster
             hierarchy.clust <- fastcluster::hclust(
@@ -219,7 +220,7 @@ fused.view <- function(
                 lower.mat, order = order.method, hclust.method = hclust.method)
         } else if(order.method == "alphabet"){
             # Fix bug of corrMatOrder when alphabet order
-            correlation.order<-BiocompR::fix.corrMatOrder.alphabet(
+            correlation.order <- BiocompR::fix.corrMatOrder.alphabet(
                 cor.order = correlation.order, str = colnames(upper.mat))
         } else if(order.method == 'default'){
             correlation.order <- seq(ncol(lower.mat))}
@@ -309,10 +310,14 @@ fused.view <- function(
     }
     # Define default theme
     upper_default_fused <- ggplot2::theme(
-        axis.title = ggplot2::element_text(size = 13),
+        axis.text.x.top = ggplot2::element_blank(),
+        axis.text.y = element_text(size = 12, color = "black"),
+        axis.text.y.right = element_blank(),
+        axis.ticks.length.x.top = ggplot2::unit(0, "pt"),
+        axis.ticks.length.y.right = ggplot2::unit(0, "pt"),
         legend.title = ggplot2:: element_text(size = 13),
         legend.text = ggplot2::element_text(size = 9),
-        legend.justification = c(1, 0),
+        legend.justification = c(0, 0.5),
         plot.margin = ggplot2::margin(0, 0, 0, 0))
     # Update theme
     upper_theme <- upper_default_fused + upper_theme
@@ -323,7 +328,7 @@ fused.view <- function(
         melt_tri = upper.melt, grid_col = grid_col,
         grid_linewidth = grid_linewidth, ggtri_theme = upper_theme,
         scale_fill_grad = upper_scale_fill_grad,
-        guide_custom_bar = upper_guide_custom_bar) +
+        guide_custom_bar = upper_guide_custom_bar, y_axis_pos = "left") +
         ggtitle(plot_title)
 
     # upper.ggplot <- ggtriangle(
@@ -365,11 +370,11 @@ fused.view <- function(
     #     ggplot2::theme(axis.text = axis.text) +
     #     ggplot2::labs(x = set.x.title, y = set.y.title)
 
-    if(annot.pos == "top"){
-        upper.ggplot <- upper.ggplot + ggplot2::theme(
-            axis.text.x.top = ggplot2::element_blank(),
-            axis.ticks.x = ggplot2::element_blank())
-    } else if(annot.pos != "left"){ stop("'annot.pos' value not supported.") }
+    # if(annot.pos == "top"){
+    #     upper.ggplot <- upper.ggplot + ggplot2::theme(
+    #         axis.text.x.top = ggplot2::element_blank(),
+    #         axis.ticks.x = ggplot2::element_blank())
+    # } else if(annot.pos != "left"){ stop("'annot.pos' value not supported.") }
 
     # if(!is.null(add.ggplot.arg)){
     #     upper.ggplot <- upper.ggplot + add.ggplot.arg
@@ -384,7 +389,7 @@ fused.view <- function(
         axis.ticks.length = ggplot2::unit(0, "pt"),
         legend.direction = 'horizontal',
         legend.position = "bottom",
-        legend.justification = c(1, 0),
+        legend.justification = c(0.4, 0.5),
         plot.margin = ggplot2::margin(0, 0, 0, 0))
     # Update theme
     lower_theme <- lower_default_fused + lower_theme
@@ -414,111 +419,177 @@ fused.view <- function(
     #                    axis.ticks.length = ggplot2::unit(0, "pt"),
     #                    legend.direction = 'horizontal')
 
+    # Reorder groups and convert as factors
+    annot.grps <- lapply(X = annot.grps, FUN = function(i){
+        if(!is.factor(i)){ factor(x = i, levels = unique(i)) } else { i }
+    })
+    annot.grps <- lapply(
+        X = annot.grps, FUN = function(i){ i[correlation.order] })
+
     # Plot Color Sidebar
     col_sidebar <- BiocompR:::plot.col.sidebar(
-        sample.names = sample.names, annot.grps = annot.grps,
+        sample.names = sample.names[correlation.order], annot.grps = annot.grps,
         annot.pal = annot.pal, annot.pos = annot.pos,
-        cor.order = correlation.order, axis.ticks.x = axis.ticks,
-        axis.ticks.y = axis.ticks, axis.title.x = axis.title.x,
-        axis.title.y = axis.title.y, set.x.title = set.x.title,
-        set.y.title = set.y.title, dendro.pos = dendro.pos,
-        merge.lgd = annot.lgd.merge, split.annot = annot.split)
-    if(annot.pos == "top"){
-        if(is.null(annot.text)){
-            annot.text <- ggplot2::element_text(
-                size = 12, face = 'bold', hjust = 1, vjust = 0.5)
-        }
-        col_sidebar$sidebar <- col_sidebar$sidebar + ggplot2::theme(
-            axis.text.x.top = axis.text.x, axis.text.y = annot.text)
-    } else if(annot.pos == "left"){
-        if(is.null(annot.text)){
-            annot.text <- ggplot2::element_text(
-                size = 12, angle = 90, face = 'bold', hjust = 0, vjust = 0.5)
-        }
-        col_sidebar$sidebar <- col_sidebar$sidebar + ggplot2::theme(
-            axis.text.x.top = annot.text, axis.text.y = axis.text.y)
-    }
-    #Remove all legends
-    upper.ggplot.nolgd <- upper.ggplot +
-        ggplot2::theme(legend.position = "none")
+        theme_annot = theme(
+            axis.ticks.x.top = axis.ticks, axis.ticks.y.right = element_blank(),
+            axis.title.x = axis.title.x,
+            axis.text.x.top = element_text(
+                size = 12, angle = 90, vjust = 0.5, hjust = 0, color = "black"),
+            axis.text.y.right = element_text(size = 12, color = "black"),
+            axis.title.y = axis.title.y,
+            plot.margin = margin(0, 0, 0.1, 0, unit = "cm")),
+        theme_legend = theme(
+            legend.title = element_text(size = 13, color = "black"),
+            legend.text = element_text(size = 12, color = "black")),
+        dendro.pos = 'top', merge.lgd = lgd.merge, right = TRUE)
+
+    # col_sidebar <- BiocompR:::plot.col.sidebar(
+    #     sample.names = sample.names, annot.grps = annot.grps,
+    #     annot.pal = annot.pal, annot.pos = annot.pos,
+    #     cor.order = correlation.order, axis.ticks.x = axis.ticks,
+    #     axis.ticks.y = axis.ticks, axis.title.x = axis.title.x,
+    #     axis.title.y = axis.title.y, set.x.title = set.x.title,
+    #     set.y.title = set.y.title, dendro.pos = dendro.pos,
+    #     merge.lgd = annot.lgd.merge, split.annot = annot.split)
+
+    # if(annot.pos == "top"){
+    #     if(is.null(annot.text)){
+    #         annot.text <- ggplot2::element_text(
+    #             size = 12, face = 'bold', hjust = 1, vjust = 0.5)
+    #     }
+    #     col_sidebar$sidebar <- col_sidebar$sidebar + ggplot2::theme(
+    #         axis.text.x.top = axis.text.x, axis.text.y = annot.text)
+    # } else if(annot.pos == "left"){
+    #     if(is.null(annot.text)){
+    #         annot.text <- ggplot2::element_text(
+    #             size = 12, angle = 90, face = 'bold', hjust = 0, vjust = 0.5)
+    #     }
+    #     col_sidebar$sidebar <- col_sidebar$sidebar + ggplot2::theme(
+    #         axis.text.x.top = annot.text, axis.text.y = axis.text.y)
+    # }
+
+    # Remove all legends
+    # upper.ggplot.nolgd <- upper.ggplot +
+    #     ggplot2::theme(legend.position = "none")
     lower.ggplot.nolgd <- lower.ggplot +
         ggplot2::theme(legend.position = "none")
-    sidebar.nolgd<-col_sidebar$sidebar
-    #Create grob for lower matrix
+    sidebar.nolgd <- col_sidebar$sidebar
+    # Create grob for lower matrix
     lower.grob <- ggplot2::ggplotGrob(lower.ggplot.nolgd)
-    #Add lower ggplot as an annotation to the upper ggplot
-    main_grob <- upper.ggplot.nolgd + ggplot2::annotation_custom(lower.grob)
-    #Convert ggplots into grobs
-    main_grob <- ggplot2::ggplotGrob(main_grob)
-    sidebar_grob <- ggplot2::ggplotGrob(sidebar.nolgd)
-    if(dendro.pos!='none'){ dendro_grob <- ggplot2::ggplotGrob(ddgr_seg) }
-    #Get legends
-    upper.legend <- BiocompR::get.lgd(upper.ggplot)
-    lower.legend <- BiocompR::get.lgd(lower.ggplot)
+    # Add lower ggplot as an annotation to the upper ggplot
+    main_gg <- upper.ggplot + ggplot2::annotation_custom(lower.grob)
 
-    #Set sizes for colorbar legends
-    sidebar.legend <- BiocompR:::stack.grobs.legends(
-        grobs.list = col_sidebar$legends, annot.grps = annot.grps,
-        height.lgds.space = 30)
+    # #Convert ggplots into grobs
+    # main_grob <- ggplot2::ggplotGrob(main_grob)
+    # sidebar_grob <- ggplot2::ggplotGrob(sidebar.nolgd)
+    # if(dendro.pos!='none'){ dendro_grob <- ggplot2::ggplotGrob(ddgr_seg) }
 
-    #Assemble grobs
-    if(annot.pos == "top"){
-        if(dendro.pos == "top"){
-            #Get common width of a list of objects widths
-            upd_grobs <- BiocompR::resize.grobs(ls.grobs = list(
-                "main_grob" = main_grob, "sidebar_grob" = sidebar_grob,
-                "dendro_grob" = dendro_grob), dimensions = "widths",
-                start.unit = 2, end.unit = 5)
+    # Get legends
+    # upper.legend <- BiocompR:::get.lgd(upper.ggplot)
+    lower.legend <- BiocompR:::get.lgd(lower.ggplot)
 
-            main_grob <- gridExtra::arrangeGrob(
-                upd_grobs$dendro_grob, upd_grobs$sidebar_grob,
-                upd_grobs$main_grob, ncol = 1, heights = c(
-                    10 + dendro.size, 9 + annot.size , 40))
-        } else {
-            #Get common width of a list of objects widths
-            upd_grobs <- BiocompR::resize.grobs(ls.grobs = list(
-                "main_grob" = main_grob, "sidebar_grob" = sidebar_grob),
-                dimensions = "widths", start.unit = 2, end.unit = 5)
+    # #Set sizes for colorbar legends
+    # sidebar.legend <- BiocompR:::stack.grobs.legends(
+    #     grobs.list = col_sidebar$legends, annot.grps = annot.grps,
+    #     height.lgds.space = 30)
 
-            main_grob<-gridExtra::arrangeGrob(
-                upd_grobs$sidebar_grob, upd_grobs$main_grob , ncol = 1,
-                heights = c(9 + annot.size , 40))
+    # Set number of columns to display annotations legends
+    # Builds color tables for legends.
+    # col_table <- build.col_table(
+    col_table <- BiocompR:::build.col_table(
+        annot.grps = annot.grps, annot.pal = annot.pal)
+    if(lgd.merge){
+        # Rbind list color tables because lgd.merge is TRUE
+        col_table <- data.table::rbindlist(col_table, idcol = TRUE)
+        if(!(is.list(annot.pal)) | length(annot.pal) == 1){
+            # Remove duplicated colors
+            col_table <- col_table[!duplicated(x = Cols)]
         }
-        #Create the Right Panel for legends
-        right.legends<-gridExtra::arrangeGrob(
-            upper.legend, sidebar.legend, nrow = 1)
-    } else {
-        #Annotation on the left
-        if(dendro.pos == "left"){
-            #Get common width of a list of objects widths
-            upd_grobs <- BiocompR::resize.grobs(ls.grobs = list(
-                "main_grob" = main_grob, "sidebar_grob" = sidebar_grob,
-                "dendro_grob" = dendro_grob), dimensions = "heights",
-                start.unit = 3, end.unit = 8)
-
-            #Make main grob
-            main_grob <- gridExtra::arrangeGrob(
-                upd_grobs$dendro_grob, upd_grobs$sidebar_grob,
-                upd_grobs$main_grob, nrow = 1,
-                widths = c(10 + dendro.size, 9 + annot.size, 40))
-        } else {
-            #Get common width of a list of objects widths
-            upd_grobs <- BiocompR::resize.grobs(ls.grobs = list(
-                "main_grob" = main_grob, "sidebar_grob" = sidebar_grob),
-                dimensions = "heights", start.unit = 3, end.unit = 8)
-            #Make main grob
-            main_grob <- gridExtra::arrangeGrob(
-                upd_grobs$sidebar_grob, upd_grobs$main_grob, ncol = 1,
-                widths = c(9 + annot.size, 40))
-        }
-        right.legends <- gridExtra::arrangeGrob(
-            upper.legend, sidebar.legend, ncol = 2)
+        col_table <- list(col_table[, c("Grps", "Cols"), ])
     }
-    #Plot Final Figure
-    fused.res <- gridExtra::grid.arrange( gridExtra::arrangeGrob(
-        grobs = list(main_grob, right.legends, lower.legend), ncol = 2,
-        nrow = 2, heights = c(40, 3), widths = c(20, 7)))
-    return(fused.res)
+    # Calculate legend length
+    lgd_sizes <- BiocompR:::get.len.legends(col_table = col_table)
+    # Calculate legend columns
+    if(is.null(lgd.ncol)){
+        lgd.ncol <- ceiling(lgd_sizes/lgd.space.height)
+    } else if(all.equal(lgd.ncol, as.integer(lgd.ncol)) == TRUE){
+        lgd.ncol <- rep(lgd.ncol, times = length(lgd_sizes))
+    }
+
+    # Build legends layout
+    lgd.layout <- BiocompR::build_legends_layout(
+        col_table = col_table, height.lgds.space = lgd.space.height,
+        ncol.override = as.numeric(lgd.ncol[1]))
+    # Create fused plot
+    arranged.grob <- heatmap_layout(
+        dd.rows = FALSE, dd.cols = FALSE, show.annot = TRUE,
+        ddgr_seg_row = NULL, ddgr_seg_col = NULL, sidebar = col_sidebar$sidebar,
+        htmp = main_gg, legends = col_sidebar$legends, dend.row.size = 0,
+        dend.col.size = 0, annot.size = annot.size, lgd.layout = lgd.layout,
+        lgd.space.width = lgd.space.width,
+        override_grob_list = lower.legend, override_grob_height = c(10, 1))
+
+    # #Assemble grobs
+    # if(annot.pos == "top"){
+    #     if(dendro.pos == "top"){
+    #         #Get common width of a list of objects widths
+    #         upd_grobs <- BiocompR::resize.grobs(ls.grobs = list(
+    #             "main_grob" = main_grob, "sidebar_grob" = sidebar_grob,
+    #             "dendro_grob" = dendro_grob), dimensions = "widths",
+    #             start.unit = 2, end.unit = 5)
+    #
+    #         main_grob <- gridExtra::arrangeGrob(
+    #             upd_grobs$dendro_grob, upd_grobs$sidebar_grob,
+    #             upd_grobs$main_grob, ncol = 1, heights = c(
+    #                 10 + dendro.size, 9 + annot.size , 40))
+    #     } else {
+    #         #Get common width of a list of objects widths
+    #         upd_grobs <- BiocompR::resize.grobs(ls.grobs = list(
+    #             "main_grob" = main_grob, "sidebar_grob" = sidebar_grob),
+    #             dimensions = "widths", start.unit = 2, end.unit = 5)
+    #
+    #         main_grob<-gridExtra::arrangeGrob(
+    #             upd_grobs$sidebar_grob, upd_grobs$main_grob , ncol = 1,
+    #             heights = c(9 + annot.size , 40))
+    #     }
+    #     #Create the Right Panel for legends
+    #     right.legends<-gridExtra::arrangeGrob(
+    #         upper.legend, sidebar.legend, nrow = 1)
+    # } else {
+    #     #Annotation on the left
+    #     if(dendro.pos == "left"){
+    #         #Get common width of a list of objects widths
+    #         upd_grobs <- BiocompR::resize.grobs(ls.grobs = list(
+    #             "main_grob" = main_grob, "sidebar_grob" = sidebar_grob,
+    #             "dendro_grob" = dendro_grob), dimensions = "heights",
+    #             start.unit = 3, end.unit = 8)
+    #
+    #         #Make main grob
+    #         main_grob <- gridExtra::arrangeGrob(
+    #             upd_grobs$dendro_grob, upd_grobs$sidebar_grob,
+    #             upd_grobs$main_grob, nrow = 1,
+    #             widths = c(10 + dendro.size, 9 + annot.size, 40))
+    #     } else {
+    #         #Get common width of a list of objects widths
+    #         upd_grobs <- BiocompR::resize.grobs(ls.grobs = list(
+    #             "main_grob" = main_grob, "sidebar_grob" = sidebar_grob),
+    #             dimensions = "heights", start.unit = 3, end.unit = 8)
+    #         #Make main grob
+    #         main_grob <- gridExtra::arrangeGrob(
+    #             upd_grobs$sidebar_grob, upd_grobs$main_grob, ncol = 1,
+    #             widths = c(9 + annot.size, 40))
+    #     }
+    #     right.legends <- gridExtra::arrangeGrob(
+    #         upper.legend, sidebar.legend, ncol = 2)
+    # }
+
+    # Plot Final Figure
+    grid::grid.newpage()
+    grid::grid.draw(arranged.grob)
+    # fused.res <- gridExtra::grid.arrange( gridExtra::arrangeGrob(
+    #     grobs = list(main_grob, right.legends, lower.legend), ncol = 2,
+    #     nrow = 2, heights = c(40, 3), widths = c(20, 7)))
+    return(arranged.grob)
 }
 
 #' Creates a plot summarizing results from 2 different pairwise comparisons.
@@ -733,13 +804,12 @@ fused.view <- function(
 #' @export
 #' @references \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6099145/#B13}{Why, When and How to Adjust Your P Values? Mohieddin Jafari and Naser Ansari-Pour - Cell J. 2019 Winter; 20(4): 604–607.}
 
-#TODO: Add parameter documentation for annot.text.
 fused.plot <- function(
     data, ncores, upper.comp, upper.value, lower.comp, lower.value,
     na.rm = 'pairwise', order.method, order.select, hclust.method = 'complete',
     p.adjust = "BH", annot.grps = list("Groups" = seq(ncol(data))),
     annot.pal = grDevices::rainbow(n = ncol(data)), annot.pos = 'top',
-    annot.size = 0, annot.text = NULL, annot.lgd.merge = FALSE,
+    annot.size = 0, annot.text = NULL, lgd.merge = FALSE,
     annot.split = FALSE,
     dendro.pos = 'none', dendro.size = 0,
     grid_col = "white",grid_linewidth = 0.3,
@@ -903,7 +973,7 @@ fused.plot <- function(
         order.method = order.method, hclust.method = hclust.method,
         annot.grps = annot.grps, annot.pal = annot.pal, annot.pos = annot.pos,
         annot.size = annot.size, annot.text = annot.text,
-        annot.lgd.merge = annot.lgd.merge, annot.split = annot.split,
+        lgd.merge = annot.lgd.merge, annot.split = annot.split,
         dendro.pos = dendro.pos, dendro.size = dendro.size,
         grid_col = grid_col, grid_linewidth = grid_linewidth,
         axis.title = axis.title, axis.title.x = axis.title.x,

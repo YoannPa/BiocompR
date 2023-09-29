@@ -2,7 +2,7 @@
 % Please edit documentation in R/core_ggplot_fun.R
 \name{ggtriangle}
 \alias{ggtriangle}
-\title{Draws a triangle ggplot for a basic upper or lower triangle matrix.}
+\title{Draws a triangle ggplot for a basic upper or lower triangle molten matrix.}
 \usage{
 ggtriangle(
   melt_tri,
@@ -12,7 +12,9 @@ ggtriangle(
   scale_fill_grad = ggplot2::scale_fill_gradientn(colors = BiocompR::biopalette(name =
     "viridis_C_plasma"), na.value = "grey"),
   guide_custom_bar = ggplot2::guide_colorbar(ticks.linewidth = 0.5, ticks.colour =
-    "black", frame.colour = "black", frame.linewidth = 0.5)
+    "black", frame.colour = "black", frame.linewidth = 0.5),
+  x_axis_pos = "top",
+  y_axis_pos = "right"
 )
 }
 \arguments{
@@ -39,12 +41,20 @@ heatmap colors and the associated color bar.}
 function \link[ggplot2]{guide_colorbar} to custom the
 triangle plot color bar appearance
 (see also 'scale_fill_grad' option).}
+
+\item{x_axis_pos}{A \code{character} to specify the position of the X
+axis on the plot (Default: x_axis_pos = "top";
+Supported: c("top", "bottom")).}
+
+\item{y_axis_pos}{A \code{character} to specify the position of the Y
+axis on the plot (Default: y_axis_pos = "right";
+Supported: c("right", "left")).}
 }
 \value{
 A \code{gg} object of a basic triangle plot (a 'geom_tile()').
 }
 \description{
-Draws a triangle ggplot for a basic upper or lower triangle matrix.
+Draws a triangle ggplot for a basic upper or lower triangle molten matrix.
 }
 \author{
 Yoann Pageaud.

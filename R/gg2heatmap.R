@@ -840,7 +840,7 @@ gg2heatmap <- function(
             title.vjust = 0.5, order = 2)) +
         ggplot2::labs(x = plot.labs$x, y = plot.labs$y)
 
-    # If facetting is on
+    # If faceting is on
     if(!is.null(facet)){
         if(show.annot){
             htmp <- htmp.source +
@@ -976,15 +976,13 @@ gg2heatmap <- function(
             theme_legend <- theme_default_legend
         } else { theme_legend <- theme_default_legend + theme_legend }
         # Create Color Sidebar
-        # col_sidebar <- plot.col.sidebar(
         col_sidebar <- BiocompR::plot.col.sidebar(
             sample.names = sample.names, annot.grps = annot.grps,
             annot.pal = annot.pal, annot.pos = 'top', annot.sep = annot.sep,
             annot.cut = annot.cut, merge.lgd = lgd.merge, right = TRUE,
             lgd.name = plot.labs$legend, lgd.ncol = lgd.ncol,
             theme_legend = theme_legend, theme_annot = theme_annot,
-            set.x.title = NULL, set.y.title = NULL, dendro.pos = 'top',
-            facet = facet)
+            dendro.pos = 'top', facet = facet)
         rm(sample.names)
         if(verbose){ cat("Done.\n") }
     }

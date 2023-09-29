@@ -5,19 +5,21 @@
 \title{Builds the gg2heatmap layout using the egg package}
 \usage{
 heatmap_layout(
-  dd.rows,
-  dd.cols,
-  show.annot,
-  ddgr_seg_row,
-  ddgr_seg_col,
+  dd.rows = FALSE,
+  dd.cols = FALSE,
+  show.annot = FALSE,
+  ddgr_seg_row = NULL,
+  ddgr_seg_col = NULL,
   sidebar,
   htmp,
   legends,
-  dend.row.size,
-  dend.col.size,
-  annot.size,
+  dend.row.size = 0,
+  dend.col.size = 0,
+  annot.size = 0,
   lgd.layout,
-  lgd.space.width
+  lgd.space.width,
+  override_grob_list = NULL,
+  override_grob_height = NULL
 )
 }
 \value{

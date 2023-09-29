@@ -193,7 +193,7 @@ ggdend <- function(df, orientation, reverse.x = FALSE, theme_dend = NULL){
 }
 
 
-#' Draws a triangle ggplot for a basic upper or lower triangle matrix.
+#' Draws a triangle ggplot for a basic upper or lower triangle molten matrix.
 #'
 #' @param melt_tri         A \code{data.frame} melted triangle containing a
 #'                         statistical test values.
@@ -213,6 +213,12 @@ ggdend <- function(df, orientation, reverse.x = FALSE, theme_dend = NULL){
 #'                         function \link[ggplot2]{guide_colorbar} to custom the
 #'                         triangle plot color bar appearance
 #'                         (see also 'scale_fill_grad' option).
+#' @param x_axis_pos       A \code{character} to specify the position of the X
+#'                         axis on the plot (Default: x_axis_pos = "top";
+#'                         Supported: c("top", "bottom")).
+#' @param y_axis_pos       A \code{character} to specify the position of the Y
+#'                         axis on the plot (Default: y_axis_pos = "right";
+#'                         Supported: c("right", "left")).
 #' @return A \code{gg} object of a basic triangle plot (a 'geom_tile()').
 #' @author Yoann Pageaud.
 #' @export
@@ -224,7 +230,7 @@ ggtriangle <- function(
         na.value = "grey"),
     guide_custom_bar = ggplot2::guide_colorbar(
         ticks.linewidth = 0.5, ticks.colour = "black", frame.colour = "black",
-        frame.linewidth = 0.5)){
+        frame.linewidth = 0.5), x_axis_pos = "top", y_axis_pos = "right"){
     # Fix BiocCheck() complaining about these objects initialization
     Var1 <- NULL
     Var2 <- NULL
@@ -245,10 +251,10 @@ ggtriangle <- function(
     ggtri_plt <- ggplot2::ggplot() +
         ggplot2::geom_tile(
             data = melt_tri, ggplot2::aes(x = Var1, y = Var2, fill = value),
-            color = grid_col, size = grid_linewidth) +
+            color = grid_col, linewidth = grid_linewidth) +
         ggtri_theme +
-        ggplot2::scale_x_discrete(position = "top", expand = c(0, 0)) +
-        ggplot2::scale_y_discrete(position = "right", expand = c(0, 0)) +
+        ggplot2::scale_x_discrete(position = x_axis_pos, expand = c(0, 0)) +
+        ggplot2::scale_y_discrete(position = y_axis_pos, expand = c(0, 0)) +
         scale_fill_grad +
         ggplot2::guides(fill = guide_custom_bar) +
         ggplot2::labs(x = NULL, y = NULL)
@@ -564,7 +570,7 @@ plot.col.sidebar <- function(
     theme_annot = ggplot2::theme(
         axis.text.x = ggplot2::element_text(size = 12),
         axis.text.y = ggplot2::element_text(size = 12)),
-    set.x.title, set.y.title, dendro.pos, facet = NULL){
+    set.x.title = NULL, set.y.title = NULL, dendro.pos, facet = NULL){
     # Fix BiocCheck() complaining about these objects initialization
     Grps <- NULL
     Cols <- NULL
@@ -904,9 +910,10 @@ update_guide_colorbar <- function(
 #' @keywords internal
 
 heatmap_layout <- function(
-    dd.rows, dd.cols, show.annot, ddgr_seg_row, ddgr_seg_col, sidebar, htmp,
-    legends, dend.row.size, dend.col.size, annot.size, lgd.layout,
-    lgd.space.width){
+    dd.rows = FALSE, dd.cols = FALSE, show.annot = FALSE, ddgr_seg_row = NULL,
+    ddgr_seg_col = NULL, sidebar, htmp, legends, dend.row.size = 0,
+    dend.col.size = 0, annot.size = 0, lgd.layout,
+    lgd.space.width, override_grob_list = NULL, override_grob_height = NULL){
     # Create empty ggplot
     ggempty <- ggplot2::ggplot(data.frame()) +
         ggplot2::theme(
@@ -960,9 +967,12 @@ heatmap_layout <- function(
         right.legends <- gridExtra::arrangeGrob(
             grobs = legends, layout_matrix = lgd.layout)
         # Set default legend width space
+        grob_list <- c(list(main_grob, right.legends), list(override_grob_list))
+        grob_list <- grob_list[!vapply(
+            X = grob_list, FUN = is.null, FUN.VALUE = logical(length = 1L))]
         arranged.grob <- gridExtra::arrangeGrob(
-            grobs = list(main_grob, right.legends), ncol = 2,
-            widths = c(20, 2 + lgd.space.width))
+            grobs = grob_list, ncol = 2, widths = c(20, 2 + lgd.space.width),
+            heights = override_grob_height)
     } else { arranged.grob <- main_grob }
     # # Plot result
     # grid::grid.draw(arranged.grob)
