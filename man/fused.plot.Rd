@@ -20,7 +20,6 @@ fused.plot(
   annot.pal = grDevices::rainbow(n = ncol(data)),
   annot.pos = "top",
   annot.size = 0,
-  annot.text = NULL,
   lgd.merge = FALSE,
   annot.split = FALSE,
   dendro.pos = "none",
@@ -79,7 +78,6 @@ fused.plot(
   raster = TRUE,
   raster1 = NULL,
   raster2 = NULL,
-  add.ggplot.arg = NULL,
   verbose = FALSE
 )
 }
@@ -344,10 +342,6 @@ should be rasterized.}
 
 \item{diagonal_col}{A \code{character} defining the color of cells
 with of the empty diagonal.}
-
-\item{add.ggplot.args}{Ultimate ggplot2 additionnal components that you
-want to pass to the plot (Use only if you are an
-ggplot2 advanced user).}
 }
 \value{
 A \code{gtable} object plotted automatically and a \code{list} of

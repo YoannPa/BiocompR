@@ -2,7 +2,7 @@
 % Please edit documentation in R/core_ggplot_fun.R
 \name{ggtriangle}
 \alias{ggtriangle}
-\title{Draws a triangle ggplot for a basic upper or lower triangle molten matrix.}
+\title{Draws a triangle ggplot for a basic molten triangle matrix.}
 \usage{
 ggtriangle(
   melt_tri,
@@ -54,7 +54,7 @@ Supported: c("right", "left")).}
 A \code{gg} object of a basic triangle plot (a 'geom_tile()').
 }
 \description{
-Draws a triangle ggplot for a basic upper or lower triangle molten matrix.
+Draws a triangle ggplot for a basic molten triangle matrix.
 }
 \author{
 Yoann Pageaud.

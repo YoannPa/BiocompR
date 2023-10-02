@@ -2,7 +2,7 @@
 % Please edit documentation in R/core_stat_tests.R
 \name{test_asso_all_annot}
 \alias{test_asso_all_annot}
-\title{Write function description here.}
+\title{Tests associations between all annotations stored in a data.frame.}
 \usage{
 test_asso_all_annot(annot.table, perm.count = 10000, verbose = FALSE)
 }
@@ -23,7 +23,7 @@ step-by-step processing of the data if TRUE
 A \code{data.table} containing all association test results.
 }
 \description{
-Write function description here.
+Tests associations between all annotations stored in a data.frame.
 }
 \examples{
 # Create mtcars annotation table

@@ -1,5 +1,5 @@
 
-#' Filters unrelevant warnings matching a regular expression.
+#' Filters irrelevant warnings matching a regular expression.
 #'
 #' @param pattern A \code{character} to be processed as a regular expression.
 #' @return A \code{character} list of warning messages without the warnings

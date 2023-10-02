@@ -2,7 +2,7 @@
 % Please edit documentation in R/warnings_handling.R
 \name{warn.handle}
 \alias{warn.handle}
-\title{Filters unrelevant warnings matching a regular expression.}
+\title{Filters irrelevant warnings matching a regular expression.}
 \usage{
 warn.handle(pattern, ...)
 }
@@ -14,7 +14,7 @@ A \code{character} list of warning messages without the warnings
         matching the pattern.
 }
 \description{
-Filters unrelevant warnings matching a regular expression.
+Filters irrelevant warnings matching a regular expression.
 }
 \author{
 Yoann Pageaud.

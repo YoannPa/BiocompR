@@ -1,43 +1,4 @@
 
-#' Checks if min & max are given by legend:
-#' \itemize{
-#'  \item{If given: updates min & max of the plot.}
-#'  \item{If none: calculates min & max from melted triangle.}
-#' }
-#'
-#' @param lgd.limits A \code{vector} of length 2, containing limit values.
-#'                   Can be NULL\cr(Default: lgd.limits=NULL).
-#' @param melt.tri   A \code{data.frame} melted triangle containing test values.
-#' @param tri.type   A \code{character} specifying the type of triangle provided
-#'                   \cr(Supported: tri.type = c("upper","lower")).
-#' @return A \code{list} of length 2 containing the updated min and max values.
-#' @author Yoann Pageaud.
-#' @export
-#' @keywords internal
-
-min.max.update <- function(lgd.limits = NULL, melt.tri, tri.type){
-    if(is.null(lgd.limits)){
-        min_tri <- min(melt.tri$value, na.rm = TRUE)
-        max_tri <- max(melt.tri$value, na.rm = TRUE)
-        if(min_tri == max_tri){
-            stop(paste(
-                "min and max values are equals. Please set limits for the",
-                tri.type, "triangle legend."))
-        }
-    } else {
-        if(length(lgd.limits) != 2){
-            if(tri.type == "upper"){ lgd.name <- "lgd.limits1" }
-            else if(tri.type == "lower"){ lgd.name <- "lgd.limits2" }
-            stop(paste(lgd.name, "should be a vector of length 2, containing",
-                       "the upper limit and the lower limit."))
-        } else {
-            min_tri <- lgd.limits[1]
-            max_tri <- lgd.limits[2]
-        }
-    }
-    return(list("min_tri" = min_tri, "max_tri" = max_tri))
-}
-
 #' Fixes a bug related to corrMatOrder when order parameter is set to
 #' 'alphabet'.
 #'
@@ -49,71 +10,44 @@ min.max.update <- function(lgd.limits = NULL, melt.tri, tri.type){
 #' @keywords internal
 
 fix.corrMatOrder.alphabet <- function(cor.order, str){
-    unlist(lapply(cor.order, function(i){
+    unlist(lapply(X = cor.order, FUN = function(i){
         grep(pattern = paste0("^", i, "$"), x = str)
     }))
 }
 
-#' Displays 2 triangle matrices together as a fused plot.
+#' Displays 2 triangle matrices fused together in a single plot.
 #'
 #' @param param1 A \code{type} parameter description.
 #' @return A \code{type} object returned description.
 #' @author Yoann Pageaud.
 #' @export
 
-#TODO: Adapt fused.view() to the new functions of core_ggplot_fun.R
 #TODO: Write documentation!
-fused.view <- function(
+ggfusion.free <- function(
     sample.names, upper.mat, lower.mat,
     order.select, order.method, hclust.method,
     annot.grps = list("Groups" = seq(length(sample.names))),
-    annot.pal = grDevices::rainbow(n = length(sample.names)), annot.pos = 'top',
-    annot.size = 1, annot.text = NULL, lgd.merge = FALSE, lgd.ncol = NULL,
-    lgd.space.height = 26, lgd.space.width = 1,
-    annot.split = FALSE, dendro.pos = 'none', dendro.size = 0,
-    grid_col = "white", grid_linewidth = 0.3,
-    upper_theme = NULL,
-    upper_scale_fill_grad = ggplot2::scale_fill_gradientn(
+    annot.pal = grDevices::rainbow(n = length(sample.names)), annot.size = 1,
+    lgd.merge = FALSE, lgd.ncol = NULL,
+    lgd.space.height = 26, lgd.space.width = 1, dendro.pos = 'none',
+    dendro.size = 0, grid_col = "white", grid_linewidth = 0.3,
+    upper_theme = NULL, upper_scale_fill_grad = ggplot2::scale_fill_gradientn(
         colors = BiocompR::biopalette(name = "viridis_C_plasma"),
         name = "Upper\ntriangle values"),
     upper_guide_custom_bar = ggplot2::guide_colorbar(
-        barheight = 23, barwidth = 0.7, ticks.linewidth = 0.5,
+        barheight = 10, barwidth = 0.7, ticks.linewidth = 0.5,
         ticks.colour = "black", frame.linewidth = 0.5, frame.colour = "black"),
-    lower_theme = NULL,
-    lower_scale_fill_grad = ggplot2::scale_fill_gradientn(
+    lower_theme = NULL, lower_scale_fill_grad = ggplot2::scale_fill_gradientn(
         colors = BiocompR::biopalette(name = "viridis_D_viridis"),
         name = "Lower\ntriangle values"),
     lower_guide_custom_bar = ggplot2::guide_colorbar(
-        barheight = 0.7, barwidth = 23, ticks.linewidth = 0.5,
+        barheight = 0.7, barwidth = 10, ticks.linewidth = 0.5,
         ticks.colour = "black", frame.linewidth = 0.5, frame.colour = "black"),
-    diagonal_col = "white",
-    plot_title = NULL,
-    axis.title = ggplot2::element_blank(),
-    axis.title.x = ggplot2::element_blank(),
-    axis.title.y = ggplot2::element_blank(),
-    axis.text = ggplot2::element_text(size = 12),
-    axis.text.x = ggplot2::element_text(angle = 90, hjust = 0, vjust = 0.5),
-    axis.text.y = ggplot2::element_blank(),
-    axis.ticks = ggplot2::element_line(color = "black"),
-    lgd.title2 = ggplot2::element_blank(),
-    lgd.text2 = ggplot2::element_blank(),
-    lgd.breaks = NULL, lgd.breaks1 = 5, lgd.breaks2 = 5,
-    lgd.labels = NULL, lgd.labels1 = NULL, lgd.labels2 = NULL,
-    lgd.round = NULL, lgd.round1 = 2, lgd.round2 = 2,
-    lgd.limits = NULL, lgd.limits1 = NULL, lgd.limits2 = NULL,
-    lgd.ticks2 = NULL,
-    lgd.ticks.linewidth2 = 2, lgd.nbin2 = 5,
-    lgd.height2 = 1, lgd.width2 = 30,
-    lgd.frame.col = "grey", lgd.frame.linewidth = 1.5,
-    lgd.frame.linewidth1 = NULL, lgd.frame.linewidth2 = NULL,
-    raster2 = TRUE,
-    # add.ggplot.arg = NULL,
-    verbose = FALSE
+    diagonal_col = "white", plot_title = NULL, verbose = FALSE
 ){
     # Order Method
     if(order.method %in% c("AOE", "FPC", "hclust", "alphabet", "default")){
-        cat(paste("Apply", order.method, "ordering method.\n"))
-
+        if(verbose){ cat("Apply", order.method, "ordering method.\n") }
         if(order.method == "hclust"){
             # Check hclust.method
             if(hclust.method %in% c(
@@ -146,58 +80,10 @@ fused.view <- function(
             }
         }
     } else { stop("the order method is not supported.") }
-
-    # Overwrite the plot titles if they take the same parameters
-    if(!BiocompR:::is.elt_blank(axis.title)){
-        axis.title.x <- axis.title
-        axis.title.y <- axis.title
-    }
-    # Label matching Breaks
-    if(!is.null(lgd.labels)){
-        if(length(lgd.labels) != length(seq(lgd.breaks))){
-            stop("the number of labels does not match the number of breaks.")
-        }
-    }
-    if(!is.null(lgd.labels1)){
-        if(length(lgd.labels1) != length(lgd.breaks1)){
-            stop(paste("the number of labels does not match the number of",
-                       "breaks for upper triangle legend."))
-        }
-    }
-    if(!is.null(lgd.labels2)){
-        if(length(lgd.labels2) != length(lgd.breaks2)){
-            stop(paste("the number of labels does not match the number of",
-                       "breaks for lower triangle legend."))
-        }
-    }
-    # Overwrite the legends rounds if they take the same parameters
-    if(!is.null(lgd.round)){ lgd.round1 <- lgd.round; lgd.round2 <- lgd.round }
-    # Overwrite the legends titles if they take the same parameters
-    if(!BiocompR:::is.elt_blank(lgd.title)){
-        lgd.title1 <- lgd.title; lgd.title2 <- lgd.title }
-    # Overwrite the legends titles if they take the same parameters
-    if(!BiocompR:::is.elt_blank(lgd.text)){
-        lgd.text1 <- lgd.text; lgd.text2 <- lgd.text }
-    # Overwrite the legends breaks if they take the same parameters
-    if(!is.null(lgd.breaks)){
-        lgd.breaks1 <- lgd.breaks; lgd.breaks2 <- lgd.breaks}
-    # Overwrite the legends bins if they take the same value
-    if(!is.null(lgd.nbin)){ lgd.nbin1 <- lgd.nbin; lgd.nbin2 <- lgd.nbin }
-    # Overwrite the legends raster arg if they take the same value
-    if(!is.null(raster)){ raster1 <- raster ; raster2 <- raster }
-    # Overwrite the legends ticks arg if they take the same value
-    if(!is.null(lgd.ticks)){ lgd.ticks1 <- lgd.ticks ; lgd.ticks2 <- lgd.ticks }
-    # Overwrite the legends ticks linewidth arg if they take the same value
-    if(!is.null(lgd.ticks.linewidth)){
-        lgd.ticks.linewidth1 <- lgd.ticks.linewidth
-        lgd.ticks.linewidth2 <- lgd.ticks.linewidth
-    }
-    # Overwrite the legends frame linewidth arg if they take the same value
-    if(!is.null(lgd.frame.linewidth)){
-        lgd.frame.linewidth1 <- lgd.frame.linewidth
-        lgd.frame.linewidth2 <- lgd.frame.linewidth
-    }
-
+    # Check if length of labels match length of breaks in upper_scale_fill_grad
+    # and lower_scale_fill_grad
+    BiocompR:::chk.breaks.labels(ScaleContinuous_obj = upper_scale_fill_grad)
+    BiocompR:::chk.breaks.labels(ScaleContinuous_obj = lower_scale_fill_grad)
     # Get order of the correlations for the method used
     if(order.select == 'upper'){
         if(order.method %in% c("AOE", "FPC", "hclust")){
@@ -253,7 +139,6 @@ fused.view <- function(
     upper.melt[, Var1 := as.factor(x = Var1)]
     upper.melt[, Var1 := factor(
         x = Var1, levels = as.character(unique(upper.melt$Var1)))]
-    # upper.melt <- data.table::melt(upper.mat, na.rm = TRUE)
     dt.lower <- data.table::as.data.table(x = lower.mat, keep.rownames = "Var1")
     lower.melt <- data.table::melt.data.table(
         data = dt.lower, id.vars = "Var1", variable.name = "Var2", na.rm = TRUE,
@@ -261,53 +146,12 @@ fused.view <- function(
     lower.melt[, Var1 := as.factor(x = Var1)]
     lower.melt[, Var1 := factor(
         x = Var1, levels = as.character(unique(lower.melt$Var1)))]
-    # lower.melt <- data.table::melt(lower.mat, na.rm = TRUE)
-
     # Invert order of samples
     upper.melt[, Var2 := factor(x = Var2, levels = rev(levels(Var2)))]
     lower.melt[, Var2 := factor(x = Var2, levels = rev(levels(Var2)))]
-    # upper.melt$Var2 <- factor(upper.melt$Var2,
-    #                           levels = rev(levels(upper.melt$Var2)))
-    # lower.melt$Var2 <- factor(lower.melt$Var2,
-    #                           levels = rev(levels(lower.melt$Var2)))
-
     # Replace identical correlations by NA
     upper.melt[Var1 == Var2, value := NA]
     lower.melt[Var1 == Var2, value := NA]
-    # upper.melt[upper.melt$Var1 == upper.melt$Var2,]$value <- NA
-    # lower.melt[lower.melt$Var1 == lower.melt$Var2,]$value <- NA
-
-    # Overwrite min and max of upper and lower melt matrices if limits have been
-    # given for legends.
-    if(is.null(lgd.limits)){
-        upper.minmax <- BiocompR:::min.max.update(
-            lgd.limits = lgd.limits1, melt.tri = upper.melt, tri.type = "upper")
-        min_upper <- upper.minmax$min_tri
-        max_upper <- upper.minmax$max_tri
-
-        lower.minmax <- BiocompR:::min.max.update(
-            lgd.limits = lgd.limits2, melt.tri = lower.melt, tri.type = "lower")
-        min_lower <- lower.minmax$min_tri
-        max_lower <- lower.minmax$max_tri
-    } else {
-        if(length(lgd.limits) != 2){
-            stop(paste("lgd.limits should be a vector of length 2, containing",
-                       "the upper limit and the lower limit."))
-        } else {
-            min_upper <- lgd.limits[1]
-            max_upper <- lgd.limits[2]
-            min_lower <- lgd.limits[1]
-            max_lower <- lgd.limits[2]
-            if(min_upper == max_upper){
-                stop(paste("min and max values are equals. Please set limits",
-                           "for the upper triangle legend."))
-            }
-            if(min_lower == max_lower){
-                stop(paste("min and max values are equals. Please set limits",
-                           "for the lower triangle legend."))
-            }
-        }
-    }
     # Define default theme
     upper_default_fused <- ggplot2::theme(
         axis.text.x.top = ggplot2::element_blank(),
@@ -330,56 +174,6 @@ fused.view <- function(
         scale_fill_grad = upper_scale_fill_grad,
         guide_custom_bar = upper_guide_custom_bar, y_axis_pos = "left") +
         ggtitle(plot_title)
-
-    # upper.ggplot <- ggtriangle(
-    #     melt_tri = upper.melt,
-    #     grid_col = grid.col,
-    #     grid_linewidth = grid_linewidth,
-    #     ggtri_theme = ggplot2::theme(
-    #         legend.title = lgd.title1,
-    #         legend.text = legend.text = ggplot2::element_text(size = 12),
-    #         legend.justification = c(1, 0),
-    #         plot.margin = ggplot2::margin(0, 0, 0, 0), axis.text = axis.text),
-    # scale_fill_grad = ggplot2::scale_fill_gradientn(
-    #     colors = lgd.pal1,
-    #     breaks = round(
-    #         seq(min_upper, max_upper, length.out = lgd.breaks1),
-    #         lgd.round1),
-    #     labels = round(
-    #         seq(min_upper, max_upper, length.out = lgd.breaks1),
-    #         lgd.round1), na.value = diag.col, name = set.lgd1.title),
-    #     guide_custom_bar = ggplot2::guide_colorbar(
-    #         ticks = lgd.ticks1, nbin = lgd.nbin1, barheight = lgd.height1,
-    #         barwidth = lgd.width1, raster = raster1,
-    #         ticks.linewidth = lgd.ticks.linewidth1,
-    #         frame.colour = lgd.frame.col,
-    #         frame.linewidth = lgd.frame.linewidth1),
-    #     plot.labs = ggplot2::labs(x = set.x.title, y = set.y.title)
-    # )
-    # upper.ggplot <- BiocompR:::basic.ggplot.tri(
-    #     melt.tri = upper.melt, grid.col = grid.col,
-    #     grid.thickness = grid.thickness,
-    #     lgd.title = lgd.title1, lgd.text = lgd.text1, lgd.pal = lgd.pal1,
-    #     min_tri = min_upper, max_tri = max_upper, lgd.breaks = lgd.breaks1,
-    #     lgd.round = lgd.round1, lgd.ticks = lgd.ticks1, lgd.nbin = lgd.nbin1,
-    #     lgd.height = lgd.height1, lgd.width = lgd.width1, rasteri = raster1,
-    #     lgd.ticks.linewidth = lgd.ticks.linewidth1,
-    #     lgd.frame.col = lgd.frame.col,
-    #     lgd.frame.linewidth = lgd.frame.linewidth1, diag.col = diag.col,
-    #     set.lgd.title = set.lgd1.title) +
-    #     ggplot2::theme(axis.text = axis.text) +
-    #     ggplot2::labs(x = set.x.title, y = set.y.title)
-
-    # if(annot.pos == "top"){
-    #     upper.ggplot <- upper.ggplot + ggplot2::theme(
-    #         axis.text.x.top = ggplot2::element_blank(),
-    #         axis.ticks.x = ggplot2::element_blank())
-    # } else if(annot.pos != "left"){ stop("'annot.pos' value not supported.") }
-
-    # if(!is.null(add.ggplot.arg)){
-    #     upper.ggplot <- upper.ggplot + add.ggplot.arg
-    # }
-
     # Define default theme
     lower_default_fused <- ggplot2::theme(
         axis.title = ggplot2::element_blank(),
@@ -401,39 +195,19 @@ fused.view <- function(
         grid_linewidth = grid_linewidth, ggtri_theme = lower_theme,
         scale_fill_grad = lower_scale_fill_grad,
         guide_custom_bar = lower_guide_custom_bar)
-
-    # lower.ggplot <- BiocompR:::basic.ggplot.tri(
-    #     melt.tri = lower.melt, grid_col = grid_col,
-    #     grid_linewidth = grid_linewidth, lgd.title = lgd.title2,
-    #     lgd.text = lgd.text2, lgd.pal = lgd.pal2, min_tri = min_lower,
-    #     max_tri = max_lower, lgd.breaks = lgd.breaks2, lgd.round = lgd.round2,
-    #     lgd.ticks = lgd.ticks2, lgd.nbin = lgd.nbin2, lgd.height = lgd.height2,
-    #     lgd.width = lgd.width2, rasteri = raster2,
-    #     lgd.ticks.linewidth = lgd.ticks.linewidth2,
-    #     lgd.frame.col = lgd.frame.col,
-    #     lgd.frame.linewidth = lgd.frame.linewidth2, diag.col = diag.col,
-    #     set.lgd.title = set.lgd2.title) +
-    #     ggplot2::theme(axis.title = ggplot2::element_blank(),
-    #                    axis.text = ggplot2::element_blank(),
-    #                    axis.ticks = ggplot2::element_blank(),
-    #                    axis.ticks.length = ggplot2::unit(0, "pt"),
-    #                    legend.direction = 'horizontal')
-
     # Reorder groups and convert as factors
     annot.grps <- lapply(X = annot.grps, FUN = function(i){
         if(!is.factor(i)){ factor(x = i, levels = unique(i)) } else { i }
     })
     annot.grps <- lapply(
         X = annot.grps, FUN = function(i){ i[correlation.order] })
-
     # Plot Color Sidebar
     col_sidebar <- BiocompR:::plot.col.sidebar(
         sample.names = sample.names[correlation.order], annot.grps = annot.grps,
-        annot.pal = annot.pal, annot.pos = annot.pos,
-        theme_annot = theme(
-            axis.ticks.x.top = axis.ticks, axis.ticks.y.right = element_blank(),
-            axis.title.x = axis.title.x,
-            axis.text.x.top = element_text(
+        annot.pal = annot.pal, annot.pos = "top", theme_annot = theme(
+            axis.ticks.x.top = ggplot2::element_line(color = "black"),
+            axis.ticks.y.right = element_blank(),
+            axis.title.x = element_blank(), axis.text.x.top = element_text(
                 size = 12, angle = 90, vjust = 0.5, hjust = 0, color = "black"),
             axis.text.y.right = element_text(size = 12, color = "black"),
             axis.title.y = axis.title.y,
@@ -442,35 +216,7 @@ fused.view <- function(
             legend.title = element_text(size = 13, color = "black"),
             legend.text = element_text(size = 12, color = "black")),
         dendro.pos = 'top', merge.lgd = lgd.merge, right = TRUE)
-
-    # col_sidebar <- BiocompR:::plot.col.sidebar(
-    #     sample.names = sample.names, annot.grps = annot.grps,
-    #     annot.pal = annot.pal, annot.pos = annot.pos,
-    #     cor.order = correlation.order, axis.ticks.x = axis.ticks,
-    #     axis.ticks.y = axis.ticks, axis.title.x = axis.title.x,
-    #     axis.title.y = axis.title.y, set.x.title = set.x.title,
-    #     set.y.title = set.y.title, dendro.pos = dendro.pos,
-    #     merge.lgd = annot.lgd.merge, split.annot = annot.split)
-
-    # if(annot.pos == "top"){
-    #     if(is.null(annot.text)){
-    #         annot.text <- ggplot2::element_text(
-    #             size = 12, face = 'bold', hjust = 1, vjust = 0.5)
-    #     }
-    #     col_sidebar$sidebar <- col_sidebar$sidebar + ggplot2::theme(
-    #         axis.text.x.top = axis.text.x, axis.text.y = annot.text)
-    # } else if(annot.pos == "left"){
-    #     if(is.null(annot.text)){
-    #         annot.text <- ggplot2::element_text(
-    #             size = 12, angle = 90, face = 'bold', hjust = 0, vjust = 0.5)
-    #     }
-    #     col_sidebar$sidebar <- col_sidebar$sidebar + ggplot2::theme(
-    #         axis.text.x.top = annot.text, axis.text.y = axis.text.y)
-    # }
-
-    # Remove all legends
-    # upper.ggplot.nolgd <- upper.ggplot +
-    #     ggplot2::theme(legend.position = "none")
+    # Remove lower legends
     lower.ggplot.nolgd <- lower.ggplot +
         ggplot2::theme(legend.position = "none")
     sidebar.nolgd <- col_sidebar$sidebar
@@ -478,24 +224,9 @@ fused.view <- function(
     lower.grob <- ggplot2::ggplotGrob(lower.ggplot.nolgd)
     # Add lower ggplot as an annotation to the upper ggplot
     main_gg <- upper.ggplot + ggplot2::annotation_custom(lower.grob)
-
-    # #Convert ggplots into grobs
-    # main_grob <- ggplot2::ggplotGrob(main_grob)
-    # sidebar_grob <- ggplot2::ggplotGrob(sidebar.nolgd)
-    # if(dendro.pos!='none'){ dendro_grob <- ggplot2::ggplotGrob(ddgr_seg) }
-
-    # Get legends
-    # upper.legend <- BiocompR:::get.lgd(upper.ggplot)
+    # Get lower legends
     lower.legend <- BiocompR:::get.lgd(lower.ggplot)
-
-    # #Set sizes for colorbar legends
-    # sidebar.legend <- BiocompR:::stack.grobs.legends(
-    #     grobs.list = col_sidebar$legends, annot.grps = annot.grps,
-    #     height.lgds.space = 30)
-
-    # Set number of columns to display annotations legends
     # Builds color tables for legends.
-    # col_table <- build.col_table(
     col_table <- BiocompR:::build.col_table(
         annot.grps = annot.grps, annot.pal = annot.pal)
     if(lgd.merge){
@@ -515,80 +246,22 @@ fused.view <- function(
     } else if(all.equal(lgd.ncol, as.integer(lgd.ncol)) == TRUE){
         lgd.ncol <- rep(lgd.ncol, times = length(lgd_sizes))
     }
-
     # Build legends layout
     lgd.layout <- BiocompR::build_legends_layout(
         col_table = col_table, height.lgds.space = lgd.space.height,
         ncol.override = as.numeric(lgd.ncol[1]))
     # Create fused plot
-    arranged.grob <- heatmap_layout(
+    arranged.grob <- BiocompR:::heatmap_layout(
         dd.rows = FALSE, dd.cols = FALSE, show.annot = TRUE,
         ddgr_seg_row = NULL, ddgr_seg_col = NULL, sidebar = col_sidebar$sidebar,
         htmp = main_gg, legends = col_sidebar$legends, dend.row.size = 0,
         dend.col.size = 0, annot.size = annot.size, lgd.layout = lgd.layout,
         lgd.space.width = lgd.space.width,
         override_grob_list = lower.legend, override_grob_height = c(10, 1))
-
-    # #Assemble grobs
-    # if(annot.pos == "top"){
-    #     if(dendro.pos == "top"){
-    #         #Get common width of a list of objects widths
-    #         upd_grobs <- BiocompR::resize.grobs(ls.grobs = list(
-    #             "main_grob" = main_grob, "sidebar_grob" = sidebar_grob,
-    #             "dendro_grob" = dendro_grob), dimensions = "widths",
-    #             start.unit = 2, end.unit = 5)
-    #
-    #         main_grob <- gridExtra::arrangeGrob(
-    #             upd_grobs$dendro_grob, upd_grobs$sidebar_grob,
-    #             upd_grobs$main_grob, ncol = 1, heights = c(
-    #                 10 + dendro.size, 9 + annot.size , 40))
-    #     } else {
-    #         #Get common width of a list of objects widths
-    #         upd_grobs <- BiocompR::resize.grobs(ls.grobs = list(
-    #             "main_grob" = main_grob, "sidebar_grob" = sidebar_grob),
-    #             dimensions = "widths", start.unit = 2, end.unit = 5)
-    #
-    #         main_grob<-gridExtra::arrangeGrob(
-    #             upd_grobs$sidebar_grob, upd_grobs$main_grob , ncol = 1,
-    #             heights = c(9 + annot.size , 40))
-    #     }
-    #     #Create the Right Panel for legends
-    #     right.legends<-gridExtra::arrangeGrob(
-    #         upper.legend, sidebar.legend, nrow = 1)
-    # } else {
-    #     #Annotation on the left
-    #     if(dendro.pos == "left"){
-    #         #Get common width of a list of objects widths
-    #         upd_grobs <- BiocompR::resize.grobs(ls.grobs = list(
-    #             "main_grob" = main_grob, "sidebar_grob" = sidebar_grob,
-    #             "dendro_grob" = dendro_grob), dimensions = "heights",
-    #             start.unit = 3, end.unit = 8)
-    #
-    #         #Make main grob
-    #         main_grob <- gridExtra::arrangeGrob(
-    #             upd_grobs$dendro_grob, upd_grobs$sidebar_grob,
-    #             upd_grobs$main_grob, nrow = 1,
-    #             widths = c(10 + dendro.size, 9 + annot.size, 40))
-    #     } else {
-    #         #Get common width of a list of objects widths
-    #         upd_grobs <- BiocompR::resize.grobs(ls.grobs = list(
-    #             "main_grob" = main_grob, "sidebar_grob" = sidebar_grob),
-    #             dimensions = "heights", start.unit = 3, end.unit = 8)
-    #         #Make main grob
-    #         main_grob <- gridExtra::arrangeGrob(
-    #             upd_grobs$sidebar_grob, upd_grobs$main_grob, ncol = 1,
-    #             widths = c(9 + annot.size, 40))
-    #     }
-    #     right.legends <- gridExtra::arrangeGrob(
-    #         upper.legend, sidebar.legend, ncol = 2)
-    # }
-
     # Plot Final Figure
     grid::grid.newpage()
     grid::grid.draw(arranged.grob)
-    # fused.res <- gridExtra::grid.arrange( gridExtra::arrangeGrob(
-    #     grobs = list(main_grob, right.legends, lower.legend), ncol = 2,
-    #     nrow = 2, heights = c(40, 3), widths = c(20, 7)))
+    # Return res
     return(arranged.grob)
 }
 
@@ -787,9 +460,6 @@ fused.view <- function(
 #' @param raster2               A \code{logical} to specify whether or not
 #'                              colors in the lower triangle associated legend
 #'                              should be rasterized.
-#' @param add.ggplot.args       Ultimate ggplot2 additionnal components that you
-#'                              want to pass to the plot (Use only if you are an
-#'                              ggplot2 advanced user).
 #' @return A \code{gtable} object plotted automatically and a \code{list} of
 #'        results from the 2 comparisons as 2 matrices, with the same gtable
 #'        object:
@@ -809,7 +479,7 @@ fused.plot <- function(
     na.rm = 'pairwise', order.method, order.select, hclust.method = 'complete',
     p.adjust = "BH", annot.grps = list("Groups" = seq(ncol(data))),
     annot.pal = grDevices::rainbow(n = ncol(data)), annot.pos = 'top',
-    annot.size = 0, annot.text = NULL, lgd.merge = FALSE,
+    annot.size = 0, lgd.merge = FALSE,
     annot.split = FALSE,
     dendro.pos = 'none', dendro.size = 0,
     grid_col = "white",grid_linewidth = 0.3,
@@ -840,8 +510,7 @@ fused.plot <- function(
     lgd.width1 = 1, lgd.width2 = 30,
     lgd.frame.col = "grey", lgd.frame.linewidth = 1.5,
     lgd.frame.linewidth1 = NULL, lgd.frame.linewidth2 = NULL,
-    raster = TRUE, raster1 = NULL, raster2 = NULL, add.ggplot.arg = NULL,
-    verbose = FALSE){
+    raster = TRUE, raster1 = NULL, raster2 = NULL, verbose = FALSE){
     # Fix BiocCheck() complaining about these objects initialization
     statistic <- NULL
     # Data format
@@ -857,13 +526,13 @@ fused.plot <- function(
     }
     # Comparison Type
     if(na.rm %in% c("pairwise", "complete")){
-        cat(paste("Apply", na.rm, "deletion of missing data.\n"))
+        if(verbose){ cat("Apply", na.rm, "deletion of missing data.\n") }
     } else { stop("the value of na.rm is not supported.") }
 
     # P-value adjustment method
     if(p.adjust %in% c(
         "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none")){
-        cat(paste("Apply", p.adjust, "multiple testing adjustment.\n"))
+        if(verbose){ cat("Apply", p.adjust, "multiple testing adjustment.\n") }
     } else { stop("multiple testing adjustment method is not supported.") }
 
     # Groups and palettes matching
@@ -927,7 +596,7 @@ fused.plot <- function(
         lower.res <- lower.mat
     } else if(upper.comp == "KS"){
         if(upper.value %in% c('n', 'stat', 'p')){
-            cat(paste("Compute pairwise", upper.comp, "test..."))
+            cat("Compute pairwise", upper.comp, "test...")
             # Compute Kolmogorov Smirnov test
             ks.res <- BiocompR::pairwise.ks(
                 data = data, statistic = upper.value, ncores = ncores)
@@ -954,8 +623,7 @@ fused.plot <- function(
                 #Overwrite "stat" by "t" for correlation
                 if(lower.value == "stat"){ lower.value <- 't' }
                 #Compute correlation
-                cat(paste(
-                    "Compute pairwise", lower.comp, "correlation test..."))
+                cat("Compute pairwise", lower.comp, "correlation test...")
                 lower.correlation.res <- psych::corr.test(
                     data, use = na.rm, method = lower.comp, adjust = p.adjust)
                 lower.mat <- lower.correlation.res[[lower.value]]
@@ -965,15 +633,14 @@ fused.plot <- function(
         lower.res <- lower.mat
     } else { stop("'upper.comp' value not supported yet.") }
 
-    #Create Fused Plot
-    # fused.res <- BiocompR::fused.view(
-    fused.res <- fused.view(
+    # Create Fused Plot
+    fused.res <- BiocompR::fused.view(
         sample.names = colnames(data), upper.mat = upper.mat,
         lower.mat = lower.mat, order.select = order.select,
         order.method = order.method, hclust.method = hclust.method,
         annot.grps = annot.grps, annot.pal = annot.pal, annot.pos = annot.pos,
-        annot.size = annot.size, annot.text = annot.text,
-        lgd.merge = annot.lgd.merge, annot.split = annot.split,
+        annot.size = annot.size,
+        lgd.merge = lgd.merge, annot.split = annot.split,
         dendro.pos = dendro.pos, dendro.size = dendro.size,
         grid_col = grid_col, grid_linewidth = grid_linewidth,
         axis.title = axis.title, axis.title.x = axis.title.x,
@@ -1003,8 +670,7 @@ fused.plot <- function(
         lgd.frame.linewidth = lgd.frame.linewidth,
         lgd.frame.linewidth1 = lgd.frame.linewidth1,
         lgd.frame.linewidth2 = lgd.frame.linewidth2,
-        raster = raster, raster1 = raster1, raster2 = raster2,
-        add.ggplot.arg = add.ggplot.arg)
+        raster = raster, raster1 = raster1, raster2 = raster2)
 
     return(list("upper.res" = upper.res, "lower.res" = lower.res,
                 "fused.plot" = fused.res))

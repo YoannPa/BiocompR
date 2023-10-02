@@ -89,6 +89,25 @@ is.elt_blank <- function(arg){
     return(bool)
 }
 
+#' Checks if n.breaks and labels match in a ScaleContinuous object.
+#'
+#' @param ScaleContinuous_obj A \code{ScaleContinuous} object usually generated
+#'                            with \link[ggplot2]{scale_fill_gradient},
+#'                            \link[ggplot2]{scale_fill_gradient2} or
+#'                            \link[ggplot2]{scale_fill_gradientn}.
+#' @author Yoann Pageaud.
+#' @keywords internal
+
+chk.breaks.labels <- function(ScaleContinuous_obj){
+    if(!is.null(ScaleContinuous_obj$n.breaks)){
+        if(ScaleContinuous_obj$n.breaks != length(
+            ScaleContinuous_obj$labels)){
+            stop("in 'upper_scale_fill_grad' n.breaks is not equal to the",
+                 "length of labels.")
+        }
+    }
+}
+
 #' Extracts legend from a ggplot2 object.
 #'
 #' @param gg2.obj  A \code{gg} object with legends.
@@ -193,7 +212,7 @@ ggdend <- function(df, orientation, reverse.x = FALSE, theme_dend = NULL){
 }
 
 
-#' Draws a triangle ggplot for a basic upper or lower triangle molten matrix.
+#' Draws a triangle ggplot for a basic molten triangle matrix.
 #'
 #' @param melt_tri         A \code{data.frame} melted triangle containing a
 #'                         statistical test values.

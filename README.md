@@ -28,41 +28,47 @@ devtools::install_github("YoannPa/BiocompR")
 ```
 
 ## Content
-Currently the package BiocompR contains **33 functions**:
+Currently the package BiocompR contains **39 exported functions**:
 
-* `basic.sidebar()` - Draws a ggplot2 of a basic sidebar.
-* `biopalette()` - A color palette advisor for biology plots.
+* `basic.sidebar()` - Draws a ggplot2 of a basic sidebar.  
+* `biopalette()` - A color palette advisor for biology plots.  
 * `bivar.plot()` - Draws boxplots or violins from a variable values against ranges of a 2nd one.  
-* `build.layout()` - Builds legends layout.
+* `build_legends_layout()` - Builds legends layout.  
 * `check_fun()` - Checks if a function exists and package of origin.  
 * `cross.biplot()` - Computes and draws biplots for multiple principal components at once.  
 * `EVA()` - Computes eigenvectors, principal component scores and correlations from a correlation test.  
 * `fused.plot()` - Creates a plot summarizing results from 2 different pairwise comparisons.  
 * `fused.view()` - Displays 2 matrices of results as a fused plot.  
 * `gg2heatmap()` - Creates a custom heatmap with dendrograms and annotations.  
-* `ggbipca()` - Computes and draws a custom PCA biplot.
-* `ggcirclart()` - Circlizes ggplot2 objects.
+* `ggbipca()` - Computes and draws a custom PCA biplot.  
+* `ggcirclart()` - Circlizes ggplot2 objects.  
 * `ggcoverage()` - Plots an annotated barplot.  
 * `ggcraviola()` - Draws a craviola plot (half-splitted and percentile-binned violin plot).  
 * `ggdend()` - Creates a dendogram in ggplot2.  
-* `ggdensity_map` - Plots a density color map from a matrix or a molten data.frame.  
+* `ggdensity_map()` - Plots a density color map from a matrix or a molten data.frame.  
 * `ggeigenvector()` - Creates an eigenvector plot using ggplot2.  
+* `ggfusion.free()` - Displays 2 triangle matrices fused together in a single plot.  
 * `gghist()` - Plots an histogram using ggplot2 from a numeric or character vector.  
 * `ggpanel.corr()` - Plots results of correlation test between a single variable and multiple others as jittered scatter plot divided into 4 different panels.  
-* `ggstackbar()` - Draws stacked barplots from an annotation table.
+* `ggstackbar()` - Draws stacked barplots from an annotation table.  
 * `ggsunset()` - Draws a sunset plot showing the completeness of a dataset.  
+* `ggtriangle()` - Draws a triangle ggplot for a basic molten triangle matrix.  
 * `ggvolcano.corr()` - Plots results of correlation test between a single variable and multiple others as volcano plot.  
 * `ggvolcano.free()` - Plots any kind of results with P-values that can be displayed as a volcano plot.  
 * `ggvolcano.test()` - Plots results of a Plots results of statistical tests as volcano plot.  
-* `ks.plot()` - Computes pairwise Kolmogorov-Smirnov tests on a matrix and display results in a fused plot.
+* `ks.plot()` - Computes pairwise Kolmogorov-Smirnov tests on a matrix and display results in a fused plot.  
 * `manage.na()` - Keeps, removes or imputes missing values in a matrix or a data.frame based on sample groups.  
 * `plot.col.sidebar()` - Creates a colored side annotation bars in ggplot2.  
+* `plot_asso_all_annot()`	- Draws association test results between all columns from a data.frame.  
+* `plot_asso_annot_PC()` - Plots association tests' results between some annotations and some PCs.  
+* `raster.gg2grob()` - Rasterize a gg plot into a raster grob.  
 * `raster.ggplot.to.grob()` - Rasterize a gg plot into a raster grob.  
 * `resize.grob.oneway()` - Resizes heights or widths of a grob based on the dimensions of another grob.  
 * `resize.grobs()` - Resizes heights or widths of multiple grobs based on a given grob dimensions.  
 * `test.annots()` - Tests association of an annotation with another one or with a PC.  
+* `test_asso_all_annot()` - Write function description here.  
 * `test_asso_annot_pc()` - Tests associations between a set of annotations and PCs from a prcomp object.  
-* `warn.handle()` - Filters unrelevant warnings matching a regular expression.  
+* `warn.handle()` - Filters irrelevant warnings matching a regular expression.  
 
 ## Problems ? / I need help !
 For any questions **Not related to bugs or development** please check the section "**Known Issues**" available below. If the issue you experience is not adressed in the known issues you can write me at [y.pageaud@dkfz.de](y.pageaud@dkfz.de).

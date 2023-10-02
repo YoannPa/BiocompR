@@ -424,7 +424,7 @@ test_asso_annot_pc <- function(
     return(dt_allres)
 }
 
-#' Write function description here.
+#' Tests associations between all annotations stored in a data.frame.
 #'
 #' @param annot.table A \code{data.frame} containing all annotations, 1
 #'                    annotation per column.
