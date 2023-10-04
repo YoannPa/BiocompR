@@ -24,6 +24,9 @@ A \code{data.table} of the correlation results with columns:
 \description{
 Converts a list of type 'psych' objects into a data.table.
 }
+\references{
+\href{https://www.scholars.northwestern.edu/en/publications/psych-procedures-for-personality-and-psychological-research}{William R Revelle, psych: Procedures for Personality and Psychological Research. Northwestern University, Evanston, Illinois, USA (2017).}
+}
 \author{
 Yoann Pageaud.
 }

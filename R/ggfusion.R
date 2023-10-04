@@ -15,7 +15,7 @@ fix.corrMatOrder.alphabet <- function(cor.order, str){
     }))
 }
 
-#' Displays 2 triangle matrices fused together in a single plot.
+#' Draws 2 triangle matrices fused together in a single plot.
 #'
 #' @param param1 A \code{type} parameter description.
 #' @return A \code{type} object returned description.
@@ -24,9 +24,8 @@ fix.corrMatOrder.alphabet <- function(cor.order, str){
 
 #TODO: Write documentation!
 ggfusion.free <- function(
-    sample.names, upper.mat, lower.mat,
-    order.select, order.method, hclust.method,
-    annot.grps = list("Groups" = seq(length(sample.names))),
+    sample.names, upper.mat, lower.mat, order.select, order.method,
+    hclust.method, annot.grps = list("Groups" = seq(length(sample.names))),
     annot.pal = grDevices::rainbow(n = length(sample.names)), annot.size = 1,
     lgd.merge = FALSE, lgd.ncol = NULL,
     lgd.space.height = 26, lgd.space.width = 1, dendro.pos = 'none',
@@ -155,11 +154,11 @@ ggfusion.free <- function(
     # Define default theme
     upper_default_fused <- ggplot2::theme(
         axis.text.x.top = ggplot2::element_blank(),
-        axis.text.y = element_text(size = 12, color = "black"),
-        axis.text.y.right = element_blank(),
+        axis.text.y = ggplot2::element_text(size = 12, color = "black"),
+        axis.text.y.right = ggplot2::element_blank(),
         axis.ticks.length.x.top = ggplot2::unit(0, "pt"),
         axis.ticks.length.y.right = ggplot2::unit(0, "pt"),
-        legend.title = ggplot2:: element_text(size = 13),
+        legend.title = ggplot2::element_text(size = 13),
         legend.text = ggplot2::element_text(size = 9),
         legend.justification = c(0, 0.5),
         plot.margin = ggplot2::margin(0, 0, 0, 0))
@@ -168,12 +167,12 @@ ggfusion.free <- function(
     # Update upper_scale_fill_grad na.value to add diagonal_col
     upper_scale_fill_grad$na.value <- diagonal_col
     # Upper plot
-    upper.ggplot <- ggtriangle(
+    upper.ggplot <- BiocompR::ggtriangle(
         melt_tri = upper.melt, grid_col = grid_col,
         grid_linewidth = grid_linewidth, ggtri_theme = upper_theme,
         scale_fill_grad = upper_scale_fill_grad,
         guide_custom_bar = upper_guide_custom_bar, y_axis_pos = "left") +
-        ggtitle(plot_title)
+        ggplot2::ggtitle(plot_title)
     # Define default theme
     lower_default_fused <- ggplot2::theme(
         axis.title = ggplot2::element_blank(),
@@ -190,7 +189,7 @@ ggfusion.free <- function(
     # Update lower_scale_fill_grad na.value to add diagonal_col
     lower_scale_fill_grad$na.value <- diagonal_col
     # Lower plot
-    lower.ggplot <- ggtriangle(
+    lower.ggplot <- BiocompR::ggtriangle(
         melt_tri = lower.melt, grid_col = grid_col,
         grid_linewidth = grid_linewidth, ggtri_theme = lower_theme,
         scale_fill_grad = lower_scale_fill_grad,
@@ -201,31 +200,6 @@ ggfusion.free <- function(
     })
     annot.grps <- lapply(
         X = annot.grps, FUN = function(i){ i[correlation.order] })
-    # Plot Color Sidebar
-    col_sidebar <- BiocompR:::plot.col.sidebar(
-        sample.names = sample.names[correlation.order], annot.grps = annot.grps,
-        annot.pal = annot.pal, annot.pos = "top", theme_annot = theme(
-            axis.ticks.x.top = ggplot2::element_line(color = "black"),
-            axis.ticks.y.right = element_blank(),
-            axis.title.x = element_blank(), axis.text.x.top = element_text(
-                size = 12, angle = 90, vjust = 0.5, hjust = 0, color = "black"),
-            axis.text.y.right = element_text(size = 12, color = "black"),
-            axis.title.y = axis.title.y,
-            plot.margin = margin(0, 0, 0.1, 0, unit = "cm")),
-        theme_legend = theme(
-            legend.title = element_text(size = 13, color = "black"),
-            legend.text = element_text(size = 12, color = "black")),
-        dendro.pos = 'top', merge.lgd = lgd.merge, right = TRUE)
-    # Remove lower legends
-    lower.ggplot.nolgd <- lower.ggplot +
-        ggplot2::theme(legend.position = "none")
-    sidebar.nolgd <- col_sidebar$sidebar
-    # Create grob for lower matrix
-    lower.grob <- ggplot2::ggplotGrob(lower.ggplot.nolgd)
-    # Add lower ggplot as an annotation to the upper ggplot
-    main_gg <- upper.ggplot + ggplot2::annotation_custom(lower.grob)
-    # Get lower legends
-    lower.legend <- BiocompR:::get.lgd(lower.ggplot)
     # Builds color tables for legends.
     col_table <- BiocompR:::build.col_table(
         annot.grps = annot.grps, annot.pal = annot.pal)
@@ -250,13 +224,40 @@ ggfusion.free <- function(
     lgd.layout <- BiocompR::build_legends_layout(
         col_table = col_table, height.lgds.space = lgd.space.height,
         ncol.override = as.numeric(lgd.ncol[1]))
+    # Plot Color Sidebar
+    col_sidebar <- BiocompR:::plot.col.sidebar(
+        sample.names = sample.names[correlation.order], annot.grps = annot.grps,
+        annot.pal = annot.pal, annot.pos = "top", theme_annot = ggplot2::theme(
+            axis.ticks.x.top = ggplot2::element_line(color = "black"),
+            axis.ticks.y.right = ggplot2::element_blank(),
+            axis.title.x = ggplot2::element_blank(),
+            axis.text.x.top = ggplot2::element_text(
+                size = 12, angle = 90, vjust = 0.5, hjust = 0, color = "black"),
+            axis.text.y.right = ggplot2::element_text(
+                size = 12, color = "black"),
+            plot.margin = ggplot2::margin(0, 0, 0.1, 0, unit = "cm")),
+        theme_legend = ggplot2::theme(
+            legend.title = ggplot2::element_text(size = 13, color = "black"),
+            legend.text = ggplot2::element_text(size = 12, color = "black")),
+        dendro.pos = 'top', merge.lgd = lgd.merge, lgd.ncol = lgd.ncol,
+        right = TRUE)
+    # Remove lower legends
+    lower.ggplot.nolgd <- lower.ggplot +
+        ggplot2::theme(legend.position = "none")
+    sidebar.nolgd <- col_sidebar$sidebar
+    # Create grob for lower matrix
+    lower.grob <- ggplot2::ggplotGrob(lower.ggplot.nolgd)
+    # Add lower ggplot as an annotation to the upper ggplot
+    main_gg <- upper.ggplot + ggplot2::annotation_custom(lower.grob)
+    # Get lower legends
+    lower.legend <- BiocompR:::get.lgd(lower.ggplot)
     # Create fused plot
     arranged.grob <- BiocompR:::heatmap_layout(
         dd.rows = FALSE, dd.cols = FALSE, show.annot = TRUE,
         ddgr_seg_row = NULL, ddgr_seg_col = NULL, sidebar = col_sidebar$sidebar,
         htmp = main_gg, legends = col_sidebar$legends, dend.row.size = 0,
         dend.col.size = 0, annot.size = annot.size, lgd.layout = lgd.layout,
-        lgd.space.width = lgd.space.width,
+        lgd.space.width = 1 + lgd.space.width,
         override_grob_list = lower.legend, override_grob_height = c(10, 1))
     # Plot Final Figure
     grid::grid.newpage()
@@ -265,7 +266,7 @@ ggfusion.free <- function(
     return(arranged.grob)
 }
 
-#' Creates a plot summarizing results from 2 different pairwise comparisons.
+#' Draws 2 triangle matrices of computed pairwise correlations' results.
 #'
 #' @param data                  A \code{matrix} or \code{dataframe}.
 #' @param ncores                An \code{integer} to specify the number of
@@ -282,7 +283,7 @@ ggfusion.free <- function(
 #'   \item{'r' - the correlation values.}
 #'   \item{'n' - the number of cases used for the comparisons.}
 #'   \item{'stat' - the values of the comparison statistic.}
-#'   \item{'p' - the P-values of the comparison.}
+#'   \item{'p' - the P-values of the comparison (-log10() transformed).}
 #'   \item{'se' - the standard errors of the comparison.}
 #'  }
 #' @param lower.comp            The comparison for which results will be
@@ -331,9 +332,6 @@ ggfusion.free <- function(
 #'                              'annot.grps'. If a list is provided, its length
 #'                              must match the length of the list provided to
 #'                              'annot.grps'.
-#' @param annot.pos             A \code{character} specifying the position of
-#'                              the annotation sidebar.\cr Possible values are:
-#'                              'top', 'left' or 'both'.
 #' @param annot.size            An \code{integer} to increase or decrease the
 #'                              size of the annotation side bar.
 #' @param dendro.pos            A \code{character} specifying the position of
@@ -345,121 +343,8 @@ ggfusion.free <- function(
 #'                              grid.
 #' @param grid_linewidth        A \code{double} value for the thickness of the
 #'                              grid.
-#' @param axis.title            An \code{element_text} object to setup axes
-#'                              titles.
-#' @param axis.title.x          An \code{element_text} object to setup X axis
-#'                              title.
-#' @param axis.title.y          An \code{element_text} object to setup Y axis
-#'                              title.
-#' @param axis.text             An \code{element_text} object to setup axes
-#'                              text.
-#' @param axis.text.x           An \code{element_text} object to setup X axis
-#'                              text.
-#' @param axis.text.y           An \code{element_text} object to setup Y axis
-#'                              text.
-#' @param axis.ticks            An \code{element_line} object to setup the ticks
-#'                              of the plot.
-#' @param set.x.title           A \code{character}to be used as the title for
-#'                              the X axis.
-#' @param set.y.title           A \code{character}to be used as the title for
-#'                              the Y axis.
-#' @param set.lgd1.title        A \code{character}to be used as the title of the
-#'                              legend.
-#' @param set.lgd2.title        A \code{character}to be used as the title of the
-#'                              legend.
-#' @param diagonal_col              A \code{character} defining the color of cells
+#' @param diagonal_col          A \code{character} defining the color of cells
 #'                              with of the empty diagonal.
-#' @param lgd.pal1              A \code{character} vector of colors to use for
-#'                              the palette of the upper triangle.
-#' @param lgd.pal2              A \code{character} vector of colors to use for
-#'                              the palette of the lower triangle.
-#' @param lgd.title             An \code{element_text} object to setup both
-#'                              legend titles.
-#' @param lgd.title1            An \code{element_text} object to setup the
-#'                              legend title of the upper triangle.
-#' @param lgd.title2            An \code{element_text} object to setup the
-#'                              legend title of the lower triangle.
-#' @param lgd.text              An \code{element_text} object to setup the text
-#'                              of both legends.
-#' @param lgd.text1             An \code{element_text} object to setup the text
-#'                              of the upper triangle legend.
-#' @param lgd.text2             An \code{element_text} object to setup the text
-#'                              of the lower triangle legend.
-#' @param lgd.breaks            A \code{double} vector defining the graduation
-#'                              position along the possible values.
-#' @param lgd.breaks1           A \code{double} vector defining the graduation
-#'                              position along the possible values of the upper
-#'                              triangle.
-#' @param lgd.breaks2           A \code{double} vector defining the graduation
-#'                              position along the possible values of the lower
-#'                              triangle.
-#' @param lgd.labels            A \code{double} vector of values to map to
-#'                              legends breaks. Will be displayed on the plot.
-#' @param lgd.labels1           A \code{double} vector of values to map to the
-#'                              upper triangle legend breaks. Will be displayed
-#'                              on the plot.
-#' @param lgd.labels2           A \code{double} vector of values to map to the
-#'                              lower triangle legend breaks. Will be displayed
-#'                              on the plot.
-#' @param lgd.round             An \code{integer} indicating the number of
-#'                              decimal places to be used for the default
-#'                              legends labels.
-#' @param lgd.round1            An \code{integer} indicating the number of
-#'                              decimal places to be used for the default
-#'                              upper triangle legend labels.
-#' @param lgd.round2            An \code{integer} indicating the number of
-#'                              decimal places to be used for the default
-#'                              lower triangle legend labels.
-#' @param lgd.limits            A \code{double} vector of length 2, giving the
-#'                              upper and lower limits for mapping breaks and
-#'                              colors to both triangle legends.
-#' @param lgd.limits1           A \code{double} vector of length 2, giving the
-#'                              upper and lower limits for mapping breaks and
-#'                              colors to the upper triangle legend.
-#' @param lgd.limits2           A \code{double} vector of length 2, giving the
-#'                              upper and lower limits for mapping breaks and
-#'                              colors to the lower triangle legend.
-#' @param lgd.ticks.linewidth   A \code{double} value to specify the thickness
-#'                              of legends ticks.
-#' @param lgd.ticks.linewidth1  A \code{double} value to specify the thickness
-#'                              of the upper triangle associated legend ticks.
-#' @param lgd.ticks.linewidth2  A \code{double} value to specify the thickness
-#'                              of the lower triangle associated legend ticks.
-#' @param lgd.nbin              An \code{integer} specifying the number of bins
-#'                              for drawing both colorbars. A smoother
-#'                              colorbar results from a larger value.
-#' @param lgd.nbin1             An \code{integer} specifying the number of bins
-#'                              for drawing the upper triangle associated
-#'                              colorbar. A smoother colorbar results from a
-#'                              larger value.
-#' @param lgd.nbin2             An \code{integer} specifying the number of bins
-#'                              for drawing the lower triangle associated
-#'                              colorbar. A smoother colorbar results from a
-#'                              larger value.
-#' @param lgd.height1           A \code{double} specifying the height of the
-#'                              upper triangle associated colorbar.
-#' @param lgd.height2           A \code{double} specifying the height of the
-#'                              lower triangle associated colorbar.
-#' @param lgd.width1            A \code{double} specifying the width of the
-#'                              upper triangle associated colorbar.
-#' @param lgd.width2            A \code{double} specifying the height of the
-#'                              lower triangle associated colorbar.
-#' @param lgd.frame.col         A \code{character} defining the color of the
-#'                              frame of legends.
-#' @param lgd.frame.linewidth   A \code{double} defining the thickness of the
-#'                              frame of both legends.
-#' @param lgd.frame.linewidth1  A \code{double} defining the thickness of the
-#'                              frame of upper triangle associated legends.
-#' @param lgd.frame.linewidth2  A \code{double} defining the thickness of the
-#'                              frame of lower triangle associated legends.
-#' @param raster                A \code{logical} to specify whether or not
-#'                              colors in both legends should be rasterized.
-#' @param raster1               A \code{logical} to specify whether or not
-#'                              colors in the upper triangle associated legend
-#'                              should be rasterized.
-#' @param raster2               A \code{logical} to specify whether or not
-#'                              colors in the lower triangle associated legend
-#'                              should be rasterized.
 #' @return A \code{gtable} object plotted automatically and a \code{list} of
 #'        results from the 2 comparisons as 2 matrices, with the same gtable
 #'        object:
@@ -472,47 +357,39 @@ ggfusion.free <- function(
 #'        }
 #' @author Yoann Pageaud.
 #' @export
+#' @examples
+#' # Plot a basic fusion correlation plot
+#' res <- ggfusion.corr(data = as.matrix(t(scale(mtcars))))
+#' @references \href{https://www.scholars.northwestern.edu/en/publications/psych-procedures-for-personality-and-psychological-research}{William R Revelle, psych: Procedures for Personality and Psychological Research. Northwestern University, Evanston, Illinois, USA (2017).}
 #' @references \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6099145/#B13}{Why, When and How to Adjust Your P Values? Mohieddin Jafari and Naser Ansari-Pour - Cell J. 2019 Winter; 20(4): 604–607.}
 
-fused.plot <- function(
-    data, ncores, upper.comp, upper.value, lower.comp, lower.value,
-    na.rm = 'pairwise', order.method, order.select, hclust.method = 'complete',
-    p.adjust = "BH", annot.grps = list("Groups" = seq(ncol(data))),
-    annot.pal = grDevices::rainbow(n = ncol(data)), annot.pos = 'top',
-    annot.size = 0, lgd.merge = FALSE,
-    annot.split = FALSE,
-    dendro.pos = 'none', dendro.size = 0,
-    grid_col = "white",grid_linewidth = 0.3,
-    axis.title = ggplot2::element_blank(),
-    axis.title.x = ggplot2::element_blank(),
-    axis.title.y = ggplot2::element_blank(),
-    axis.text = ggplot2::element_text(size = 12),
-    axis.text.x = ggplot2::element_text(angle = 90, hjust = 0, vjust = 0.5),
-    axis.text.y = ggplot2::element_blank(),
-    axis.ticks = ggplot2::element_line(color = "black"),
-    set.x.title = NULL, set.y.title = NULL,
-    set.lgd1.title = NULL, set.lgd2.title = NULL,
-    diag.col = "white",
-    lgd.pal1 = NULL, lgd.pal2 = NULL, lgd.title = ggplot2::element_blank(),
-    lgd.title1 = ggplot2::element_blank(),
-    lgd.title2 = ggplot2::element_blank(),
-    lgd.text = ggplot2::element_text(size = 12),
-    lgd.text1 = ggplot2::element_blank(), lgd.text2 = ggplot2::element_blank(),
-    lgd.breaks = NULL, lgd.breaks1 = NULL, lgd.breaks2 = NULL,
-    lgd.labels = NULL, lgd.labels1 = NULL, lgd.labels2 = NULL,
-    lgd.round = NULL, lgd.round1 = 2, lgd.round2 = 2,
-    lgd.limits = NULL, lgd.limits1 = NULL, lgd.limits2 = NULL,
-    lgd.ticks = TRUE, lgd.ticks1 = NULL, lgd.ticks2 = NULL,
-    lgd.ticks.linewidth = 2, lgd.ticks.linewidth1 = NULL,
-    lgd.ticks.linewidth2 = NULL,
-    lgd.nbin = NULL, lgd.nbin1 = NULL, lgd.nbin2 = NULL,
-    lgd.height1 = 26, lgd.height2 = 1,
-    lgd.width1 = 1, lgd.width2 = 30,
-    lgd.frame.col = "grey", lgd.frame.linewidth = 1.5,
-    lgd.frame.linewidth1 = NULL, lgd.frame.linewidth2 = NULL,
-    raster = TRUE, raster1 = NULL, raster2 = NULL, verbose = FALSE){
+ggfusion.corr <- function(
+    data, ncores = 1, upper.comp = "pearson", upper.value = "r",
+    lower.comp = "pearson", lower.value = "p",
+    na.rm = 'pairwise', order.method = 'hclust', order.select = 'upper',
+    hclust.method = 'complete', p.adjust = "BH",
+    annot.grps = list("Groups" = seq(ncol(data))),
+    annot.pal = grDevices::rainbow(n = ncol(data)), annot.size = 1,
+    lgd.merge = FALSE, upper_theme = NULL,
+    upper_scale_fill_grad = ggplot2::scale_fill_gradientn(
+        colors = BiocompR::biopalette(name = "RColorBrewer_RdBu8"),
+        name = "Upper\ntriangle values"),
+    upper_guide_custom_bar = ggplot2::guide_colorbar(
+        barheight = 10, barwidth = 0.7, ticks.linewidth = 0.5,
+        ticks.colour = "black", frame.linewidth = 0.5, frame.colour = "black"),
+    lower_theme = NULL, lower_scale_fill_grad = ggplot2::scale_fill_gradient2(
+        low = "darkblue", mid = "white", high = "darkred",
+        midpoint = -log10(0.05), name = "Lower\ntriangle values"),
+    lower_guide_custom_bar = ggplot2::guide_colorbar(
+        barheight = 0.7, barwidth = 10, ticks.linewidth = 0.5,
+        ticks.colour = "black", frame.linewidth = 0.5, frame.colour = "black"),
+    dendro.pos = 'none', dendro.size = 1, grid_col = "white",
+    grid_linewidth = 0.3, plot_title = NULL, diagonal_col = "white",
+    lgd.ncol = NULL, lgd.space.height = 26, lgd.space.width = 1,
+    verbose = FALSE){
     # Fix BiocCheck() complaining about these objects initialization
-    statistic <- NULL
+    # statistic <- NULL
+
     # Data format
     if(!(is.matrix(data))){if(is.data.frame(data)){data<-as.matrix(data)
     } else { stop("data is neither a matrix or a dataframe.") } }
@@ -540,10 +417,10 @@ fused.plot <- function(
         data = data, annot.grps = annot.grps, annot.pal = annot.pal,
         verbose = verbose)
 
-    # Position annotation
-    if(!annot.pos %in% c("top", "left", "both")){
-        stop("annotation sidebar cannot be put here.")
-    }
+    # # Position annotation
+    # if(!annot.pos %in% c("top", "left", "both")){
+    #     stop("annotation sidebar cannot be put here.")
+    # }
 
     # Checking comparisons
     if(upper.comp %in% c("pearson", "spearman", "kendall")){
@@ -556,6 +433,8 @@ fused.plot <- function(
         upper.correlation.res <- psych::corr.test(
             data, use = na.rm, method = upper.comp, adjust = p.adjust)
         upper.mat <- upper.correlation.res[[upper.value]]
+        # if P-value, auto -log10 transform matrix
+        if(upper.value == "p"){ upper.mat <- -log10(upper.mat) }
         upper.res <- upper.mat
         if(verbose){ cat("Done.\n") }
         if(lower.comp == upper.comp){
@@ -564,6 +443,7 @@ fused.plot <- function(
             # Assign same matrix
             lower.correlation.res <- upper.correlation.res
             lower.mat <- lower.correlation.res[[lower.value]]
+
         } else {
             if(lower.comp %in% c( "pearson", "spearman", "kendall")){
                 # Overwrite "stat" by "t" for correlation
@@ -576,102 +456,89 @@ fused.plot <- function(
                     data, use = na.rm, method = lower.comp, adjust = p.adjust)
                 lower.mat <- lower.correlation.res[[lower.value]]
                 if(verbose){ cat("Done.\n") }
-            } else if(lower.comp == "KS"){
-                if(lower.value %in% c('n', 'stat', 'p')){
-                    if(verbose){
-                        cat("Compute pairwise", lower.comp, "test...")
-                    }
-                    # Compute Kolmogorov-Smirnov test
-                    ks.res <- BiocompR::pairwise.ks(
-                        data = data, statistic = lower.value, ncores = ncores)
-                    lower.mat <- ks.res$res.statistic
-                    cat("Done.\n")
-                } else if(lower.value == 'r'){
-                    stop("a KS test does not compute a correlation value.")
-                } else if(lower.value == 'se'){
-                    stop("a KS test does not compute a standard error.")
-                } else { stop("Unknown statistic for 'lower.value'.") }
+            # } else if(lower.comp == "KS"){
+            #     if(lower.value %in% c('n', 'stat', 'p')){
+            #         if(verbose){
+            #             cat("Compute pairwise", lower.comp, "test...")
+            #         }
+            #         # Compute Kolmogorov-Smirnov test
+            #         ks.res <- BiocompR::pairwise.ks(
+            #             data = data, statistic = lower.value, ncores = ncores)
+            #         lower.mat <- ks.res$res.statistic
+            #         cat("Done.\n")
+            #     } else if(lower.value == 'r'){
+            #         stop("a KS test does not compute a correlation value.")
+            #     } else if(lower.value == 'se'){
+            #         stop("a KS test does not compute a standard error.")
+            #     } else { stop("Unknown statistic for 'lower.value'.") }
             } else { stop("'lower.comp' value not supported yet.") }
         }
+        # if P-value, auto -log10 transform matrix
+        if(lower.value == "p"){ lower.mat <- -log10(lower.mat) }
         lower.res <- lower.mat
-    } else if(upper.comp == "KS"){
-        if(upper.value %in% c('n', 'stat', 'p')){
-            cat("Compute pairwise", upper.comp, "test...")
-            # Compute Kolmogorov Smirnov test
-            ks.res <- BiocompR::pairwise.ks(
-                data = data, statistic = upper.value, ncores = ncores)
-            upper.mat <- ks.res$res.statistic
-            cat("Done.\n")
-        } else if(upper.value == 'r'){
-            stop("a KS test does not compute a correlation value.")
-        } else if(upper.value == 'se'){
-            stop("a KS test does not compute a standard error.")
-        } else { stop("Unknown statistic for 'upper.value'.") }
-        upper.res <- upper.mat
-        if(lower.comp == upper.comp){
-            if(lower.value %in% c('n', 'stat', 'p')){
-                lower.mat <- BiocompR::get.ks.stat(
-                    table_combinations = ks.res$table_combinations,
-                    df.ks.tests = ks.res$res.test, statistic)
-            } else if(lower.value == 'r'){
-                stop("a KS test does not compute a correlation value.")
-            } else if(lower.value == 'se'){
-                stop("a KS test does not compute a standard error.")
-            } else { stop("Unknown statistic for 'upper.value'.") }
-        } else {
-            if(lower.comp %in% c("pearson", "spearman", "kendall")){
-                #Overwrite "stat" by "t" for correlation
-                if(lower.value == "stat"){ lower.value <- 't' }
-                #Compute correlation
-                cat("Compute pairwise", lower.comp, "correlation test...")
-                lower.correlation.res <- psych::corr.test(
-                    data, use = na.rm, method = lower.comp, adjust = p.adjust)
-                lower.mat <- lower.correlation.res[[lower.value]]
-                cat("Done.\n")
-            } else { stop("'lower.comp' value not supported yet.") }
-        }
-        lower.res <- lower.mat
+        # Update colorbar names
+        upper_scale_fill_grad$name <- paste(
+            simplecap(x = upper.comp), metric_alias(upper.value), sep = "\n")
+        lower_scale_fill_grad$name <- paste(
+            simplecap(x = lower.comp), metric_alias(lower.value), sep = "\n")
+
+    # } else if(upper.comp == "KS"){
+    #     if(upper.value %in% c('n', 'stat', 'p')){
+    #         cat("Compute pairwise", upper.comp, "test...")
+    #         # Compute Kolmogorov Smirnov test
+    #         ks.res <- BiocompR::pairwise.ks(
+    #             data = data, statistic = upper.value, ncores = ncores)
+    #         upper.mat <- ks.res$res.statistic
+    #         cat("Done.\n")
+    #     } else if(upper.value == 'r'){
+    #         stop("a KS test does not compute a correlation value.")
+    #     } else if(upper.value == 'se'){
+    #         stop("a KS test does not compute a standard error.")
+    #     } else { stop("Unknown statistic for 'upper.value'.") }
+    #     upper.res <- upper.mat
+    #     if(lower.comp == upper.comp){
+    #         if(lower.value %in% c('n', 'stat', 'p')){
+    #             lower.mat <- BiocompR::get.ks.stat(
+    #                 table_combinations = ks.res$table_combinations,
+    #                 df.ks.tests = ks.res$res.test, statistic)
+    #         } else if(lower.value == 'r'){
+    #             stop("a KS test does not compute a correlation value.")
+    #         } else if(lower.value == 'se'){
+    #             stop("a KS test does not compute a standard error.")
+    #         } else { stop("Unknown statistic for 'upper.value'.") }
+    #     } else {
+    #         if(lower.comp %in% c("pearson", "spearman", "kendall")){
+    #             #Overwrite "stat" by "t" for correlation
+    #             if(lower.value == "stat"){ lower.value <- 't' }
+    #             #Compute correlation
+    #             cat("Compute pairwise", lower.comp, "correlation test...")
+    #             lower.correlation.res <- psych::corr.test(
+    #                 data, use = na.rm, method = lower.comp, adjust = p.adjust)
+    #             lower.mat <- lower.correlation.res[[lower.value]]
+    #             cat("Done.\n")
+    #         } else { stop("'lower.comp' value not supported yet.") }
+    #     }
+    #     lower.res <- lower.mat
     } else { stop("'upper.comp' value not supported yet.") }
 
     # Create Fused Plot
-    fused.res <- BiocompR::fused.view(
+    # fused.res <- BiocompR::ggfusion.free(
+    fused.res <- ggfusion.free(
         sample.names = colnames(data), upper.mat = upper.mat,
         lower.mat = lower.mat, order.select = order.select,
         order.method = order.method, hclust.method = hclust.method,
-        annot.grps = annot.grps, annot.pal = annot.pal, annot.pos = annot.pos,
-        annot.size = annot.size,
-        lgd.merge = lgd.merge, annot.split = annot.split,
-        dendro.pos = dendro.pos, dendro.size = dendro.size,
-        grid_col = grid_col, grid_linewidth = grid_linewidth,
-        axis.title = axis.title, axis.title.x = axis.title.x,
-        axis.title.y = axis.title.y, axis.text = axis.text,
-        axis.text.x = axis.text.x, axis.text.y = axis.text.y,
-        axis.ticks = axis.ticks, set.x.title = set.x.title,
-        set.y.title = set.y.title, set.lgd1.title = set.lgd1.title,
-        set.lgd2.title = set.lgd2.title, diagonal_col = diagonal_col,
-        lgd.pal1 = lgd.pal1, lgd.pal2 = lgd.pal2,
-        lgd.title = lgd.title, lgd.title1 = lgd.title1,
-        lgd.title2 = lgd.title2, lgd.text = lgd.text, lgd.text1 = lgd.text1,
-        lgd.text2 = lgd.text2, lgd.breaks = lgd.breaks,
-        lgd.breaks1 = lgd.breaks1, lgd.breaks2 = lgd.breaks2,
-        lgd.labels = lgd.labels, lgd.labels1 = lgd.labels1,
-        lgd.labels2 = lgd.labels2, lgd.round = lgd.round,
-        lgd.round1 = lgd.round1, lgd.round2 = lgd.round2,
-        lgd.limits = lgd.limits, lgd.limits1 = lgd.limits1,
-        lgd.limits2 = lgd.limits2, lgd.ticks = lgd.ticks,
-        lgd.ticks1 = lgd.ticks1, lgd.ticks2 = lgd.ticks2,
-        lgd.ticks.linewidth = lgd.ticks.linewidth,
-        lgd.ticks.linewidth1 = lgd.ticks.linewidth1,
-        lgd.ticks.linewidth2 = lgd.ticks.linewidth2,
-        lgd.nbin = lgd.nbin, lgd.nbin1 = lgd.nbin1, lgd.nbin2 = lgd.nbin2,
-        lgd.height1 = lgd.height1, lgd.height2 = lgd.height2,
-        lgd.width1 = lgd.width1, lgd.width2 = lgd.width2,
-        lgd.frame.col = lgd.frame.col,
-        lgd.frame.linewidth = lgd.frame.linewidth,
-        lgd.frame.linewidth1 = lgd.frame.linewidth1,
-        lgd.frame.linewidth2 = lgd.frame.linewidth2,
-        raster = raster, raster1 = raster1, raster2 = raster2)
-
+        annot.grps = annot.grps, annot.pal = annot.pal, annot.size = annot.size,
+        lgd.merge = lgd.merge, lgd.ncol = lgd.ncol,
+        lgd.space.height = lgd.space.height, lgd.space.width = lgd.space.width,
+        dendro.pos = dendro.pos, dendro.size = dendro.size, grid_col = grid_col,
+        grid_linewidth = grid_linewidth, upper_theme = upper_theme,
+        upper_scale_fill_grad = upper_scale_fill_grad,
+        upper_guide_custom_bar = upper_guide_custom_bar,
+        lower_theme = lower_theme,
+        lower_scale_fill_grad = lower_scale_fill_grad,
+        lower_guide_custom_bar = lower_guide_custom_bar,
+        diagonal_col = diagonal_col, plot_title = plot_title, verbose = verbose)
+    # Return plot and matrices
     return(list("upper.res" = upper.res, "lower.res" = lower.res,
                 "fused.plot" = fused.res))
 }

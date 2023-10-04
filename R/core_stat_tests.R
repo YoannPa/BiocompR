@@ -1,4 +1,45 @@
 
+#' Converts to uppercase the first letter in a character string.
+#'
+#' @param x A \code{character}.
+#' @return A \code{character} with the first letter converted to uppercase.
+#' @author Yoann Pageaud.
+#' @examples simplecap(x = "test")
+#' @references \href{https://www.R-project.org/}{R Core Team (2022). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria.}
+#' @keywords internal
+
+simplecap <- function(x){
+    substr(x, 1, 1) <- toupper(substr(x, 1, 1))
+    return(x)
+}
+
+#' Returns the alias of a correlation test metric.
+#'
+#' @param metric A \code{character} matching a specific metric return by the
+#'               \link[psych]{corr.test} function.
+#' @return A \code{character} being the alias of the metric given.
+#' @author Yoann Pageaud.
+#' @examples
+#' # Get the alias of the metric 'r'
+#' metric_alias(metric = "r")
+#' @references \href{https://www.scholars.northwestern.edu/en/publications/psych-procedures-for-personality-and-psychological-research}{William R Revelle, psych: Procedures for Personality and Psychological Research. Northwestern University, Evanston, Illinois, USA (2017).}
+#' @keywords internal
+
+metric_alias <- function(metric = "r"){
+    if(metric == "r"){
+        alias <- "correlations"
+    } else if(metric == "n"){
+        alias <- "n. cases"
+    } else if(metric == "t"){
+        alias <- "t-test values"
+    } else if(metric == "p"){
+        alias <- "-log10(P-values)"
+    } else if(metric == "se"){
+        alias <- "standard error"
+    }
+    return(alias)
+}
+
 #' Extracts Kolmogorov-Smirnov test results and return them as a matrix.
 #'
 #' @param df.ks.tests A \code{data.frame} containing raw results from multiple
@@ -9,7 +50,6 @@
 #' @return A \code{matrix} containing the KS test's statistic values of
 #'         interest.
 #' @author Yoann Pageaud.
-#' @export
 #' @keywords internal
 
 get.ks.stat <- function(table_combinations, df.ks.tests, statistic){
@@ -35,7 +75,6 @@ get.ks.stat <- function(table_combinations, df.ks.tests, statistic){
 #'         data.frame of the pairwise KS raw test results, and a table of
 #'         pairwise combinations.
 #' @author Yoann Pageaud.
-#' @export
 #' @keywords internal
 
 pairwise.ks <- function(data, statistic, ncores){
@@ -75,7 +114,7 @@ pairwise.ks <- function(data, statistic, ncores){
 #'          test.}
 #'         }
 #' @author Yoann Pageaud.
-#' @export
+#' @references \href{https://www.scholars.northwestern.edu/en/publications/psych-procedures-for-personality-and-psychological-research}{William R Revelle, psych: Procedures for Personality and Psychological Research. Northwestern University, Evanston, Illinois, USA (2017).}
 #' @keywords internal
 
 ls.psych.as.dt <- function(psych.list){

@@ -256,11 +256,11 @@ ggtriangle <- function(
     value <- NULL
     # Define default theme
     theme_default_ggtri <- ggplot2::theme(
-        axis.text.x.top = element_text(
+        axis.text.x.top = ggplot2::element_text(
             color = "black", angle = 90, hjust = 0, vjust = 0.5),
-        axis.text.y.right = element_text(color = "black"),
-        axis.title = element_blank(),
-        legend.title = element_text(size = 12),
+        axis.text.y.right = ggplot2::element_text(color = "black"),
+        axis.title = ggplot2::element_blank(),
+        legend.title = ggplot2::element_text(size = 12),
         panel.grid = ggplot2::element_blank(),
         panel.background = ggplot2::element_rect(fill = "transparent"),
         plot.background = ggplot2::element_rect(fill = "transparent"))
