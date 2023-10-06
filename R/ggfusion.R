@@ -25,10 +25,11 @@ fix.corrMatOrder.alphabet <- function(cor.order, str){
 #TODO: Write documentation!
 ggfusion.free <- function(
     sample.names, upper.mat, lower.mat, order.select, order.method,
-    hclust.method, annot.grps = list("Groups" = seq(length(sample.names))),
+    hclust.method, dendrograms = TRUE,
+    annot.grps = list("Groups" = seq(length(sample.names))),
     annot.pal = grDevices::rainbow(n = length(sample.names)), annot.size = 1,
     lgd.merge = FALSE, lgd.ncol = NULL,
-    lgd.space.height = 26, lgd.space.width = 1, dendro.pos = 'none',
+    lgd.space.height = 26, lgd.space.width = 1,
     dendro.size = 0, grid_col = "white", grid_linewidth = 0.3,
     upper_theme = NULL, upper_scale_fill_grad = ggplot2::scale_fill_gradientn(
         colors = BiocompR::biopalette(name = "viridis_C_plasma"),
@@ -44,6 +45,14 @@ ggfusion.free <- function(
         ticks.colour = "black", frame.linewidth = 0.5, frame.colour = "black"),
     diagonal_col = "white", plot_title = NULL, verbose = FALSE
 ){
+    # Check logicals for dendrograms
+    if(length(dendrograms) == 1){
+        dd.rows <- dendrograms
+        dd.cols <- dendrograms
+    } else if(length(dendrograms) == 2){
+        dd.rows <- dendrograms[1]
+        dd.cols <- dendrograms[2]
+    } else { stop("'dendrograms' length > 2. Too many values.") }
     # Order Method
     if(order.method %in% c("AOE", "FPC", "hclust", "alphabet", "default")){
         if(verbose){ cat("Apply", order.method, "ordering method.\n") }
@@ -56,15 +65,10 @@ ggfusion.free <- function(
                     cat("Apply", hclust.method, "clustering method.\n")
                 }
             } else { stop("the clustering method is not supported.") }
-            # Check dendrogram
-            if(dendro.pos != "none"){
-                if(!dendro.pos %in% c('top', 'left', 'both')){
-                    stop("dendrogram cannot be put here.")
-                }
-            }
         } else {
             # Check dendrogram
-            if(dendro.pos != "none"){
+            # if(dendro.pos != "none"){
+            if(dd.rows | dd.cols){
                 stop(paste("order != 'hclust'. Dendrogram cannot be generated",
                            "if rows & cols are not ordered following the",
                            "hierarchical clustering."))
@@ -92,15 +96,16 @@ ggfusion.free <- function(
             # Fix bug of corrMatOrder when alphabet order
             correlation.order <- BiocompR::fix.corrMatOrder.alphabet(
                 cor.order = correlation.order, str = colnames(upper.mat))
-        }else if(order.method == 'default'){
+        } else if(order.method == 'default'){
             correlation.order <- seq(ncol(upper.mat))}
-        if(dendro.pos != "none"){
+        # if(dendro.pos != "none"){
+        if(dd.rows | dd.cols){
             # Generate Hierarchy Cluster
             hierarchy.clust <- fastcluster::hclust(
                 d = stats::as.dist(1-upper.mat), method = hclust.method)
         }
     } else {
-        if(order.method %in% c("AOE","FPC","hclust")){
+        if(order.method %in% c("AOE", "FPC", "hclust")){
             correlation.order <- corrplot::corrMatOrder(
                 lower.mat, order = order.method, hclust.method = hclust.method)
         } else if(order.method == "alphabet"){
@@ -109,18 +114,26 @@ ggfusion.free <- function(
                 cor.order = correlation.order, str = colnames(upper.mat))
         } else if(order.method == 'default'){
             correlation.order <- seq(ncol(lower.mat))}
-        if(dendro.pos != "none"){
+        # if(dendro.pos != "none"){
+        if(dd.rows | dd.cols){
             # Generate Hierarchy Cluster
             hierarchy.clust <- fastcluster::hclust(
                 d = stats::as.dist(1-lower.mat), method = hclust.method)
         }
     }
     # Generate Dendrogram
-    if(dendro.pos != "none"){
-        dendrogram <- stats::as.dendrogram(hierarchy.clust)
-        ddgr_dat <- ggdendro::dendro_data(dendrogram) #Dendrogram data
-        ddgr_seg <- BiocompR::ggdend( #Get dendrogram segments
-            df = ddgr_dat$segments, orientation = dendro.pos, reverse.x = TRUE)
+    # if(dendro.pos != "none"){
+    if(dd.rows | dd.cols){
+        ddgr <- stats::as.dendrogram(hierarchy.clust)
+        ddgr_dat <- ggdendro::dendro_data(ddgr) # Dendrogram data
+        if(dd.cols){
+            ddgr_seg_col <- BiocompR::ggdend( # Get dendrogram segments
+                df = ddgr_dat$segments, orientation = "top")
+        }
+        if(dd.rows){
+            ddgr_seg_row <- BiocompR::ggdend( # Get dendrogram segments
+                df = ddgr_dat$segments, orientation = "left", reverse.x = TRUE)
+        }
     }
     # Re-order rows and columns
     if(order.method != 'default'){
@@ -253,10 +266,11 @@ ggfusion.free <- function(
     lower.legend <- BiocompR:::get.lgd(lower.ggplot)
     # Create fused plot
     arranged.grob <- BiocompR:::heatmap_layout(
-        dd.rows = FALSE, dd.cols = FALSE, show.annot = TRUE,
-        ddgr_seg_row = NULL, ddgr_seg_col = NULL, sidebar = col_sidebar$sidebar,
-        htmp = main_gg, legends = col_sidebar$legends, dend.row.size = 0,
-        dend.col.size = 0, annot.size = annot.size, lgd.layout = lgd.layout,
+        dd.rows = dd.rows, dd.cols = dd.cols, show.annot = TRUE,
+        ddgr_seg_row = ddgr_seg_row, ddgr_seg_col = ddgr_seg_col,
+        sidebar = col_sidebar$sidebar, htmp = main_gg,
+        legends = col_sidebar$legends, dend.row.size = 0, dend.col.size = 0,
+        annot.size = annot.size, lgd.layout = lgd.layout,
         lgd.space.width = 1 + lgd.space.width,
         override_grob_list = lower.legend, override_grob_height = c(10, 1))
     # Plot Final Figure
@@ -334,9 +348,6 @@ ggfusion.free <- function(
 #'                              'annot.grps'.
 #' @param annot.size            An \code{integer} to increase or decrease the
 #'                              size of the annotation side bar.
-#' @param dendro.pos            A \code{character} specifying the position of
-#'                              dendrograms if the selected order is 'hclust'.
-#'                              \cr Possible values are: 'top','left','none'.
 #' @param dendro.size           An \code{integer} to increase or decrease the
 #'                              size of the dendrogram.
 #' @param grid_col              A \code{character} specifying the color of the
@@ -367,7 +378,8 @@ ggfusion.corr <- function(
     data, ncores = 1, upper.comp = "pearson", upper.value = "r",
     lower.comp = "pearson", lower.value = "p",
     na.rm = 'pairwise', order.method = 'hclust', order.select = 'upper',
-    hclust.method = 'complete', p.adjust = "BH",
+    hclust.method = 'complete', p.adjust = "BH", dendrograms = TRUE,
+    dendro.size = 1,
     annot.grps = list("Groups" = seq(ncol(data))),
     annot.pal = grDevices::rainbow(n = ncol(data)), annot.size = 1,
     lgd.merge = FALSE, upper_theme = NULL,
@@ -383,10 +395,9 @@ ggfusion.corr <- function(
     lower_guide_custom_bar = ggplot2::guide_colorbar(
         barheight = 0.7, barwidth = 10, ticks.linewidth = 0.5,
         ticks.colour = "black", frame.linewidth = 0.5, frame.colour = "black"),
-    dendro.pos = 'none', dendro.size = 1, grid_col = "white",
-    grid_linewidth = 0.3, plot_title = NULL, diagonal_col = "white",
-    lgd.ncol = NULL, lgd.space.height = 26, lgd.space.width = 1,
-    verbose = FALSE){
+    grid_col = "white", grid_linewidth = 0.3, plot_title = NULL,
+    diagonal_col = "white", lgd.ncol = NULL, lgd.space.height = 26,
+    lgd.space.width = 1, verbose = FALSE){
     # Fix BiocCheck() complaining about these objects initialization
     # statistic <- NULL
 
@@ -405,13 +416,15 @@ ggfusion.corr <- function(
     if(na.rm %in% c("pairwise", "complete")){
         if(verbose){ cat("Apply", na.rm, "deletion of missing data.\n") }
     } else { stop("the value of na.rm is not supported.") }
-
     # P-value adjustment method
     if(p.adjust %in% c(
         "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none")){
         if(verbose){ cat("Apply", p.adjust, "multiple testing adjustment.\n") }
     } else { stop("multiple testing adjustment method is not supported.") }
-
+    # Check logicals for dendrograms
+    if(length(dendrograms) > 2){
+        stop("'dendrograms' length > 2. Too many values.")
+    }
     # Groups and palettes matching
     BiocompR:::check.annotations(
         data = data, annot.grps = annot.grps, annot.pal = annot.pal,
@@ -478,9 +491,11 @@ ggfusion.corr <- function(
         lower.res <- lower.mat
         # Update colorbar names
         upper_scale_fill_grad$name <- paste(
-            simplecap(x = upper.comp), metric_alias(upper.value), sep = "\n")
+            BiocompR:::simplecap(x = upper.comp),
+            BiocompR:::metric_alias(upper.value), sep = "\n")
         lower_scale_fill_grad$name <- paste(
-            simplecap(x = lower.comp), metric_alias(lower.value), sep = "\n")
+            BiocompR:::simplecap(x = lower.comp),
+            BiocompR:::metric_alias(lower.value), sep = "\n")
 
     # } else if(upper.comp == "KS"){
     #     if(upper.value %in% c('n', 'stat', 'p')){
@@ -527,10 +542,11 @@ ggfusion.corr <- function(
         sample.names = colnames(data), upper.mat = upper.mat,
         lower.mat = lower.mat, order.select = order.select,
         order.method = order.method, hclust.method = hclust.method,
+        dendrograms = dendrograms,
         annot.grps = annot.grps, annot.pal = annot.pal, annot.size = annot.size,
         lgd.merge = lgd.merge, lgd.ncol = lgd.ncol,
         lgd.space.height = lgd.space.height, lgd.space.width = lgd.space.width,
-        dendro.pos = dendro.pos, dendro.size = dendro.size, grid_col = grid_col,
+        dendro.size = dendro.size, grid_col = grid_col,
         grid_linewidth = grid_linewidth, upper_theme = upper_theme,
         upper_scale_fill_grad = upper_scale_fill_grad,
         upper_guide_custom_bar = upper_guide_custom_bar,

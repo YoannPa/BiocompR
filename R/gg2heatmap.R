@@ -711,9 +711,9 @@ gg2heatmap <- function(
             t(dend_mat), method = method.cols, threads = ncores)))
         column.order <- stats::order.dendrogram(ddgr)
         if(dd.cols){
-            #Get dendrogram data
+            # Get dendrogram data
             ddgr_dat <- ggdendro::dendro_data(ddgr)
-            #Get dendrogram segments and order matrix columns
+            # Get dendrogram segments and order matrix columns
             ddgr_seg_col <- BiocompR::ggdend(
                 df = ddgr_dat$segments, orientation = "top",
                 theme_dend = theme_dend_top)

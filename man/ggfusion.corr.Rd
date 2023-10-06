@@ -16,6 +16,8 @@ ggfusion.corr(
   order.select = "upper",
   hclust.method = "complete",
   p.adjust = "BH",
+  dendrograms = TRUE,
+  dendro.size = 1,
   annot.grps = list(Groups = seq(ncol(data))),
   annot.pal = grDevices::rainbow(n = ncol(data)),
   annot.size = 1,
@@ -32,8 +34,6 @@ ggfusion.corr(
   lower_guide_custom_bar = ggplot2::guide_colorbar(barheight = 0.7, barwidth = 10,
     ticks.linewidth = 0.5, ticks.colour = "black", frame.linewidth = 0.5, frame.colour =
     "black"),
-  dendro.pos = "none",
-  dendro.size = 1,
   grid_col = "white",
   grid_linewidth = 0.3,
   plot_title = NULL,
@@ -109,6 +109,9 @@ for multiple tests should be used.\cr
 p.adjust = c("holm", "hochberg", "hommel",
 "bonferroni", "BH", "BY", "fdr", "none")).}
 
+\item{dendro.size}{An \code{integer} to increase or decrease the
+size of the dendrogram.}
+
 \item{annot.grps}{A \code{list} of vectors of groups to which
 variables belongs for the annotation sidebars.
 Vectors' lengths have to match the number of
@@ -124,13 +127,6 @@ must match the length of the list provided to
 
 \item{annot.size}{An \code{integer} to increase or decrease the
 size of the annotation side bar.}
-
-\item{dendro.pos}{A \code{character} specifying the position of
-dendrograms if the selected order is 'hclust'.
-\cr Possible values are: 'top','left','none'.}
-
-\item{dendro.size}{An \code{integer} to increase or decrease the
-size of the dendrogram.}
 
 \item{grid_col}{A \code{character} specifying the color of the
 grid.}
