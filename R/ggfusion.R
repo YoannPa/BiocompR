@@ -25,12 +25,12 @@ fix.corrMatOrder.alphabet <- function(cor.order, str){
 #TODO: Write documentation!
 ggfusion.free <- function(
     sample.names, upper.mat, lower.mat, order.select, order.method,
-    hclust.method, dendrograms = TRUE,
+    hclust.method, dendrograms = FALSE,
     annot.grps = list("Groups" = seq(length(sample.names))),
     annot.pal = grDevices::rainbow(n = length(sample.names)), annot.size = 1,
     lgd.merge = FALSE, lgd.ncol = NULL,
     lgd.space.height = 26, lgd.space.width = 1,
-    dendro.size = 0, grid_col = "white", grid_linewidth = 0.3,
+    dend.size = 1, grid_col = "white", grid_linewidth = 0.3,
     upper_theme = NULL, upper_scale_fill_grad = ggplot2::scale_fill_gradientn(
         colors = BiocompR::biopalette(name = "viridis_C_plasma"),
         name = "Upper\ntriangle values"),
@@ -53,6 +53,14 @@ ggfusion.free <- function(
         dd.rows <- dendrograms[1]
         dd.cols <- dendrograms[2]
     } else { stop("'dendrograms' length > 2. Too many values.") }
+    # Check dendrogram sizes
+    if(length(dend.size) == 1){
+        dend.row.size <- dend.size
+        dend.col.size <- dend.size
+    } else if(length(dend.size) == 2){
+        dend.row.size <- dend.size[1]
+        dend.col.size <- dend.size[2]
+    } else { stop("'dend.size' length > 2. Too many values.") }
     # Order Method
     if(order.method %in% c("AOE", "FPC", "hclust", "alphabet", "default")){
         if(verbose){ cat("Apply", order.method, "ordering method.\n") }
@@ -69,9 +77,10 @@ ggfusion.free <- function(
             # Check dendrogram
             # if(dendro.pos != "none"){
             if(dd.rows | dd.cols){
-                stop(paste("order != 'hclust'. Dendrogram cannot be generated",
-                           "if rows & cols are not ordered following the",
-                           "hierarchical clustering."))
+                stop(paste(
+                    "order != 'hclust' and dendrograms = TRUE. Dendrogram",
+                     "cannot be generated if rows & cols are not ordered",
+                     "following the hierarchical clustering."))
             }
         }
         # Order select
@@ -269,7 +278,8 @@ ggfusion.free <- function(
         dd.rows = dd.rows, dd.cols = dd.cols, show.annot = TRUE,
         ddgr_seg_row = ddgr_seg_row, ddgr_seg_col = ddgr_seg_col,
         sidebar = col_sidebar$sidebar, htmp = main_gg,
-        legends = col_sidebar$legends, dend.row.size = 0, dend.col.size = 0,
+        legends = col_sidebar$legends, dend.row.size = dend.row.size,
+        dend.col.size = dend.col.size*3,
         annot.size = annot.size, lgd.layout = lgd.layout,
         lgd.space.width = 1 + lgd.space.width,
         override_grob_list = lower.legend, override_grob_height = c(10, 1))
@@ -285,7 +295,7 @@ ggfusion.free <- function(
 #' @param data                  A \code{matrix} or \code{dataframe}.
 #' @param ncores                An \code{integer} to specify the number of
 #'                              cores/threads to be used to parallel-run tests.
-#' @param upper.comp            The comparison for which results will be
+#' @param upper.corr            The comparison for which results will be
 #'                              displayed in the upper triangle of the plot as a
 #'                              \code{character} matching one of these:
 #'                              'pearson','spearman','kendall'.
@@ -300,7 +310,7 @@ ggfusion.free <- function(
 #'   \item{'p' - the P-values of the comparison (-log10() transformed).}
 #'   \item{'se' - the standard errors of the comparison.}
 #'  }
-#' @param lower.comp            The comparison for which results will be
+#' @param lower.corr            The comparison for which results will be
 #'                              displayed in the lower triangle of the plot as a
 #'                              \code{character} matching one of these:
 #'                              'pearson','spearman','kendall'.
@@ -311,16 +321,16 @@ ggfusion.free <- function(
 #'                              'pairwise' is the default value and will do
 #'                              pairwise deletion of cases. 'complete' will
 #'                              select just complete cases.
-#' @param order.method          A \code{character} specifying the ordering
-#'                              method to apply.
-#'                              \cr Possible ordering methods are:
-#' \itemize{
-#'  \item{'AOE' - angular order of the eigenvectors.}
-#'  \item{'FPC' - first principal component order.}
-#'  \item{'hclust' - hierarchical clustering order.}
-#'  \item{'alphabet' - alphabetical order}
-#'  \item{'default'}
-#' }
+#' @param order.method        A \code{character} specifying the ordering method
+#'                            to apply.
+#'                            \cr Possible ordering methods are:
+#'                            \itemize{
+#'                             \item{'AOE' - angular order of the eigenvectors.}
+#'                             \item{'FPC' - first principal component order.}
+#'                             \item{'hclust' - hierarchical clustering order.}
+#'                             \item{'alphabet' - alphabetical order}
+#'                             \item{'default'}
+#'                            }
 #' @param order.select          A \code{character} specifying comparison results
 #'                              to use for the clustering.\cr Possible values
 #'                              are 'upper' or 'lower'.
@@ -369,23 +379,38 @@ ggfusion.free <- function(
 #' @author Yoann Pageaud.
 #' @export
 #' @examples
-#' # Plot a basic fusion correlation plot
-#' res <- ggfusion.corr(data = as.matrix(t(scale(mtcars))))
+#' # Default fusion correlation plot showing Pearson correlations & P-values
+#' mat <- as.matrix(t(scale(mtcars)))
+#' res <- ggfusion.corr(data = mat)
+#' # Same thing using the Spearman correlation
+#' res <- ggfusion.corr(
+#'     data = mat, upper.corr = "spearman", lower.corr = "spearman")
+#' # Fuse correlations results from Pearson (top) and Spearman (bottom)
+#' res <- ggfusion.corr(
+#'     data = mat, upper.corr = "pearson", upper.value = "r",
+#'     lower.corr = "spearman", lower.value = "r",
+#'     lower_scale_fill_grad = ggplot2::scale_fill_gradientn(
+#'         colors = BiocompR::biopalette(name = "RColorBrewer_RdBu8"),
+#'         limits = c(-1, 1))) # Setting the scale of the Spearman correlations
+#' # Set the missing data removal method to complete before computing
+#' # correlations
+#' res <- ggfusion.corr(data = mat, na.rm = "complete")
+#'
+#'
 #' @references \href{https://www.scholars.northwestern.edu/en/publications/psych-procedures-for-personality-and-psychological-research}{William R Revelle, psych: Procedures for Personality and Psychological Research. Northwestern University, Evanston, Illinois, USA (2017).}
 #' @references \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6099145/#B13}{Why, When and How to Adjust Your P Values? Mohieddin Jafari and Naser Ansari-Pour - Cell J. 2019 Winter; 20(4): 604–607.}
 
+#TODO: fix alphabet order error ggfusion.corr(data = mat, order.method = "alphabet")
 ggfusion.corr <- function(
-    data, ncores = 1, upper.comp = "pearson", upper.value = "r",
-    lower.comp = "pearson", lower.value = "p",
-    na.rm = 'pairwise', order.method = 'hclust', order.select = 'upper',
-    hclust.method = 'complete', p.adjust = "BH", dendrograms = TRUE,
-    dendro.size = 1,
+    data, upper.corr = "pearson", upper.value = "r", lower.corr = "pearson",
+    lower.value = "p", na.rm = 'pairwise', order.method = 'hclust',
+    order.select = 'upper', hclust.method = 'complete', p.adjust = "BH",
+    dendrograms = FALSE, dend.size = 1,
     annot.grps = list("Groups" = seq(ncol(data))),
     annot.pal = grDevices::rainbow(n = ncol(data)), annot.size = 1,
-    lgd.merge = FALSE, upper_theme = NULL,
-    upper_scale_fill_grad = ggplot2::scale_fill_gradientn(
+    upper_theme = NULL, upper_scale_fill_grad = ggplot2::scale_fill_gradientn(
         colors = BiocompR::biopalette(name = "RColorBrewer_RdBu8"),
-        name = "Upper\ntriangle values"),
+        name = "Upper\ntriangle values", limits = c(-1, 1)),
     upper_guide_custom_bar = ggplot2::guide_colorbar(
         barheight = 10, barwidth = 0.7, ticks.linewidth = 0.5,
         ticks.colour = "black", frame.linewidth = 0.5, frame.colour = "black"),
@@ -395,9 +420,9 @@ ggfusion.corr <- function(
     lower_guide_custom_bar = ggplot2::guide_colorbar(
         barheight = 0.7, barwidth = 10, ticks.linewidth = 0.5,
         ticks.colour = "black", frame.linewidth = 0.5, frame.colour = "black"),
-    grid_col = "white", grid_linewidth = 0.3, plot_title = NULL,
-    diagonal_col = "white", lgd.ncol = NULL, lgd.space.height = 26,
-    lgd.space.width = 1, verbose = FALSE){
+    plot_title = NULL, grid_col = "white", grid_linewidth = 0.3,
+    diagonal_col = "white", lgd.merge = FALSE, lgd.ncol = NULL,
+    lgd.space.height = 26, lgd.space.width = 1, ncores = 1, verbose = FALSE){
     # Fix BiocCheck() complaining about these objects initialization
     # statistic <- NULL
 
@@ -436,21 +461,21 @@ ggfusion.corr <- function(
     # }
 
     # Checking comparisons
-    if(upper.comp %in% c("pearson", "spearman", "kendall")){
+    if(upper.corr %in% c("pearson", "spearman", "kendall")){
         #Overwrite "stat" by "t" for correlation
         if(upper.value == "stat"){ upper.value <- 't' }
         # Compute correlation
         if(verbose){
-            cat("Compute pairwise", upper.comp, "correlation test...")
+            cat("Compute pairwise", upper.corr, "correlation test...")
         }
         upper.correlation.res <- psych::corr.test(
-            data, use = na.rm, method = upper.comp, adjust = p.adjust)
+            data, use = na.rm, method = upper.corr, adjust = p.adjust)
         upper.mat <- upper.correlation.res[[upper.value]]
         # if P-value, auto -log10 transform matrix
         if(upper.value == "p"){ upper.mat <- -log10(upper.mat) }
         upper.res <- upper.mat
         if(verbose){ cat("Done.\n") }
-        if(lower.comp == upper.comp){
+        if(lower.corr == upper.corr){
             # Overwrite "stat" by "t" for correlation
             if(lower.value == "stat"){ lower.value <- 't' }
             # Assign same matrix
@@ -458,15 +483,15 @@ ggfusion.corr <- function(
             lower.mat <- lower.correlation.res[[lower.value]]
 
         } else {
-            if(lower.comp %in% c( "pearson", "spearman", "kendall")){
+            if(lower.corr %in% c( "pearson", "spearman", "kendall")){
                 # Overwrite "stat" by "t" for correlation
                 if(lower.value == "stat"){ lower.value <- 't' }
                 # Compute correlation
                 if(verbose){
-                    cat("Compute pairwise", lower.comp, "correlation test...")
+                    cat("Compute pairwise", lower.corr, "correlation test...")
                 }
                 lower.correlation.res <- psych::corr.test(
-                    data, use = na.rm, method = lower.comp, adjust = p.adjust)
+                    data, use = na.rm, method = lower.corr, adjust = p.adjust)
                 lower.mat <- lower.correlation.res[[lower.value]]
                 if(verbose){ cat("Done.\n") }
             # } else if(lower.comp == "KS"){
@@ -484,17 +509,17 @@ ggfusion.corr <- function(
             #     } else if(lower.value == 'se'){
             #         stop("a KS test does not compute a standard error.")
             #     } else { stop("Unknown statistic for 'lower.value'.") }
-            } else { stop("'lower.comp' value not supported yet.") }
+            } else { stop("'lower.corr' value not supported yet.") }
         }
         # if P-value, auto -log10 transform matrix
         if(lower.value == "p"){ lower.mat <- -log10(lower.mat) }
         lower.res <- lower.mat
         # Update colorbar names
         upper_scale_fill_grad$name <- paste(
-            BiocompR:::simplecap(x = upper.comp),
+            BiocompR:::simplecap(x = upper.corr),
             BiocompR:::metric_alias(upper.value), sep = "\n")
         lower_scale_fill_grad$name <- paste(
-            BiocompR:::simplecap(x = lower.comp),
+            BiocompR:::simplecap(x = lower.corr),
             BiocompR:::metric_alias(lower.value), sep = "\n")
 
     # } else if(upper.comp == "KS"){
@@ -534,7 +559,7 @@ ggfusion.corr <- function(
     #         } else { stop("'lower.comp' value not supported yet.") }
     #     }
     #     lower.res <- lower.mat
-    } else { stop("'upper.comp' value not supported yet.") }
+    } else { stop("'upper.corr' value not supported yet.") }
 
     # Create Fused Plot
     # fused.res <- BiocompR::ggfusion.free(
@@ -546,7 +571,7 @@ ggfusion.corr <- function(
         annot.grps = annot.grps, annot.pal = annot.pal, annot.size = annot.size,
         lgd.merge = lgd.merge, lgd.ncol = lgd.ncol,
         lgd.space.height = lgd.space.height, lgd.space.width = lgd.space.width,
-        dendro.size = dendro.size, grid_col = grid_col,
+        dend.size = dend.size, grid_col = grid_col,
         grid_linewidth = grid_linewidth, upper_theme = upper_theme,
         upper_scale_fill_grad = upper_scale_fill_grad,
         upper_guide_custom_bar = upper_guide_custom_bar,

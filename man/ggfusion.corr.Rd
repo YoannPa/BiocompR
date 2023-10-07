@@ -6,25 +6,24 @@
 \usage{
 ggfusion.corr(
   data,
-  ncores = 1,
-  upper.comp = "pearson",
+  upper.corr = "pearson",
   upper.value = "r",
-  lower.comp = "pearson",
+  lower.corr = "pearson",
   lower.value = "p",
   na.rm = "pairwise",
   order.method = "hclust",
   order.select = "upper",
   hclust.method = "complete",
   p.adjust = "BH",
-  dendrograms = TRUE,
-  dendro.size = 1,
+  dendrograms = FALSE,
+  dend.size = 1,
   annot.grps = list(Groups = seq(ncol(data))),
   annot.pal = grDevices::rainbow(n = ncol(data)),
   annot.size = 1,
-  lgd.merge = FALSE,
   upper_theme = NULL,
   upper_scale_fill_grad = ggplot2::scale_fill_gradientn(colors =
-    BiocompR::biopalette(name = "RColorBrewer_RdBu8"), name = "Upper\\ntriangle values"),
+    BiocompR::biopalette(name = "RColorBrewer_RdBu8"), name = "Upper\\ntriangle values",
+    limits = c(-1, 1)),
   upper_guide_custom_bar = ggplot2::guide_colorbar(barheight = 10, barwidth = 0.7,
     ticks.linewidth = 0.5, ticks.colour = "black", frame.linewidth = 0.5, frame.colour =
     "black"),
@@ -34,23 +33,22 @@ ggfusion.corr(
   lower_guide_custom_bar = ggplot2::guide_colorbar(barheight = 0.7, barwidth = 10,
     ticks.linewidth = 0.5, ticks.colour = "black", frame.linewidth = 0.5, frame.colour =
     "black"),
+  plot_title = NULL,
   grid_col = "white",
   grid_linewidth = 0.3,
-  plot_title = NULL,
   diagonal_col = "white",
+  lgd.merge = FALSE,
   lgd.ncol = NULL,
   lgd.space.height = 26,
   lgd.space.width = 1,
+  ncores = 1,
   verbose = FALSE
 )
 }
 \arguments{
 \item{data}{A \code{matrix} or \code{dataframe}.}
 
-\item{ncores}{An \code{integer} to specify the number of
-cores/threads to be used to parallel-run tests.}
-
-\item{upper.comp}{The comparison for which results will be
+\item{upper.corr}{The comparison for which results will be
 displayed in the upper triangle of the plot as a
 \code{character} matching one of these:
 'pearson','spearman','kendall'.}
@@ -67,7 +65,7 @@ displayed in the upper triangle of the plot as a
  \item{'se' - the standard errors of the comparison.}
 }}
 
-\item{lower.comp}{The comparison for which results will be
+\item{lower.corr}{The comparison for which results will be
 displayed in the lower triangle of the plot as a
 \code{character} matching one of these:
 'pearson','spearman','kendall'.}
@@ -81,9 +79,9 @@ Possible types are 'pairwise' and 'complete'.
 pairwise deletion of cases. 'complete' will
 select just complete cases.}
 
-\item{order.method}{A \code{character} specifying the ordering
-                             method to apply.
-                             \cr Possible ordering methods are:
+\item{order.method}{A \code{character} specifying the ordering method
+to apply.
+\cr Possible ordering methods are:
 \itemize{
  \item{'AOE' - angular order of the eigenvectors.}
  \item{'FPC' - first principal component order.}
@@ -109,9 +107,6 @@ for multiple tests should be used.\cr
 p.adjust = c("holm", "hochberg", "hommel",
 "bonferroni", "BH", "BY", "fdr", "none")).}
 
-\item{dendro.size}{An \code{integer} to increase or decrease the
-size of the dendrogram.}
-
 \item{annot.grps}{A \code{list} of vectors of groups to which
 variables belongs for the annotation sidebars.
 Vectors' lengths have to match the number of
@@ -136,6 +131,12 @@ grid.}
 
 \item{diagonal_col}{A \code{character} defining the color of cells
 with of the empty diagonal.}
+
+\item{ncores}{An \code{integer} to specify the number of
+cores/threads to be used to parallel-run tests.}
+
+\item{dendro.size}{An \code{integer} to increase or decrease the
+size of the dendrogram.}
 }
 \value{
 A \code{gtable} object plotted automatically and a \code{list} of
@@ -153,8 +154,24 @@ A \code{gtable} object plotted automatically and a \code{list} of
 Draws 2 triangle matrices of computed pairwise correlations' results.
 }
 \examples{
-# Plot a basic fusion correlation plot
-res <- ggfusion.corr(data = as.matrix(t(scale(mtcars))))
+# Default fusion correlation plot showing Pearson correlations & P-values
+mat <- as.matrix(t(scale(mtcars)))
+res <- ggfusion.corr(data = mat)
+# Same thing using the Spearman correlation
+res <- ggfusion.corr(
+    data = mat, upper.corr = "spearman", lower.corr = "spearman")
+# Fuse correlations results from Pearson (top) and Spearman (bottom)
+res <- ggfusion.corr(
+    data = mat, upper.corr = "pearson", upper.value = "r",
+    lower.corr = "spearman", lower.value = "r",
+    lower_scale_fill_grad = ggplot2::scale_fill_gradientn(
+        colors = BiocompR::biopalette(name = "RColorBrewer_RdBu8"),
+        limits = c(-1, 1))) # Setting the scale of the Spearman correlations
+# Set the missing data removal method to complete before computing
+# correlations
+res <- ggfusion.corr(data = mat, na.rm = "complete")
+
+
 }
 \references{
 \href{https://www.scholars.northwestern.edu/en/publications/psych-procedures-for-personality-and-psychological-research}{William R Revelle, psych: Procedures for Personality and Psychological Research. Northwestern University, Evanston, Illinois, USA (2017).}
