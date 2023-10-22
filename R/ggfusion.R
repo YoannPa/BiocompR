@@ -6,7 +6,6 @@
 #' @param str       A \code{character} vector from which to get elements order.
 #' @return A \code{type} object returned description.
 #' @author Yoann Pageaud.
-#' @export
 #' @keywords internal
 
 fix.corrMatOrder.alphabet <- function(cor.order, str){
@@ -43,8 +42,7 @@ ggfusion.free <- function(
     lower_guide_custom_bar = ggplot2::guide_colorbar(
         barheight = 0.7, barwidth = 10, ticks.linewidth = 0.5,
         ticks.colour = "black", frame.linewidth = 0.5, frame.colour = "black"),
-    diagonal_col = "white", plot_title = NULL, verbose = FALSE
-){
+    diagonal_col = "white", plot_title = NULL, verbose = FALSE){
     # Check logicals for dendrograms
     if(length(dendrograms) == 1){
         dd.rows <- dendrograms
@@ -79,8 +77,8 @@ ggfusion.free <- function(
             if(dd.rows | dd.cols){
                 stop(paste(
                     "order != 'hclust' and dendrograms = TRUE. Dendrogram",
-                     "cannot be generated if rows & cols are not ordered",
-                     "following the hierarchical clustering."))
+                    "cannot be generated if rows & cols are not ordered",
+                    "following the hierarchical clustering."))
             }
         }
         # Order select
@@ -98,13 +96,22 @@ ggfusion.free <- function(
     BiocompR:::chk.breaks.labels(ScaleContinuous_obj = lower_scale_fill_grad)
     # Get order of the correlations for the method used
     if(order.select == 'upper'){
-        if(order.method %in% c("AOE", "FPC", "hclust")){
-            correlation.order <- corrplot::corrMatOrder(
-                upper.mat, order = order.method, hclust.method = hclust.method)
-        } else if(order.method == "alphabet"){
-            # Fix bug of corrMatOrder when alphabet order
-            correlation.order <- BiocompR::fix.corrMatOrder.alphabet(
-                cor.order = correlation.order, str = colnames(upper.mat))
+        if(order.method %in% c("AOE", "FPC", "hclust", "alphabet")){
+            if(any(upper.mat == Inf)){
+                # If matrix of P-values reverse -log10 transformation
+                correlation.order <- corrplot::corrMatOrder(
+                    10^(-upper.mat), order = order.method,
+                    hclust.method = hclust.method)
+            } else {
+                correlation.order <- corrplot::corrMatOrder(
+                    upper.mat, order = order.method,
+                    hclust.method = hclust.method)
+            }
+            if(order.method == "alphabet"){
+                # Fix bug of corrMatOrder when alphabet order
+                correlation.order <- BiocompR:::fix.corrMatOrder.alphabet(
+                    cor.order = correlation.order, str = colnames(upper.mat))
+            }
         } else if(order.method == 'default'){
             correlation.order <- seq(ncol(upper.mat))}
         # if(dendro.pos != "none"){
@@ -114,13 +121,22 @@ ggfusion.free <- function(
                 d = stats::as.dist(1-upper.mat), method = hclust.method)
         }
     } else {
-        if(order.method %in% c("AOE", "FPC", "hclust")){
-            correlation.order <- corrplot::corrMatOrder(
-                lower.mat, order = order.method, hclust.method = hclust.method)
-        } else if(order.method == "alphabet"){
-            # Fix bug of corrMatOrder when alphabet order
-            correlation.order <- BiocompR::fix.corrMatOrder.alphabet(
-                cor.order = correlation.order, str = colnames(upper.mat))
+        if(order.method %in% c("AOE", "FPC", "hclust", "alphabet")){
+            # If matrix contain Inf, then potential log transformed p.values
+            if(any(lower.mat == Inf)){
+                correlation.order <- corrplot::corrMatOrder(
+                    10^(-lower.mat), order = order.method,
+                    hclust.method = hclust.method)
+            } else {
+                correlation.order <- corrplot::corrMatOrder(
+                    lower.mat, order = order.method,
+                    hclust.method = hclust.method)
+            }
+            if(order.method == "alphabet"){
+                # Fix bug of corrMatOrder when alphabet order
+                correlation.order <- BiocompR:::fix.corrMatOrder.alphabet(
+                    cor.order = correlation.order, str = colnames(upper.mat))
+            }
         } else if(order.method == 'default'){
             correlation.order <- seq(ncol(lower.mat))}
         # if(dendro.pos != "none"){
@@ -395,12 +411,15 @@ ggfusion.free <- function(
 #' # Set the missing data removal method to complete before computing
 #' # correlations
 #' res <- ggfusion.corr(data = mat, na.rm = "complete")
-#'
-#'
+#' # Order samples following the angular order of eigenvectors
+#' # (of the 2 first eigenvalues on the matrix selected).
+#' res <- ggfusion.corr(data = mat, order.method = "AOE")
+#' # Select the lower matrix (instead of the upper) to apply the order method
+#' res <- ggfusion.corr(
+#'     data = mat, order.method = "AOE", order.select = "lower")
 #' @references \href{https://www.scholars.northwestern.edu/en/publications/psych-procedures-for-personality-and-psychological-research}{William R Revelle, psych: Procedures for Personality and Psychological Research. Northwestern University, Evanston, Illinois, USA (2017).}
 #' @references \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6099145/#B13}{Why, When and How to Adjust Your P Values? Mohieddin Jafari and Naser Ansari-Pour - Cell J. 2019 Winter; 20(4): 604–607.}
 
-#TODO: fix alphabet order error ggfusion.corr(data = mat, order.method = "alphabet")
 ggfusion.corr <- function(
     data, upper.corr = "pearson", upper.value = "r", lower.corr = "pearson",
     lower.value = "p", na.rm = 'pairwise', order.method = 'hclust',
@@ -427,7 +446,7 @@ ggfusion.corr <- function(
     # statistic <- NULL
 
     # Data format
-    if(!(is.matrix(data))){if(is.data.frame(data)){data<-as.matrix(data)
+    if(!(is.matrix(data))){ if(is.data.frame(data)){ data <- as.matrix(data)
     } else { stop("data is neither a matrix or a dataframe.") } }
     # Upper value type
     if(!(upper.value %in% c('r', 'n', 'stat', 'p', 'se'))){
@@ -466,13 +485,19 @@ ggfusion.corr <- function(
         if(upper.value == "stat"){ upper.value <- 't' }
         # Compute correlation
         if(verbose){
-            cat("Compute pairwise", upper.corr, "correlation test...")
+            cat("Compute pairwise", BiocompR:::simplecap(upper.corr),
+                "correlation test...")
         }
         upper.correlation.res <- psych::corr.test(
             data, use = na.rm, method = upper.corr, adjust = p.adjust)
         upper.mat <- upper.correlation.res[[upper.value]]
-        # if P-value, auto -log10 transform matrix
-        if(upper.value == "p"){ upper.mat <- -log10(upper.mat) }
+        if(upper.value == "p"){
+            # if p.adjust != "none" copy upper.tri matrix to lower.tri matrix
+            upper.mat[lower.tri(upper.mat)] <- t(upper.mat)[
+                lower.tri(upper.mat)]
+            # if P-value, auto -log10 transform matrix
+            upper.mat <- -log10(upper.mat)
+        }
         upper.res <- upper.mat
         if(verbose){ cat("Done.\n") }
         if(lower.corr == upper.corr){
@@ -481,38 +506,43 @@ ggfusion.corr <- function(
             # Assign same matrix
             lower.correlation.res <- upper.correlation.res
             lower.mat <- lower.correlation.res[[lower.value]]
-
         } else {
             if(lower.corr %in% c( "pearson", "spearman", "kendall")){
                 # Overwrite "stat" by "t" for correlation
                 if(lower.value == "stat"){ lower.value <- 't' }
                 # Compute correlation
                 if(verbose){
-                    cat("Compute pairwise", lower.corr, "correlation test...")
+                    cat("Compute pairwise", BiocompR:::simplecap(lower.corr),
+                        "correlation test...")
                 }
                 lower.correlation.res <- psych::corr.test(
                     data, use = na.rm, method = lower.corr, adjust = p.adjust)
                 lower.mat <- lower.correlation.res[[lower.value]]
                 if(verbose){ cat("Done.\n") }
-            # } else if(lower.comp == "KS"){
-            #     if(lower.value %in% c('n', 'stat', 'p')){
-            #         if(verbose){
-            #             cat("Compute pairwise", lower.comp, "test...")
-            #         }
-            #         # Compute Kolmogorov-Smirnov test
-            #         ks.res <- BiocompR::pairwise.ks(
-            #             data = data, statistic = lower.value, ncores = ncores)
-            #         lower.mat <- ks.res$res.statistic
-            #         cat("Done.\n")
-            #     } else if(lower.value == 'r'){
-            #         stop("a KS test does not compute a correlation value.")
-            #     } else if(lower.value == 'se'){
-            #         stop("a KS test does not compute a standard error.")
-            #     } else { stop("Unknown statistic for 'lower.value'.") }
+                # } else if(lower.comp == "KS"){
+                #     if(lower.value %in% c('n', 'stat', 'p')){
+                #         if(verbose){
+                #             cat("Compute pairwise", lower.comp, "test...")
+                #         }
+                #         # Compute Kolmogorov-Smirnov test
+                #         ks.res <- BiocompR::pairwise.ks(
+                #             data = data, statistic = lower.value, ncores = ncores)
+                #         lower.mat <- ks.res$res.statistic
+                #         cat("Done.\n")
+                #     } else if(lower.value == 'r'){
+                #         stop("a KS test does not compute a correlation value.")
+                #     } else if(lower.value == 'se'){
+                #         stop("a KS test does not compute a standard error.")
+                #     } else { stop("Unknown statistic for 'lower.value'.") }
             } else { stop("'lower.corr' value not supported yet.") }
         }
-        # if P-value, auto -log10 transform matrix
-        if(lower.value == "p"){ lower.mat <- -log10(lower.mat) }
+        if(lower.value == "p"){
+            # if p.adjust != "none" copy upper.tri matrix to lower.tri matrix
+            lower.mat[lower.tri(lower.mat)] <- t(lower.mat)[
+                lower.tri(lower.mat)]
+            # if P-value, auto -log10 transform matrix
+            lower.mat <- -log10(lower.mat)
+        }
         lower.res <- lower.mat
         # Update colorbar names
         upper_scale_fill_grad$name <- paste(
@@ -522,48 +552,48 @@ ggfusion.corr <- function(
             BiocompR:::simplecap(x = lower.corr),
             BiocompR:::metric_alias(lower.value), sep = "\n")
 
-    # } else if(upper.comp == "KS"){
-    #     if(upper.value %in% c('n', 'stat', 'p')){
-    #         cat("Compute pairwise", upper.comp, "test...")
-    #         # Compute Kolmogorov Smirnov test
-    #         ks.res <- BiocompR::pairwise.ks(
-    #             data = data, statistic = upper.value, ncores = ncores)
-    #         upper.mat <- ks.res$res.statistic
-    #         cat("Done.\n")
-    #     } else if(upper.value == 'r'){
-    #         stop("a KS test does not compute a correlation value.")
-    #     } else if(upper.value == 'se'){
-    #         stop("a KS test does not compute a standard error.")
-    #     } else { stop("Unknown statistic for 'upper.value'.") }
-    #     upper.res <- upper.mat
-    #     if(lower.comp == upper.comp){
-    #         if(lower.value %in% c('n', 'stat', 'p')){
-    #             lower.mat <- BiocompR::get.ks.stat(
-    #                 table_combinations = ks.res$table_combinations,
-    #                 df.ks.tests = ks.res$res.test, statistic)
-    #         } else if(lower.value == 'r'){
-    #             stop("a KS test does not compute a correlation value.")
-    #         } else if(lower.value == 'se'){
-    #             stop("a KS test does not compute a standard error.")
-    #         } else { stop("Unknown statistic for 'upper.value'.") }
-    #     } else {
-    #         if(lower.comp %in% c("pearson", "spearman", "kendall")){
-    #             #Overwrite "stat" by "t" for correlation
-    #             if(lower.value == "stat"){ lower.value <- 't' }
-    #             #Compute correlation
-    #             cat("Compute pairwise", lower.comp, "correlation test...")
-    #             lower.correlation.res <- psych::corr.test(
-    #                 data, use = na.rm, method = lower.comp, adjust = p.adjust)
-    #             lower.mat <- lower.correlation.res[[lower.value]]
-    #             cat("Done.\n")
-    #         } else { stop("'lower.comp' value not supported yet.") }
-    #     }
-    #     lower.res <- lower.mat
+        # } else if(upper.comp == "KS"){
+        #     if(upper.value %in% c('n', 'stat', 'p')){
+        #         cat("Compute pairwise", upper.comp, "test...")
+        #         # Compute Kolmogorov Smirnov test
+        #         ks.res <- BiocompR::pairwise.ks(
+        #             data = data, statistic = upper.value, ncores = ncores)
+        #         upper.mat <- ks.res$res.statistic
+        #         cat("Done.\n")
+        #     } else if(upper.value == 'r'){
+        #         stop("a KS test does not compute a correlation value.")
+        #     } else if(upper.value == 'se'){
+        #         stop("a KS test does not compute a standard error.")
+        #     } else { stop("Unknown statistic for 'upper.value'.") }
+        #     upper.res <- upper.mat
+        #     if(lower.comp == upper.comp){
+        #         if(lower.value %in% c('n', 'stat', 'p')){
+        #             lower.mat <- BiocompR::get.ks.stat(
+        #                 table_combinations = ks.res$table_combinations,
+        #                 df.ks.tests = ks.res$res.test, statistic)
+        #         } else if(lower.value == 'r'){
+        #             stop("a KS test does not compute a correlation value.")
+        #         } else if(lower.value == 'se'){
+        #             stop("a KS test does not compute a standard error.")
+        #         } else { stop("Unknown statistic for 'upper.value'.") }
+        #     } else {
+        #         if(lower.comp %in% c("pearson", "spearman", "kendall")){
+        #             #Overwrite "stat" by "t" for correlation
+        #             if(lower.value == "stat"){ lower.value <- 't' }
+        #             #Compute correlation
+        #             cat("Compute pairwise", lower.comp, "correlation test...")
+        #             lower.correlation.res <- psych::corr.test(
+        #                 data, use = na.rm, method = lower.comp, adjust = p.adjust)
+        #             lower.mat <- lower.correlation.res[[lower.value]]
+        #             cat("Done.\n")
+        #         } else { stop("'lower.comp' value not supported yet.") }
+        #     }
+        #     lower.res <- lower.mat
     } else { stop("'upper.corr' value not supported yet.") }
 
     # Create Fused Plot
-    # fused.res <- BiocompR::ggfusion.free(
-    fused.res <- ggfusion.free(
+    fused.res <- BiocompR::ggfusion.free(
+    # fused.res <- ggfusion.free(
         sample.names = colnames(data), upper.mat = upper.mat,
         lower.mat = lower.mat, order.select = order.select,
         order.method = order.method, hclust.method = hclust.method,

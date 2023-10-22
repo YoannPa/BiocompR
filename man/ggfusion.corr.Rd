@@ -170,8 +170,12 @@ res <- ggfusion.corr(
 # Set the missing data removal method to complete before computing
 # correlations
 res <- ggfusion.corr(data = mat, na.rm = "complete")
-
-
+# Order samples following the angular order of eigenvectors
+# (of the 2 first eigenvalues on the matrix selected).
+res <- ggfusion.corr(data = mat, order.method = "AOE")
+# Select the lower matrix (instead of the upper) to apply the order method
+res <- ggfusion.corr(
+    data = mat, order.method = "AOE", order.select = "lower")
 }
 \references{
 \href{https://www.scholars.northwestern.edu/en/publications/psych-procedures-for-personality-and-psychological-research}{William R Revelle, psych: Procedures for Personality and Psychological Research. Northwestern University, Evanston, Illinois, USA (2017).}
