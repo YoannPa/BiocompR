@@ -15,6 +15,7 @@ ggfusion.free(
   annot.grps = list(Groups = seq(length(sample.names))),
   annot.pal = grDevices::rainbow(n = length(sample.names)),
   annot.size = 1,
+  theme_legend = NULL,
   lgd.merge = FALSE,
   lgd.ncol = NULL,
   lgd.space.height = 26,

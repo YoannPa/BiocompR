@@ -10,16 +10,17 @@ ggfusion.corr(
   upper.value = "r",
   lower.corr = "pearson",
   lower.value = "p",
+  p.adjust = "BH",
   na.rm = "pairwise",
   order.method = "hclust",
   order.select = "upper",
   hclust.method = "complete",
-  p.adjust = "BH",
   dendrograms = FALSE,
   dend.size = 1,
   annot.grps = list(Groups = seq(ncol(data))),
   annot.pal = grDevices::rainbow(n = ncol(data)),
   annot.size = 1,
+  theme_legend = NULL,
   upper_theme = NULL,
   upper_scale_fill_grad = ggplot2::scale_fill_gradientn(colors =
     BiocompR::biopalette(name = "RColorBrewer_RdBu8"), name = "Upper\\ntriangle values",
@@ -72,6 +73,12 @@ displayed in the lower triangle of the plot as a
 
 \item{lower.value}{See 'upper.value' help.}
 
+\item{p.adjust}{A \code{character} specifying what adjustment
+for multiple tests should be used.\cr
+(Default: p.adjust = "BH"; Supported:
+p.adjust = c("holm", "hochberg", "hommel",
+"bonferroni", "BH", "BY", "fdr", "none")).}
+
 \item{na.rm}{A \code{character} to specify how to handle
 missing values when calculating a correlation.
 Possible types are 'pairwise' and 'complete'.
@@ -101,12 +108,6 @@ method is 'hclust'.\cr Possible methods are:
 'average' (= UPGMA), 'mcquitty' (= WPGMA),
 'median' (= WPGMC) or 'centroid' (= UPGMC).}
 
-\item{p.adjust}{A \code{character} specifying what adjustment
-for multiple tests should be used.\cr
-(Default: p.adjust = "BH"; Supported:
-p.adjust = c("holm", "hochberg", "hommel",
-"bonferroni", "BH", "BY", "fdr", "none")).}
-
 \item{annot.grps}{A \code{list} of vectors of groups to which
 variables belongs for the annotation sidebars.
 Vectors' lengths have to match the number of
@@ -122,6 +123,12 @@ must match the length of the list provided to
 
 \item{annot.size}{An \code{integer} to increase or decrease the
 size of the annotation side bar.}
+
+\item{theme_legend}{A ggplot2 \code{theme} to specify any theme parameter
+you wish to custom on legends
+(Default: theme_legend = NULL). For more information
+about how to define a theme, see
+\link[ggplot2]{theme}.}
 
 \item{grid_col}{A \code{character} specifying the color of the
 grid.}
@@ -155,9 +162,13 @@ Draws 2 triangle matrices of computed pairwise correlations' results.
 }
 \examples{
 # Default fusion correlation plot showing Pearson correlations & P-values
+# (log-scaled by default) adjusted using the Benjamini-Hochberg correction
 mat <- as.matrix(t(scale(mtcars)))
 res <- ggfusion.corr(data = mat)
-# Same thing using the Spearman correlation
+# You can select different multiple-testing adjustment methods for P-values
+# calculation: e.g. using the Bonferroni correction
+res <- ggfusion.corr(data = mat, p.adjust = "bonferroni")
+# Change the correlation test to Spearman correlation
 res <- ggfusion.corr(
     data = mat, upper.corr = "spearman", lower.corr = "spearman")
 # Fuse correlations results from Pearson (top) and Spearman (bottom)
@@ -176,6 +187,37 @@ res <- ggfusion.corr(data = mat, order.method = "AOE")
 # Select the lower matrix (instead of the upper) to apply the order method
 res <- ggfusion.corr(
     data = mat, order.method = "AOE", order.select = "lower")
+# Using "hclust" as the ordering method, you can specify the clustering
+# method: e.g. 'average' for UPGMA clustering
+res <- ggfusion.corr(
+    data = mat, order.method = "hclust", hclust.method = "average")
+# Display dendrograms of the clustering (only when "hclust" is used)
+res <- ggfusion.corr(
+    data = mat, order.method = "hclust", hclust.method = "average",
+    dendrograms = TRUE)
+# Display dendrogram on columns only
+res <- ggfusion.corr(data = mat, dendrograms = c(FALSE, TRUE))
+# It works the other way around for dendrogram on rows only
+res <- ggfusion.corr(data = mat, dendrograms = c(TRUE, FALSE))
+# Decrease width of left dendrogram and increase width of top dendrogram
+res <- ggfusion.corr(data = mat, dendrograms = TRUE, dend.size = c(0.5, 2))
+# Add 1 annotation for the top color bar and a palette from biopalette()
+res <- ggfusion.corr(
+    data = mat, annot.grps = list("Carb" = as.factor(mtcars$carb)),
+    annot.pal = biopalette(name = "ggsci_LocusZoom")[1:6])
+# Add more annotations as factor, adjust colorbar width, and justify legends
+res <- ggfusion.corr(
+    data = mat,
+    annot.grps = list( # Separate annotations must all have different values
+        "Carb" = as.factor(paste(mtcars$carb, "Carb")),
+        "Gear" = as.factor(paste(mtcars$gear, "Gear")),
+        "Am" = as.factor(paste(mtcars$am, "Am"))),
+    annot.pal = list( # Palettes order must matches annotations order
+        biopalette(name = "ggsci_LocusZoom")[1:6],
+        c("pink", "red", "darkred"), biopalette(name = "BiocompR_cond")),
+    annot.size = 3, # Increases top colorbar width
+    lgd.space.height = 22, theme_legend = ggplot2::theme(
+        legend.justification = c(0, 0.8))) # Justifies all legends on left
 }
 \references{
 \href{https://www.scholars.northwestern.edu/en/publications/psych-procedures-for-personality-and-psychological-research}{William R Revelle, psych: Procedures for Personality and Psychological Research. Northwestern University, Evanston, Illinois, USA (2017).}
