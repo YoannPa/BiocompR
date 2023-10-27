@@ -98,6 +98,7 @@ others as volcano plot.
 }
 \examples{
 # Calculate correlation on mtcars dataset
+library(Hmisc)
 corr_res <- Hmisc::rcorr(x = as.matrix(mtcars))
 # Create data.table with labels, correlation values, and P values
 dt_corr <- data.table(

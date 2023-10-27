@@ -1,6 +1,6 @@
 Package: BiocompR
 Title: BiocompR - Advanced visualizations for data comparison
-Version: 0.0.233
+Version: 0.0.234
 Authors@R: 
     person(given = "Yoann",
            family = "Pageaud",
@@ -29,6 +29,7 @@ Imports:
     grDevices,
     grid,
     gridExtra,
+    Hmisc,
     magick,
     psych,
     parallel,
@@ -38,7 +39,6 @@ RoxygenNote: 7.2.3
 Suggests: 
     knitr,
     rmarkdown,
-    magick,
-    Hmisc
+    magick
 VignetteBuilder: knitr
 biocViews: Software, Infrastructure, DataRepresentation

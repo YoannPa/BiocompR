@@ -384,24 +384,49 @@ build.ggvolcano <- function(
     if(data.type == "corr"){
       groups <- c("Negatively correlated", "Insufficiently correlated",
                   "Positively correlated")
+      # Assign groups
+      if(!is.null(x.cutoff)){
+        dt.data[corr <= x.cutoff.values[1], grp := groups[1]]
+        dt.data[corr >= x.cutoff.values[2], grp := groups[3]]
+        dt.data[
+          corr > x.cutoff.values[1] & corr < x.cutoff.values[2],
+          grp := groups[2]]
+      } else {
+        dt.data[corr < 0, grp := groups[1]]
+        dt.data[corr > 0, grp := groups[3]]
+        dt.data[corr == 0, grp := groups[2]]
+      }
     } else if(data.type == "t.test"){
       groups <- c(
         "Negative log2(Fold change)", "Insufficient log2(Fold change)",
         "Positive log2(Fold change)")
+      # Assign groups
+      if(!is.null(x.cutoff)){
+        dt.data[fold <= x.cutoff.values[1], grp := groups[1]]
+        dt.data[fold >= x.cutoff.values[2], grp := groups[3]]
+        dt.data[
+          fold > x.cutoff.values[1] & fold < x.cutoff.values[2],
+          grp := groups[2]]
+      } else {
+        dt.data[fold < 0, grp := groups[1]]
+        dt.data[fold > 0, grp := groups[3]]
+        dt.data[fold == 0, grp := groups[2]]
+      }
     } else if(data.type == "free"){
       groups <- c("Negatively associated", "Insufficiently associated",
                   "Positively associated")
-    }
-    # Assign groups
-    if(!is.null(x.cutoff)){
-      dt.data[corr <= x.cutoff.values[1], grp := groups[1]]
-      dt.data[corr >= x.cutoff.values[2], grp := groups[3]]
-      dt.data[corr > x.cutoff.values[1] & corr < x.cutoff.values[2],
-              grp := groups[2]]
-    } else {
-      dt.data[corr < 0, grp := groups[1]]
-      dt.data[corr > 0, grp := groups[3]]
-      dt.data[corr == 0, grp := groups[2]]
+      # Assign groups
+      if(!is.null(x.cutoff)){
+        dt.data[xval <= x.cutoff.values[1], grp := groups[1]]
+        dt.data[xval >= x.cutoff.values[2], grp := groups[3]]
+        dt.data[
+          xval > x.cutoff.values[1] & xval < x.cutoff.values[2],
+          grp := groups[2]]
+      } else {
+        dt.data[xval < 0, grp := groups[1]]
+        dt.data[xval > 0, grp := groups[3]]
+        dt.data[xval == 0, grp := groups[2]]
+      }
     }
     dt.data[, grp := as.factor(grp)]
     dt.data[, grp := factor(grp, levels = levels(grp)[
@@ -598,6 +623,7 @@ build.ggvolcano <- function(
 #' @export
 #' @examples
 #' # Calculate correlation on mtcars dataset
+#' library(Hmisc)
 #' corr_res <- Hmisc::rcorr(x = as.matrix(mtcars))
 #' # Create data.table with labels, correlation values, and P values
 #' dt_corr <- data.table(
@@ -732,6 +758,7 @@ ggvolcano.corr <- function(
 #' @importFrom data.table `:=`
 #' @export
 
+#TODO add verbose
 ggvolcano.test <- function(
   data, p.cutoff = 0.01, l2fc.cutoff = NULL, title.cutoff = "L2FC cut-off",
   label.cutoff = 0, x.col.sign = FALSE, l2.transform = FALSE,
@@ -739,10 +766,11 @@ ggvolcano.test <- function(
   #Apply log2 transformation if needed
   if(l2.transform){ data[, (2) := log2(x = data[[2]])] }
   #Build volcano plot for t-test data
-  BiocompR::build.ggvolcano(
+  ggvol <- BiocompR::build.ggvolcano(
     data = data, data.type = "t.test", label.cutoff = label.cutoff,
     p.cutoff = p.cutoff, x.cutoff = l2fc.cutoff, title.x.cutoff = title.cutoff,
     x.col.sign = x.col.sign, force.label = force.label)
+  return(ggvol)
 }
 
 
