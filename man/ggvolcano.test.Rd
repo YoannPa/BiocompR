@@ -9,7 +9,7 @@ ggvolcano.test(
   p.cutoff = 0.01,
   l2fc.cutoff = NULL,
   title.cutoff = "L2FC cut-off",
-  label.cutoff = 0,
+  label.cutoff = NULL,
   x.col.sign = FALSE,
   l2.transform = FALSE,
   force.label = NULL
@@ -55,7 +55,7 @@ log2(fold change) limits on the volcano plot
 
 \item{label.cutoff}{A \code{numeric} vector of 1 or 2 values, to be used as
 a cut-off on log2(fold change) values
-(Default: label.cutoff = 0).
+(Default: label.cutoff = NULL does not show any label).
 \itemize{
  \item{If 1 value is given, it will be defined as the
  minimum cut-off on absolute log2(fold change) values
@@ -87,7 +87,7 @@ dots will remain black.}
 second column should be log2 transformed
 (l2.transform = TRUE) or if the log2 transformation has
 already been applied and no further transformation is
-needed (Default: l2.transform = TRUE).}
+needed (Default: l2.transform = FALSE).}
 
 \item{force.label}{A \code{character} vector matching elements in the
 first column of 'data' that you wish to label,
@@ -100,6 +100,39 @@ A \code{gg} volcano plot of your statistical test results.
 }
 \description{
 Plots results of statistical tests as a volcano plot.
+}
+\examples{
+# Compute t.test and fold change of Tooth Growth in Guinea Pigs
+dt <- as.data.table(ToothGrowth)
+ls_res <- lapply(unique(dt$dose), FUN = function(d){
+    log2fc <- mean(log2(dt[dose == d & supp == "VC"]$len)) - mean(
+        log2(dt[dose == d & supp == "OJ"]$len))
+    p.val <- t.test(
+        x = dt[dose == d & supp == "VC"]$len,
+        y = dt[dose == d & supp == "OJ"]$len)$p.value
+    data.table("dose" = as.character(d), "logfc" = log2fc, "p.val" = p.val)
+})
+dt_res <- rbindlist(ls_res)
+# Most basic volcano plot on statistical test results
+ggvolcano.test(data = dt_res)
+# Suppress the alpha warning when drawing a volcano
+warn.handle(
+  print(ggvolcano.test(data = dt_res)),
+  pattern = "Using alpha for a discrete variable is not advised.")
+# Set another P-value cutoff
+ggvolcano.test(data = dt_res, p.cutoff = 0.05)
+# Set an absolute log2 fold change cutoff
+ggvolcano.test(data = dt_res, l2fc.cutoff = 0.4)
+# Set different negative and positive log2 fold change cutoffs
+ggvolcano.test(data = dt_res, l2fc.cutoff = c(-0.3, 0.5))
+# Rename log2 fold change cutoff title
+ggvolcano.test(
+  data = dt_res, l2fc.cutoff = 0.4,
+  title.cutoff = "Minimum absolute log2(FC)")
+# Set a negative and positive log2 fold change cutoff to show/hide labels
+ggvolcano.test(data = dt_res, l2fc.cutoff = 0.4, label.cutoff = c(-0.4, 0))
+# Turn on autocolor based on X-axis sign of values and significance
+ggvolcano.test(data = dt_res, l2fc.cutoff = c(-0.4, 0), x.col.sign = TRUE)
 }
 \author{
 Yoann Pageaud, Verena Bitto.

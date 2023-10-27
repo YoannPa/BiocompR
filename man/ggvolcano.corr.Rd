@@ -10,7 +10,7 @@ ggvolcano.corr(
   p.cutoff = 0.01,
   corr.cutoff = NULL,
   title.cutoff = "Correlation cut-off",
-  label.cutoff = 0,
+  label.cutoff = NULL,
   x.col.sign = FALSE,
   force.label = NULL
 )
@@ -54,8 +54,9 @@ correlation limits on the volcano plot
 (Default: title.cutoff = "Correlation cut-off").}
 
 \item{label.cutoff}{A \code{numeric} vector of 1 or 2 values, comprised
-between -1 and 1, to be used as a cut-off on correlation
-values (Default: corr.cutoff = NULL).
+between -1 and 1, to be used as a cut-off on label
+display
+(Default: label.cutoff = NULL does not show any label).
 \itemize{
  \item{If 1 value is given, it will be defined as the
  minimum cut-off on absolute correlation values
@@ -98,7 +99,6 @@ others as volcano plot.
 }
 \examples{
 # Calculate correlation on mtcars dataset
-library(Hmisc)
 corr_res <- Hmisc::rcorr(x = as.matrix(mtcars))
 # Create data.table with labels, correlation values, and P values
 dt_corr <- data.table(

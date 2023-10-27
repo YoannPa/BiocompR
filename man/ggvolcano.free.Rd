@@ -7,7 +7,7 @@ plot.}
 \usage{
 ggvolcano.free(
   data,
-  label.cutoff = 0,
+  label.cutoff = NULL,
   p.cutoff = 0.01,
   x.cutoff = NULL,
   title.x.cutoff = "X-Axis cutoff",
@@ -30,7 +30,8 @@ ggvolcano.free(
 }}
 
 \item{label.cutoff}{A \code{numeric} vector of 1 or 2 values, to be used as
-a cut-off on Y-axis values (Default: label.cutoff = 0).
+a cut-off on Y-axis values
+(Default: label.cutoff = NULL does not show any label).
 \itemize{
  \item{If 1 value is given, it will be defined as the
  minimum cut-off on absolute Y-axis values

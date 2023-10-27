@@ -5,7 +5,7 @@
 \title{Plots results of correlation test between a single variable and multiple
 others as jittered scatter plot divided into 4 different panels.}
 \usage{
-ggpanel.corr(data, p.cutoff = 0.01, label.cutoff = 0, jitter.height = 0.4)
+ggpanel.corr(data, p.cutoff = 0.01, label.cutoff = NULL, jitter.height = 0.4)
 }
 \arguments{
 \item{data}{A \code{data.table} with 3 to 5 columns:
@@ -27,7 +27,8 @@ maximum cut-off on p-values
 
 \item{label.cutoff}{A \code{numeric} vector of 1 or 2 values, between -1
 and 1 to be used as the minimum cut-off on positive
-and negative correlation values.
+and negative correlation values for displaying
+labels.
 \itemize{
  \item{If 1 value is given, it will be define as the
  minimum cut-off on absolute correlation values
@@ -39,6 +40,8 @@ and negative correlation values.
  The smallest value must be comprised between -1 and
  0. The biggest value must be comprised between 0
  and 1.}
+ (Default: label.cutoff = NULL does not show any
+ label).
 }}
 
 \item{jitter.height}{A \code{numeric} to specify the amount of vertical

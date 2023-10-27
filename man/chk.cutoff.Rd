@@ -5,7 +5,7 @@
 \title{Checks cut-off value(s) given and computes the negative and positive
 cut-offs.}
 \usage{
-chk.cutoff(cutoff = 0, data.type)
+chk.cutoff(cutoff = NULL, data.type)
 }
 \arguments{
 \item{cutoff}{A \code{numeric} vector of 1 or 2 values, to be used as a

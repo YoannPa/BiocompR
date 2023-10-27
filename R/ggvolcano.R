@@ -17,7 +17,6 @@
 #'                  (Supported: data.type = c("t.test", "corr")).
 #' @return A valid \code{data.table} with new column names.
 #' @author Yoann Pageaud.
-#' @export
 #' @keywords internal
 
 chk.dt <- function(data, data.type){
@@ -78,29 +77,33 @@ chk.dt <- function(data, data.type){
 #' @return A \code{numeric} vector of length 2 containing the negative cut-off
 #'         and the positive cut-off for Y-axis values.
 #' @author Yoann Pageaud.
-#' @export
 #' @keywords internal
 
-chk.cutoff <- function(cutoff = 0, data.type){
+chk.cutoff <- function(cutoff = NULL, data.type){
   #Assign cutoff values
-  if(length(cutoff) == 2){
-    neg.cutoff <- min(cutoff)
-    pos.cutoff <- max(cutoff)
-  } else if(length(cutoff) == 1){
-    neg.cutoff<- -cutoff
-    pos.cutoff<- cutoff
-  } else { stop("'cutoff' must be either of length 1 or 2.") }
-  #Check cutoff values
-  if(data.type == "corr"){
-    if(!(-1 <= neg.cutoff & neg.cutoff <= 0)){
-      stop("min(cutoff) must be comprised between -1 and 0.")
+  if(is.null(cutoff)){
+    neg.cutoff <- -Inf
+    pos.cutoff <- Inf
+  } else {
+    if(length(cutoff) == 2){
+      neg.cutoff <- min(cutoff)
+      pos.cutoff <- max(cutoff)
+    } else if(length(cutoff) == 1){
+      neg.cutoff<- -cutoff
+      pos.cutoff<- cutoff
+    } else { stop("'cutoff' must be either of length 1 or 2.") }
+    #Check cutoff values
+    if(data.type == "corr"){
+      if(!(-1 <= neg.cutoff & neg.cutoff <= 0)){
+        stop("min(cutoff) must be comprised between -1 and 0.")
+      }
+      if(!(0 <= pos.cutoff & pos.cutoff <= 1)){
+        stop("max(cutoff) must be comprised between 0 and 1.")
+      }
+    } else if(data.type %in% c("t.test", "free")){
+      if(!(neg.cutoff <= 0)){ stop("min(cutoff) must be inferior to 0.") }
+      if(!(pos.cutoff >= 0)){ stop("max(cutoff) must be superior to 0.") }
     }
-    if(!(0 <= pos.cutoff & pos.cutoff <= 1)){
-      stop("max(cutoff) must be comprised between 0 and 1.")
-    }
-  } else if(data.type %in% c("t.test", "free")){
-    if(!(neg.cutoff <= 0)){ stop("min(cutoff) must be inferior to 0.") }
-    if(!(pos.cutoff >= 0)){ stop("max(cutoff) must be superior to 0.") }
   }
   return(c("negative.cutoff" = neg.cutoff, "positive.cutoff" = pos.cutoff))
 }
@@ -124,7 +127,8 @@ chk.cutoff <- function(cutoff = 0, data.type){
 #'                     generate 'data'
 #'                     (Supported: data.type = c("t.test", "corr")).
 #' @param label.cutoff A \code{numeric} vector of 1 or 2 values, to be used as a
-#'                     cut-off on Y-axis values (Default: label.cutoff = 0).
+#'                     cut-off on Y-axis values
+#'                     (Default: label.cutoff = NULL does not show any label).
 #'                     \itemize{
 #'                      \item{If 1 value is given, it will be defined as the
 #'                      minimum cut-off on absolute Y-axis values
@@ -145,7 +149,6 @@ chk.cutoff <- function(cutoff = 0, data.type){
 #'          \item{The label cut-off positive and negative values.}
 #'         }
 #' @author Yoann Pageaud.
-#' @export
 #' @keywords internal
 
 chk.param <- function(data, data.type, label.cutoff){
@@ -156,9 +159,9 @@ chk.param <- function(data, data.type, label.cutoff){
     data <- data.table::as.data.table(data)
   }
   #Check & format data.table
-  data <- BiocompR::chk.dt(data = data, data.type = data.type)
+  data <- BiocompR:::chk.dt(data = data, data.type = data.type)
   #Check label.cutoff values
-  cutoff.values <- BiocompR::chk.cutoff(
+  cutoff.values <- BiocompR:::chk.cutoff(
     cutoff = label.cutoff, data.type = data.type)
   return(list(orig.cnames, data, cutoff.values))
 }
@@ -184,7 +187,8 @@ chk.param <- function(data, data.type, label.cutoff){
 #'                          (Default: p.cutoff = 0.01).
 #' @param label.cutoff      A \code{numeric} vector of 1 or 2 values, between -1
 #'                          and 1 to be used as the minimum cut-off on positive
-#'                          and negative correlation values.
+#'                          and negative correlation values for displaying
+#'                          labels.
 #'                          \itemize{
 #'                           \item{If 1 value is given, it will be define as the
 #'                           minimum cut-off on absolute correlation values
@@ -196,6 +200,8 @@ chk.param <- function(data, data.type, label.cutoff){
 #'                           The smallest value must be comprised between -1 and
 #'                           0. The biggest value must be comprised between 0
 #'                           and 1.}
+#'                           (Default: label.cutoff = NULL does not show any
+#'                           label).
 #'                          }
 #' @param jitter.height A \code{numeric} to specify the amount of vertical
 #'                      jitter (Default: jitter.height = 0.4).
@@ -212,14 +218,14 @@ chk.param <- function(data, data.type, label.cutoff){
 #' @export
 
 ggpanel.corr <- function(
-  data, p.cutoff = 0.01, label.cutoff = 0, jitter.height = 0.4){
+  data, p.cutoff = 0.01, label.cutoff = NULL, jitter.height = 0.4){
   #Fix BiocCheck() complaining about these objects initialization
   corr <- NULL
   P.value <- NULL
   grp <- NULL
   size <- NULL
   #Check test parameters
-  res.param <- BiocompR::chk.param(
+  res.param <- BiocompR:::chk.param(
     data = data, data.type = "corr", label.cutoff = label.cutoff)
   orig.cnames <- res.param[[1]]
   data <- res.param[[2]]
@@ -298,7 +304,8 @@ ggpanel.corr <- function(
 #'                       generate 'data'
 #'                       (Supported: data.type = c("t.test", "corr")).
 #' @param label.cutoff   A \code{numeric} vector of 1 or 2 values, to be used as
-#'                       a cut-off on Y-axis values (Default: label.cutoff = 0).
+#'                       a cut-off on Y-axis values
+#'                       (Default: label.cutoff = NULL does not show any label).
 #'                       \itemize{
 #'                        \item{If 1 value is given, it will be defined as the
 #'                        minimum cut-off on absolute Y-axis values
@@ -356,7 +363,7 @@ ggpanel.corr <- function(
 #' @keywords internal
 
 build.ggvolcano <- function(
-  data, data.type, label.cutoff = 0, p.cutoff = 0.01, x.cutoff = NULL,
+  data, data.type, label.cutoff = NULL, p.cutoff = 0.01, x.cutoff = NULL,
   title.x.cutoff = "X-Axis cutoff", x.col.sign = FALSE, force.label = NULL){
   #Fix BiocCheck() complaining about these objects initialization
   corr <- NULL
@@ -369,14 +376,14 @@ build.ggvolcano <- function(
   #Make a copy of the data.table to work on
   dt.data <- data.table::as.data.table(data)
   #Check test parameters
-  res.param <- BiocompR::chk.param(
+  res.param <- BiocompR:::chk.param(
     data = dt.data, data.type = data.type, label.cutoff = label.cutoff)
   orig.cnames <- res.param[[1]]
   dt.data <- res.param[[2]]
   cutoff.values <- res.param[[3]]
   #Check x.cutoff values
   if(!is.null(x.cutoff)){
-    x.cutoff.values <- BiocompR::chk.cutoff(
+    x.cutoff.values <- BiocompR:::chk.cutoff(
       cutoff = x.cutoff, data.type = data.type)
   }
   #If x.col.sign TRUE add grp color to data
@@ -539,11 +546,6 @@ build.ggvolcano <- function(
     ggplot2::labs(x = orig.cnames[2], y = paste0(
       "-log10(", orig.cnames[3], ")"), color = orig.cnames[4],
       size = orig.cnames[5])
-  # #Return plot removing warning about discrete variable given to alpha
-  # BiocompR::warn.handle(
-  #   pattern = "Using alpha for a discrete variable is not advised.",
-  #   print(ggvol))
-
   # Return volcano plot
   return(ggvol)
 }
@@ -586,8 +588,9 @@ build.ggvolcano <- function(
 #'                     correlation limits on the volcano plot
 #'                     (Default: title.cutoff = "Correlation cut-off").
 #' @param label.cutoff A \code{numeric} vector of 1 or 2 values, comprised
-#'                     between -1 and 1, to be used as a cut-off on correlation
-#'                     values (Default: corr.cutoff = NULL).
+#'                     between -1 and 1, to be used as a cut-off on label
+#'                     display
+#'                     (Default: label.cutoff = NULL does not show any label).
 #'                     \itemize{
 #'                      \item{If 1 value is given, it will be defined as the
 #'                      minimum cut-off on absolute correlation values
@@ -623,7 +626,6 @@ build.ggvolcano <- function(
 #' @export
 #' @examples
 #' # Calculate correlation on mtcars dataset
-#' library(Hmisc)
 #' corr_res <- Hmisc::rcorr(x = as.matrix(mtcars))
 #' # Create data.table with labels, correlation values, and P values
 #' dt_corr <- data.table(
@@ -670,7 +672,7 @@ build.ggvolcano <- function(
 
 ggvolcano.corr <- function(
   data, p.cutoff = 0.01, corr.cutoff = NULL,
-  title.cutoff = "Correlation cut-off", label.cutoff = 0, x.col.sign = FALSE,
+  title.cutoff = "Correlation cut-off", label.cutoff = NULL, x.col.sign = FALSE,
   force.label = NULL){
   #Build volcano plot for correlation data
   BiocompR::build.ggvolcano(
@@ -717,7 +719,7 @@ ggvolcano.corr <- function(
 #'                     (Default: title.cutoff = "L2FC cut-off").
 #' @param label.cutoff A \code{numeric} vector of 1 or 2 values, to be used as
 #'                     a cut-off on log2(fold change) values
-#'                     (Default: label.cutoff = 0).
+#'                     (Default: label.cutoff = NULL does not show any label).
 #'                     \itemize{
 #'                      \item{If 1 value is given, it will be defined as the
 #'                      minimum cut-off on absolute log2(fold change) values
@@ -747,7 +749,7 @@ ggvolcano.corr <- function(
 #'                     second column should be log2 transformed
 #'                     (l2.transform = TRUE) or if the log2 transformation has
 #'                     already been applied and no further transformation is
-#'                     needed (Default: l2.transform = TRUE).
+#'                     needed (Default: l2.transform = FALSE).
 #' @param force.label  A \code{character} vector matching elements in the
 #'                     first column of 'data' that you wish to label,
 #'                     independently from their actual significance
@@ -757,11 +759,42 @@ ggvolcano.corr <- function(
 #' @author Yoann Pageaud, Verena Bitto.
 #' @importFrom data.table `:=`
 #' @export
+#' @examples
+#' # Compute t.test and fold change of Tooth Growth in Guinea Pigs
+#' dt <- as.data.table(ToothGrowth)
+#' ls_res <- lapply(unique(dt$dose), FUN = function(d){
+#'     log2fc <- mean(log2(dt[dose == d & supp == "VC"]$len)) - mean(
+#'         log2(dt[dose == d & supp == "OJ"]$len))
+#'     p.val <- t.test(
+#'         x = dt[dose == d & supp == "VC"]$len,
+#'         y = dt[dose == d & supp == "OJ"]$len)$p.value
+#'     data.table("dose" = as.character(d), "logfc" = log2fc, "p.val" = p.val)
+#' })
+#' dt_res <- rbindlist(ls_res)
+#' # Most basic volcano plot on statistical test results
+#' ggvolcano.test(data = dt_res)
+#' # Suppress the alpha warning when drawing a volcano
+#' warn.handle(
+#'   print(ggvolcano.test(data = dt_res)),
+#'   pattern = "Using alpha for a discrete variable is not advised.")
+#' # Set another P-value cutoff
+#' ggvolcano.test(data = dt_res, p.cutoff = 0.05)
+#' # Set an absolute log2 fold change cutoff
+#' ggvolcano.test(data = dt_res, l2fc.cutoff = 0.4)
+#' # Set different negative and positive log2 fold change cutoffs
+#' ggvolcano.test(data = dt_res, l2fc.cutoff = c(-0.3, 0.5))
+#' # Rename log2 fold change cutoff title
+#' ggvolcano.test(
+#'   data = dt_res, l2fc.cutoff = 0.4,
+#'   title.cutoff = "Minimum absolute log2(FC)")
+#' # Set a negative and positive log2 fold change cutoff to show/hide labels
+#' ggvolcano.test(data = dt_res, l2fc.cutoff = 0.4, label.cutoff = c(-0.4, 0))
+#' # Turn on autocolor based on X-axis sign of values and significance
+#' ggvolcano.test(data = dt_res, l2fc.cutoff = c(-0.4, 0), x.col.sign = TRUE)
 
-#TODO add verbose
 ggvolcano.test <- function(
   data, p.cutoff = 0.01, l2fc.cutoff = NULL, title.cutoff = "L2FC cut-off",
-  label.cutoff = 0, x.col.sign = FALSE, l2.transform = FALSE,
+  label.cutoff = NULL, x.col.sign = FALSE, l2.transform = FALSE,
   force.label = NULL){
   #Apply log2 transformation if needed
   if(l2.transform){ data[, (2) := log2(x = data[[2]])] }
@@ -790,7 +823,8 @@ ggvolcano.test <- function(
 #'                        define dots sizes based on another variable.}
 #'                       }
 #' @param label.cutoff   A \code{numeric} vector of 1 or 2 values, to be used as
-#'                       a cut-off on Y-axis values (Default: label.cutoff = 0).
+#'                       a cut-off on Y-axis values
+#'                       (Default: label.cutoff = NULL does not show any label).
 #'                       \itemize{
 #'                        \item{If 1 value is given, it will be defined as the
 #'                        minimum cut-off on absolute Y-axis values
@@ -847,7 +881,7 @@ ggvolcano.test <- function(
 #' @export
 
 ggvolcano.free <- function(
-  data, label.cutoff = 0, p.cutoff = 0.01, x.cutoff = NULL,
+  data, label.cutoff = NULL, p.cutoff = 0.01, x.cutoff = NULL,
   title.x.cutoff = "X-Axis cutoff", x.col.sign = FALSE, force.label = NULL){
   #Build volcano plot for free data
   BiocompR::build.ggvolcano(
