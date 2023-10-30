@@ -75,15 +75,27 @@ get.ks.stat <- function(table_combinations, df.ks.tests, statistic){
 #'         data.frame of the pairwise KS raw test results, and a table of
 #'         pairwise combinations.
 #' @author Yoann Pageaud.
-#' @keywords internal
+#' @export
+#' @examples
+#' # Format the airquality dataset
+#' airquality <- data.table::as.data.table(airquality)
+#' airquality[, Month:= factor(Month, labels = month.abb[5:9])]
+#' df_month <- as.data.frame(data.table::dcast(
+#'     data = airquality, Day~Month, value.var = "Ozone")[, c(2:6)])
+#' # Do a pairwise Kolmogorov-Smirnov test and collect the KS 'stat' distances
+#' # (only 1 core/thread used in the example)
+#' ks_res <- pairwise.ks(data = df_month)
+#' # Access the matrix of KS distances
+#' ks_res$res.statistic
 
-pairwise.ks <- function(data, statistic, ncores){
+pairwise.ks <- function(data, statistic = "stat", ncores = 1){
     table_combinations <- expand.grid(colnames(data), colnames(data))
     List_ks.tests <- parallel::mclapply(
         seq(nrow(table_combinations)), mc.cores = ncores, function(i){
             #Compute KS test
-            ks.res <- stats::ks.test(x = data[,table_combinations[i,1]],
-                                     y = data[,table_combinations[i,2]])
+            ks.res <- stats::ks.test(
+                x = data[, table_combinations[i,1]],
+                y = data[,table_combinations[i,2]])
             #Create table with all statistics of the KS test
             data.frame('n' = nrow(data[stats::complete.cases(
                 data[, c(table_combinations[i, 1], table_combinations[i, 2])]),
@@ -93,7 +105,7 @@ pairwise.ks <- function(data, statistic, ncores){
     #Create Table
     df.ks.tests <- do.call("rbind", List_ks.tests)
     #Get matrix of the stat of interest
-    mat <- BiocompR::get.ks.stat(
+    mat <- BiocompR:::get.ks.stat(
         table_combinations = table_combinations, df.ks.tests = df.ks.tests,
         statistic = statistic)
     return(list("res.statistic" = mat, "res.test" = df.ks.tests,

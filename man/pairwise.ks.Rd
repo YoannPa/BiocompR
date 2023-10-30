@@ -4,7 +4,7 @@
 \alias{pairwise.ks}
 \title{Computes a Kolmogrov-Smirnov test between all columns of a data.frame.}
 \usage{
-pairwise.ks(data, statistic, ncores)
+pairwise.ks(data, statistic = "stat", ncores = 1)
 }
 \arguments{
 \item{data}{A \code{data.frame} of numerical values.}
@@ -24,7 +24,18 @@ A \code{list} containing a matrix of the statistic values, a
 \description{
 Computes a Kolmogrov-Smirnov test between all columns of a data.frame.
 }
+\examples{
+# Format the airquality dataset
+airquality <- data.table::as.data.table(airquality)
+airquality[, Month:= factor(Month, labels = month.abb[5:9])]
+df_month <- as.data.frame(data.table::dcast(
+    data = airquality, Day~Month, value.var = "Ozone")[, c(2:6)])
+# Do a pairwise Kolmogorov-Smirnov test and collect the KS 'stat' distances
+# (only 1 core/thread used in the example)
+ks_res <- pairwise.ks(data = df_month)
+# Access the matrix of KS distances
+ks_res$res.statistic
+}
 \author{
 Yoann Pageaud.
 }
-\keyword{internal}

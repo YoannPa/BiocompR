@@ -20,11 +20,31 @@ fix.corrMatOrder.alphabet <- function(cor.order, str){
 #' @return A \code{type} object returned description.
 #' @author Yoann Pageaud.
 #' @export
+#' @examples
+#' # Compute Pairwise t test and adjust P-values using Benjamini-Horberg method
+#' airquality <- data.table::as.data.table(airquality)
+#' airquality[, Month:= factor(Month, labels = month.abb[5:9])]
+#' mat_pval <- pairwise.t.test(
+#'     x = airquality$Ozone, g = airquality$Month,
+#'     p.adjust.method = "BH")$p.value
+#' mat_pval <- cbind(rbind(NA, mat_pval), NA)
+#' colnames(mat_pval) <- levels(airquality$Month)
+#' rownames(mat_pval) <- levels(airquality$Month)
+#' mat_pval[upper.tri(mat_pval)] <- t(mat_pval)[upper.tri(mat_pval)]
+#' mat_pval <- -log10(mat_pval)
+#' # Compute Kolmogorov-Smirnov distance between months' measures
+#' df_month <- as.data.frame(data.table::dcast(
+#'     data = airquality, Day~Month, value.var = "Ozone")[, c(2:6)])
+#' ks_res <- pairwise.ks(data = df_month)$res.statistic
+#' # Draw the most basic ggfusion.free plot based on these results
+#' ggfusion.free(
+#'     sample.names = levels(airquality$Month), upper.mat = mat_pval,
+#'     lower.mat = ks_res)
 
 #TODO: Write documentation!
 ggfusion.free <- function(
-    sample.names, upper.mat, lower.mat, order.select, order.method,
-    hclust.method, dendrograms = FALSE,
+    sample.names, upper.mat, lower.mat, order.method = "hclust",
+    order.select = "upper", hclust.method = "complete", dendrograms = FALSE,
     annot.grps = list("Groups" = seq(length(sample.names))),
     annot.pal = grDevices::rainbow(n = length(sample.names)), annot.size = 1,
     theme_legend = NULL, lgd.merge = FALSE, lgd.ncol = NULL,
@@ -43,6 +63,9 @@ ggfusion.free <- function(
         barheight = 0.7, barwidth = 10, ticks.linewidth = 0.5,
         ticks.colour = "black", frame.linewidth = 0.5, frame.colour = "black"),
     diagonal_col = "white", plot_title = NULL, verbose = FALSE){
+    # Check if diagonal from matrices contains any NA. If so, replace by 0.
+    if(anyNA(diag(upper.mat))){ diag(upper.mat) <- 0 }
+    if(anyNA(diag(lower.mat))){ diag(lower.mat) <- 0 }
     # Check logicals for dendrograms
     if(length(dendrograms) == 1){
         dd.rows <- dendrograms
@@ -97,7 +120,7 @@ ggfusion.free <- function(
     # Get order of the correlations for the method used
     if(order.select == 'upper'){
         if(order.method %in% c("AOE", "FPC", "hclust", "alphabet")){
-            if(any(upper.mat == Inf)){
+            if(any(upper.mat[!is.na(upper.mat)] == Inf)){
                 # If matrix of P-values reverse -log10 transformation
                 correlation.order <- corrplot::corrMatOrder(
                     10^(-upper.mat), order = order.method,
@@ -123,7 +146,7 @@ ggfusion.free <- function(
     } else {
         if(order.method %in% c("AOE", "FPC", "hclust", "alphabet")){
             # If matrix contain Inf, then potential log transformed p.values
-            if(any(lower.mat == Inf)){
+            if(any(lower.mat[!is.na(lower.mat)] == Inf)){
                 correlation.order <- corrplot::corrMatOrder(
                     10^(-lower.mat), order = order.method,
                     hclust.method = hclust.method)

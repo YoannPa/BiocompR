@@ -8,9 +8,9 @@ ggfusion.free(
   sample.names,
   upper.mat,
   lower.mat,
-  order.select,
-  order.method,
-  hclust.method,
+  order.method = "hclust",
+  order.select = "upper",
+  hclust.method = "complete",
   dendrograms = FALSE,
   annot.grps = list(Groups = seq(length(sample.names))),
   annot.pal = grDevices::rainbow(n = length(sample.names)),
@@ -48,6 +48,27 @@ A \code{type} object returned description.
 }
 \description{
 Draws 2 triangle matrices fused together in a single plot.
+}
+\examples{
+# Compute Pairwise t test and adjust P-values using Benjamini-Horberg method
+airquality <- data.table::as.data.table(airquality)
+airquality[, Month:= factor(Month, labels = month.abb[5:9])]
+mat_pval <- pairwise.t.test(
+    x = airquality$Ozone, g = airquality$Month,
+    p.adjust.method = "BH")$p.value
+mat_pval <- cbind(rbind(NA, mat_pval), NA)
+colnames(mat_pval) <- levels(airquality$Month)
+rownames(mat_pval) <- levels(airquality$Month)
+mat_pval[upper.tri(mat_pval)] <- t(mat_pval)[upper.tri(mat_pval)]
+mat_pval <- -log10(mat_pval)
+# Compute Kolmogorov-Smirnov distance between months' measures
+df_month <- as.data.frame(data.table::dcast(
+    data = airquality, Day~Month, value.var = "Ozone")[, c(2:6)])
+ks_res <- pairwise.ks(data = df_month)$res.statistic
+# Draw the most basic ggfusion.free plot based on these results
+ggfusion.free(
+    sample.names = levels(airquality$Month), upper.mat = mat_pval,
+    lower.mat = ks_res)
 }
 \author{
 Yoann Pageaud.
