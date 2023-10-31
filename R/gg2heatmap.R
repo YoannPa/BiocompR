@@ -224,7 +224,7 @@
 #'                         space (Default: lgd.space.height = 29).
 #' @param lgd.ncol        An \code{integer} to override the internal legend
 #'                        layout build, to specify the number of columns on
-#'                        which legends' keys should be displayed
+#'                        which legends'keys should be displayed
 #'                        (Default: lgd.ncol = NULL).
 #' @param y.axis.right    A \code{logical} to specify whether the heatmap Y axis
 #'                        should be displayed on the right (y.axis.right = TRUE)

@@ -42,7 +42,7 @@ metric_alias <- function(metric = "r"){
 
 #' Extracts Kolmogorov-Smirnov test results and return them as a matrix.
 #'
-#' @param df.ks.tests A \code{data.frame} containing raw results from multiple
+#' @param dt_ks_tests A \code{data.table} containing raw results from multiple
 #'                    Kolmogorov-Smirnov tests.
 #' @param statistic   A \code{character} specifying the type of statistic to
 #'                    retrieve from the test\cr
@@ -52,14 +52,18 @@ metric_alias <- function(metric = "r"){
 #' @author Yoann Pageaud.
 #' @keywords internal
 
-get.ks.stat <- function(table_combinations, df.ks.tests, statistic){
-    ks.res <- df.ks.tests[[statistic]]
-    tbl.ks <- cbind(table_combinations, ks.res)
-    #Cast a molten tables into a matrix
-    mat.ks <- data.table::dcast(
-        data = tbl.ks, formula = Var1 ~ Var2, value.var = "ks.res")
-    rownames(mat.ks) <- mat.ks$Var1
-    mat <- as.matrix(mat.ks[,-1])
+get_ks_stat <- function(table_combinations, dt_ks_tests, statistic){
+    # ks.res <- df.ks.tests[[statistic]]
+    # tbl.ks <- cbind(table_combinations, ks.res)
+    tbl_ks <- cbind(
+        data.table::as.data.table(table_combinations),
+        "ks.res" = dt_ks_tests[[statistic]])
+    # Cast a molten table into a matrix
+    dt_ks <- data.table::dcast(
+        data = tbl_ks, formula = Var1 ~ Var2, value.var = "ks.res")
+    mat <- as.matrix(dt_ks, rownames = "Var1")
+    # rownames(mat.ks) <- mat.ks$Var1
+    # mat <- as.matrix(mat.ks[,-1])
     return(mat)
 }
 
@@ -90,25 +94,30 @@ get.ks.stat <- function(table_combinations, df.ks.tests, statistic){
 
 pairwise.ks <- function(data, statistic = "stat", ncores = 1){
     table_combinations <- expand.grid(colnames(data), colnames(data))
-    List_ks.tests <- parallel::mclapply(
+    ls_ks_tests <- parallel::mclapply(
         seq(nrow(table_combinations)), mc.cores = ncores, function(i){
-            #Compute KS test
+            # Compute KS test
             ks.res <- stats::ks.test(
                 x = data[, table_combinations[i,1]],
                 y = data[,table_combinations[i,2]])
-            #Create table with all statistics of the KS test
-            data.frame('n' = nrow(data[stats::complete.cases(
-                data[, c(table_combinations[i, 1], table_combinations[i, 2])]),
-                ]), 'stat' = ks.res$statistic, 'p' = ks.res$p.value,
-                row.names = NULL)
+            # Create table with all statistics of the KS test
+            data.table::data.table(
+                'n' = nrow(data[stats::complete.cases(data[, c(
+                    table_combinations[i, 1], table_combinations[i, 2])]),]),
+                'stat' = ks.res$statistic, 'p' = ks.res$p.value)
+            # data.frame('n' = nrow(data[stats::complete.cases(
+            #     data[, c(table_combinations[i, 1], table_combinations[i, 2])]),
+            #     ]), 'stat' = ks.res$statistic, 'p' = ks.res$p.value,
+            #     row.names = NULL)
         })
-    #Create Table
-    df.ks.tests <- do.call("rbind", List_ks.tests)
-    #Get matrix of the stat of interest
-    mat <- BiocompR:::get.ks.stat(
-        table_combinations = table_combinations, df.ks.tests = df.ks.tests,
+    # Create Table
+    dt_ks_tests <- data.table::rbindlist(ls_ks_tests)
+    # df.ks.tests <- do.call("rbind", ls_ks_tests)
+    # Get matrix of the stat of interest
+    mat <- BiocompR:::get_ks_stat(
+        table_combinations = table_combinations, dt_ks_tests = dt_ks_tests,
         statistic = statistic)
-    return(list("res.statistic" = mat, "res.test" = df.ks.tests,
+    return(list("res.statistic" = mat, "res.test" = dt_ks_tests,
                 "table_combinations" = table_combinations))
 }
 

@@ -306,7 +306,7 @@ space (Default: lgd.space.height = 29).}
 
 \item{lgd.ncol}{An \code{integer} to override the internal legend
 layout build, to specify the number of columns on
-which legends' keys should be displayed
+which legends'keys should be displayed
 (Default: lgd.ncol = NULL).}
 
 \item{y.axis.right}{A \code{logical} to specify whether the heatmap Y axis

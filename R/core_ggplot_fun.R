@@ -100,8 +100,7 @@ is.elt_blank <- function(arg){
 
 chk.breaks.labels <- function(ScaleContinuous_obj){
     if(!is.null(ScaleContinuous_obj$n.breaks)){
-        if(ScaleContinuous_obj$n.breaks != length(
-            ScaleContinuous_obj$labels)){
+        if(ScaleContinuous_obj$n.breaks != length(ScaleContinuous_obj$labels)){
             stop("in 'upper_scale_fill_grad' n.breaks is not equal to the",
                  "length of labels.")
         }

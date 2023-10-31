@@ -16,7 +16,133 @@ fix.corrMatOrder.alphabet <- function(cor.order, str){
 
 #' Draws 2 triangle matrices fused together in a single plot.
 #'
-#' @param param1 A \code{type} parameter description.
+#' @param sample.names A \code{character} vector: usually the colnames/rownames
+#'                     of your input matrices 'upper.mat' and 'lower.mat'.
+#' @param upper.mat    A numerical \code{matrix} that will be displayed as the
+#'                     upper triangle part of the fusion plot.
+#' @param lower.mat    A numerical \code{matrix} that will be displayed as the
+#'                     lower triangle part of the fusion plot.
+#' @param order.method A \code{character} specifying the ordering method to
+#'                     apply.\cr Possible ordering methods are:
+#'                     \itemize{
+#'                      \item{'AOE' - angular order of the eigenvectors.}
+#'                      \item{'FPC' - first principal component order.}
+#'                      \item{'hclust' - hierarchical clustering order.}
+#'                      \item{'alphabet' - alphabetical order}
+#'                      \item{'default'}
+#'                     }
+#' @param order.select A \code{character} specifying comparison results to use
+#'                     for the clustering.\cr Possible values are 'upper' or
+#'                     'lower'.
+#' @param hclust.method         A \code{character} specifying the method to use
+#'                              for the hierarchical clustering if the ordering
+#'                              method is 'hclust'.\cr Possible methods are:
+#'                              'ward.D','ward.D2', 'single', 'complete',
+#'                              'average' (= UPGMA), 'mcquitty' (= WPGMA),
+#'                              'median' (= WPGMC) or 'centroid' (= UPGMC).
+#' @param dendrograms     A \code{logical} vector to specify whether dendrograms
+#'                        should be plotted with the fusion plot.
+#'                        \itemize{
+#'                         \item{If dendrograms = TRUE: both dendrograms on row
+#'                               and columns of the matrix will be plotted.}
+#'                         \item{If dendrograms = FALSE: both dendrograms on
+#'                               rows and columns of the matrix will NOT be
+#'                               plotted.}
+#'                         \item{If the vector is of length 2: the first logical
+#'                               will apply for rows, and the second logical
+#'                               will apply for columns.}
+#'                        }
+#' @param annot.grps            A \code{list} of vectors of groups to which
+#'                              variables belongs for the annotation sidebars.
+#'                              Vectors' lengths have to match the number of
+#'                              variables.
+#' @param annot.pal             A \code{vector} or a list of vectors containing
+#'                              colors as characters for the annotation
+#'                              sidebars. The length of vectors has to match the
+#'                              number of levels of vectors listed in
+#'                              'annot.grps'. If a list is provided, its length
+#'                              must match the length of the list provided to
+#'                              'annot.grps'.
+#' @param annot.size            An \code{integer} to increase or decrease the
+#'                              size of the annotation side bar.
+#' @param theme_legend    A ggplot2 \code{theme} to specify any theme parameter
+#'                        you wish to custom on annotations'legends
+#'                        (Default: theme_legend = NULL). For more information
+#'                        about how to define a theme, see
+#'                        \link[ggplot2]{theme}.
+#' @param lgd.merge       A \code{logical} specifying whether the legends of
+#'                        multiple annotation bars should be merged
+#'                        (lgd.merge = TRUE) or remain separated
+#'                        (lgd.merge = FALSE). lgd.merge is especially useful
+#'                        when you want to map the same color palette to
+#'                        multiple annotations sharing the same values
+#'                        (Default: lgd.merge = FALSE).
+#' @param lgd.ncol        An \code{integer} to override the internal legend
+#'                        layout build, to specify the number of columns on
+#'                        which legends'keys should be displayed
+#'                        (Default: lgd.ncol = NULL).
+#' @param lgd.space.width  A \code{numeric} specifying the width of the legend
+#'                         space (Default: lgd.space.width = 1).
+#' @param lgd.space.height An \code{integer} specifying the height of the legend
+#'                         space (Default: lgd.space.height = 26).
+#' @param dend.size       A \code{numeric} vector defining row and column
+#'                        dendrograms size (Default: dend.size = 1).
+#'                        \itemize{
+#'                         \item{If dend.size is a \code{numeric}: the value is
+#'                               used to set both the width of the dendrogram
+#'                               built on rows, and the height of the dendrogram
+#'                               built on columns.}
+#'                         \item{If dend.size is a \code{numeric} vector of
+#'                               length 2: the first numeric will apply to the
+#'                               dendrogram built on rows, and the second
+#'                               numeric will apply to the dendrogram built on
+#'                               columns.}
+#'                        }
+#' @param grid_col              A \code{character} specifying the color of the
+#'                              grid.
+#' @param grid_linewidth        A \code{double} value for the thickness of the
+#'                              grid.
+#' @param upper_theme     A ggplot2 \code{theme} to specify any theme parameter
+#'                        you wish to custom the upper triangle of the fusion
+#'                        plot (Default: upper_theme = NULL). For more
+#'                        information about how to define a theme, see
+#'                        \link[ggplot2]{theme}.
+#' @param upper_scale_fill_grad A \code{ScaleContinous} object generated by
+#'                              ggplot2 functions such as
+#'                              \link[ggplot2]{scale_fill_gradient},
+#'                              \link[ggplot2]{scale_fill_gradient2} or
+#'                              \link[ggplot2]{scale_fill_gradientn} to
+#'                              customize the color bar associated to the upper
+#'                              triangle of the fusion plot.
+#' @param upper_guide_custom_bar A \code{guide} object generated by the ggplot2
+#'                               function \link[ggplot2]{guide_colorbar} to
+#'                               custom the appearance of the color bar
+#'                               associated to the upper triangle of the fusion
+#'                               plot.
+#'                               (see also 'upper_scale_fill_grad' option).
+#' @param lower_theme     A ggplot2 \code{theme} to specify any theme parameter
+#'                        you wish to custom the lower triangle of the fusion
+#'                        plot (Default: lower_theme = NULL). For more
+#'                        information about how to define a theme, see
+#'                        \link[ggplot2]{theme}.
+#' @param lower_scale_fill_grad A \code{ScaleContinous} object generated by
+#'                              ggplot2 functions such as
+#'                              \link[ggplot2]{scale_fill_gradient},
+#'                              \link[ggplot2]{scale_fill_gradient2} or
+#'                              \link[ggplot2]{scale_fill_gradientn} to
+#'                              customize the color bar associated to the lower
+#'                              triangle of the fusion plot.
+#' @param lower_guide_custom_bar A \code{guide} object generated by the ggplot2
+#'                               function \link[ggplot2]{guide_colorbar} to
+#'                               custom the appearance of the color bar
+#'                               associated to the lower triangle of the fusion
+#'                               plot.
+#'                               (see also 'lower_scale_fill_grad' option).
+#' @param diagonal_col          A \code{character} defining the color of cells
+#'                              with of the empty diagonal.
+#' @param verbose         A \code{logical} to display information about the
+#'                        step-by-step processing of the data if TRUE
+#'                        (Default: verbose = FALSE).
 #' @return A \code{type} object returned description.
 #' @author Yoann Pageaud.
 #' @export
@@ -40,6 +166,24 @@ fix.corrMatOrder.alphabet <- function(cor.order, str){
 #' ggfusion.free(
 #'     sample.names = levels(airquality$Month), upper.mat = mat_pval,
 #'     lower.mat = ks_res)
+#' # Custom legends to describe what data your fusion plot shows
+#' ggfusion.free(
+#'     sample.names = levels(airquality$Month), upper.mat = mat_pval,
+#'     lower.mat = ks_res, dendrograms = TRUE, # Show the clustering
+#'     # Change annotation title and use a color palette from biopalette()
+#'     annot.grps = list("Months" = levels(airquality$Month)),
+#'     annot.pal = BiocompR::biopalette(name = "ggsci_Frontiers")[1:5],
+#'     # Custom upper triangle legend
+#'     upper_scale_fill_grad = ggplot2::scale_fill_gradient2(
+#'         low = "darkblue", mid = "white", high = "darkred",
+#'         midpoint = -log10(0.05), name = "Student test\n-log10(P-values)",
+#'         limits = c(0, 4)),
+#'     # Custom upper triangle legend using a viridis palette from biopalette()
+#'     lower_scale_fill_grad = ggplot2::scale_fill_gradientn(
+#'         colors = BiocompR::biopalette(name = "viridis_H_turbo"),
+#'         name = "Kolmogorov-Smirnov\ndistances", limits = c(0, 1)),
+#'     # Modify lower triangle's legend justification
+#'     lower_theme = ggplot2::theme(legend.justification = c(0.3, 0.5)))
 
 #TODO: Write documentation!
 ggfusion.free <- function(
@@ -62,7 +206,7 @@ ggfusion.free <- function(
     lower_guide_custom_bar = ggplot2::guide_colorbar(
         barheight = 0.7, barwidth = 10, ticks.linewidth = 0.5,
         ticks.colour = "black", frame.linewidth = 0.5, frame.colour = "black"),
-    diagonal_col = "white", plot_title = NULL, verbose = FALSE){
+    diagonal_col = "white", verbose = FALSE){
     # Check if diagonal from matrices contains any NA. If so, replace by 0.
     if(anyNA(diag(upper.mat))){ diag(upper.mat) <- 0 }
     if(anyNA(diag(lower.mat))){ diag(lower.mat) <- 0 }
@@ -139,9 +283,11 @@ ggfusion.free <- function(
             correlation.order <- seq(ncol(upper.mat))}
         # if(dendro.pos != "none"){
         if(dd.rows | dd.cols){
-            # Generate Hierarchy Cluster
+            # Generate Hierarchy Cluster on normalized data
+            norm_upper_mat <- (upper.mat-min(upper.mat))/(
+                max(upper.mat)-min(upper.mat))
             hierarchy.clust <- fastcluster::hclust(
-                d = stats::as.dist(1-upper.mat), method = hclust.method)
+                d = stats::as.dist(1-norm_upper_mat), method = hclust.method)
         }
     } else {
         if(order.method %in% c("AOE", "FPC", "hclust", "alphabet")){
@@ -164,13 +310,14 @@ ggfusion.free <- function(
             correlation.order <- seq(ncol(lower.mat))}
         # if(dendro.pos != "none"){
         if(dd.rows | dd.cols){
-            # Generate Hierarchy Cluster
+            # Generate Hierarchy Cluster on normalized data
+            norm_lower_mat <- (lower.mat-min(lower.mat))/(
+                max(lower.mat)-min(lower.mat))
             hierarchy.clust <- fastcluster::hclust(
-                d = stats::as.dist(1-lower.mat), method = hclust.method)
+                d = stats::as.dist(1-norm_lower_mat), method = hclust.method)
         }
     }
     # Generate Dendrogram
-    # if(dendro.pos != "none"){
     if(dd.rows | dd.cols){
         ddgr <- stats::as.dendrogram(hierarchy.clust)
         ddgr_dat <- ggdendro::dendro_data(ddgr) # Dendrogram data
@@ -235,8 +382,7 @@ ggfusion.free <- function(
         melt_tri = upper.melt, grid_col = grid_col,
         grid_linewidth = grid_linewidth, ggtri_theme = upper_theme,
         scale_fill_grad = upper_scale_fill_grad,
-        guide_custom_bar = upper_guide_custom_bar, y_axis_pos = "left") +
-        ggplot2::ggtitle(plot_title)
+        guide_custom_bar = upper_guide_custom_bar, y_axis_pos = "left")
     # Define default theme
     lower_default_fused <- ggplot2::theme(
         axis.title = ggplot2::element_blank(),
@@ -341,8 +487,6 @@ ggfusion.free <- function(
 #' Draws 2 triangle matrices of computed pairwise correlations' results.
 #'
 #' @param data                  A \code{matrix} or \code{dataframe}.
-#' @param ncores                An \code{integer} to specify the number of
-#'                              cores/threads to be used to parallel-run tests.
 #' @param upper.corr            The comparison for which results will be
 #'                              displayed in the upper triangle of the plot as a
 #'                              \code{character} matching one of these:
@@ -388,6 +532,18 @@ ggfusion.free <- function(
 #'                              'ward.D','ward.D2', 'single', 'complete',
 #'                              'average' (= UPGMA), 'mcquitty' (= WPGMA),
 #'                              'median' (= WPGMC) or 'centroid' (= UPGMC).
+#' @param dendrograms     A \code{logical} vector to specify whether dendrograms
+#'                        should be plotted with the fusion plot.
+#'                        \itemize{
+#'                         \item{If dendrograms = TRUE: both dendrograms on row
+#'                               and columns of the matrix will be plotted.}
+#'                         \item{If dendrograms = FALSE: both dendrograms on
+#'                               rows and columns of the matrix will NOT be
+#'                               plotted.}
+#'                         \item{If the vector is of length 2: the first logical
+#'                               will apply for rows, and the second logical
+#'                               will apply for columns.}
+#'                        }
 #' @param p.adjust              A \code{character} specifying what adjustment
 #'                              for multiple tests should be used.\cr
 #'                              (Default: p.adjust = "BH"; Supported:
@@ -407,18 +563,83 @@ ggfusion.free <- function(
 #' @param annot.size            An \code{integer} to increase or decrease the
 #'                              size of the annotation side bar.
 #' @param theme_legend    A ggplot2 \code{theme} to specify any theme parameter
-#'                        you wish to custom on legends
+#'                        you wish to custom on annotations'legends
 #'                        (Default: theme_legend = NULL). For more information
 #'                        about how to define a theme, see
 #'                        \link[ggplot2]{theme}.
-#' @param dendro.size           An \code{integer} to increase or decrease the
-#'                              size of the dendrogram.
+#' @param upper_theme     A ggplot2 \code{theme} to specify any theme parameter
+#'                        you wish to custom the upper triangle of the fusion
+#'                        plot (Default: upper_theme = NULL). For more
+#'                        information about how to define a theme, see
+#'                        \link[ggplot2]{theme}.
+#' @param upper_scale_fill_grad A \code{ScaleContinous} object generated by
+#'                              ggplot2 functions such as
+#'                              \link[ggplot2]{scale_fill_gradient},
+#'                              \link[ggplot2]{scale_fill_gradient2} or
+#'                              \link[ggplot2]{scale_fill_gradientn} to
+#'                              customize the color bar associated to the upper
+#'                              triangle of the fusion plot.
+#' @param upper_guide_custom_bar A \code{guide} object generated by the ggplot2
+#'                               function \link[ggplot2]{guide_colorbar} to
+#'                               custom the appearance of the color bar
+#'                               associated to the upper triangle of the fusion
+#'                               plot.
+#'                               (see also 'upper_scale_fill_grad' option).
+#' @param lower_theme     A ggplot2 \code{theme} to specify any theme parameter
+#'                        you wish to custom the lower triangle of the fusion
+#'                        plot (Default: lower_theme = NULL). For more
+#'                        information about how to define a theme, see
+#'                        \link[ggplot2]{theme}.
+#' @param lower_scale_fill_grad A \code{ScaleContinous} object generated by
+#'                              ggplot2 functions such as
+#'                              \link[ggplot2]{scale_fill_gradient},
+#'                              \link[ggplot2]{scale_fill_gradient2} or
+#'                              \link[ggplot2]{scale_fill_gradientn} to
+#'                              customize the color bar associated to the lower
+#'                              triangle of the fusion plot.
+#' @param lower_guide_custom_bar A \code{guide} object generated by the ggplot2
+#'                               function \link[ggplot2]{guide_colorbar} to
+#'                               custom the appearance of the color bar
+#'                               associated to the lower triangle of the fusion
+#'                               plot.
+#'                               (see also 'lower_scale_fill_grad' option).
+#' @param dend.size       A \code{numeric} vector defining row and column
+#'                        dendrograms size (Default: dend.size = 1).
+#'                        \itemize{
+#'                         \item{If dend.size is a \code{numeric}: the value is
+#'                               used to set both the width of the dendrogram
+#'                               built on rows, and the height of the dendrogram
+#'                               built on columns.}
+#'                         \item{If dend.size is a \code{numeric} vector of
+#'                               length 2: the first numeric will apply to the
+#'                               dendrogram built on rows, and the second
+#'                               numeric will apply to the dendrogram built on
+#'                               columns.}
+#'                        }
 #' @param grid_col              A \code{character} specifying the color of the
 #'                              grid.
 #' @param grid_linewidth        A \code{double} value for the thickness of the
 #'                              grid.
 #' @param diagonal_col          A \code{character} defining the color of cells
 #'                              with of the empty diagonal.
+#' @param lgd.merge       A \code{logical} specifying whether the legends of
+#'                        multiple annotation bars should be merged
+#'                        (lgd.merge = TRUE) or remain separated
+#'                        (lgd.merge = FALSE). lgd.merge is especially useful
+#'                        when you want to map the same color palette to
+#'                        multiple annotations sharing the same values
+#'                        (Default: lgd.merge = FALSE).
+#' @param lgd.ncol        An \code{integer} to override the internal legend
+#'                        layout build, to specify the number of columns on
+#'                        which legends'keys should be displayed
+#'                        (Default: lgd.ncol = NULL).
+#' @param lgd.space.width  A \code{numeric} specifying the width of the legend
+#'                         space (Default: lgd.space.width = 1).
+#' @param lgd.space.height An \code{integer} specifying the height of the legend
+#'                         space (Default: lgd.space.height = 26).
+#' @param verbose         A \code{logical} to display information about the
+#'                        step-by-step processing of the data if TRUE
+#'                        (Default: verbose = FALSE).
 #' @return A \code{gtable} object plotted automatically and a \code{list} of
 #'        results from the 2 comparisons as 2 matrices, with the same gtable
 #'        object:
@@ -512,9 +733,9 @@ ggfusion.corr <- function(
     lower_guide_custom_bar = ggplot2::guide_colorbar(
         barheight = 0.7, barwidth = 10, ticks.linewidth = 0.5,
         ticks.colour = "black", frame.linewidth = 0.5, frame.colour = "black"),
-    plot_title = NULL, grid_col = "white", grid_linewidth = 0.3,
-    diagonal_col = "white", lgd.merge = FALSE, lgd.ncol = NULL,
-    lgd.space.height = 26, lgd.space.width = 1, ncores = 1, verbose = FALSE){
+    grid_col = "white", grid_linewidth = 0.3, diagonal_col = "white",
+    lgd.merge = FALSE, lgd.ncol = NULL, lgd.space.height = 26,
+    lgd.space.width = 1, verbose = FALSE){
     # Fix BiocCheck() complaining about these objects initialization
     # statistic <- NULL
 
@@ -665,8 +886,7 @@ ggfusion.corr <- function(
     } else { stop("'upper.corr' value not supported yet.") }
 
     # Create Fused Plot
-    # fused.res <- BiocompR::ggfusion.free(
-    fused.res <- ggfusion.free(
+    fused.res <- BiocompR::ggfusion.free(
         sample.names = colnames(data), upper.mat = upper.mat,
         lower.mat = lower.mat, order.select = order.select,
         order.method = order.method, hclust.method = hclust.method,
@@ -681,7 +901,7 @@ ggfusion.corr <- function(
         lower_theme = lower_theme,
         lower_scale_fill_grad = lower_scale_fill_grad,
         lower_guide_custom_bar = lower_guide_custom_bar,
-        diagonal_col = diagonal_col, plot_title = plot_title, verbose = verbose)
+        diagonal_col = diagonal_col, verbose = verbose)
     # Return plot and matrices
     return(list("upper.res" = upper.res, "lower.res" = lower.res,
                 "fused.plot" = fused.res))
