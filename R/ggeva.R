@@ -6,7 +6,6 @@
 #' @return A \code{character} containg the value of the eigenvalue variance
 #'         accounted for its associated eigen vector.
 #' @author Yoann Pageaud.
-#' @export
 #' @keywords internal
 
 var.accounted <- function(colname, eigen.values){
@@ -54,9 +53,9 @@ ggeigenvector <- function(
             arrow = grid::arrow(length = grid::unit(0.3, "cm"))) +
         ggplot2::scale_color_manual(values = colors) +
         ggplot2::labs(
-            x = BiocompR::var.accounted(
+            x = BiocompR:::var.accounted(
                 colname = xcol, eigen.values = eigenvalues),
-            y = BiocompR::var.accounted(
+            y = BiocompR:::var.accounted(
                 colname = ycol, eigen.values = eigenvalues)) +
         ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5),
                        axis.title = ggplot2::element_text(size = 13),
@@ -102,9 +101,9 @@ ggeigenvector <- function(
 #' @author Yoann Pageaud.
 #' @export
 
-EVA <- function(data, use = "pairwise", method = "pearson", adjust = "none",
-                var.min = 0.01, groups = as.character(seq(ncol(data))),
-                colors = grDevices::rainbow(n = ncol(data)), label = TRUE){
+ggeva <- function(data, use = "pairwise", method = "pearson", adjust = "none",
+                  var.min = 0.01, groups = as.character(seq(ncol(data))),
+                  colors = grDevices::rainbow(n = ncol(data)), label = TRUE){
     #Compute a correlation test on the data
     M <- psych::corr.test(
         x = data, use = use, method = method, adjust = adjust)$r

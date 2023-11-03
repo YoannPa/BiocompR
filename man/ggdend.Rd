@@ -30,6 +30,27 @@ A \code{gg} plot of the dendrogram.
 \description{
 Creates a dendogram in ggplot2.
 }
+\examples{
+# Create matrix from mtcars dataset
+mat <- as.matrix(t(scale(mtcars)))
+# Compute Pearson's correlation between cars
+corr.res <- psych::corr.test(
+    mat, use = "pairwise", method = "pearson", adjust = "BH")$r
+# Normalize the correlation matrix
+norm.res <- (corr.res-min(corr.res))/(max(corr.res)-min(corr.res))
+# Do a complete hierarchy clustering on the normalized matrix
+hierarchy.clust <- fastcluster::hclust(
+    d = stats::as.dist(1-norm.res), method = "complete")
+# Convert the cluster object into a dendrogram object
+ddgr <- stats::as.dendrogram(hierarchy.clust)
+ddgr_dat <- ggdendro::dendro_data(ddgr)
+# Draw the dendrogram vertically
+ggdend(df = ddgr_dat$segments, orientation = "top")
+# Same horizontally
+ggdend(df = ddgr_dat$segments, orientation = "left")
+# Reverse branches order
+ggdend(df = ddgr_dat$segments, orientation = "left", reverse.x = TRUE)
+}
 \author{
 Yoann Pageaud.
 }

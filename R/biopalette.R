@@ -11,7 +11,7 @@ plot_col <- function(dt){
     dt_pal <- data.table::data.table(
         "Samples" = dt$palettes[[1]], "Groups" = dt$palettes[[1]],
         ".id" = dt$names)
-    basic_pal <- BiocompR::basic.sidebar(
+    basic_pal <- BiocompR::ggsidebar.basic(
         data = dt_pal, palette = dt$palettes[[1]])
     basic_pal <- basic_pal +
         ggplot2::theme(

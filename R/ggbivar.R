@@ -35,18 +35,18 @@
 #' @export
 #' @examples
 #' # Draw a bivar boxplot with a step of 1
-#' bivar.plot(data = iris[, c(1,3)], cat.step = 1)
+#' ggbivar(data = iris[, c(1,3)], cat.step = 1)
 #' # Draw a bivar violin plot with a step of 1
-#' bivar.plot(data = iris[, c(1,3)], cat.step = 1, violin = TRUE)
+#' ggbivar(data = iris[, c(1,3)], cat.step = 1, violin = TRUE)
 #' # Change the filling color of the bivar plot
-#' bivar.plot(data = iris[, c(1,3)], cat.step = 1, fill = "red")
+#' ggbivar(data = iris[, c(1,3)], cat.step = 1, fill = "red")
 #' # Aggregate values above 5
-#' bivar.plot(data = iris[, c(1,3)], cat.step = 1, fill = "red", cat.max = 5)
+#' ggbivar(data = iris[, c(1,3)], cat.step = 1, fill = "red", cat.max = 5)
 #' # Example of customization of axis titles using ggplot2 syntax
-#' bivar.plot(data = iris[, c(1,3)], cat.step = 1, fill = "red", cat.max = 5) +
+#' ggbivar(data = iris[, c(1,3)], cat.step = 1, fill = "red", cat.max = 5) +
 #'   labs(x = "Petal length", y = "Sepal length")
 
-bivar.plot <- function(
+ggbivar <- function(
     data, violin = FALSE, cat.step = 10L, cat.max = 10L, fill = "deepskyblue3"){
     #Fix BiocCheck() complaining about these objects initialization
     category <- NULL

@@ -56,6 +56,33 @@ A \code{gg} object of a basic triangle plot (a 'geom_tile()').
 \description{
 Draws a triangle ggplot for a basic molten triangle matrix.
 }
+\examples{
+# Create matrix from mtcars dataset
+mat <- as.matrix(t(scale(mtcars)))
+# Compute Pearson's correlation between cars
+corr.res <- psych::corr.test(
+    mat, use = "pairwise", method = "pearson", adjust = "BH")$r
+# Order samples following a complete hierarchical clustering
+correlation.order <- corrplot::corrMatOrder(
+    corr = corr.res, order = "hclust", hclust.method = "complete")
+corr.res <- corr.res[correlation.order, correlation.order]
+# Remove duplicated data
+corr.res[upper.tri(corr.res)] <- NA
+# Melt Correlation matrix
+dt.corr <- data.table::as.data.table(x = corr.res, keep.rownames = "Var1")
+molt.corr <- data.table::melt.data.table(
+    data = dt.corr, id.vars = "Var1", variable.name = "Var2", na.rm = TRUE,
+    measure.vars = colnames(dt.corr)[-c(1)])
+molt.corr[, Var1 := as.factor(x = Var1)]
+molt.corr[, Var1 := factor(
+    x = Var1, levels = as.character(unique(molt.corr$Var1)))]
+# Invert order of samples
+molt.corr[, Var2 := factor(x = Var2, levels = rev(levels(Var2)))]
+# Replace identical correlations by NAs
+molt.corr[Var1 == Var2, value := NA]
+# Draw the triangle plot
+ggtriangle(melt_tri = molt.corr)
+}
 \author{
 Yoann Pageaud.
 }

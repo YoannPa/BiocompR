@@ -142,6 +142,26 @@ get.lgd <- function(gg2.obj){
 #' @return A \code{gg} plot of the dendrogram.
 #' @author Yoann Pageaud.
 #' @export
+#' @examples
+#' # Create matrix from mtcars dataset
+#' mat <- as.matrix(t(scale(mtcars)))
+#' # Compute Pearson's correlation between cars
+#' corr.res <- psych::corr.test(
+#'     mat, use = "pairwise", method = "pearson", adjust = "BH")$r
+#' # Normalize the correlation matrix
+#' norm.res <- (corr.res-min(corr.res))/(max(corr.res)-min(corr.res))
+#' # Do a complete hierarchy clustering on the normalized matrix
+#' hierarchy.clust <- fastcluster::hclust(
+#'     d = stats::as.dist(1-norm.res), method = "complete")
+#' # Convert the cluster object into a dendrogram object
+#' ddgr <- stats::as.dendrogram(hierarchy.clust)
+#' ddgr_dat <- ggdendro::dendro_data(ddgr)
+#' # Draw the dendrogram vertically
+#' ggdend(df = ddgr_dat$segments, orientation = "top")
+#' # Same horizontally
+#' ggdend(df = ddgr_dat$segments, orientation = "left")
+#' # Reverse branches order
+#' ggdend(df = ddgr_dat$segments, orientation = "left", reverse.x = TRUE)
 
 ggdend <- function(df, orientation, reverse.x = FALSE, theme_dend = NULL){
     #Fix BiocCheck() complaining about these objects initialization
@@ -240,6 +260,32 @@ ggdend <- function(df, orientation, reverse.x = FALSE, theme_dend = NULL){
 #' @return A \code{gg} object of a basic triangle plot (a 'geom_tile()').
 #' @author Yoann Pageaud.
 #' @export
+#' @examples
+#' # Create matrix from mtcars dataset
+#' mat <- as.matrix(t(scale(mtcars)))
+#' # Compute Pearson's correlation between cars
+#' corr.res <- psych::corr.test(
+#'     mat, use = "pairwise", method = "pearson", adjust = "BH")$r
+#' # Order samples following a complete hierarchical clustering
+#' correlation.order <- corrplot::corrMatOrder(
+#'     corr = corr.res, order = "hclust", hclust.method = "complete")
+#' corr.res <- corr.res[correlation.order, correlation.order]
+#' # Remove duplicated data
+#' corr.res[upper.tri(corr.res)] <- NA
+#' # Melt Correlation matrix
+#' dt.corr <- data.table::as.data.table(x = corr.res, keep.rownames = "Var1")
+#' molt.corr <- data.table::melt.data.table(
+#'     data = dt.corr, id.vars = "Var1", variable.name = "Var2", na.rm = TRUE,
+#'     measure.vars = colnames(dt.corr)[-c(1)])
+#' molt.corr[, Var1 := as.factor(x = Var1)]
+#' molt.corr[, Var1 := factor(
+#'     x = Var1, levels = as.character(unique(molt.corr$Var1)))]
+#' # Invert order of samples
+#' molt.corr[, Var2 := factor(x = Var2, levels = rev(levels(Var2)))]
+#' # Replace identical correlations by NAs
+#' molt.corr[Var1 == Var2, value := NA]
+#' # Draw the triangle plot
+#' ggtriangle(melt_tri = molt.corr)
 
 ggtriangle <- function(
     melt_tri, grid_col = "white", grid_linewidth = 0.3, ggtri_theme = NULL,
@@ -449,7 +495,7 @@ build_legends_layout <- function(
 
 #' Draws a ggplot2 of a basic sidebar.
 #'
-#' @param data      A \code{data.frame} with the column names 'Samples','.id'
+#' @param data      A \code{data.table} with the column names 'Samples','.id'
 #'                  and 'Groups' in this order.
 #' @param palette   A \code{character} vector containing R colors like a
 #'                  palette.
@@ -463,8 +509,37 @@ build_legends_layout <- function(
 #' @author Yoann Pageaud.
 #' @importFrom data.table `:=`
 #' @export
+#' @examples
+#' # Prepare the dataset
+#' dt_cars <- as.data.table(mtcars, keep.rownames = "Samples")
+#' dt_cars <- dt_cars[, c("Samples", "am", "gear", "carb"), ]
+#' dt_cars <- melt.data.table(
+#'     data = dt_cars, id.vars = "Samples", variable.name = ".id",
+#'     value.name = "Groups")
+#' dt_cars[, Groups := paste(Groups, .id)]
+#' # Create palette (length matches number of unique value in column 'Groups')
+#' pal <- rainbow(n = 11)
+#' # Draw the most basic annotation sidebar with 1 annotation only ('am')
+#' ggsidebar.basic(data = dt_cars[.id == "am"], palette = pal)
+#' # Draw an annotation sidebar with multiple annotations
+#' ggsidebar.basic(data = dt_cars, palette = pal)
+#' # Custom the annotation sidebar using ggplot2
+#' ggsidebar.basic(data = dt_cars, palette = pal) +
+#'     scale_y_discrete(expand = c(0,0)) +
+#'     scale_x_discrete(expand = c(0,0)) +
+#'     theme(
+#'         axis.title.y = element_blank(),
+#'         axis.text.x = element_text(angle = -45, hjust = 0, size = 10))
+#' # Separate annotation with a blank space
+#' ggsidebar.basic(data = dt_cars, palette = pal, annot.sep = 0.1)
+#' # Separate samples within annotations by a blank space
+#' ggsidebar.basic(data = dt_cars, palette = pal, annot.cut = 0.3)
+#' # Display legend keys on 2 columns instead of 1
+#' ggsidebar.basic(data = dt_cars, palette = pal, lgd.ncol = 2)
+#' # Specify 1 of the annotation as the facet of the sidebar
+#' ggsidebar.basic(data = dt_cars, palette = pal, facet = "am")
 
-basic.sidebar <- function(
+ggsidebar.basic <- function(
     data, palette, annot.sep = 0, annot.cut = 0, lgd.ncol = 1, facet = NULL){
     #Fix BiocCheck() complaining about these objects initialization
     .id <- NULL
@@ -473,10 +548,12 @@ basic.sidebar <- function(
     Samples <- NULL
     # Set palette if facet is on
     if(!is.null(facet)){
-        dt_levcol <- data.table::data.table(
-            "levels" = levels(data$Groups), "colors" = palette)
-        sublev <- data[.id == facet]$Groups
-        palette <- dt_levcol[!levels %in% levels(droplevels(sublev))]$colors
+        if(is.factor(data$Groups)){
+            dt_levcol <- data.table::data.table(
+                "levels" = levels(data$Groups), "colors" = palette)
+            sublev <- data[.id == facet]$Groups
+            palette <- dt_levcol[!levels %in% levels(droplevels(sublev))]$colors
+        }
     }
     # Create a basic sidebar plot
     basic <- ggplot2::ggplot() +
@@ -492,14 +569,14 @@ basic.sidebar <- function(
         ggplot2::guides(fill = ggplot2::guide_legend(
             ncol = lgd.ncol, byrow = TRUE))
     if(!is.null(facet)){
-        #Add faceting
+        # Add faceting
         dt.facet <- data[.id == facet]
         dt.facet[, `:=`(facet.annot, Groups)]
         data <- merge(
             x = data, y = dt.facet[, c("Samples", "facet.annot"), ],
             by = "Samples", all.x = TRUE)
         data <- data[.id != facet]
-        #Plot annotation bar with facet
+        # Plot annotation bar with facet
         basic <- basic + ggplot2::geom_tile(data = data, mapping = ggplot2::aes(
             x = Samples, y = .id, fill = Groups, height = 1 - annot.sep,
             width = 1 - annot.cut)) +
@@ -576,19 +653,30 @@ basic.sidebar <- function(
 #'                objects.}
 #'         }
 #' @author Yoann Pageaud.
-#' @export plot.col.sidebar
+#' @export ggsidebar.full
 #' @export
+#' @examples
+#' # Draw a default sidebar
+#' annotbar <- ggsidebar.full(
+#'     sample.names = rownames(mtcars),
+#'     annot.grps = list("Carb" = paste(mtcars$carb, "carb")),
+#'     annot.pal = rainbow(n = 6))
+#' # Draw the sidebar and customize it with ggplot2
+#' annotbar$sidebar +
+#'     theme(
+#'         axis.text.x = element_text(angle = 45, hjust = 0),
+#'         plot.margin = margin(0, 3, 0, 0, "cm"))
+#' # Draw the sidebar's first legend
+#' grid::grid.draw(annotbar$legends[[1]])
 
-plot.col.sidebar <- function(
+ggsidebar.full <- function(
     sample.names, annot.grps, annot.pal, annot.pos = "top", annot.sep = 0,
     annot.cut = 0, merge.lgd = FALSE, right = FALSE, lgd.name = "Legends",
-    lgd.ncol = 1, theme_legend = ggplot2::theme(
-        legend.title = ggplot2::element_blank(),
-        legend.text = ggplot2::element_blank()),
+    lgd.ncol = 1, theme_legend = NULL,
     theme_annot = ggplot2::theme(
         axis.text.x = ggplot2::element_text(size = 12),
         axis.text.y = ggplot2::element_text(size = 12)),
-    set.x.title = NULL, set.y.title = NULL, dendro.pos, facet = NULL){
+    set.x.title = NULL, set.y.title = NULL, dendro.pos = "top", facet = NULL){
     # Fix BiocCheck() complaining about these objects initialization
     Grps <- NULL
     Cols <- NULL
@@ -636,7 +724,6 @@ plot.col.sidebar <- function(
         dt_annot[, Samples := factor(x = Samples, levels = sample_order)]
         dt_annot
     })
-
     # Rbind all annotations
     dframe.annot <- data.table::rbindlist(dframe.annot, idcol = TRUE)
     unique_id <- unique(dframe.annot$.id)
@@ -668,8 +755,7 @@ plot.col.sidebar <- function(
         }
     }
     # Plot color sidebars
-    col_sidebar <- BiocompR::basic.sidebar(
-        # col_sidebar <- basic.sidebar(
+    col_sidebar <- BiocompR::ggsidebar.basic(
         data = data.table::copy(dframe.annot), palette = col_table$Cols,
         annot.sep = annot.sep, annot.cut = annot.cut, facet = facet,
         lgd.ncol = lgd.ncol[1])
@@ -740,7 +826,7 @@ plot.col.sidebar <- function(
             # Get all legends separately
             sidebar.lgd <- lapply(
                 X = seq_along(levels(dframe.annot$.id)), FUN = function(i){
-                    BiocompR:::get.lgd(BiocompR::basic.sidebar(
+                    BiocompR:::get.lgd(BiocompR::ggsidebar.basic(
                         data = dframe.annot[.id == levels(dframe.annot$.id)[i]],
                         palette = col_table[.id == i]$Cols,
                         lgd.ncol = lgd.ncol[i]) + theme_legend + ggplot2::labs(

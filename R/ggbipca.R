@@ -593,66 +593,66 @@ ggbipca <- function(
 #' #Get PCA results
 #' pca.res <- prcomp(iris[,-5])
 #' #Draw the simplest cross-biplot:
-#' cross.biplot(prcomp.res = pca.res, data = iris)
+#' ggcross.biplot(prcomp.res = pca.res, data = iris)
 #' #Draw a biplot of PC1 to PC4:
-#' cross.biplot(prcomp.res = pca.res, data = iris, PCs = c(1:4))
+#' ggcross.biplot(prcomp.res = pca.res, data = iris, PCs = c(1:4))
 #' #Change data scale:
-#' cross.biplot(prcomp.res = pca.res, data = iris, scale = 2)
+#' ggcross.biplot(prcomp.res = pca.res, data = iris, scale = 2)
 #' #Change points size:
-#' cross.biplot(prcomp.res = pca.res, data = iris, point.size = 2)
+#' ggcross.biplot(prcomp.res = pca.res, data = iris, point.size = 2)
 #' #Color points following Species:
-#' cross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
+#' ggcross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
 #'              color.data = "Species")
 #' #Change points shape following Species:
 #' # (could use any other categorical / ordinal value if others available)
-#' cross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
+#' ggcross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
 #'              color.data = "Species", shape.data = "Species")
 #' #Map custom colors:
-#' cross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
+#' ggcross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
 #'              color.data = "Species", shape.data = "Species") +
 #'   scale_color_manual(values = c("green", "red", "orange"))
 #' #Map custom point shapes:
-#' cross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
+#' ggcross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
 #'              color.data = "Species", shape.data = "Species") +
 #'   scale_color_manual(values = c("green", "red", "orange")) +
 #'   scale_shape_manual(values = c(83, 8, 25))
 #' #Map custom filling colors:
-#' cross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
+#' ggcross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
 #'              fill.data = "Species", shape.data = "Species") +
 #'   scale_fill_manual(values = c("green", "royalblue", "orange")) +
 #'   scale_shape_manual(values = c(21, 22, 23)) # Needs values between 21 and 25
 #' #Enable custom filling colors and fix point shapes:
-#' cross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
+#' ggcross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
 #'              fill.data = "Species", shape.data = "Species") +
 #'   scale_fill_manual(values = c("green", "royalblue", "orange")) +
 #'   scale_shape_manual(values = rep(21, 3)) # Maps shape N°21 to 3 categories
 #' #Map filling colors, outline colors, and point shapes all together:
-#' cross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
+#' ggcross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
 #'              fill.data = "Species", shape.data = "Species",
 #'              color.data = "Species") +
 #'   scale_fill_manual(values = c("green", "royalblue", "orange")) +
 #'   scale_color_manual(values = c("black", "red", "blue")) +
 #'   scale_shape_manual(values = c(21, 22, 23)) # Needs values between 21 and 25
 #' #Show loadings:
-#' cross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
+#' ggcross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
 #'              color.data = "Species", shape.data = "Species",
 #'              loadings = TRUE) +
 #'   scale_color_manual(values = c("green", "red", "orange")) +
 #'   scale_shape_manual(values = c(83, 8, 25))
 #' #Change loadings color:
-#' cross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
+#' ggcross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
 #'              color.data = "Species", shape.data = "Species", loadings = TRUE,
 #'              loadings.col = "purple") +
 #'   scale_color_manual(values = c("green", "red", "orange")) +
 #'   scale_shape_manual(values = c(83, 8, 25))
 #' #Display the top 1 loading in each quadrant:
-#' cross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
+#' ggcross.biplot(prcomp.res = pca.res, data = iris, point.size = 2,
 #'              color.data = "Species", shape.data = "Species", loadings = TRUE,
 #'              loadings.col = "purple", top.load.by.quad = 1) +
 #'   scale_color_manual(values = c("green", "red", "orange")) +
 #'   scale_shape_manual(values = c(83, 8, 25))
 
-cross.biplot <- function(
+ggcross.biplot <- function(
   prcomp.res, data, PCs = c(1, 2, 3), scale = 1, point.size = 1,
   color.data = NULL, fill.data = NULL, shape.data = NULL, loadings = FALSE,
   loadings.col = "red", top.load.by.quad = NULL){

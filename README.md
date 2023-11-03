@@ -28,6 +28,7 @@ devtools::install_github("YoannPa/BiocompR")
 ```
 
 ## Content
+**⚠️ WARNING: functions' names are outdated! Update coming soon...**
 Currently the package BiocompR contains **39 exported functions**:
 
 * `basic.sidebar()` - Draws a ggplot2 of a basic sidebar.  

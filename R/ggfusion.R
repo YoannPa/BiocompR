@@ -444,7 +444,7 @@ ggfusion.free <- function(
         theme_legend <- theme_default_legend
     } else { theme_legend <- theme_default_legend + theme_legend }
     # Plot Color Sidebar
-    col_sidebar <- BiocompR:::plot.col.sidebar(
+    col_sidebar <- BiocompR:::ggsidebar.full(
         sample.names = sample.names[correlation.order], annot.grps = annot.grps,
         annot.pal = annot.pal, annot.pos = "top", theme_annot = ggplot2::theme(
             axis.ticks.x.top = ggplot2::element_line(color = "black"),
@@ -715,7 +715,7 @@ ggfusion.free <- function(
 
 ggfusion.corr <- function(
     data, upper.corr = "pearson", upper.value = "r", lower.corr = "pearson",
-    lower.value = "p", p.adjust = "BH", na.rm = 'pairwise',
+    lower.value = "p", p.adjust = "BH", na.rm = "pairwise",
     order.method = 'hclust', order.select = 'upper', hclust.method = 'complete',
     dendrograms = FALSE, dend.size = 1,
     annot.grps = list("Groups" = seq(ncol(data))),

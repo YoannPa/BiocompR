@@ -95,12 +95,12 @@ build_asso_plot <- function(
 #' # Compute PCA on mtcars matrix
 #' pcs_mtcars <- prcomp(x = mat_mtcars)
 #' # Plot association tests' results between annotations and PCs
-#' plot_asso_annot_PC(
+#' ggasso.annot_pc(
 #'     annot.table = mtcars_annot, prcomp.res = pcs_mtcars,
 #'     dataset.name = "mtcars", PC.origin = "mpg, disp, hp, drat, wt & qsec",
 #'     verbose = TRUE)
 
-plot_asso_annot_PC <- function(
+ggasso.annot_pc <- function(
     annot.table, prcomp.res, perm.count = 10000, max.PCs = 8, p.treshold = 0.05,
     dataset.name = "dataset", PC.origin = NULL, verbose = FALSE){
     # Compute association tests between annotations and PCs
@@ -140,10 +140,10 @@ plot_asso_annot_PC <- function(
 #' mtcars_annot <- data.table::as.data.table(
 #'     mtcars[, c("cyl", "vs", "am", "gear", "carb")], keep.rownames = "cars")
 #' # Plot association tests' results between all annotations
-#' plot_asso_all_annot(
+#' ggasso.all_annot(
 #'     annot.table = mtcars_annot, cohort.name = "mtcars_annot", verbose = TRUE)
 
-plot_asso_all_annot <- function(
+ggasso.all_annot <- function(
     annot.table, perm.count = 10000, cohort.name = "dataset", verbose = FALSE){
     # Compute association tests between all annotations
     asso_res <- test_asso_all_annot(
