@@ -28,6 +28,10 @@ annotation cells (Default: annot.cut = 0).}
 
 \item{lgd.ncol}{An \code{integer} specifying the number of columns to be
 used to display a legend (Default: lgd.ncol = 1).}
+
+\item{facet}{A \code{character} matching an annotation name in the '.id'
+column of 'data' to be used to split the sidebar in separate
+panels following the annotation.}
 }
 \value{
 A \code{gg} object of the basic sidebar (a 'geom_tile()').

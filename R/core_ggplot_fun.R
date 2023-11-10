@@ -231,7 +231,7 @@ ggdend <- function(df, orientation, reverse.x = FALSE, theme_dend = NULL){
 }
 
 
-#' Draws a triangle ggplot for a basic molten triangle matrix.
+#' Draws a triangle plot from a basic molten triangle matrix.
 #'
 #' @param melt_tri         A \code{data.frame} melted triangle containing a
 #'                         statistical test values.
@@ -373,12 +373,15 @@ map.cat2pal <- function(origin.grps, groups, annot.pal){
 #'                   categories for legends, in their order of input.
 #' @param annot.pal  A \code{list} of character vectors, or a \code{vector} of
 #'                   characters matching valid codes for R colors.
+#' @param facet      A \code{character} matching an annotation name in
+#'                   'annot.grps' to be used to split heatmap in separate panels
+#'                   following the annotation.
 #' @return A \code{data.table} list of categories matching their colors for each
 #'         legend.
 #' @author Yoann Pageaud.
 #' @keywords internal
 
-build.col_table <- function(annot.grps, annot.pal){
+build.col_table <- function(annot.grps, annot.pal, facet = NULL){
     # Create list of groups using levels of annotation groups
     origin.grps <- lapply(X = annot.grps, FUN = levels)
     # origin.grps <- lapply(X = annot.grps, FUN = function(i){
@@ -386,7 +389,7 @@ build.col_table <- function(annot.grps, annot.pal){
     # })
 
     # Update levels following the new order of the annotation
-    groups <- origin.grps
+    # groups <- origin.grps
     # groups <- lapply(X = lapply(X = annot.grps, FUN = function(i){
     #     factor(x = i, levels =  unique(i))}), FUN = levels)
 
@@ -394,13 +397,19 @@ build.col_table <- function(annot.grps, annot.pal){
     if(is.list(annot.pal)){
         # Map categories to palettes
         col_table <- BiocompR:::map.cat2pal(
-            origin.grps = origin.grps, groups = groups, annot.pal = annot.pal)
+            origin.grps = origin.grps, groups = origin.grps,
+            annot.pal = annot.pal)
     } else if(!is.list(annot.pal)){
         col_table <- lapply(X = origin.grps, FUN = function(grp){
             data.table::data.table(
                 "Grps" = grp, "Cols" = annot.pal, stringsAsFactors = FALSE)
         })
     }
+    # Remove facet annotation from the list if any specified
+    if(!is.null(facet)){
+        col_table[[match(facet, names(origin.grps))]] <- NULL
+    }
+    # Return list of color tables
     return(col_table)
 }
 
@@ -481,14 +490,16 @@ build_legends_layout <- function(
             #Empty vectors from the legend previously used
             base::`<<-` (lgd_sizes, lgd_sizes[-lgd_position])
             base::`<<-` (legend_ids, legend_ids[-lgd_position])
-            base::`<<-` (ncol.by.lgd, ncol.by.lgd[-lgd_position])
+            if(is.null(ncol.override)){
+                base::`<<-` (ncol.by.lgd, ncol.by.lgd[-lgd_position])
+            }
             #Return column matrix
             col_mat
         }
     })
-    #Cbind all columns
+    # Cbind all columns
     mlayout <- do.call(cbind, columns)
-    #Return legends layout
+    # Return legends layout
     return(mlayout)
 }
 
@@ -505,6 +516,9 @@ build_legends_layout <- function(
 #'                  annotation cells (Default: annot.cut = 0).
 #' @param lgd.ncol  An \code{integer} specifying the number of columns to be
 #'                  used to display a legend (Default: lgd.ncol = 1).
+#' @param facet     A \code{character} matching an annotation name in the '.id'
+#'                  column of 'data' to be used to split the sidebar in separate
+#'                  panels following the annotation.
 #' @return A \code{gg} object of the basic sidebar (a 'geom_tile()').
 #' @author Yoann Pageaud.
 #' @importFrom data.table `:=`
@@ -646,6 +660,9 @@ ggsidebar.basic <- function(
 #' @param set.y.title  A \code{character}to be used as the title for the Y axis.
 #' @param dendro.pos   A \code{character} specifying the position of the
 #'                     dendrogram (Supported: dendro.pos = c('top', 'left')).
+#' @param facet        A \code{character} matching an annotation name in
+#'                     'annot.grps' to be used to split the sidebar in separate
+#'                     panels following the annotation.
 #' @return A \code{list} of length 2:
 #'         \itemize{
 #'          \item{'sidebar' contains the colored sidebar plot.}

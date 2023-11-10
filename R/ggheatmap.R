@@ -547,7 +547,7 @@ ggheatmap <- function(
     if(!is.null(top.rows)){
         if(is.numeric(top.rows)){
             top.rows <- as.integer(top.rows)
-            if(top.rows <1){
+            if(top.rows < 1){
                 stop("'top.rows' must be a non-zero positive integer.") }
         } else { stop("'top.rows' must be a non-zero positive integer.") }
     }
@@ -640,7 +640,12 @@ ggheatmap <- function(
     if(verbose){ cat("Done.\n") }
 
     # Subset top rows if any value defined
-    if(!is.null(top.rows)){ m <- utils::head(x = m, n = top.rows) }
+    if(!is.null(top.rows)){
+        if(method.rows != 'none' | method.cols != 'none'){
+            m <- m[stats::complete.cases(m), ]
+        }
+        m <- utils::head(x = m, n = top.rows)
+    }
 
     # Remove NAs if some for dendrogram matrix
     if(method.rows != 'none' | method.cols != 'none'){
@@ -727,8 +732,9 @@ ggheatmap <- function(
         m <- m[row_hclust$labels, ]
         # All dendrograms on and all methods specified
         dframe <- m[row.order, column.order, drop = FALSE]
-    } else if(method.rows != 'none' & is.null(rank.fun) &
-              method.cols == 'none'){
+    } else if(method.rows != 'none' & method.cols == 'none'){
+    # } else if(method.rows != 'none' & is.null(rank.fun) &
+    #           method.cols == 'none'){
         # Keep rows selected for the method applied on rows
         m <- m[row_hclust$labels, ]
         # row.dendrogram on, col.dendrogram off, method.row specified
@@ -773,13 +779,16 @@ ggheatmap <- function(
             dt.facet <- data.table::data.table(
                 "variable" = colnames(dt.frame)[-c(1)],
                 "facet.annot" = annot.grps[[facet]])
-            melted_mat <- merge(x = melted_mat, y = dt.facet, by = "variable",
-                                all.x = TRUE, sort = FALSE)
+            melted_mat <- merge(
+                x = melted_mat, y = dt.facet, by = "variable", all.x = TRUE,
+                sort = FALSE)
             # If no factor defined, define some
             if(!is.factor(melted_mat$facet.annot)){
-                melted_mat[, facet.annot := as.factor(facet.annot)]
+                # melted_mat[, facet.annot := as.factor(facet.annot)]
+                # melted_mat[, facet.annot := factor(
+                #     x = facet.annot, levels = sort(levels(facet.annot)))]
                 melted_mat[, facet.annot := factor(
-                    x = facet.annot, levels = sort(levels(facet.annot)))]
+                    x = facet.annot, levels = unique(facet.annot))]
             }
             melted_mat[, variable := as.factor(variable)]
             melted_mat[, variable := factor(x = variable, levels = unique(
@@ -940,9 +949,8 @@ ggheatmap <- function(
         }
         # Set number of columns to display annotations legends
         # Builds color tables for legends.
-        # col_table <- build.col_table(
         col_table <- BiocompR:::build.col_table(
-            annot.grps = annot.grps, annot.pal = annot.pal)
+            annot.grps = annot.grps, annot.pal = annot.pal, facet = facet)
         if(lgd.merge){
             # Rbind list color tables because lgd.merge is TRUE
             col_table <- data.table::rbindlist(col_table, idcol = TRUE)

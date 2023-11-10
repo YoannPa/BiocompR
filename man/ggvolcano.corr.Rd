@@ -3,7 +3,7 @@
 \name{ggvolcano.corr}
 \alias{ggvolcano.corr}
 \title{Plots results of correlation test between a single variable and multiple
-others as volcano plot.}
+others as a volcano plot.}
 \usage{
 ggvolcano.corr(
   data,
@@ -95,7 +95,7 @@ A \code{gg} volcano plot of your correlation test results.
 }
 \description{
 Plots results of correlation test between a single variable and multiple
-others as volcano plot.
+others as a volcano plot.
 }
 \examples{
 # Calculate correlation on mtcars dataset

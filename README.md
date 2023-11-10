@@ -28,39 +28,40 @@ devtools::install_github("YoannPa/BiocompR")
 ```
 
 ## Content
-**⚠️ WARNING: functions' names are outdated! Update coming soon...**
-Currently the package BiocompR contains **39 exported functions**:
+Currently the package BiocompR contains **40 exported functions**:
 
-* `basic.sidebar()` - Draws a ggplot2 of a basic sidebar.  
 * `biopalette()` - A color palette advisor for biology plots.  
-* `bivar.plot()` - Draws boxplots or violins from a variable values against ranges of a 2nd one.  
 * `build_legends_layout()` - Builds legends layout.  
-* `check_fun()` - Checks if a function exists and package of origin.  
-* `cross.biplot()` - Computes and draws biplots for multiple principal components at once.  
-* `EVA()` - Computes eigenvectors, principal component scores and correlations from a correlation test.  
-* `gg2heatmap()` - Creates a custom heatmap with dendrograms and annotations.  
-* `ggbipca()` - Computes and draws a custom PCA biplot.  
+* `check_fun()` - Checks if a function exists and package of origin.
+* `ggasso.all_annot()` - 	Draws association test results between all columns from a data.frame.  
+* `ggasso.annot_pc()` - 	Plots association tests' results between some annotations and some PCs.  
+* `ggbipca()` - 	Computes and draws a custom PCA biplot.  
+* `ggbivar()` - 		Draws boxplots or violins from a variable values against ranges of a 2nd one.  
 * `ggcirclart()` - Circlizes ggplot2 objects.  
-* `ggcoverage()` - Plots an annotated barplot.  
+* `ggcoverage()` - Plots an annotated stacked barplot.  
 * `ggcraviola()` - Draws a craviola plot (half-splitted and percentile-binned violin plot).  
 * `ggdend()` - Creates a dendogram in ggplot2.  
 * `ggdensity_map()` - Plots a density color map from a matrix or a molten data.frame.  
 * `ggeigenvector()` - Creates an eigenvector plot using ggplot2.  
+* `ggeva()` - Computes eigenvectors, PC scores and correlations from a correlation test.  
 * `ggfusion.corr()` - Draws 2 triangle matrices of computed pairwise correlations' results.  
 * `ggfusion.free()` - Draws 2 triangle matrices fused together in a single plot.  
+* `ggheatmap()` - Creates a custom heatmap with dendrograms and annotations.  
 * `gghist()` - Plots an histogram using ggplot2 from a numeric or character vector.  
 * `ggpanel.corr()` - Plots results of correlation test between a single variable and multiple others as jittered scatter plot divided into 4 different panels.  
+* `ggsidebar.basic()` - Draws a ggplot2 of a basic sidebar.  
+* `ggsidebar.full()` - Creates a colored side annotation bars in ggplot2.  
 * `ggstackbar()` - Draws stacked barplots from an annotation table.  
 * `ggsunset()` - Draws a sunset plot showing the completeness of a dataset.  
-* `ggtriangle()` - Draws a triangle ggplot for a basic molten triangle matrix.  
+* `ggtriangle()` - Draws a triangle plot from a basic molten triangle matrix.  
 * `ggvolcano.corr()` - Plots results of correlation test between a single variable and multiple others as volcano plot.  
 * `ggvolcano.free()` - Plots any kind of results with P-values that can be displayed as a volcano plot.  
 * `ggvolcano.test()` - Plots results of a Plots results of statistical tests as volcano plot.  
 * `ks.plot()` - Computes pairwise Kolmogorov-Smirnov tests on a matrix and display results in a fused plot.  
-* `manage.na()` - Keeps, removes or imputes missing values in a matrix or a data.frame based on sample groups.  
-* `plot.col.sidebar()` - Creates a colored side annotation bars in ggplot2.  
-* `plot_asso_all_annot()`	- Draws association test results between all columns from a data.frame.  
-* `plot_asso_annot_PC()` - Plots association tests' results between some annotations and some PCs.  
+* `manage.na()` - Keeps, removes or imputes missing values in a matrix or a data.frame based on sample groups.
+* `pairwise.ks()` - Computes a Kolmogrov-Smirnov test between all columns of a data.frame.  
+* `prepare_annot_asso()` - Prepares annotations to be tested for associations.  
+* `prepare_pca_data()` - Collects and computes needed metrics for PCA biplot.  
 * `raster.gg2grob()` - Rasterize a gg plot into a raster grob.  
 * `raster.ggplot.to.grob()` - Rasterize a gg plot into a raster grob.  
 * `resize.grob.oneway()` - Resizes heights or widths of a grob based on the dimensions of another grob.  

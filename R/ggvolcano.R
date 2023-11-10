@@ -552,7 +552,7 @@ build.ggvolcano <- function(
 
 
 #' Plots results of correlation test between a single variable and multiple
-#' others as volcano plot.
+#' others as a volcano plot.
 #'
 #' @param data         A \code{data.table} with 3 to 5 columns:
 #'                     \itemize{

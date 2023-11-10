@@ -88,6 +88,10 @@ how to define a theme, see \link[ggplot2]{theme}.}
 
 \item{dendro.pos}{A \code{character} specifying the position of the
 dendrogram (Supported: dendro.pos = c('top', 'left')).}
+
+\item{facet}{A \code{character} matching an annotation name in
+'annot.grps' to be used to split the sidebar in separate
+panels following the annotation.}
 }
 \value{
 A \code{list} of length 2:
