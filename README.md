@@ -21,7 +21,12 @@ _I would like to thank every people who contributed to the development of this p
 **2.** [**Klinik für Anästhesiologie und Operative Intensivmedizin, Medizinische Fakultät Mannheim, Universität Heidelberg, Germany.**](https://www.umm.de/klinik-fuer-anaesthesiologie-und-operative-intensivmedizin/)  
 **3.** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
-## Installing BiocompR
+## Linux prerequisites (under Ubuntu & Debian)
+From your terminal install the following libraries (these are devtools and magick packages dependencies):
+```bash
+sudo apt install libfontconfig1-dev libxml2-dev libharfbuzz-dev libfribidi-dev libcurl4-openssl-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev libmagick++-dev
+```
+## Install BiocompR
 In R execute the following command:
 ```R
 devtools::install_github("YoannPa/BiocompR")
