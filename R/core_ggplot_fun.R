@@ -1074,9 +1074,8 @@ heatmap_layout <- function(
             draw = FALSE))
     } else if(!dd.rows & dd.cols & !show.annot){
         main_grob <- R.devices::suppressGraphics(egg::ggarrange(
-            ddgr_seg_col, sidebar, htmp,
-            heights = c(dend.col.size + 2, annot.size, 30), byrow = FALSE,
-            draw = FALSE))
+            ddgr_seg_col, htmp, heights = c(dend.col.size + 2, 30),
+            byrow = FALSE, draw = FALSE))
     }
     # Add annotation legends or not
     if(show.annot){
