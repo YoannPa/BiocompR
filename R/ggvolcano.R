@@ -438,6 +438,8 @@ build.ggvolcano <- function(
     dt.data[, grp := as.factor(grp)]
     dt.data[, grp := factor(grp, levels = levels(grp)[
       order(match(levels(grp), groups))])]
+    # Add a 4th element to ori.cnames to be used as fold change legend title
+    orig.cnames <- c(orig.cnames, "Fold change categories")
   }
   #Create shading conditions
   dt.data[pval > p.cutoff, "P-value" := as.factor(paste0("> ", p.cutoff))]

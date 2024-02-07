@@ -708,7 +708,7 @@ ggsidebar.full <- function(
     if(is.list(annot.pal)){ # If a list of palettes is provided
         # Map categories to palettes
         col_table <- BiocompR:::map.cat2pal(origin.grps, groups, annot.pal)
-    } else if(!is.list(annot.pal)){ #if a single palette is provided
+    } else if(!is.list(annot.pal)){ # If a single palette is provided
         # Map groups to the same palette
         ls.df.grp.pal <- lapply(X = origin.grps, FUN = function(grp){
             data.table::data.table(
