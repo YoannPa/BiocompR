@@ -629,15 +629,15 @@ ggheatmap <- function(
     if(verbose){ cat("Done.\n") }
 
     # Apply ranking function if any function defined
-    if(verbose){ cat("Ranking data by rows...") }
     if(!is.null(rank.fun)){
+        if(verbose){ cat("Ranking data by rows...") }
         # Check the structure of the rank.fun string
         rank.fun <- BiocompR::check_fun(fun = rank.fun, param.name = "rank.fun")
         m <- eval(parse(text = paste0(
             "m[order(apply(m, 1, ", rank.fun,
             ", na.rm = TRUE), decreasing = TRUE), , drop = FALSE]")))
+        if(verbose){ cat("Done.\n") }
     }
-    if(verbose){ cat("Done.\n") }
 
     # Subset top rows if any value defined
     if(!is.null(top.rows)){
@@ -762,6 +762,9 @@ ggheatmap <- function(
         melted_mat <- data.table::merge.data.table(
             x = melted_mat, y = dt.cat, by.x = "rn", by.y = "I", all.x = TRUE)
         # Replace rn values by rows values and remove rows column
+        melted_mat[, rows := as.factor(rows)]
+        melted_mat[, rows := factor(
+            x = rows, levels = unique(melted_mat[order(rn)]$rows))]
         melted_mat[, rn := rows]
         melted_mat <- melted_mat[, -c("rows"), ]
         # Apply split.by.rows option
