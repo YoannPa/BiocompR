@@ -255,9 +255,18 @@
 #' @importFrom data.table `:=` `.I`
 #' @export
 #' @examples
-#' # Create the basic ggheatmap
+#' # Create a basic ggheatmap from a matrix
 #' mat <- as.matrix(t(scale(mtcars)))
 #' res <- ggheatmap(m = mat)
+#' # m can also be a molten data.frame
+#' molten.cars <- melt.data.table(
+#'   data = as.data.table(mat, keep.rownames = TRUE), id.vars = "rn",
+#'   variable.name = "cars")
+#' molten.cars[
+#'   rn %in% c('mpg', 'disp', 'hp', 'drat', 'qsec'), groups := "kinetic"]
+#' molten.cars[
+#'   rn %in% c('cyl', 'wt', 'vs', 'am', 'gear', 'carb'), groups := "mechanic"]
+#' res <- ggheatmap(m = molten.cars)
 #' # Apply Euclidean distance on rows, and Manhattan distance on columns
 #' res <- ggheatmap(m = mat, dist.method = c("euclidean", "manhattan"))
 #' # Rank heatmap rows following their standard deviation
@@ -326,14 +335,7 @@
 #'   facet = "Carb", # Facetting heatmap using annotation 'Carb'
 #'   dendrograms = FALSE, # Hide dendrogram since the facetting is On.
 #'   dist.method = "none") # Disable clustering to let facetting work.
-#' # Splitting on rows following a group annotation
-#' molten.cars <- melt.data.table(
-#'   data = as.data.table(mat, keep.rownames = TRUE), id.vars = "rn",
-#'   variable.name = "cars")
-#' molten.cars[
-#'   rn %in% c('mpg', 'disp', 'hp', 'drat', 'qsec'), groups := "kinetic"]
-#' molten.cars[
-#'   rn %in% c('cyl', 'wt', 'vs', 'am', 'gear', 'carb'), groups := "mechanic"]
+#' # Splitting on rows following a group annotation using the molten data.frame
 #' res <- ggheatmap(
 #'   m = molten.cars, split.by.rows = "groups", # Splitting on rows by 'groups'
 #'   dist.method = c('none', 'euclidean'), # Disable clustering on rows
@@ -341,8 +343,10 @@
 #'   lgd.space.width = 5, # Increase legend space
 #'   theme_heatmap = ggplot2::theme(
 #'     axis.text.y.left = element_text(size = 12), # Show Y labels on the left
-#'     axis.ticks.y.left = element_line(linewidth = 0.5)), # Show Y ticks on left
-#'   theme_legend = ggplot2::theme(legend.justification = c(0.5, 0.5))) # Center legend
+#'     axis.ticks.y.left = element_line(
+#'       linewidth = 0.5)), # Show Y ticks on left
+#'   theme_legend = ggplot2::theme(
+#'     legend.justification = c(0.5, 0.5))) # Center legend
 #' # Custom heatmap cells borders color and width
 #' res <- ggheatmap(m = mat, border.col = "black", border.size = 0.5)
 #' # Custom heatmap cells height and width
