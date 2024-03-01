@@ -843,8 +843,11 @@ ggheatmap <- function(
         theme_heatmap <- theme_default_htmp + theme_heatmap + theme_forced_htmp
     }
     # Update guide_colorbar and force order parameter
-    guide_custom_bar <- BiocompR:::update_guide_colorbar(
-        new_guide = guide_custom_bar, forced_param = list("order" = 1))
+    guide_custom_bar$params$order <- 1
+    # (Replaced to support ggplot2 3.5.0)
+    # guide_custom_bar <- BiocompR:::update_guide_colorbar(
+    #     new_guide = guide_custom_bar, forced_param = list("order" = 1))
+
     # Set heatmap source parameters
     htmp.source <- ggplot2::ggplot() +
         scale_fill_grad +

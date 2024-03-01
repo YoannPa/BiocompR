@@ -61,6 +61,7 @@
 #'                       (Default: verbose = FALSE).
 #' @return A \code{gg} craviola plot.
 #' @author Yoann Pageaud.
+#' @references \href{https://stackoverflow.com/questions/35717353/split-violin-plot-with-ggplot2}{Split violin plot with ggplot2}
 #' @importFrom data.table `:=`
 #' @export
 #' @examples

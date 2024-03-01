@@ -139,6 +139,9 @@ scale_fill_manual(
   labels = c("Control", "Case"), # Rename conditions
   values = biopalette(name = "BiocompR_cond3", mute = TRUE)) # Change colors
 }
+\references{
+\href{https://stackoverflow.com/questions/35717353/split-violin-plot-with-ggplot2}{Split violin plot with ggplot2}
+}
 \author{
 Yoann Pageaud.
 }
