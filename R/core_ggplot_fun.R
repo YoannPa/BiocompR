@@ -780,9 +780,11 @@ ggsidebar.full <- function(
     col_sidebar <- col_sidebar + theme_legend
     # Modify base plot following its position
     if(annot.pos == "top"){
-        theme_annot <- theme_annot + ggplot2::theme(
-            axis.text.x.top = theme_annot$axis.text.x,
-            axis.text.x = ggplot2::element_blank())
+        # Fixes bug appearing after R version 4.2.2 and ggplot2 version 3.5.0
+        # theme_annot <- theme_annot + ggplot2::theme(
+        #     axis.text.x.top = theme_annot$axis.text.x,
+        #     axis.text.x = ggplot2::element_blank()
+        #     )
         col_sidebar <- col_sidebar + theme_annot +
             ggplot2::scale_x_discrete(expand = c(0, 0), position = "top") +
             ggplot2::xlab(set.x.title)
