@@ -586,6 +586,8 @@ ggsidebar.basic <- function(
         # Add faceting
         dt.facet <- data[.id == facet]
         dt.facet[, `:=`(facet.annot, Groups)]
+        # Make sure that rows in dt.facet are unique
+        dt.facet <- unique(dt.facet)
         data <- merge(
             x = data, y = dt.facet[, c("Samples", "facet.annot"), ],
             by = "Samples", all.x = TRUE)
