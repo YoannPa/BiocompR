@@ -442,16 +442,22 @@ build.ggvolcano <- function(
     orig.cnames <- c(orig.cnames, "Fold change categories")
   }
   #Create shading conditions
-  dt.data[pval > p.cutoff, "P-value" := as.factor(paste0("> ", p.cutoff))]
-  dt.data[pval <= p.cutoff, "P-value" := paste0("<= ", p.cutoff)]
+  dt.data[
+      pval > p.cutoff, c("P-value", "pval_alpha") := .(
+          as.factor(paste0("> ", p.cutoff)), 0.1)]
+  dt.data[
+      pval <= p.cutoff, c("P-value", "pval_alpha") := .(
+          paste0("<= ", p.cutoff), 1)]
+  dt.data[, pval_alpha := as.factor(pval_alpha)]
+  dt.data[, pval_alpha := factor(x = pval_alpha, levels = c("0.1", "1"))]
   #Build scatter plot
   ggvol <- ggplot2::ggplot()
-  if(ncol(dt.data) == 6){
+  if(ncol(dt.data) == 7){
     ggvol <- ggvol + ggplot2::geom_point(
       data = dt.data, mapping = ggplot2::aes(
         x = dt.data[[2]], y = -log10(pval), color = grp, size = size,
         alpha = `P-value`))
-  } else if(ncol(dt.data) == 5){
+  } else if(ncol(dt.data) == 6){
     ggvol <- ggvol + ggplot2::geom_point(
       data = dt.data, mapping = ggplot2::aes(
         x = dt.data[[2]], y = -log10(pval), color = grp, alpha = `P-value`))
@@ -460,6 +466,9 @@ build.ggvolcano <- function(
       data = dt.data, mapping = ggplot2::aes(
         x = dt.data[[2]], y = -log10(pval), alpha = `P-value`))
   }
+  dt.data[, pval_alpha := droplevels(pval_alpha)]
+  ggvol <- ggvol + scale_alpha_manual(
+    values = as.numeric(levels(dt.data$pval_alpha)))
   if(x.col.sign){
     #Set X sign color palette
     if(nrow(dt.data[grp == groups[1]]) != 0){
@@ -510,12 +519,12 @@ build.ggvolcano <- function(
     ggvol <- ggvol + ggrepel::geom_label_repel(
       data = dt.label, mapping = ggplot2::aes(
         x = dt.label[[2]], y = -log10(pval), label = labels, color = grp),
-      size = 4.5, max.overlaps = Inf)
+      size = 4.5, max.overlaps = Inf, show.legend = FALSE)
   } else if(ncol(dt.data) == 4){
     ggvol <- ggvol + ggrepel::geom_label_repel(
       data = dt.label, mapping = ggplot2::aes(
         x = dt.label[[2]], y = -log10(pval), label = labels),
-      size = 4.5, max.overlaps = Inf)
+      size = 4.5, max.overlaps = Inf, show.legend = FALSE)
   }
   #Create P-value label
   ggvol <- ggvol + ggrepel::geom_label_repel(
