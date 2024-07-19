@@ -20,39 +20,39 @@
 #' @keywords internal
 
 chk.dt <- function(data, data.type){
-  #Check col2
-  if(is.numeric(data[[2]])){
+    #Check col2
+    if(is.numeric(data[[2]])){
+        if(data.type == "corr"){
+            if(any(data[, 2] < -1) | any(data[, 2] > 1)){
+                stop(
+                    "Correlation values in column 2 must be comprised between -1 and 1.")
+            }
+        }
+    } else { stop("Column 2 type must be numeric.") }
+    #Check col3
+    if(is.numeric(data[[3]])){
+        if(any(data[, 3] < 0) | any(data[, 3] > 1)){
+            stop("P-values in column 3 must be comprised between 0 and 1.")}
+    } else { stop("Column 3 type must be numeric.") }
+    #Check data.type and select appropriate colnames
     if(data.type == "corr"){
-      if(any(data[, 2] < -1) | any(data[, 2] > 1)){
-        stop(
-          "Correlation values in column 2 must be comprised between -1 and 1.")
-      }
+        vec.colnames <- c("labels", "corr", "pval", "grp", "size")
+    } else if(data.type == "t.test"){
+        vec.colnames <- c("labels", "fold", "pval", "grp", "size")
+    } else if(data.type == "free"){
+        vec.colnames <- c("labels", "xval", "pval", "grp", "size")
     }
-  } else { stop("Column 2 type must be numeric.") }
-  #Check col3
-  if(is.numeric(data[[3]])){
-    if(any(data[, 3] < 0) | any(data[, 3] > 1)){
-      stop("P-values in column 3 must be comprised between 0 and 1.")}
-  } else { stop("Column 3 type must be numeric.") }
-  #Check data.type and select appropriate colnames
-  if(data.type == "corr"){
-    vec.colnames <- c("labels", "corr", "pval", "grp", "size")
-  } else if(data.type == "t.test"){
-    vec.colnames <- c("labels", "fold", "pval", "grp", "size")
-  } else if(data.type == "free"){
-    vec.colnames <- c("labels", "xval", "pval", "grp", "size")
-  }
-  #Check ncol(data) and change column names
-  if(ncol(data) < 3){ stop("Data should contain at least 3 columns.")
-  } else if(ncol(data) == 3){ colnames(data) <- vec.colnames[seq(3)]
-  } else if(ncol(data) == 4){ colnames(data) <- vec.colnames[seq(4)]
-  } else if(ncol(data) == 5){
-    if(!is.numeric(data[[5]])){ stop("Column 5 type must be numeric.") }
-    colnames(data) <- vec.colnames[seq(5)]
-  } else if (ncol(data) > 5){
-    stop("Too many columns. ncol(data) must be <= 5.")
-  }
-  return(data)
+    #Check ncol(data) and change column names
+    if(ncol(data) < 3){ stop("Data should contain at least 3 columns.")
+    } else if(ncol(data) == 3){ colnames(data) <- vec.colnames[seq(3)]
+    } else if(ncol(data) == 4){ colnames(data) <- vec.colnames[seq(4)]
+    } else if(ncol(data) == 5){
+        if(!is.numeric(data[[5]])){ stop("Column 5 type must be numeric.") }
+        colnames(data) <- vec.colnames[seq(5)]
+    } else if (ncol(data) > 5){
+        stop("Too many columns. ncol(data) must be <= 5.")
+    }
+    return(data)
 }
 
 
@@ -62,9 +62,10 @@ chk.dt <- function(data, data.type){
 #' @param cutoff    A \code{numeric} vector of 1 or 2 values, to be used as a
 #'                  cut-off on Y-axis values (Default: cutoff = 0).
 #'                  \itemize{
-#'                   \item{If 1 value is given, it will be defined as the
-#'                   minimum cut-off on absolute Y-axis values
-#'                   (positive and negative ones).}
+#'                   \item{If 1 negative value is given, it will be defined as
+#'                   the maximum cut-off on negative Y-axis values.}
+#'                   \item{If 1 positive value is given, it will be defined as
+#'                   the minimum cut-off on positive Y-axis values.}
 #'                   \item{If 2 values are given: The smallest one will be used
 #'                   as a maximum cut-off on negative Y-axis values. The biggest
 #'                   one will be used as a minimum cut-off on positive Y-axis
@@ -80,32 +81,47 @@ chk.dt <- function(data, data.type){
 #' @keywords internal
 
 chk.cutoff <- function(cutoff = NULL, data.type){
-  #Assign cutoff values
-  if(is.null(cutoff)){
-    neg.cutoff <- -Inf
-    pos.cutoff <- Inf
-  } else {
-    if(length(cutoff) == 2){
-      neg.cutoff <- min(cutoff)
-      pos.cutoff <- max(cutoff)
-    } else if(length(cutoff) == 1){
-      neg.cutoff<- -cutoff
-      pos.cutoff<- cutoff
-    } else { stop("'cutoff' must be either of length 1 or 2.") }
-    #Check cutoff values
-    if(data.type == "corr"){
-      if(!(-1 <= neg.cutoff & neg.cutoff <= 0)){
-        stop("min(cutoff) must be comprised between -1 and 0.")
-      }
-      if(!(0 <= pos.cutoff & pos.cutoff <= 1)){
-        stop("max(cutoff) must be comprised between 0 and 1.")
-      }
-    } else if(data.type %in% c("t.test", "free")){
-      if(!(neg.cutoff <= 0)){ stop("min(cutoff) must be inferior to 0.") }
-      if(!(pos.cutoff >= 0)){ stop("max(cutoff) must be superior to 0.") }
+    # Assign cutoff values
+    if(is.null(cutoff)){
+        neg.cutoff <- -Inf
+        pos.cutoff <- Inf
+    } else {
+        if(length(cutoff) == 2){
+            neg.cutoff <- min(cutoff)
+            pos.cutoff <- max(cutoff)
+        } else if(length(cutoff) == 1){
+            if(sign(cutoff) == 1){
+                pos.cutoff<- cutoff
+                neg.cutoff<- NULL
+            } else if(sign(cutoff) == -1){
+                pos.cutoff<- NULL
+                neg.cutoff<- cutoff
+            } else if(sign(cutoff) == 0){
+                pos.cutoff <- 0
+                neg.cutoff <- NULL
+            }
+            # neg.cutoff<- -cutoff
+            # pos.cutoff<- cutoff
+        } else { stop("'cutoff' must be either of length 1 or 2.") }
+        # Check cutoff values
+        if(data.type == "corr"){
+            if(!(all(cutoff <= 1) & all(cutoff >= -1))){
+                stop("cutoff must be comprised between -1 and 1.")
+            }
+            # if(!(-1 <= neg.cutoff & neg.cutoff <= 0)){
+            #   stop("min(cutoff) must be comprised between -1 and 0.")
+            # }
+            # if(!(0 <= pos.cutoff & pos.cutoff <= 1)){
+            #   stop("max(cutoff) must be comprised between 0 and 1.")
+            # }
+        } else if(data.type %in% c("t.test", "free")){
+            if(is.null(neg.cutoff)){ neg.cutoff <- -Inf }
+            if(is.null(pos.cutoff)){ pos.cutoff <- Inf }
+            if(!(neg.cutoff <= 0)){ stop("min(cutoff) must be inferior to 0.") }
+            if(!(pos.cutoff >= 0)){ stop("max(cutoff) must be superior to 0.") }
+        }
     }
-  }
-  return(c("negative.cutoff" = neg.cutoff, "positive.cutoff" = pos.cutoff))
+    return(c("negative.cutoff" = neg.cutoff, "positive.cutoff" = pos.cutoff))
 }
 
 
@@ -152,18 +168,18 @@ chk.cutoff <- function(cutoff = NULL, data.type){
 #' @keywords internal
 
 chk.param <- function(data, data.type, label.cutoff){
-  #Get colnames
-  orig.cnames <- colnames(data)
-  #Convert as a data.table
-  if(!data.table::is.data.table(data)){
-    data <- data.table::as.data.table(data)
-  }
-  #Check & format data.table
-  data <- BiocompR:::chk.dt(data = data, data.type = data.type)
-  #Check label.cutoff values
-  cutoff.values <- BiocompR:::chk.cutoff(
-    cutoff = label.cutoff, data.type = data.type)
-  return(list(orig.cnames, data, cutoff.values))
+    #Get colnames
+    orig.cnames <- colnames(data)
+    #Convert as a data.table
+    if(!data.table::is.data.table(data)){
+        data <- data.table::as.data.table(data)
+    }
+    #Check & format data.table
+    data <- BiocompR:::chk.dt(data = data, data.type = data.type)
+    #Check label.cutoff values
+    cutoff.values <- BiocompR:::chk.cutoff(
+        cutoff = label.cutoff, data.type = data.type)
+    return(list(orig.cnames, data, cutoff.values))
 }
 
 
@@ -218,71 +234,71 @@ chk.param <- function(data, data.type, label.cutoff){
 #' @export
 
 ggpanel.corr <- function(
-  data, p.cutoff = 0.01, label.cutoff = NULL, jitter.height = 0.4){
-  #Fix BiocCheck() complaining about these objects initialization
-  corr <- NULL
-  P.value <- NULL
-  grp <- NULL
-  size <- NULL
-  #Check test parameters
-  res.param <- BiocompR:::chk.param(
-    data = data, data.type = "corr", label.cutoff = label.cutoff)
-  orig.cnames <- res.param[[1]]
-  data <- res.param[[2]]
-  cutoff.values <- res.param[[3]]
+    data, p.cutoff = 0.01, label.cutoff = NULL, jitter.height = 0.4){
+    #Fix BiocCheck() complaining about these objects initialization
+    corr <- NULL
+    P.value <- NULL
+    grp <- NULL
+    size <- NULL
+    #Check test parameters
+    res.param <- BiocompR:::chk.param(
+        data = data, data.type = "corr", label.cutoff = label.cutoff)
+    orig.cnames <- res.param[[1]]
+    data <- res.param[[2]]
+    cutoff.values <- res.param[[3]]
 
-  #Define P-value intervals
-  data$P.value <- cut(
-    x = data$pval, breaks = c(min(data$pval), p.cutoff, max(data$pval)),
-    labels = c(paste0("<= ", p.cutoff,":\n[ ", formatC(
-      x = min(data$pval), format = "e", digits = 2), ", ", p.cutoff, " ]"),
-      paste0("> ", p.cutoff, ":\n] ",p.cutoff,", ",
-             formatC(x = max(data$pval), format = "e", digits = 2), " ]")),
-    include.lowest = TRUE)
-  #Define correlation value intervals
-  data$cor.cat <- cut(x = data$corr, breaks = c(-Inf, 0, +Inf),
-                      labels = c("Negative Correlation","Positive Correlation"))
-  #Remove labels out of cut-offs
-  data[!(corr >= cutoff.values[2] | corr <= cutoff.values[1]), labels := ""]
-  #Seed position for using geom_label_repel() with geom_jitter().
-  pos <- ggplot2::position_jitter(seed = 1, height = jitter.height)
-  #Plot Spearman correlation results
-  if(ncol(data) == 5){
-    ggpan <- ggplot2::ggplot(
-      data = data, mapping = ggplot2::aes(
-        x = corr, y = P.value, label = labels))
-  } else if(ncol(data) == 6){
-    ggpan <- ggplot2::ggplot(data = data, mapping = ggplot2::aes(
-      x = corr, y = P.value, label = labels, color = grp))
-  } else{
-    ggpan <- ggplot2::ggplot(data = data, mapping = ggplot2::aes(
-      x = corr, y = P.value, label = labels, color = grp, size = size))
-  }
-  ggpan <- ggpan +
-    ggplot2::geom_jitter(position = pos) +
-    ggplot2::facet_grid(
-      P.value ~ cor.cat, scales = "free", space = "free", switch = "y") +
-    ggrepel::geom_label_repel(position = pos, size = 4) +
-    ggplot2::theme(
-      axis.ticks.x = ggplot2::element_blank(),
-      panel.background = ggplot2::element_blank(),
-      panel.grid.major.x = ggplot2::element_line(colour = "grey"),
-      panel.border = ggplot2::element_rect(
-        color = "black", fill = NA, size = 1),
-      axis.title = ggplot2::element_text(size = 13),
-      axis.text.x = ggplot2::element_text(size = 12),
-      axis.text.y = ggplot2::element_blank(),
-      axis.ticks.y = ggplot2::element_blank(),
-      plot.title = ggplot2::element_text(hjust = 0.5, size = 15),
-      legend.title = ggplot2::element_text(size = 13),
-      legend.text = ggplot2::element_text(size = 12),
-      strip.text = ggplot2::element_text(size = 12),
-      strip.background = ggplot2::element_rect(
-        fill = NA, colour = 'black', size = 1),
-      legend.key = ggplot2::element_blank()) +
-    ggplot2::labs(
-      x = orig.cnames[2], color = orig.cnames[4], size = orig.cnames[5])
-  return(ggpan)
+    #Define P-value intervals
+    data$P.value <- cut(
+        x = data$pval, breaks = c(min(data$pval), p.cutoff, max(data$pval)),
+        labels = c(paste0("<= ", p.cutoff,":\n[ ", formatC(
+            x = min(data$pval), format = "e", digits = 2), ", ", p.cutoff, " ]"),
+            paste0("> ", p.cutoff, ":\n] ",p.cutoff,", ",
+                   formatC(x = max(data$pval), format = "e", digits = 2), " ]")),
+        include.lowest = TRUE)
+    #Define correlation value intervals
+    data$cor.cat <- cut(x = data$corr, breaks = c(-Inf, 0, +Inf),
+                        labels = c("Negative Correlation","Positive Correlation"))
+    #Remove labels out of cut-offs
+    data[!(corr >= cutoff.values[2] | corr <= cutoff.values[1]), labels := ""]
+    #Seed position for using geom_label_repel() with geom_jitter().
+    pos <- ggplot2::position_jitter(seed = 1, height = jitter.height)
+    #Plot Spearman correlation results
+    if(ncol(data) == 5){
+        ggpan <- ggplot2::ggplot(
+            data = data, mapping = ggplot2::aes(
+                x = corr, y = P.value, label = labels))
+    } else if(ncol(data) == 6){
+        ggpan <- ggplot2::ggplot(data = data, mapping = ggplot2::aes(
+            x = corr, y = P.value, label = labels, color = grp))
+    } else{
+        ggpan <- ggplot2::ggplot(data = data, mapping = ggplot2::aes(
+            x = corr, y = P.value, label = labels, color = grp, size = size))
+    }
+    ggpan <- ggpan +
+        ggplot2::geom_jitter(position = pos) +
+        ggplot2::facet_grid(
+            P.value ~ cor.cat, scales = "free", space = "free", switch = "y") +
+        ggrepel::geom_label_repel(position = pos, size = 4) +
+        ggplot2::theme(
+            axis.ticks.x = ggplot2::element_blank(),
+            panel.background = ggplot2::element_blank(),
+            panel.grid.major.x = ggplot2::element_line(colour = "grey"),
+            panel.border = ggplot2::element_rect(
+                color = "black", fill = NA, size = 1),
+            axis.title = ggplot2::element_text(size = 13),
+            axis.text.x = ggplot2::element_text(size = 12),
+            axis.text.y = ggplot2::element_blank(),
+            axis.ticks.y = ggplot2::element_blank(),
+            plot.title = ggplot2::element_text(hjust = 0.5, size = 15),
+            legend.title = ggplot2::element_text(size = 13),
+            legend.text = ggplot2::element_text(size = 12),
+            strip.text = ggplot2::element_text(size = 12),
+            strip.background = ggplot2::element_rect(
+                fill = NA, colour = 'black', size = 1),
+            legend.key = ggplot2::element_blank()) +
+        ggplot2::labs(
+            x = orig.cnames[2], color = orig.cnames[4], size = orig.cnames[5])
+    return(ggpan)
 }
 
 
@@ -324,9 +340,10 @@ ggpanel.corr <- function(
 #' @param x.cutoff       A \code{numeric} vector of 1 or 2 values, to be used as
 #'                       a cut-off on Y-axis values (Default: x.cutoff = NULL).
 #'                       \itemize{
-#'                        \item{If 1 value is given, it will be defined as the
-#'                        minimum cut-off on absolute Y-axis values
-#'                        (positive and negative ones).}
+#'                        \item{If 1 negative value is given, it will be defined
+#'                        as the maximum cut-off on negative Y-axis values.}
+#'                        \item{If 1 positive value is given, it will be defined
+#'                        as the minimum cut-off on positive Y-axis values.}
 #'                        \item{If 2 values are given: The smallest one will be
 #'                        used as a maximum cut-off on negative Y-axis values.
 #'                        The biggest one will be used as a minimum cut-off on
@@ -363,202 +380,281 @@ ggpanel.corr <- function(
 #' @keywords internal
 
 build.ggvolcano <- function(
-  data, data.type, label.cutoff = NULL, p.cutoff = 0.01, x.cutoff = NULL,
-  title.x.cutoff = "X-Axis cutoff", x.col.sign = FALSE, force.label = NULL){
-  #Fix BiocCheck() complaining about these objects initialization
-  corr <- NULL
-  grp <- NULL
-  fold <- NULL
-  xval <- NULL
-  pval <- NULL
-  size <- NULL
-  `P-value` <- NULL
-  #Make a copy of the data.table to work on
-  dt.data <- data.table::as.data.table(data)
-  #Check test parameters
-  res.param <- BiocompR:::chk.param(
-    data = dt.data, data.type = data.type, label.cutoff = label.cutoff)
-  orig.cnames <- res.param[[1]]
-  dt.data <- res.param[[2]]
-  cutoff.values <- res.param[[3]]
-  #Check x.cutoff values
-  if(!is.null(x.cutoff)){
-    x.cutoff.values <- BiocompR:::chk.cutoff(
-      cutoff = x.cutoff, data.type = data.type)
-  }
-  #If x.col.sign TRUE add grp color to data
-  if(x.col.sign){
-    if(data.type == "corr"){
-      groups <- c("Negatively correlated", "Insufficiently correlated",
-                  "Positively correlated")
-      # Assign groups
-      if(!is.null(x.cutoff)){
-        dt.data[corr <= x.cutoff.values[1], grp := groups[1]]
-        dt.data[corr >= x.cutoff.values[2], grp := groups[3]]
-        dt.data[
-          corr > x.cutoff.values[1] & corr < x.cutoff.values[2],
-          grp := groups[2]]
-      } else {
-        dt.data[corr < 0, grp := groups[1]]
-        dt.data[corr > 0, grp := groups[3]]
-        dt.data[corr == 0, grp := groups[2]]
-      }
-    } else if(data.type == "t.test"){
-      groups <- c(
-        "Negative log2(Fold change)", "Insufficient log2(Fold change)",
-        "Positive log2(Fold change)")
-      # Assign groups
-      if(!is.null(x.cutoff)){
-        dt.data[fold <= x.cutoff.values[1], grp := groups[1]]
-        dt.data[fold >= x.cutoff.values[2], grp := groups[3]]
-        dt.data[
-          fold > x.cutoff.values[1] & fold < x.cutoff.values[2],
-          grp := groups[2]]
-      } else {
-        dt.data[fold < 0, grp := groups[1]]
-        dt.data[fold > 0, grp := groups[3]]
-        dt.data[fold == 0, grp := groups[2]]
-      }
-    } else if(data.type == "free"){
-      groups <- c("Negatively associated", "Insufficiently associated",
-                  "Positively associated")
-      # Assign groups
-      if(!is.null(x.cutoff)){
-        dt.data[xval <= x.cutoff.values[1], grp := groups[1]]
-        dt.data[xval >= x.cutoff.values[2], grp := groups[3]]
-        dt.data[
-          xval > x.cutoff.values[1] & xval < x.cutoff.values[2],
-          grp := groups[2]]
-      } else {
-        dt.data[xval < 0, grp := groups[1]]
-        dt.data[xval > 0, grp := groups[3]]
-        dt.data[xval == 0, grp := groups[2]]
-      }
+    data, data.type, label.cutoff = NULL, p.cutoff = 0.01, x.cutoff = NULL,
+    title.x.cutoff = "X-Axis cutoff", x.col.sign = FALSE, force.label = NULL){
+    # Fix BiocCheck() complaining about these objects initialization
+    corr <- NULL
+    grp <- NULL
+    fold <- NULL
+    xval <- NULL
+    pval <- NULL
+    size <- NULL
+    `P-value` <- NULL
+    # Make a copy of the data.table to work on
+    dt.data <- data.table::as.data.table(data)
+    # Check test parameters
+    res.param <- BiocompR:::chk.param(
+        data = dt.data, data.type = data.type, label.cutoff = label.cutoff)
+    orig.cnames <- res.param[[1]]
+    dt.data <- res.param[[2]]
+    cutoff.values <- res.param[[3]]
+    # Check x.cutoff values
+    if(!is.null(x.cutoff)){
+        x.cutoff.values <- BiocompR:::chk.cutoff(
+            cutoff = x.cutoff, data.type = data.type)
     }
-    dt.data[, grp := as.factor(grp)]
-    dt.data[, grp := factor(grp, levels = levels(grp)[
-      order(match(levels(grp), groups))])]
-    # Add a 4th element to ori.cnames to be used as fold change legend title
-    orig.cnames <- c(orig.cnames, "Fold change categories")
-  }
-  #Create shading conditions
-  dt.data[
-      pval > p.cutoff, c("P-value", "pval_alpha") := .(
-          as.factor(paste0("> ", p.cutoff)), 0.1)]
-  dt.data[
-      pval <= p.cutoff, c("P-value", "pval_alpha") := .(
-          paste0("<= ", p.cutoff), 1)]
-  dt.data[, pval_alpha := as.factor(pval_alpha)]
-  dt.data[, pval_alpha := factor(x = pval_alpha, levels = c("0.1", "1"))]
-  #Build scatter plot
-  ggvol <- ggplot2::ggplot()
-  if(ncol(dt.data) == 7){
-    ggvol <- ggvol + ggplot2::geom_point(
-      data = dt.data, mapping = ggplot2::aes(
-        x = dt.data[[2]], y = -log10(pval), color = grp, size = size,
-        alpha = `P-value`))
-  } else if(ncol(dt.data) == 6){
-    ggvol <- ggvol + ggplot2::geom_point(
-      data = dt.data, mapping = ggplot2::aes(
-        x = dt.data[[2]], y = -log10(pval), color = grp, alpha = `P-value`))
-  } else {
-    ggvol <- ggvol + ggplot2::geom_point(
-      data = dt.data, mapping = ggplot2::aes(
-        x = dt.data[[2]], y = -log10(pval), alpha = `P-value`))
-  }
-  dt.data[, pval_alpha := droplevels(pval_alpha)]
-  ggvol <- ggvol + scale_alpha_manual(
-    values = as.numeric(levels(dt.data$pval_alpha)))
-  if(x.col.sign){
-    #Set X sign color palette
-    if(nrow(dt.data[grp == groups[1]]) != 0){
-      col.neg <- "darkblue" } else { col.neg <- NULL }
-    if(nrow(dt.data[grp == groups[2]]) != 0){
-      col.neutral <- "grey" } else { col.neutral <- NULL }
-    if(nrow(dt.data[grp == groups[3]]) != 0){
-      col.pos <- "darkred" } else { col.pos <- NULL }
-    xsign_palette <- c(col.neg, col.neutral, col.pos)
-    ggvol <- ggvol + ggplot2::scale_color_manual(values = xsign_palette)
-  }
-  #Make p-value cut-off
-  ggvol <- ggvol + ggplot2::geom_hline(
-    yintercept = -log10(p.cutoff), color = 'black')
-  #Make Y-Axis cut-off
-  if(!is.null(x.cutoff)){
-    #Make negative and positive cut-off
-    ggvol <- ggvol +
-      ggplot2::geom_vline(xintercept = x.cutoff.values[1], color = 'darkblue') +
-      ggplot2::geom_vline(xintercept = x.cutoff.values[2], color = 'darkred')
-  }
-  #Create labels table
-  if(is.null(force.label)){
-    if(data.type == "corr"){
-      dt.label <- dt.data[(corr >= cutoff.values[2] | corr <= cutoff.values[1]) &
-                         pval <= p.cutoff]
-    } else if(data.type == "t.test"){
-      dt.label <- dt.data[(fold >= cutoff.values[2] | fold <= cutoff.values[1]) &
-                         pval <= p.cutoff]
-    } else if(data.type == "free"){
-      dt.label <- dt.data[(xval >= cutoff.values[2] | xval <= cutoff.values[1]) &
-                         pval <= p.cutoff]
-    } else { stop("Unsupported 'data.type'.") }
-  } else {
-    #Keep only some labels of interest
-    if(all(force.label %in% dt.data[["labels"]])){
-      #Override label display to force labeling of specific data
-      dt.label <- dt.data[labels %in% force.label]
+    # If x.col.sign TRUE add grp color to data
+    if(x.col.sign){
+        if(data.type == "corr"){
+            groups <- c("Negatively correlated", "Insufficiently correlated",
+                        "Positively correlated")
+            # Assign groups
+            if(!is.null(x.cutoff)){
+                if(is.na(x.cutoff.values["negative.cutoff"])){
+                    x.cutoff.values["negative.cutoff"] <- 0
+                }
+                if(is.na(x.cutoff.values["positive.cutoff"])){
+                    x.cutoff.values["positive.cutoff"] <- 0
+                }
+                dt.data[corr < x.cutoff.values[
+                    "negative.cutoff"], grp := groups[1]]
+                dt.data[corr > x.cutoff.values[
+                    "positive.cutoff"], grp := groups[3]]
+                dt.data[
+                    corr >= x.cutoff.values ["negative.cutoff"] &
+                        corr <= x.cutoff.values["positive.cutoff"],
+                    grp := groups[2]]
+            } else {
+                dt.data[corr < 0, grp := groups[1]]
+                dt.data[corr > 0, grp := groups[3]]
+                dt.data[corr == 0, grp := groups[2]]
+            }
+        } else if(data.type == "t.test"){
+            groups <- c(
+                "Negative log2(Fold change)", "Insufficient log2(Fold change)",
+                "Positive log2(Fold change)")
+            # Assign groups
+            if(!is.null(x.cutoff)){
+                if(is.na(x.cutoff.values["negative.cutoff"])){
+                    x.cutoff.values["negative.cutoff"] <- 0
+                }
+                if(is.na(x.cutoff.values["positive.cutoff"])){
+                    x.cutoff.values["positive.cutoff"] <- 0
+                }
+                dt.data[fold < x.cutoff.values[
+                    "negative.cutoff"], grp := groups[1]]
+                dt.data[fold > x.cutoff.values[
+                    "positive.cutoff"], grp := groups[3]]
+                dt.data[
+                    fold >= x.cutoff.values["negative.cutoff"] &
+                        fold <= x.cutoff.values["positive.cutoff"],
+                    grp := groups[2]]
+            } else {
+                dt.data[fold < 0, grp := groups[1]]
+                dt.data[fold > 0, grp := groups[3]]
+                dt.data[fold == 0, grp := groups[2]]
+            }
+        } else if(data.type == "free"){
+            groups <- c("Negatively associated", "Insufficiently associated",
+                        "Positively associated")
+            # Assign groups
+            if(!is.null(x.cutoff)){
+                if(is.na(x.cutoff.values["negative.cutoff"])){
+                    x.cutoff.values["negative.cutoff"] <- 0
+                }
+                if(is.na(x.cutoff.values["positive.cutoff"])){
+                    x.cutoff.values["positive.cutoff"] <- 0
+                }
+                dt.data[xval < x.cutoff.values[
+                    "negative.cutoff"], grp := groups[1]]
+                dt.data[xval > x.cutoff.values[
+                    "positive.cutoff"], grp := groups[3]]
+                dt.data[
+                    xval >= x.cutoff.values["negative.cutoff"] &
+                        xval <= x.cutoff.values["positive.cutoff"],
+                    grp := groups[2]]
+            } else {
+                dt.data[xval < 0, grp := groups[1]]
+                dt.data[xval > 0, grp := groups[3]]
+                dt.data[xval == 0, grp := groups[2]]
+            }
+        }
+        dt.data[, grp := as.factor(grp)]
+        dt.data[, grp := factor(grp, levels = levels(grp)[
+            order(match(levels(grp), groups))])]
+        # Add a 4th element to ori.cnames to be used as fold change legend title
+        orig.cnames <- c(orig.cnames, "Fold change categories")
+    }
+    # Create shading conditions
+    dt.data[
+        pval > p.cutoff, c("P-value", "pval_alpha") := .(
+            as.factor(paste0("> ", p.cutoff)), 0.3)]
+    dt.data[
+        pval <= p.cutoff, c("P-value", "pval_alpha") := .(
+            paste0("<= ", p.cutoff), 1)]
+    dt.data[, pval_alpha := as.factor(pval_alpha)]
+    dt.data[, pval_alpha := factor(x = pval_alpha, levels = c("0.3", "1"))]
+    # Build scatter plot
+    ggvol <- ggplot2::ggplot()
+    if(ncol(dt.data) == 7){
+        ggvol <- ggvol + ggplot2::geom_point(
+            data = dt.data, mapping = ggplot2::aes(
+                x = dt.data[[2]], y = -log10(pval), color = grp, size = size,
+                alpha = `P-value`))
+    } else if(ncol(dt.data) == 6){
+        ggvol <- ggvol + ggplot2::geom_point(
+            data = dt.data, mapping = ggplot2::aes(
+                x = dt.data[[2]], y = -log10(pval), color = grp,
+                alpha = `P-value`))
     } else {
-      warning(
-        "Some labels specified in 'force.label' are not part of the dataset.")
-      force.label <- force.label[force.label %in% dt.data[["labels"]]]
-      dt.label <- dt.data[labels %in% force.label]
+        ggvol <- ggvol + ggplot2::geom_point(
+            data = dt.data, mapping = ggplot2::aes(
+                x = dt.data[[2]], y = -log10(pval), alpha = `P-value`))
     }
-  }
-  #Create labels
-  if(ncol(dt.data) > 4){
+    dt.data[, pval_alpha := droplevels(pval_alpha)]
+    ggvol <- ggvol + scale_alpha_manual(
+        values = as.numeric(levels(dt.data$pval_alpha)))
+    if(x.col.sign){
+        #Set X sign color palette
+        if(nrow(dt.data[grp == groups[1]]) != 0){
+            col.neg <- "darkblue" } else { col.neg <- NULL }
+        if(nrow(dt.data[grp == groups[2]]) != 0){
+            col.neutral <- "grey" } else { col.neutral <- NULL }
+        if(nrow(dt.data[grp == groups[3]]) != 0){
+            col.pos <- "darkred" } else { col.pos <- NULL }
+        xsign_palette <- c(col.neg, col.neutral, col.pos)
+        ggvol <- ggvol + ggplot2::scale_color_manual(values = xsign_palette)
+    }
+    #Make p-value cut-off
+    ggvol <- ggvol + ggplot2::geom_hline(
+        yintercept = -log10(p.cutoff), color = 'black')
+    #Make Y-Axis cut-off
+    if(!is.null(x.cutoff)){
+        #Make negative and positive cut-off
+        if(length(x.cutoff) == 1){
+            if(sign(x.cutoff) == -1){
+                # There is no positive cutoff
+                ggvol <- ggvol +
+                    ggplot2::geom_vline(
+                        xintercept = x.cutoff.values["negative.cutoff"],
+                        color = 'darkblue')
+            }
+            if(sign(x.cutoff) == 1){
+                # There is no negative cutoff
+                ggvol <- ggvol +
+                    ggplot2::geom_vline(
+                        xintercept = x.cutoff.values["positive.cutoff"],
+                        color = 'darkred')
+            }
+        } else if(length(x.cutoff) == 2){
+            ggvol <- ggvol +
+                ggplot2::geom_vline(
+                    xintercept = x.cutoff.values["negative.cutoff"],
+                    color = 'darkblue') +
+                ggplot2::geom_vline(
+                    xintercept = x.cutoff.values["positive.cutoff"],
+                    color = 'darkred')
+        }
+    }
+    #Create labels table
+    if(is.null(force.label)){
+        if(data.type == "corr"){
+            dt.label <- dt.data[
+                (corr >= cutoff.values[2] | corr <= cutoff.values[1]) &
+                    pval <= p.cutoff]
+        } else if(data.type == "t.test"){
+            dt.label <- dt.data[
+                (fold >= cutoff.values[2] | fold <= cutoff.values[1]) &
+                    pval <= p.cutoff]
+        } else if(data.type == "free"){
+            dt.label <- dt.data[
+                (xval >= cutoff.values[2] | xval <= cutoff.values[1]) &
+                    pval <= p.cutoff]
+        } else { stop("Unsupported 'data.type'.") }
+    } else {
+        #Keep only some labels of interest
+        if(all(force.label %in% dt.data[["labels"]])){
+            #Override label display to force labeling of specific data
+            dt.label <- dt.data[labels %in% force.label]
+        } else {
+            warning(
+                "Some labels specified in 'force.label' are not part of the dataset.")
+            force.label <- force.label[force.label %in% dt.data[["labels"]]]
+            dt.label <- dt.data[labels %in% force.label]
+        }
+    }
+    #Create labels
+    if(ncol(dt.data) > 5){
+        ggvol <- ggvol + ggrepel::geom_label_repel(
+            data = dt.label, mapping = ggplot2::aes(
+                x = dt.label[[2]], y = -log10(pval), label = labels,
+                color = grp),
+            size = 4.5, max.overlaps = Inf, show.legend = FALSE)
+    } else if(ncol(dt.data) == 5){
+        ggvol <- ggvol + ggrepel::geom_label_repel(
+            data = dt.label, mapping = ggplot2::aes(
+                x = dt.label[[2]], y = -log10(pval), label = labels),
+            size = 4.5, max.overlaps = Inf, show.legend = FALSE)
+    }
+    # Create P-value label
     ggvol <- ggvol + ggrepel::geom_label_repel(
-      data = dt.label, mapping = ggplot2::aes(
-        x = dt.label[[2]], y = -log10(pval), label = labels, color = grp),
-      size = 4.5, max.overlaps = Inf, show.legend = FALSE)
-  } else if(ncol(dt.data) == 4){
-    ggvol <- ggvol + ggrepel::geom_label_repel(
-      data = dt.label, mapping = ggplot2::aes(
-        x = dt.label[[2]], y = -log10(pval), label = labels),
-      size = 4.5, max.overlaps = Inf, show.legend = FALSE)
-  }
-  #Create P-value label
-  ggvol <- ggvol + ggrepel::geom_label_repel(
-    data = data.frame(), mapping = ggplot2::aes(
-      x = -Inf, y = -log10(p.cutoff), fontface = 1, label = "P-value cut-off"),
-    color = "black", direction = "x", size = 4)
-  #Create Y-axis label
-  if(!is.null(x.cutoff)){
-    #Make negative and positive cut-off label
+        data = data.frame(), mapping = ggplot2::aes(
+            x = -Inf, y = -log10(p.cutoff), fontface = 1,
+            label = "P-value cut-off"),
+        color = "black", direction = "x", size = 4)
+    # Create Y-axis label
+    if(!is.null(x.cutoff)){
+        # Make negative and positive cut-off label
+        if(length(x.cutoff) == 1){
+            if(sign(x.cutoff) == -1){
+                # There is no positive cutoff
+                ggvol <- ggvol +
+                    ggrepel::geom_label_repel(
+                        data = data.frame(), mapping = ggplot2::aes(
+                            x = x.cutoff.values["negative.cutoff"], y = Inf,
+                            fontface = 1, label = title.x.cutoff),
+                        color = "darkblue", direction = "y", size = 4)
+            }
+            if(sign(x.cutoff) == 1){
+                # There is no negative cutoff
+                ggvol <- ggvol +
+                    ggrepel::geom_label_repel(
+                        data = data.frame(), mapping = ggplot2::aes(
+                            x = x.cutoff.values["positive.cutoff"], y = Inf,
+                            fontface = 1, label = title.x.cutoff),
+                        color = "darkred", direction = "y", size = 4)
+            }
+        } else if(length(x.cutoff) == 2){
+            ggvol <- ggvol +
+                ggrepel::geom_label_repel(
+                    data = data.frame(), mapping = ggplot2::aes(
+                        x = x.cutoff.values["negative.cutoff"], y = Inf,
+                        fontface = 1, label = title.x.cutoff),
+                    color = "darkblue", direction = "y", size = 4) +
+                ggrepel::geom_label_repel(
+                    data = data.frame(), mapping = ggplot2::aes(
+                        x = x.cutoff.values["positive.cutoff"], y = Inf,
+                        fontface = 1, label = title.x.cutoff),
+                    color = "darkred", direction = "y", size = 4)
+        }
+    }
+    # Add default volcano theme
     ggvol <- ggvol +
-      ggrepel::geom_label_repel(data = data.frame(), mapping = ggplot2::aes(
-        x = x.cutoff.values[1], y = Inf, fontface = 1, label = title.x.cutoff),
-        color = "darkblue", direction = "y", size = 4) +
-      ggrepel::geom_label_repel(data = data.frame(), mapping = ggplot2::aes(
-        x = x.cutoff.values[2], y = Inf, fontface = 1, label = title.x.cutoff),
-        color = "darkred", direction = "y", size = 4)
-  }
-  #Add default volcano theme
-  ggvol <- ggvol +
-    ggplot2::theme(
-      axis.ticks = ggplot2::element_blank(),
-      panel.background = ggplot2::element_blank(),
-      panel.grid.major = ggplot2::element_line(colour = "grey"),
-      axis.title = ggplot2::element_text(size = 13),
-      axis.text = ggplot2::element_text(size = 12),
-      plot.title = ggplot2::element_text(size = 15, hjust = 0.5),
-      legend.title = ggplot2::element_text(size = 13),
-      legend.text = ggplot2::element_text(size = 12),
-      legend.key = ggplot2::element_blank()) +
-    ggplot2::labs(x = orig.cnames[2], y = paste0(
-      "-log10(", orig.cnames[3], ")"), color = orig.cnames[4],
-      size = orig.cnames[5])
-  # Return volcano plot
-  return(ggvol)
+        ggplot2::theme(
+            axis.ticks = ggplot2::element_blank(),
+            panel.background = ggplot2::element_blank(),
+            panel.grid.major = ggplot2::element_line(colour = "grey"),
+            axis.title = ggplot2::element_text(size = 13),
+            axis.text = ggplot2::element_text(size = 12),
+            plot.title = ggplot2::element_text(size = 15, hjust = 0.5),
+            legend.title = ggplot2::element_text(size = 13),
+            legend.text = ggplot2::element_text(size = 12),
+            legend.key = ggplot2::element_blank()) +
+        ggplot2::labs(x = orig.cnames[2], y = paste0(
+            "-log10(", orig.cnames[3], ")"), color = orig.cnames[4],
+            size = orig.cnames[5])
+    # Return volcano plot
+    return(ggvol)
 }
 
 
@@ -583,9 +679,10 @@ build.ggvolcano <- function(
 #'                     between -1 and 1, to be used as a cut-off on correlation
 #'                     values (Default: corr.cutoff = NULL).
 #'                     \itemize{
-#'                      \item{If 1 value is given, it will be defined as the
-#'                      minimum cut-off on absolute correlation values
-#'                      (positive and negative ones).}
+#'                      \item{If 1 negative value is given, it will be defined
+#'                      as the maximum cut-off on negative correlation values.}
+#'                      \item{If 1 positive value is given, it will be defined
+#'                      as the minimum cut-off on positive correlation values.}
 #'                      \item{If 2 values are given: The smallest one will be
 #'                      used as a maximum cut-off on negative correlation
 #'                      values. The biggest one will be used as a minimum
@@ -645,22 +742,21 @@ build.ggvolcano <- function(
 #'   p_value = corr_res$P[-nrow(corr_res$r), "carb"])
 #' # Draw basic correlation volcano plot
 #' ggvolcano.corr(data = dt_corr)
-#' # Suppress the alpha warning when drawing a volcano
-#' warn.handle(
-#'   print(ggvolcano.corr(data = dt_corr)),
-#'   pattern = "Using alpha for a discrete variable is not advised.")
 #' # Set another P-value cutoff
 #' ggvolcano.corr(data = dt_corr, p.cutoff = 0.05)
-#' # Set an absolute correlation cutoff
+#' # Set a positive correlation cutoff
 #' ggvolcano.corr(data = dt_corr, corr.cutoff = 0.4)
+#' # Set a negative correlation cutoff
+#' ggvolcano.corr(data = dt_corr, corr.cutoff = -0.3)
 #' # Set different negative and positive corelation cutoffs
 #' ggvolcano.corr(data = dt_corr, corr.cutoff = c(-0.3, 0.5))
 #' # Rename correlation cutoff title
 #' ggvolcano.corr(
-#'   data = dt_corr, corr.cutoff = 0.5,
+#'   data = dt_corr, corr.cutoff = c(-0.4, 0.4),
 #'   title.cutoff = "Minimum absolute correlation")
 #' # Set a negative and positive correlation cutoff to show/hide point labels
-#' ggvolcano.corr(data = dt_corr, corr.cutoff = 0.4, label.cutoff = c(-0.4, 1))
+#' ggvolcano.corr(
+#'   data = dt_corr, corr.cutoff =  c(-0.4, 0.4), label.cutoff = c(-0.4, 1))
 #' # Turn on autocolor based on X-axis sign of values and significance
 #' ggvolcano.corr(data = dt_corr, corr.cutoff = c(-0.6, 0.5), x.col.sign = TRUE)
 #' # Force a specific label display on not significantly correlated variable
@@ -682,14 +778,14 @@ build.ggvolcano <- function(
 #'   scale_size(breaks = c(1, 2, 3))
 
 ggvolcano.corr <- function(
-  data, p.cutoff = 0.01, corr.cutoff = NULL,
-  title.cutoff = "Correlation cut-off", label.cutoff = NULL, x.col.sign = FALSE,
-  force.label = NULL){
-  #Build volcano plot for correlation data
-  BiocompR::build.ggvolcano(
-    data = data, data.type = "corr", label.cutoff = label.cutoff,
-    p.cutoff = p.cutoff, x.cutoff = corr.cutoff, title.x.cutoff = title.cutoff,
-    x.col.sign = x.col.sign, force.label = force.label)
+    data, p.cutoff = 0.01, corr.cutoff = NULL,
+    title.cutoff = "Correlation cut-off", label.cutoff = NULL, x.col.sign = FALSE,
+    force.label = NULL){
+    #Build volcano plot for correlation data
+    BiocompR::build.ggvolcano(
+        data = data, data.type = "corr", label.cutoff = label.cutoff,
+        p.cutoff = p.cutoff, x.cutoff = corr.cutoff, title.x.cutoff = title.cutoff,
+        x.col.sign = x.col.sign, force.label = force.label)
 }
 
 
@@ -713,9 +809,12 @@ ggvolcano.corr <- function(
 #'                     a cut-off on log2(fold change) values
 #'                     (Default: l2fc.cutoff = NULL).
 #'                     \itemize{
-#'                      \item{If 1 value is given, it will be defined as the
-#'                      minimum cut-off on absolute log2(fold change) values
-#'                      (positive and negative ones).}
+#'                      \item{If 1 negative value is given, it will be defined
+#'                      as the maximum cut-off on negative log2(fold change)
+#'                      values.}
+#'                      \item{If 1 positive value is given, it will be defined
+#'                      as the minimum cut-off on positive log2(fold change)
+#'                      values.}
 #'                      \item{If 2 values are given: The smallest one will be
 #'                      used as a maximum cut-off on negative log2(fold change)
 #'                      values. The biggest one will be used as a minimum
@@ -784,37 +883,34 @@ ggvolcano.corr <- function(
 #' dt_res <- rbindlist(ls_res)
 #' # Most basic volcano plot on statistical test results
 #' ggvolcano.test(data = dt_res)
-#' # Suppress the alpha warning when drawing a volcano
-#' warn.handle(
-#'   print(ggvolcano.test(data = dt_res)),
-#'   pattern = "Using alpha for a discrete variable is not advised.")
 #' # Set another P-value cutoff
 #' ggvolcano.test(data = dt_res, p.cutoff = 0.05)
 #' # Set an absolute log2 fold change cutoff
-#' ggvolcano.test(data = dt_res, l2fc.cutoff = 0.4)
+#' ggvolcano.test(data = dt_res, l2fc.cutoff = c(-0.4, 0.4))
 #' # Set different negative and positive log2 fold change cutoffs
 #' ggvolcano.test(data = dt_res, l2fc.cutoff = c(-0.3, 0.5))
 #' # Rename log2 fold change cutoff title
 #' ggvolcano.test(
-#'   data = dt_res, l2fc.cutoff = 0.4,
+#'   data = dt_res, l2fc.cutoff = c(-0.4, 0.4),
 #'   title.cutoff = "Minimum absolute log2(FC)")
 #' # Set a negative and positive log2 fold change cutoff to show/hide labels
-#' ggvolcano.test(data = dt_res, l2fc.cutoff = 0.4, label.cutoff = c(-0.4, 0))
+#' ggvolcano.test(
+#'   data = dt_res, l2fc.cutoff = c(-0.4, 0.4), label.cutoff = c(-0.4, 0))
 #' # Turn on autocolor based on X-axis sign of values and significance
 #' ggvolcano.test(data = dt_res, l2fc.cutoff = c(-0.4, 0), x.col.sign = TRUE)
 
 ggvolcano.test <- function(
-  data, p.cutoff = 0.01, l2fc.cutoff = NULL, title.cutoff = "L2FC cut-off",
-  label.cutoff = NULL, x.col.sign = FALSE, l2.transform = FALSE,
-  force.label = NULL){
-  #Apply log2 transformation if needed
-  if(l2.transform){ data[, (2) := log2(x = data[[2]])] }
-  #Build volcano plot for t-test data
-  ggvol <- BiocompR::build.ggvolcano(
-    data = data, data.type = "t.test", label.cutoff = label.cutoff,
-    p.cutoff = p.cutoff, x.cutoff = l2fc.cutoff, title.x.cutoff = title.cutoff,
-    x.col.sign = x.col.sign, force.label = force.label)
-  return(ggvol)
+    data, p.cutoff = 0.01, l2fc.cutoff = NULL, title.cutoff = "L2FC cut-off",
+    label.cutoff = NULL, x.col.sign = FALSE, l2.transform = FALSE,
+    force.label = NULL){
+    #Apply log2 transformation if needed
+    if(l2.transform){ data[, (2) := log2(x = data[[2]])] }
+    #Build volcano plot for t-test data
+    ggvol <- BiocompR::build.ggvolcano(
+        data = data, data.type = "t.test", label.cutoff = label.cutoff,
+        p.cutoff = p.cutoff, x.cutoff = l2fc.cutoff, title.x.cutoff = title.cutoff,
+        x.col.sign = x.col.sign, force.label = force.label)
+    return(ggvol)
 }
 
 
@@ -854,9 +950,10 @@ ggvolcano.test <- function(
 #' @param x.cutoff       A \code{numeric} vector of 1 or 2 values, to be used as
 #'                       a cut-off on Y-axis values (Default: x.cutoff = NULL).
 #'                       \itemize{
-#'                        \item{If 1 value is given, it will be defined as the
-#'                        minimum cut-off on absolute Y-axis values
-#'                        (positive and negative ones).}
+#'                        \item{If 1 negative value is given, it will be defined
+#'                        as the maximum cut-off on negative Y-axis values.}
+#'                        \item{If 1 positive value is given, it will be defined
+#'                        as the minimum cut-off on positive Y-axis values.}
 #'                        \item{If 2 values are given: The smallest one will be
 #'                        used as a maximum cut-off on negative Y-axis values.
 #'                        The biggest one will be used as a minimum cut-off on
@@ -892,11 +989,11 @@ ggvolcano.test <- function(
 #' @export
 
 ggvolcano.free <- function(
-  data, label.cutoff = NULL, p.cutoff = 0.01, x.cutoff = NULL,
-  title.x.cutoff = "X-Axis cutoff", x.col.sign = FALSE, force.label = NULL){
-  #Build volcano plot for free data
-  BiocompR::build.ggvolcano(
-    data = data, data.type = "free", label.cutoff = label.cutoff,
-    p.cutoff = p.cutoff, x.cutoff = x.cutoff, title.x.cutoff = title.x.cutoff,
-    x.col.sign = x.col.sign, force.label = force.label)
+    data, label.cutoff = NULL, p.cutoff = 0.01, x.cutoff = NULL,
+    title.x.cutoff = "X-Axis cutoff", x.col.sign = FALSE, force.label = NULL){
+    #Build volcano plot for free data
+    BiocompR::build.ggvolcano(
+        data = data, data.type = "free", label.cutoff = label.cutoff,
+        p.cutoff = p.cutoff, x.cutoff = x.cutoff, title.x.cutoff = title.x.cutoff,
+        x.col.sign = x.col.sign, force.label = force.label)
 }

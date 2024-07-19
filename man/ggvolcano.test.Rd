@@ -36,9 +36,12 @@ cut-off on p-values (Default: p.cutoff = 0.01).}
 a cut-off on log2(fold change) values
 (Default: l2fc.cutoff = NULL).
 \itemize{
- \item{If 1 value is given, it will be defined as the
- minimum cut-off on absolute log2(fold change) values
- (positive and negative ones).}
+ \item{If 1 negative value is given, it will be defined
+ as the maximum cut-off on negative log2(fold change)
+ values.}
+ \item{If 1 positive value is given, it will be defined
+ as the minimum cut-off on positive log2(fold change)
+ values.}
  \item{If 2 values are given: The smallest one will be
  used as a maximum cut-off on negative log2(fold change)
  values. The biggest one will be used as a minimum
@@ -115,22 +118,19 @@ ls_res <- lapply(unique(dt$dose), FUN = function(d){
 dt_res <- rbindlist(ls_res)
 # Most basic volcano plot on statistical test results
 ggvolcano.test(data = dt_res)
-# Suppress the alpha warning when drawing a volcano
-warn.handle(
-  print(ggvolcano.test(data = dt_res)),
-  pattern = "Using alpha for a discrete variable is not advised.")
 # Set another P-value cutoff
 ggvolcano.test(data = dt_res, p.cutoff = 0.05)
 # Set an absolute log2 fold change cutoff
-ggvolcano.test(data = dt_res, l2fc.cutoff = 0.4)
+ggvolcano.test(data = dt_res, l2fc.cutoff = c(-0.4, 0.4))
 # Set different negative and positive log2 fold change cutoffs
 ggvolcano.test(data = dt_res, l2fc.cutoff = c(-0.3, 0.5))
 # Rename log2 fold change cutoff title
 ggvolcano.test(
-  data = dt_res, l2fc.cutoff = 0.4,
+  data = dt_res, l2fc.cutoff = c(-0.4, 0.4),
   title.cutoff = "Minimum absolute log2(FC)")
 # Set a negative and positive log2 fold change cutoff to show/hide labels
-ggvolcano.test(data = dt_res, l2fc.cutoff = 0.4, label.cutoff = c(-0.4, 0))
+ggvolcano.test(
+  data = dt_res, l2fc.cutoff = c(-0.4, 0.4), label.cutoff = c(-0.4, 0))
 # Turn on autocolor based on X-axis sign of values and significance
 ggvolcano.test(data = dt_res, l2fc.cutoff = c(-0.4, 0), x.col.sign = TRUE)
 }

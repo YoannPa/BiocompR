@@ -56,9 +56,10 @@ maximum cut-off on p-values (Default: p.cutoff = 0.01).}
 \item{x.cutoff}{A \code{numeric} vector of 1 or 2 values, to be used as
 a cut-off on Y-axis values (Default: x.cutoff = NULL).
 \itemize{
- \item{If 1 value is given, it will be defined as the
- minimum cut-off on absolute Y-axis values
- (positive and negative ones).}
+ \item{If 1 negative value is given, it will be defined
+ as the maximum cut-off on negative Y-axis values.}
+ \item{If 1 positive value is given, it will be defined
+ as the minimum cut-off on positive Y-axis values.}
  \item{If 2 values are given: The smallest one will be
  used as a maximum cut-off on negative Y-axis values.
  The biggest one will be used as a minimum cut-off on

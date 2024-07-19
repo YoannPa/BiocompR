@@ -36,9 +36,10 @@ cut-off on p-values (Default: p.cutoff = 0.01).}
 between -1 and 1, to be used as a cut-off on correlation
 values (Default: corr.cutoff = NULL).
 \itemize{
- \item{If 1 value is given, it will be defined as the
- minimum cut-off on absolute correlation values
- (positive and negative ones).}
+ \item{If 1 negative value is given, it will be defined
+ as the maximum cut-off on negative correlation values.}
+ \item{If 1 positive value is given, it will be defined
+ as the minimum cut-off on positive correlation values.}
  \item{If 2 values are given: The smallest one will be
  used as a maximum cut-off on negative correlation
  values. The biggest one will be used as a minimum
@@ -107,22 +108,21 @@ dt_corr <- data.table(
   p_value = corr_res$P[-nrow(corr_res$r), "carb"])
 # Draw basic correlation volcano plot
 ggvolcano.corr(data = dt_corr)
-# Suppress the alpha warning when drawing a volcano
-warn.handle(
-  print(ggvolcano.corr(data = dt_corr)),
-  pattern = "Using alpha for a discrete variable is not advised.")
 # Set another P-value cutoff
 ggvolcano.corr(data = dt_corr, p.cutoff = 0.05)
-# Set an absolute correlation cutoff
+# Set a positive correlation cutoff
 ggvolcano.corr(data = dt_corr, corr.cutoff = 0.4)
+# Set a negative correlation cutoff
+ggvolcano.corr(data = dt_corr, corr.cutoff = -0.3)
 # Set different negative and positive corelation cutoffs
 ggvolcano.corr(data = dt_corr, corr.cutoff = c(-0.3, 0.5))
 # Rename correlation cutoff title
 ggvolcano.corr(
-  data = dt_corr, corr.cutoff = 0.5,
+  data = dt_corr, corr.cutoff = c(-0.4, 0.4),
   title.cutoff = "Minimum absolute correlation")
 # Set a negative and positive correlation cutoff to show/hide point labels
-ggvolcano.corr(data = dt_corr, corr.cutoff = 0.4, label.cutoff = c(-0.4, 1))
+ggvolcano.corr(
+  data = dt_corr, corr.cutoff =  c(-0.4, 0.4), label.cutoff = c(-0.4, 1))
 # Turn on autocolor based on X-axis sign of values and significance
 ggvolcano.corr(data = dt_corr, corr.cutoff = c(-0.6, 0.5), x.col.sign = TRUE)
 # Force a specific label display on not significantly correlated variable
