@@ -23,6 +23,7 @@ chk.dt <- function(data, data.type){
     #Check col2
     if(is.numeric(data[[2]])){
         if(data.type == "corr"){
+            if(anyNA(data[, 2])){ stop("column 2 contains NAs.") }
             if(any(data[, 2] < -1) | any(data[, 2] > 1)){
                 stop(
                     "Correlation values in column 2 must be comprised between -1 and 1.")
