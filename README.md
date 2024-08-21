@@ -40,11 +40,13 @@ Currently the package BiocompR contains **40 exported functions**:
 * `check_fun()` - Checks if a function exists and package of origin.
 * `ggasso.all_annot()` - 	Draws association test results between all columns from a data.frame.  
 * `ggasso.annot_pc()` - 	Plots association tests' results between some annotations and some PCs.  
+* `ggasycorr()` - Draws an asymmetrical pairwise correlation plot.  
 * `ggbipca()` - 	Computes and draws a custom PCA biplot.  
 * `ggbivar()` - 		Draws boxplots or violins from a variable values against ranges of a 2nd one.  
 * `ggcirclart()` - Circlizes ggplot2 objects.  
 * `ggcoverage()` - Plots an annotated stacked barplot.  
 * `ggcraviola()` - Draws a craviola plot (half-splitted and percentile-binned violin plot).  
+* `ggcross.biplot()` - Computes and draws biplots for multiple principal components at once.  
 * `ggdend()` - Creates a dendogram in ggplot2.  
 * `ggdensity_map()` - Plots a density color map from a matrix or a molten data.frame.  
 * `ggeigenvector()` - Creates an eigenvector plot using ggplot2.  
