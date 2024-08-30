@@ -136,7 +136,7 @@ ggdensity_map <- function(
         #Compute density
         ls.density <- colDensity(
             x = m, na.rm = TRUE, from = from, to = to, ncores = ncores)
-        if(verbose){cat("Done.\n")}
+        if(verbose){ cat("Done.\n") }
         dt.density <- data.table::rbindlist(l = ls.density)
         #Sort using function if any set
         if(!is.null(sort.fun)){
@@ -146,6 +146,10 @@ ggdensity_map <- function(
             sorted.names <- names(sort(sort.fun.vals))
             dt.density[, variable := as.factor(variable)]
             dt.density[, variable := factor(variable, levels = sorted.names)]
+        } else { # Keep original order of columns in the matrix
+            dt.density[, variable := as.factor(variable)]
+            dt.density[, variable := factor(
+                variable, levels = unique(dt.density$variable))]
         }
     } else if(is.data.frame(m)){
         if(verbose){cat("data.frame detected\n")}
