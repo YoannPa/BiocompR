@@ -15,6 +15,12 @@ ggfusion.free(
   annot.grps = list(Groups = seq(length(sample.names))),
   annot.pal = grDevices::rainbow(n = length(sample.names)),
   annot.size = 1,
+  annot_theme = ggplot2::theme(axis.ticks.x.top = ggplot2::element_line(color = "black"),
+    axis.ticks.y.right = ggplot2::element_blank(), axis.title.x =
+    ggplot2::element_blank(), axis.text.x.top = ggplot2::element_text(size = 10, angle =
+    90, vjust = 0.5, hjust = 0, color = "black"), axis.text.y.right =
+    ggplot2::element_text(size = 12, color = "black"), plot.margin = ggplot2::margin(0.1,
+    0, 0, 0, unit = "cm")),
   theme_legend = NULL,
   lgd.merge = FALSE,
   lgd.ncol = NULL,

@@ -191,8 +191,16 @@ ggfusion.free <- function(
     order.select = "upper", hclust.method = "complete", dendrograms = FALSE,
     annot.grps = list("Groups" = seq(length(sample.names))),
     annot.pal = grDevices::rainbow(n = length(sample.names)), annot.size = 1,
+    annot_theme = ggplot2::theme(
+        axis.ticks.x.top = ggplot2::element_line(color = "black"),
+        axis.ticks.y.right = ggplot2::element_blank(),
+        axis.title.x = ggplot2::element_blank(),
+        axis.text.x.top = ggplot2::element_text(
+            size = 10, angle = 90, vjust = 0.5, hjust = 0, color = "black"),
+        axis.text.y.right = ggplot2::element_text(size = 12, color = "black"),
+        plot.margin = ggplot2::margin(0.1, 0, 0, 0, unit = "cm")),
     theme_legend = NULL, lgd.merge = FALSE, lgd.ncol = NULL,
-    lgd.space.height = 26, lgd.space.width = 1,
+    lgd.space.height = 26, lgd.space.width =1,
     dend.size = 1, grid_col = "white", grid_linewidth = 0.3,
     upper_theme = NULL, upper_scale_fill_grad = ggplot2::scale_fill_gradientn(
         colors = BiocompR::biopalette(name = "viridis_C_plasma"),
@@ -446,17 +454,19 @@ ggfusion.free <- function(
     # Plot Color Sidebar
     col_sidebar <- BiocompR:::ggsidebar.full(
         sample.names = sample.names[correlation.order], annot.grps = annot.grps,
-        annot.pal = annot.pal, annot.pos = "top", theme_annot = ggplot2::theme(
-            axis.ticks.x.top = ggplot2::element_line(color = "black"),
-            axis.ticks.y.right = ggplot2::element_blank(),
-            axis.title.x = ggplot2::element_blank(),
-            axis.text.x.top = ggplot2::element_text(
-                size = 10, angle = 90, vjust = 0.5, hjust = 0, color = "black"),
-            axis.text.y.right = ggplot2::element_text(
-                size = 12, color = "black"),
-            plot.margin = ggplot2::margin(0.1, 0, 0, 0, unit = "cm")),
-        theme_legend = theme_legend, dendro.pos = 'top', merge.lgd = lgd.merge,
-        lgd.ncol = lgd.ncol, right = TRUE)
+        annot.pal = annot.pal, annot.pos = "top",
+        # theme_annot = ggplot2::theme(
+        #     axis.ticks.x.top = ggplot2::element_line(color = "black"),
+        #     axis.ticks.y.right = ggplot2::element_blank(),
+        #     axis.title.x = ggplot2::element_blank(),
+        #     axis.text.x.top = ggplot2::element_text(
+        #         size = 10, angle = 90, vjust = 0.5, hjust = 0, color = "black"),
+        #     axis.text.y.right = ggplot2::element_text(
+        #         size = 12, color = "black"),
+        #     plot.margin = ggplot2::margin(0.1, 0, 0, 0, unit = "cm")),
+        theme_annot = annot_theme, theme_legend = theme_legend,
+        dendro.pos = 'top', merge.lgd = lgd.merge, lgd.ncol = lgd.ncol,
+        right = TRUE)
     # Remove lower legends
     lower.ggplot.nolgd <- lower.ggplot +
         ggplot2::theme(legend.position = "none")
@@ -720,6 +730,14 @@ ggfusion.corr <- function(
     dendrograms = FALSE, dend.size = 1,
     annot.grps = list("Groups" = seq(ncol(data))),
     annot.pal = grDevices::rainbow(n = ncol(data)), annot.size = 1,
+    annot_theme = ggplot2::theme(
+        axis.ticks.x.top = ggplot2::element_line(color = "black"),
+        axis.ticks.y.right = ggplot2::element_blank(),
+        axis.title.x = ggplot2::element_blank(),
+        axis.text.x.top = ggplot2::element_text(
+            size = 10, angle = 90, vjust = 0.5, hjust = 0, color = "black"),
+        axis.text.y.right = ggplot2::element_text(size = 12, color = "black"),
+        plot.margin = ggplot2::margin(0.1, 0, 0, 0, unit = "cm")),
     theme_legend = NULL,
     upper_theme = NULL, upper_scale_fill_grad = ggplot2::scale_fill_gradientn(
         colors = BiocompR::biopalette(name = "RColorBrewer_RdBu8"),
@@ -892,6 +910,7 @@ ggfusion.corr <- function(
         order.method = order.method, hclust.method = hclust.method,
         dendrograms = dendrograms,
         annot.grps = annot.grps, annot.pal = annot.pal, annot.size = annot.size,
+        annot_theme = annot_theme,
         theme_legend = theme_legend, lgd.merge = lgd.merge, lgd.ncol = lgd.ncol,
         lgd.space.height = lgd.space.height, lgd.space.width = lgd.space.width,
         dend.size = dend.size, grid_col = grid_col,
