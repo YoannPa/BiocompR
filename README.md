@@ -21,6 +21,9 @@ _I would like to thank every people who contributed to the development of this p
 **2.** [**Klinik für Anästhesiologie und Operative Intensivmedizin, Medizinische Fakultät Mannheim, Universität Heidelberg, Germany.**](https://www.umm.de/klinik-fuer-anaesthesiologie-und-operative-intensivmedizin/)  
 **3.** [**DKFZ - Clinical Cooperation Unit Translational Radiation Oncology, Germany.**](https://www.dkfz.de/en/molekulare-radioonkologie/index.php)  
 
+**Funding:** Development and maintenance funded by [de.NBI](https://www.denbi.de/).  
+Feel free to take the [de.NBI survey about BiocompR](https://www.surveymonkey.de/r/denbi-service?sc=hd-hub&tool=biocompR).  
+
 ## Linux prerequisites (under Ubuntu & Debian)
 From your terminal install the following libraries (these are devtools and magick packages dependencies):
 ```bash
