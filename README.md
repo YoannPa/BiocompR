@@ -4,7 +4,7 @@
 ![GitHub issues](https://img.shields.io/github/issues-raw/YoannPa/BiocompR)
 ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/YoannPa/BiocompR)  
 
-_**BiocompR** is an R package built upon ggplot2, and using data.table. It improves some visualisations commonly used in biology and genomics for data comparison and dataset exploration, introduces new kind of plots, provides a toolbox of functions to work with ggplot2 and grid objects, and ultimately, allows users to customize plots produced into publication ready figures._  
+_**BiocompR** is an R package built upon ggplot2, and using data.table. It is a visualization framework for data comparison and exploration. It improves some visualisations commonly used in biology and genomics, introduces new kind of plots, provides a toolbox of functions to work with ggplot2 and grid objects, and ultimately, allows users to customize plots produced into publication-ready figures._  
 
 **Author: PAGEAUD Y.<sup>1</sup>**  
 **How to cite:** _Pageaud Y. et al., BiocompR - Advanced visualizations for data comparison._  
